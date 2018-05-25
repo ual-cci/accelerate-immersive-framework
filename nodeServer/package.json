@@ -1,0 +1,20 @@
+{
+  "name": "nodeserver",
+  "version": "1.0.0",
+  "description": "shareDB server to connect to an ember front end using websockets and operational transforms",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Louis McCallum",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "sharedb": "^1.0.0-beta.8",
+    "websocket-json-stream": "0.0.3",
+    "ws": "^5.1.1"
+  },
+  "devDependencies": {
+    "sharedb-mongo": "^1.0.0-beta.4"
+  }
+}
