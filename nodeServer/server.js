@@ -11,7 +11,7 @@ createDoc(startServer);
 // Create initial document then fire callback
 function createDoc(callback) {
   var connection = backend.connect();
-  var doc = connection.get('MIMIC', 'doc-2');
+  var doc = connection.get('MIMIC', 'text-area');
   console.log("fetching doc");
   doc.fetch(function(err) {
     if (err) throw err;
