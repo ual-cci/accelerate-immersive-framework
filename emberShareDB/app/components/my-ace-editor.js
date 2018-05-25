@@ -10,6 +10,11 @@ export default Component.extend({
   editor: null,
   suppress:false,
   path:[""],
+  getSession() {
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    return session;
+  },
   opTransform(ops, editor) {
     function opToDelta(op) {
       const index = op.p[op.p.length - 1];
@@ -52,13 +57,39 @@ export default Component.extend({
     const deltas = ops.map(opToDelta);
     return deltas;
   },
+  onSessionChange(self, delta) {
+    const surpress = self.get('surpress');
+    const doc = self.get('doc');
+    if(!surpress)
+    {
+      console.log('not surpressed');
+      const editor = self.editor;
+      const session = editor.getSession();
+      const aceDoc = session.getDocument();
+      const op = {};
+      const start = aceDoc.positionToIndex(delta.start);
+      op.p = [start];
+      let action;
+      if (delta.action === 'insert') {
+        action = 'si';
+      } else if (delta.action === 'remove') {
+        action = 'sd';
+      } else {
+        throw new Error(`action ${action} not supported`);
+      }
+      const str = delta.lines.join('\n');
+      op[action] = str;
+
+      doc.submitOp(op);
+    }
+  },
   didInsertElement() {
     this._super(...arguments);
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
 
-    const doc = con.get('MIMIC','doc-7');
+    const doc = con.get('MIMIC-2','text-area');
     this.set('doc', doc);
 
     const editor = this.get('editor');
@@ -70,46 +101,18 @@ export default Component.extend({
       const doc = this.get('doc');
       console.log(doc.data);
 
-      this.suppress = true;
+      this.set('surpress', true);
       session.setValue(doc.data);
-      this.suppress = false;
+      this.set('surpress', false);
 
-      session.on('change',function onChange(delta) {
-        console.log('onChange',delta);
-        console.log('updating doc from ace change');
-        const surpress = this.get('surpress');
-        if(!surpress)
-        {
-          console.log('not surpressed');
-          const aceDoc = session.getDocument();
-          const op = {};
-          const start = aceDoc.positionToIndex(delta.start);
-          const end = aceDoc.positionToIndex(delta.end);
-          op.p = [start];
-          let action;
-          if (delta.action === 'insert') {
-            action = 'si';
-          } else if (delta.action === 'remove') {
-            action = 'sd';
-          } else {
-            throw new Error(`action ${action} not supported`);
-          }
-          const str = delta.lines.join('\n');
-          op[action] = str;
-
-          doc.submitOp(op);
-          console.log(op);
-        }
-        else
-        {
-          this.suppress = false;
-        }
-      })
+      session.on('change',(delta)=>{
+        this.onSessionChange(this, delta);
+      });
     });
     doc.on('op',(ops,source) => {
       if(!source)
       {
-        console.log('updating from remote');
+        console.log('updating from remote',this.get('surpress'));
         const deltas = this.opTransform(ops, editor);
         this.set('surpress', true);
         session.getDocument().applyDeltas(deltas);
