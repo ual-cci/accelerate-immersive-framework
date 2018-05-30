@@ -3,10 +3,11 @@ export function initialize(instance) {
   const session = instance.lookup('service:session');
   session.on('authenticationSucceeded', function() {
     console.log('authenticationSucceeded callback');
-    applicationRoute.transitionTo('index');
+    applicationRoute.transitionTo('application');
   });
   session.on('invalidationSucceeded', function() {
-    applicationRoute.transitionTo('bye');
+    console.log('invalidationSucceeded callback');
+    applicationRoute.transitionTo('application');
   });
 }
 
