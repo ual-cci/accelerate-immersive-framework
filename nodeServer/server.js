@@ -3,9 +3,10 @@ var express = require('express');
 var ShareDB = require('sharedb');
 var WebSocket = require('ws');
 var WebSocketJSONStream = require('websocket-json-stream');
-bodyParser = require('body-parser'),
-oauthserver = require('oauth2-server'),
-mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+var oauthserver = require('oauth2-server');
+var mongoose = require('mongoose');
+var cors = require('express-cors');
 
 const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
@@ -61,6 +62,13 @@ function startAuth()
 function startServer() {
   // Create a web server to serve files and listen to WebSocket connections
   app.use(express.static('static'));
+  app.use(cors({
+    allowedOrigins: [
+        'http://localhost:4200'
+    ],
+    headers: ["Authorization"]
+  }));
+
   var server = http.createServer(app);
 
   // Connect any incoming WebSocket connection to ShareDB
