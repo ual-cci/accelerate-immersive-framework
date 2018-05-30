@@ -14,23 +14,10 @@ var clientModel = require('./mongo/model/client'),
 
 var loadExampleData = function() {
 
-	var client = new clientModel({
-		clientId: 'application',
-		clientSecret: 'secret'
-	});
-
 	var user = new userModel({
 		id: '123',
-		username: 'pedroetb',
-		password: 'password'
-	});
-
-	client.save(function(err, client) {
-
-		if (err) {
-			return console.error(err);
-		}
-		console.log('Created client', client);
+		username: 'letme',
+		password: 'in'
 	});
 
 	user.save(function(err, user) {
@@ -78,7 +65,6 @@ var dump = function() {
  */
 
 var getAccessToken = function(bearerToken, callback) {
-
 	tokenModel.findOne({
 		accessToken: bearerToken
 	}, callback);
@@ -136,7 +122,6 @@ var getUser = function(username, password, callback) {
 /**
  * Export model definition object.
  */
-
 module.exports = {
 	getAccessToken: getAccessToken,
 	getClient: getClient,

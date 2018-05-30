@@ -1,5 +1,6 @@
 import OAuth2PasswordGrant from 'ember-simple-auth/authenticators/oauth2-password-grant';
 import config from '../config/environment';
+import $ from 'jquery';
 
 export default OAuth2PasswordGrant.extend({
   serverTokenEndpoint: `${config.apiHost}/token`,
@@ -7,7 +8,7 @@ export default OAuth2PasswordGrant.extend({
   makeRequest: function (url, data) {
       var client_id = 'application';
       var client_secret = 'secret';
-      return Ember.$.ajax({
+      return $.ajax({
           url: this.serverTokenEndpoint,
           type: 'POST',
           data: data,
