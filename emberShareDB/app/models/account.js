@@ -4,5 +4,6 @@ const { attr, Model } = DS;
 
 export default Model.extend({
   login: attr('string'),
-  name:  attr('string')
+  name: attr('string'),
+  password: attr('string')
 });

@@ -10,3 +10,15 @@
   {{/if}}
 </form>
 </div>
+<div class = "container">
+<form {{action 'createNewUser' on='submit'}}>
+  <label for="newUserIdentification">Register New Users</label>
+  {{input id='newUserIdentification' placeholder='Enter Login' value=newUserIdentification}}
+  <label for="newUserPassword">Password</label>
+  {{input id='newUserPassword' placeholder='Enter Password' type='password' value=newUserPassword}}
+  <button type="submit">Create</button>
+  {{#if errorMessage}}
+    <p>{{errorMessage}}</p>
+  {{/if}}
+</form>
+</div>

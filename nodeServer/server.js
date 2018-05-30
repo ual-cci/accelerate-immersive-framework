@@ -7,13 +7,13 @@ var bodyParser = require('body-parser');
 var oauthserver = require('oauth2-server');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
+var userAPI = require('./user-model.js');
 
 const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
 const app = express();
-createDoc(startServer);
+startServer();
 
-// Create initial document then fire callback
 function createDoc(callback) {
   var connection = backend.connect();
   var doc = connection.get('MIMIC-2', 'text-area');
@@ -44,7 +44,7 @@ function startAuth()
   });
 
   app.oauth = oauthserver({
-    model: require('./model.js'),
+    model: userAPI,
     grants: ['password'],
     debug: true
   });
@@ -57,20 +57,15 @@ function startAuth()
 
   app.use(app.oauth.errorHandler());
 
+  app.post('/accounts', function (req, res) {
+    console.log('request for new user');
+    userAPI.newUser("test","test",function(){},function(){});
+    res.sendStatus(200);
+  })
 }
 
-function startServer() {
-  // Create a web server to serve files and listen to WebSocket connections
-  app.use(express.static('static'));
-  app.use(cors({
-    allowedOrigins: [
-        'http://localhost:4200'
-    ],
-    headers: ["Authorization"]
-  }));
-
-  var server = http.createServer(app);
-
+function startWS(server)
+{
   // Connect any incoming WebSocket connection to ShareDB
   var wss = new WebSocket.Server({server: server});
   wss.on('connection', function(ws, req) {
@@ -81,7 +76,21 @@ function startServer() {
     console.log('WebSocket connection');
     backend.listen(stream);
   });
+}
 
+function startServer() {
+  // Create a web server to serve files and listen to WebSocket connections
+  app.use(express.static('static'));
+  app.use(cors({
+    allowedOrigins: [
+        'http://localhost:4200'
+    ],
+    headers: ["Authorization", "Content-Type"]
+  }));
+
+  var server = http.createServer(app);
+
+  startWS(server);
   startAuth();
 
   server.listen(8080);
