@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
+import RSVP from 'rsvp';
 
 export default Controller.extend({
   actions: {
@@ -7,18 +8,17 @@ export default Controller.extend({
     transitionToLoginRoute() {
       this.transitionToRoute('login');
     },
-    createNewDoc(name, isPrivate) {
-      console.log('creating new doc:', name, isPrivate);
+    createNewDocument(docName, isPrivate) {
+      console.log('creating new doc:', docName, isPrivate);
       let doc = this.get('store').createRecord('code-document', {
         source:'<some code>',
         owner:'Louis',
-        public:false,
-        name:'LOUIS'
+        public:!isPrivate,
+        name:docName
       });
       doc.save()
       .then(()=>console.log("doc created"))
       .catch((err)=>console.log(err));
-      return true;
     },
   }
 });

@@ -15,13 +15,12 @@ export default Component.extend({
     },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
-    // do all the other things
     },
     createNewDoc() {
       let docName = this.get('docName');
       let isPrivate = this.get('isPrivate');
       console.log('sendingAction', 'onNewDoc', docName, isPrivate);
-      this.sendAction('onNewDoc', "name of a doc", true);
+      this.get('onNewDoc')(docName, isPrivate);
     }
   }
 });
