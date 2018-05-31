@@ -6,15 +6,21 @@ export default Route.extend(ApplicationRouteMixin, {
   sessionAccount: inject('session-account'),
   session: inject('session'),
   beforeModel() {
-    return this._loadCurrentUser().then(this.transitionTo('documents'));
+    //return this._loadCurrentUser();
   },
   sessionAuthenticated() {
     this._super(...arguments);
-    console.log("session authenticated");
-    this._loadCurrentUser().then(this.transitionTo('documents'));
+    console.log("session authenticated", this.get('session'));
+    this.transitionTo('documents');
+    //this._loadCurrentUser();
   },
   _loadCurrentUser() {
     console.log("loading current user");
-    return this.get('sessionAccount').loadCurrentUser().catch(() => this.get('session').invalidate());
+    return this.get('sessionAccount').loadCurrentUser()
+    .then(this.transitionTo('documents'))
+    .catch(() => {
+      this.get('session').invalidate();
+      //this.transitionTo('login');
+    });
   }
 });

@@ -19,7 +19,7 @@ var newUser = function(username, password, email) {
 			userModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
 					var user = new userModel({
-						id: c,
+						account_id: c,
 						username: username,
 						password: hash,
 						email: email
@@ -41,6 +41,7 @@ var newUser = function(username, password, email) {
 //AUTH
 
 var getAccessToken = function(bearerToken, callback) {
+	console.log('getting token');
 	tokenModel.findOne({
 		accessToken: bearerToken
 	}, callback);
@@ -76,6 +77,7 @@ var getUser = function(username, password, callback) {
 			callback(err);
 			return;
 		}
+		console.log("getting user", user);
 		var hash = user.password;
 		bcrypt.compare(password, hash).then((res) => {
 			callback(err, user);
@@ -123,7 +125,6 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-
 dump();
 // dropUsers();
 // dropTokens();

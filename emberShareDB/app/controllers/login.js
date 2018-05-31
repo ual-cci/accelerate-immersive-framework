@@ -27,8 +27,8 @@ export default Controller.extend({
     authenticate() {
       let { identification, password } = this.getProperties('identification', 'password');
       console.log(identification, password);
-      this.get('session').authenticate('authenticator:oauth2', identification, password).then(function() {
-        console.log("authenticated");
+      this.get('session').authenticate('authenticator:oauth2', identification, password).then((response) => {
+        console.log("authenticated", response);
       }).catch((err) => {
         this.set('loginErrorMessage', err.error_description);
       });
@@ -42,7 +42,7 @@ export default Controller.extend({
           username: newUsername,
           password: newUserPassword,
           email: newUserEmail,
-          created:Date.now()
+          created: Date.now()
         });
         user.save().then(function() {
           console.log("user created");

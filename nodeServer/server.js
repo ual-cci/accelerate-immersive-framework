@@ -72,7 +72,6 @@ function startWS(server)
 function startDocAPI()
 {
   app.get('/code-documents', (req,res) => {
-    console.log('getting all docs');
     let query = connection.createFetchQuery(collectionName,{},[],(err, results) => {
       if(!err)
       {
@@ -80,15 +79,14 @@ function startDocAPI()
         for(var i = 0; i < results.length; i++) {
           let res = results[i];
           var doc = {
-            source:res.data,
-            owner:"owner",
-            name:res.id,
-            created:null,
-            public:false
+            source: res.data,
+            owner: "owner",
+            name: res.id,
+            created: null,
+            public: false
           }
           docs.push({attributes:doc,id:res.id,type:"code-document"});
         }
-        console.log(docs);
         res.status(200).send({data:docs});
       }
       else
