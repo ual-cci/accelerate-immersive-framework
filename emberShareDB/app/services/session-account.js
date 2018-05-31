@@ -6,7 +6,6 @@ export default Service.extend({
   session: inject('session'),
   store: inject(),
   loadCurrentUser() {
-    console.log('session-account');
     return new RSVP.Promise((resolve, reject) => {
       const accountId = this.get('session.data.authenticated.account_id');
       console.log('accountID',accountId);

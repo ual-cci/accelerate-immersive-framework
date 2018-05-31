@@ -4,13 +4,14 @@ import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mi
 
 export default Route.extend(ApplicationRouteMixin, {
   sessionAccount: inject('session-account'),
+  session: inject('session'),
   beforeModel() {
     return this._loadCurrentUser();
   },
   sessionAuthenticated() {
     this._super(...arguments);
     console.log("session authenticated");
-    this._loadCurrentUser();
+    this._loadCurrentUser().then(this.transitionTo('code-editor'));
   },
   _loadCurrentUser() {
     console.log("loading current user");

@@ -9,7 +9,7 @@
     {{#if session.isAuthenticated}}
       <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
       {{#if sessionAccount.account}}
-        <p class="navbar-text pull-right">Signed in as {{sessionAccount.account.name}}</p>
+        <p class="navbar-text pull-right">Signed in as {{sessionAccount.account.username}}</p>
       {{/if}}
     {{else}}
       <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
