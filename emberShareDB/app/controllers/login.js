@@ -16,7 +16,7 @@ export default Controller.extend({
     },
     createNewUser() {
       let { newUserIdentification, newUserPassword } = this.getProperties('newUserIdentification', 'newUserPassword');
-      console.log('updating record for:',newUserIdentification, newUserPassword)
+      console.log('creating record for:',newUserIdentification, newUserPassword)
       let user = this.get('store').createRecord('account', {
         login: "",
         name: newUserIdentification,

@@ -33,6 +33,7 @@ function createDoc(callback) {
 function startAuth()
 {
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
   var mongoUri = 'mongodb://localhost/oauth';
@@ -58,10 +59,13 @@ function startAuth()
   app.use(app.oauth.errorHandler());
 
   app.post('/accounts', function (req, res) {
-    console.log('request for new user');
-    userAPI.newUser("test","test",function(){},function(){});
-    res.sendStatus(200);
-  })
+    //console.log('request for new user', req.body);
+    let attr = req.body.data.attributes;
+    console.log(attr);
+    userAPI.newUser(attr.name,attr.password)
+    .then( () =>res.sendStatus(200))
+    .catch( (err) => res.sendStatus(401));
+  });
 }
 
 function startWS(server)

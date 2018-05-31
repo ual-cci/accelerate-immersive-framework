@@ -3,23 +3,27 @@ var mongoose = require('mongoose');
 let clientModel = require('./mongo/model/client');
 let	tokenModel = require('./mongo/model/token');
 let	userModel = require('./mongo/model/user');
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 //API
 
-var newUser = function(username, password, onSuccess, onError) {
-	userModel.count({}, function(err, c) {
-		var user = new userModel({
-			id: c,
-			username: username,
-			password: password
-		});
-		user.save(function(err, user) {
-			if (err) {
-				onError();
-				return;
-			}
-			onSuccess();
-			return;
+var newUser = function(username, password) {
+	return new Promise((resolve, reject) => {
+		userModel.count({}, (err, c) => {
+			bcrypt.hash(password, saltRounds).then((hash) => {
+				var user = new userModel({
+					id: c,
+					username: username,
+					password: hash
+				});
+				user.save((err, user) => {
+					if (err) {
+						reject(err);
+					}
+					resolve();
+				});
+			});
 		});
 	});
 };
@@ -55,9 +59,13 @@ var saveAccessToken = function(accessToken, clientId, expires, user, callback) {
 
 var getUser = function(username, password, callback) {
 	userModel.findOne({
-		username: username,
-		password: password
-	}, callback);
+		username: username
+	}, (err, user) => {
+		var hash = user.password;
+		bcrypt.compare(password, hash).then((res) => {
+			callback(err, user);
+		});
+	});
 };
 
 module.exports = {
