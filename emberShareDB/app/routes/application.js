@@ -6,12 +6,12 @@ export default Route.extend(ApplicationRouteMixin, {
   sessionAccount: inject('session-account'),
   session: inject('session'),
   beforeModel() {
-    return this._loadCurrentUser().then(this.transitionTo('code-editor'));
+    return this._loadCurrentUser().then(this.transitionTo('documents'));
   },
   sessionAuthenticated() {
     this._super(...arguments);
     console.log("session authenticated");
-    this._loadCurrentUser().then(this.transitionTo('code-editor'));
+    this._loadCurrentUser().then(this.transitionTo('documents'));
   },
   _loadCurrentUser() {
     console.log("loading current user");

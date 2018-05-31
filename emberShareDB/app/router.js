@@ -9,6 +9,7 @@ const Router = EmberRouter.extend({
 Router.map(function() {
   this.route('login');
   this.route('code-editor');
+  this.route('documents');
 });
 
 export default Router;

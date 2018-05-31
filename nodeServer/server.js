@@ -13,8 +13,9 @@ const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
 const connection = backend.connect();
 const app = express();
-startServer();
 const collectionName = 'MIMIC'
+
+startServer();
 
 function startAuthAPI()
 {
@@ -71,9 +72,32 @@ function startWS(server)
 function startDocAPI()
 {
   app.get('/code-documents', (req,res) => {
-    let attr = req.body.data.attributes;
-    console.log(attr);
+    console.log('getting all docs');
+    let query = connection.createFetchQuery(collectionName,{},[],(err, results) => {
+      if(!err)
+      {
+        let docs = [];
+        for(var i = 0; i < results.length; i++) {
+          let res = results[i];
+          var doc = {
+            source:res.data,
+            owner:"owner",
+            name:res.id,
+            created:null,
+            public:false
+          }
+          docs.push({attributes:doc,id:res.id,type:"code-document"});
+        }
+        console.log(docs);
+        res.status(200).send({data:docs});
+      }
+      else
+      {
+        res.status(400).send(err);
+      }
+    });
   });
+
   app.post('/code-documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
