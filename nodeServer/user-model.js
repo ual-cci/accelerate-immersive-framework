@@ -8,20 +8,27 @@ const saltRounds = 10;
 
 //API
 
-var newUser = function(username, password) {
+var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
-		userModel.count({}, (err, c) => {
-			bcrypt.hash(password, saltRounds).then((hash) => {
-				var user = new userModel({
-					id: c,
-					username: username,
-					password: hash
-				});
-				user.save((err, user) => {
-					if (err) {
-						reject(err);
-					}
-					resolve();
+		userModel.find({username:username}, function(err,user) {
+			if(user.length > 0 || err)
+			{
+				reject("user already exists");
+			}
+			userModel.count({}, (err, c) => {
+				bcrypt.hash(password, saltRounds).then((hash) => {
+					var user = new userModel({
+						id: c,
+						username: username,
+						password: hash,
+						email: email
+					});
+					user.save((err, user) => {
+						if (err) {
+							reject("internal error creating user");
+						}
+						resolve();
+					});
 				});
 			});
 		});
@@ -61,6 +68,11 @@ var getUser = function(username, password, callback) {
 	userModel.findOne({
 		username: username
 	}, (err, user) => {
+		if(err || !user)
+		{
+			callback(err);
+			return;
+		}
 		var hash = user.password;
 		bcrypt.compare(password, hash).then((res) => {
 			callback(err, user);
@@ -78,6 +90,14 @@ module.exports = {
 };
 
 //HELPER
+
+var dropUsers = function() {
+	userModel.remove({},function(err){console.log('cleared all users')});
+}
+
+var dropTokens = function() {
+	tokenModel.remove({},function(err){console.log('cleared all tokens')});
+}
 
 var dump = function() {
 	clientModel.find(function(err, clients) {
@@ -102,3 +122,5 @@ var dump = function() {
 };
 
 dump();
+//dropUsers();
+//dropTokens();

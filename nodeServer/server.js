@@ -62,9 +62,9 @@ function startAuth()
     //console.log('request for new user', req.body);
     let attr = req.body.data.attributes;
     console.log(attr);
-    userAPI.newUser(attr.name,attr.password)
+    userAPI.newUser(attr.username,attr.password,attr.email)
     .then( () =>res.sendStatus(200))
-    .catch( (err) => res.sendStatus(401));
+    .catch( (err) =>  res.status(400).send(err));
   });
 }
 

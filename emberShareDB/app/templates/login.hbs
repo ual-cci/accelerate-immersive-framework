@@ -1,24 +1,28 @@
 <div class = "container">
 <form {{action 'authenticate' on='submit'}}>
-  <label for="identification">Login</label>
+  <label for="identification">Username</label>
   {{input id='identification' placeholder='Enter Login' value=identification}}
   <label for="password">Password</label>
   {{input id='password' placeholder='Enter Password' type='password' value=password}}
   <button type="submit">Login</button>
-  {{#if errorMessage}}
-    <p>{{errorMessage}}</p>
+  {{#if loginErrorMessage}}
+    <p>{{loginErrorMessage}}</p>
   {{/if}}
 </form>
 </div>
 <div class = "container">
 <form {{action 'createNewUser' on='submit'}}>
-  <label for="newUserIdentification">Register New Users</label>
-  {{input id='newUserIdentification' placeholder='Enter Login' value=newUserIdentification}}
+  <label for="newUsername">Username</label>
+  {{input id='newUsername' placeholder='Username' value=newUsername}}
+  <label for="newUserEmail">Email (optional)</label>
+  {{input id='newUserEmail' placeholder='Email' value=newUserEmail}}
   <label for="newUserPassword">Password</label>
   {{input id='newUserPassword' placeholder='Enter Password' type='password' value=newUserPassword}}
-  <button type="submit">Create</button>
-  {{#if errorMessage}}
-    <p>{{errorMessage}}</p>
+  <label for="newUserPasswordAgain">Password (again)</label>
+  {{input id='newUserPasswordAgain' placeholder='Enter Password (again)' type='password' value=newUserPasswordAgain}}
+  <button type="submit">Create New User</button>
+  {{#if registerMessage}}
+    <p>{{registerMessage}}</p>
   {{/if}}
 </form>
 </div>

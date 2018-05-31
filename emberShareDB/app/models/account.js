@@ -3,7 +3,8 @@ import DS from 'ember-data';
 const { attr, Model } = DS;
 
 export default Model.extend({
-  login: attr('string'),
-  name: attr('string'),
-  password: attr('string')
+  username: attr('string'),
+  password: attr('string'),
+  email: attr('string'),
+  created: attr('date')
 });
