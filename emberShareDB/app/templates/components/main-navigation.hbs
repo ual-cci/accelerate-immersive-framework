@@ -4,15 +4,22 @@
       {{#link-to 'index' classNames='navbar-brand'}}
         Home
       {{/link-to}}
-    </div>
-    {{! display logout button when the session is authenticated, login button otherwise }}
-    {{#if session.isAuthenticated}}
-      <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
-      {{#if sessionAccount.account}}
-        <p class="navbar-text pull-right">Signed in as {{sessionAccount.account.username}}</p>
+      {{! display logout button when the session is authenticated, login button otherwise }}
+      {{#if session.isAuthenticated}}
+        <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
+        {{#if sessionAccount.account}}
+          <p class="navbar-text pull-right">Signed in as {{sessionAccount.account.username}}</p>
+        {{/if}}
+        <form {{action 'createNewDoc' on='submit'}}>
+          {{input id='docName' placeholder='Doc Name' value=docName}}
+          <label for="isPrivate">Private?</label>
+          {{input type="checkbox" id='isPrivate' checked=true click=(action 'checkboxClicked')}}
+          <button type="submit">Create New Document</button>
+        </form>
+      {{else}}
+        <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
       {{/if}}
-    {{else}}
-      <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
-    {{/if}}
+    </div>
+
   </div>
 </nav>

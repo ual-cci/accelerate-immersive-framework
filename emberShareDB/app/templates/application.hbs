@@ -1,4 +1,4 @@
-{{main-navigation onLogin='transitionToLoginRoute'}}
+{{main-navigation onLogin='transitionToLoginRoute' onNewDoc=(action 'createNewDoc' docName isPrivate)}}
 <div class="container">
   {{outlet}}
 </div>

@@ -12,9 +12,11 @@ export default Service.extend({
       if (!isEmpty(accountId)) {
         this.get('store').find('account', accountId).then((account) => {
           this.set('account', account);
+          console.log('setting account to ', account);
           resolve();
         }, reject);
       } else {
+        console.log('accountID empty, resolving');
         resolve();
       }
     });

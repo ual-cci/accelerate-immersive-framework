@@ -14,6 +14,7 @@ var newUser = function(username, password, email) {
 			if(user.length > 0 || err)
 			{
 				reject("user already exists");
+				return;
 			}
 			userModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
@@ -26,8 +27,10 @@ var newUser = function(username, password, email) {
 					user.save((err, user) => {
 						if (err) {
 							reject("internal error creating user");
+								return;
 						}
 						resolve();
+						return;
 					});
 				});
 			});
@@ -122,5 +125,5 @@ var dump = function() {
 };
 
 dump();
-//dropUsers();
-//dropTokens();
+// dropUsers();
+// dropTokens();

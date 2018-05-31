@@ -11,26 +11,12 @@ var userAPI = require('./user-model.js');
 
 const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
+const connection = backend.connect();
 const app = express();
 startServer();
+const collectionName = 'MIMIC'
 
-function createDoc(callback) {
-  var connection = backend.connect();
-  var doc = connection.get('MIMIC-2', 'text-area');
-  console.log("fetching doc");
-  doc.fetch(function(err) {
-    if (err) throw err;
-    if (doc.type === null) {
-      doc.create('', callback);
-      console.log("doc created");
-      return;
-    }
-    console.log("doc fetched", doc.id, doc.data);
-    callback();
-  });
-}
-
-function startAuth()
+function startAuthAPI()
 {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
@@ -63,7 +49,7 @@ function startAuth()
     let attr = req.body.data.attributes;
     console.log(attr);
     userAPI.newUser(attr.username,attr.password,attr.email)
-    .then( () =>res.sendStatus(200))
+    .then( () => res.sendStatus(200))
     .catch( (err) =>  res.status(400).send(err));
   });
 }
@@ -72,7 +58,7 @@ function startWS(server)
 {
   // Connect any incoming WebSocket connection to ShareDB
   var wss = new WebSocket.Server({server: server});
-  wss.on('connection', function(ws, req) {
+  wss.on('connection', (ws, req) => {
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
@@ -82,8 +68,44 @@ function startWS(server)
   });
 }
 
-function startServer() {
-  // Create a web server to serve files and listen to WebSocket connections
+function startDocAPI()
+{
+  app.get('/code-documents', (req,res) => {
+    let attr = req.body.data.attributes;
+    console.log(attr);
+  });
+  app.post('/code-documents', (req,res) => {
+    let attr = req.body.data.attributes;
+    console.log(attr);
+    createDoc(attr.name)
+    .then( (doc) => res.status(200).end())
+    .catch( (err) =>  res.status(400).send({errors:[err]}));
+  });
+}
+
+function createDoc(docName) {
+  return new Promise((resolve, reject) => {
+    var doc = connection.get(collectionName, docName);
+    doc.fetch(function(err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (doc.type === null) {
+        doc.create('',resolve);
+        console.log("doc created");
+        resolve(doc);
+        return;
+      }
+      console.log("doc fetched", doc.id, doc.data);
+      resolve(doc);
+      return;
+    });
+  });
+}
+
+function startServer()
+{
   app.use(express.static('static'));
   app.use(cors({
     allowedOrigins: [
@@ -95,7 +117,8 @@ function startServer() {
   var server = http.createServer(app);
 
   startWS(server);
-  startAuth();
+  startAuthAPI();
+  startDocAPI();
 
   server.listen(8080);
   console.log('Listening on http://localhost:8080');
