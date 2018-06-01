@@ -20,8 +20,12 @@ export default Component.extend({
       let docName = this.get('docName');
       let isPrivate = this.get('isPrivate');
       let currentUser = this.get('sessionAccount').currentUserName;
-      console.log('sendingAction', 'onNewDoc', docName, isPrivate, currentUser);
-      this.get('onNewDoc')(docName, isPrivate, currentUser);
+      if(docName.length > 1)
+      {
+        docName = docName.replace(/\s/g, "-");
+        console.log('sendingAction', 'onNewDoc', docName, isPrivate, currentUser);
+        this.get('onNewDoc')(docName, isPrivate, currentUser);
+      }
     }
   }
 });
