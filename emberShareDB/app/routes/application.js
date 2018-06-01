@@ -18,6 +18,7 @@ export default Route.extend(ApplicationRouteMixin, {
     this.get('sessionAccount').loadCurrentUser()
     .then(() => {
       console.log("loaded user, transitioning to documents");
+      console.log("currentUser", this.get('sessionAccount').currentUserName);
       this.transitionTo('documents');
     })
     .catch(() => {

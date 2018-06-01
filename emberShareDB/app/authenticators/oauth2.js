@@ -31,7 +31,6 @@ export default OAuth2PasswordGrant.extend({
             response = assign(response, { 'expires_at': expiresAt });
           }
           response = assign(response, { 'user_id': identification });
-          console.log("AUTHENTICATION RESPONSE", response);
           resolve(response);
         });
       }, (response) => {

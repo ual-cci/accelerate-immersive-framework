@@ -19,8 +19,9 @@ export default Component.extend({
     createNewDoc() {
       let docName = this.get('docName');
       let isPrivate = this.get('isPrivate');
-      console.log('sendingAction', 'onNewDoc', docName, isPrivate);
-      this.get('onNewDoc')(docName, isPrivate);
+      let currentUser = this.get('sessionAccount').currentUserName;
+      console.log('sendingAction', 'onNewDoc', docName, isPrivate, currentUser);
+      this.get('onNewDoc')(docName, isPrivate, currentUser);
     }
   }
 });

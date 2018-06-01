@@ -4,6 +4,7 @@ import RSVP from 'rsvp';
 
 export default Controller.extend({
   session: inject('session'),
+  sessionAccount: inject('session-account'),
   store: inject(),
   validateRegistration: function() {
     return new RSVP.Promise((resolve, reject) => {
