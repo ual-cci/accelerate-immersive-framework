@@ -10,21 +10,15 @@ export default Route.extend(ApplicationRouteMixin, {
   },
   sessionAuthenticated() {
     this._super(...arguments);
-    console.log("session authenticated", this.get('session'));
     this._loadCurrentUser();
   },
   _loadCurrentUser() {
-    console.log("loading current user");
     this.get('sessionAccount').loadCurrentUser()
     .then(() => {
-      console.log("loaded user, transitioning to documents");
-      console.log("currentUser", this.get('sessionAccount').currentUserName);
       this.transitionTo('documents');
     })
     .catch(() => {
-      console.log("load user rejected");
       this.get('session').invalidate();
-      //this.transitionTo('login');
     });
   }
 });

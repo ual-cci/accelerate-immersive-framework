@@ -13,7 +13,7 @@ const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
 const connection = backend.connect();
 const app = express();
-const collectionName = 'mimic-docs'
+const collectionName = 'mimicDocs'
 
 startServer();
 
@@ -29,6 +29,7 @@ function startAuthAPI()
       return console.error('Error connecting to "%s":', mongoUri, err);
     }
     console.log('Connected successfully to "%s"', mongoUri);
+    userAPI.init();
   });
 
   app.oauth = oauthserver({
@@ -53,6 +54,7 @@ function startAuthAPI()
     .then( () => res.sendStatus(200))
     .catch( (err) =>  res.status(400).send(err));
   });
+
 }
 
 function startWS(server)
@@ -78,7 +80,6 @@ function startDocAPI()
         let docs = [];
         for(var i = 0; i < results.length; i++) {
           let res = results[i];
-          console.log(res);
           var doc = {
             source: res.data.source,
             owner: res.data.name,

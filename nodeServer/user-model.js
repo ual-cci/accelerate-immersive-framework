@@ -8,6 +8,22 @@ const saltRounds = 10;
 
 //API
 
+var init = function() {
+	console.log("checking client");
+	clientModel.find({clientId:"application"}, (err, client) => {
+		if(client.length < 1)
+		{
+			console.log("client doesnt exist, creating");
+			var client = new clientModel({clientId:"application", clientSecret:"secret"});
+			client.save((err, client) => console.log("saved client"));
+		}
+		else
+		{
+			console.log("client exists");
+		}
+	});
+}
+
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
 		userModel.find({username:username}, function(err,user) {
@@ -91,7 +107,8 @@ module.exports = {
 	grantTypeAllowed: grantTypeAllowed,
 	saveAccessToken: saveAccessToken,
 	getUser: getUser,
-	newUser: newUser
+	newUser: newUser,
+	init: init
 };
 
 //HELPER

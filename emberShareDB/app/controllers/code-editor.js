@@ -1,15 +1,16 @@
-import Component from '@ember/component';
+import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 
-export default Component.extend({
+export default Controller.extend({
+  queryParams: ['documentName'],
+  documentName: null,
   websockets: service(),
   socketRef: null,
   con: null,
   doc: null,
   editor: null,
   suppress:false,
-  documentName:"",
   getSession() {
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -83,13 +84,12 @@ export default Component.extend({
       doc.submitOp(op);
     }
   },
-  didInsertElement() {
-    this._super(...arguments);
+  initShareDB() {
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
-
-    const doc = con.get('mimic-docs',this.get('documentName'));
+    console.log("document",this.get('documentName'));
+    const doc = con.get('mimicDocs',this.get('documentName'));
     this.set('doc', doc);
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -123,16 +123,11 @@ export default Component.extend({
     console.log("DOC:","type",doc.type,"id", doc.id, "data", doc.data);
     this.set('socketRef', socket);
   },
-  willDestroyElement() {
-    this._super(...arguments);
-  },
   actions: {
-    valueUpdated()  {
-      //console.log("editor updated");
-    },
     editorReady(editor) {
       console.log("editor ready", editor);
       this.set('editor', editor);
+      this.initShareDB();
     }
   }
 });
