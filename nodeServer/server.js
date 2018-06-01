@@ -13,7 +13,7 @@ const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
 const connection = backend.connect();
 const app = express();
-const collectionName = 'MIMIC'
+const collectionName = 'mimic-docs'
 
 startServer();
 
@@ -78,12 +78,13 @@ function startDocAPI()
         let docs = [];
         for(var i = 0; i < results.length; i++) {
           let res = results[i];
+          console.log(res);
           var doc = {
-            source: res.data,
-            owner: "owner",
+            source: res.data.source,
+            owner: res.data.name,
             name: res.id,
             created: null,
-            public: false
+            public: res.data.isPrivate ? "false":"true"
           }
           docs.push({attributes:doc,id:res.id,type:"code-document"});
         }
@@ -99,13 +100,13 @@ function startDocAPI()
   app.post('/code-documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
-    createDoc(attr.name)
+    createDoc(attr.name, attr.owner,attr.public ? "false":"true")
     .then( (doc) => res.status(200).end())
     .catch( (err) =>  res.status(400).send({errors:[err]}));
   });
 }
 
-function createDoc(docName) {
+function createDoc(docName,owner,isPrivate) {
   return new Promise((resolve, reject) => {
     var doc = connection.get(collectionName, docName);
     doc.fetch(function(err) {
@@ -114,7 +115,7 @@ function createDoc(docName) {
         return;
       }
       if (doc.type === null) {
-        doc.create('',resolve);
+        doc.create({source:"",name:owner,isPrivate:isPrivate},resolve);
         console.log("doc created");
         resolve(doc);
         return;

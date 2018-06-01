@@ -9,7 +9,7 @@ export default Component.extend({
   doc: null,
   editor: null,
   suppress:false,
-  path:[""],
+  documentName:"",
   getSession() {
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -68,7 +68,7 @@ export default Component.extend({
       const aceDoc = session.getDocument();
       const op = {};
       const start = aceDoc.positionToIndex(delta.start);
-      op.p = [start];
+      op.p = ['source',start];
       let action;
       if (delta.action === 'insert') {
         action = 'si';
@@ -89,9 +89,8 @@ export default Component.extend({
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
 
-    const doc = con.get('MIMIC-2','text-area');
+    const doc = con.get('mimic-docs',this.get('documentName'));
     this.set('doc', doc);
-
     const editor = this.get('editor');
     const session = editor.getSession();
 
@@ -100,9 +99,11 @@ export default Component.extend({
 
       const doc = this.get('doc');
       console.log(doc.data);
+      // const op = {p:['name'],oi:'louis'};
+      // doc.submitOp(op);
 
       this.set('surpress', true);
-      session.setValue(doc.data);
+      session.setValue(doc.data.source);
       this.set('surpress', false);
 
       session.on('change',(delta)=>{
