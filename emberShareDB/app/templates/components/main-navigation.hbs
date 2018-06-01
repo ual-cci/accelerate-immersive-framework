@@ -7,8 +7,8 @@
       {{! display logout button when the session is authenticated, login button otherwise }}
       {{#if session.isAuthenticated}}
         <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
-        {{#if sessionAccount.account}}
-          <p class="navbar-text pull-right">Signed in as {{sessionAccount.account.username}}</p>
+        {{#if sessionAccount.currentUserName}}
+          <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
         {{/if}}
         <form {{action 'createNewDoc' on='submit'}}>
           {{input id='docName' placeholder='Doc Name' value=docName}}
@@ -20,6 +20,5 @@
         <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
       {{/if}}
     </div>
-
   </div>
 </nav>
