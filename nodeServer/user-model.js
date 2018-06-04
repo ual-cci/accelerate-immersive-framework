@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-
+const guid = require('./uuid.js');
 let clientModel = require('./mongo/model/client');
 let	tokenModel = require('./mongo/model/token');
 let	userModel = require('./mongo/model/user');
@@ -59,7 +59,7 @@ var newUser = function(username, password, email) {
 
 var getNewUserId = function(callback)
 {
-	var uuid = guid();
+	var uuid = guid.guid();
 	console.log("uuid",uuid);
 	userModel.find({account_id:uuid}, function(err,user) {
 		if(user.length > 0 || err) {
@@ -132,17 +132,6 @@ module.exports = {
 };
 
 //HELPER
-
-function guid() {
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-    s4() + '-' + s4() + s4() + s4();
-}
-
-function s4() {
-  return Math.floor((1 + Math.random()) * 0x10000)
-    .toString(16)
-    .substring(1);
-}
 
 var dropUsers = function() {
 	userModel.remove({},function(err){console.log('cleared all users')});

@@ -8,6 +8,7 @@ var oauthserver = require('oauth2-server');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 var userAPI = require('./user-model.js');
+var guid = require('./uuid.js');
 
 const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
 const backend = new ShareDB({db:db});
@@ -79,16 +80,9 @@ function startDocAPI()
       {
         let docs = [];
         for(var i = 0; i < results.length; i++) {
-          let res = results[i];
-          var doc = {
-            source: res.data.source,
-            owner: res.data.name,
-            name: res.id,
-            created: null,
-            public: res.data.isPrivate ? "false":"true"
-          }
-          docs.push({attributes:doc,id:res.id,type:"document"});
+          docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
         }
+        console.log(docs);
         res.status(200).send({data:docs});
       }
       else
@@ -101,51 +95,68 @@ function startDocAPI()
   app.post('/documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
-    createDoc(attr.name, attr.owner,attr.public ? "false":"true")
-    .then( function(doc){sendDocResponse(res,200,attr)},
-     function(err) {sendErrorResponse(res,422,err)});
+    createDoc(attr.name, attr.owner, attr.public ? "false":"true")
+    .then( function(doc){
+      res.type('application/vnd.api+json');
+      res.status(200);
+      var json = {
+        data:{
+          id:doc.data.documentId,
+          type:'document',
+          attr:doc.data
+        }
+      }
+      res.json(json);
+    },
+     function(err) {
+       res.type('application/vnd.api+json');
+       res.status(code);
+       res.json({errors:[err]});
+     });
   });
 }
 
-var sendErrorResponse = function(res, code, error)
+function getNewDocumentId(callback)
 {
-  res.type('application/vnd.api+json');
-  res.status(code);
-  res.json({errors:[error]});
-}
-
-var sendDocResponse = function(res, code, d)
-{
-  res.type('application/vnd.api+json');
-  res.status(code);
-  var json = {
-    data:{
-      id:d.name,
-      type:'document',
-      attr:d
+  const uuid = guid.guid();
+  var doc = connection.get(collectionName, uuid);
+  doc.fetch(function(err) {
+    if (doc.type === null) {
+      return callback(uuid);
     }
-  }
-  res.json(json);
+    else {
+      getNewDocumentId(callback);
+    }
+  });
 }
 
 function createDoc(docName,owner,isPrivate) {
   return new Promise((resolve, reject) => {
-    var doc = connection.get(collectionName, docName);
-    doc.fetch(function(err) {
-      if (err) {
-        console.log("database error making document");
-        reject("database error making document");
+    console.log("creating doc");
+    getNewDocumentId(function(uuid) {
+      var doc = connection.get(collectionName, uuid);
+      doc.fetch(function(err) {
+        if (err) {
+          console.log("database error making document");
+          reject("database error making document");
+          return;
+        }
+        if (doc.type === null) {
+          doc.create({
+            source:"",
+            owner:owner,
+            isPrivate:isPrivate,
+            name:docName,
+            documentId:uuid
+          },resolve);
+          console.log("doc created");
+          resolve(doc);
+          return;
+        }
+        console.log("document with that name alrady exists");
+        reject("document with that name alrady exists");
         return;
-      }
-      if (doc.type === null) {
-        doc.create({source:"",name:owner,isPrivate:isPrivate},resolve);
-        console.log("doc created");
-        resolve(doc);
-        return;
-      }
-      console.log("document with that name alrady exists");
-      reject("document with that name alrady exists");
-      return;
+      });
     });
   });
 }

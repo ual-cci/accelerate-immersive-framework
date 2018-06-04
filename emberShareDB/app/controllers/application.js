@@ -15,7 +15,8 @@ export default Controller.extend({
         source:'<some code>',
         owner:currentUser,
         public:!isPrivate,
-        name:docName
+        name:docName,
+        documentId:"",
       });
       doc.save().then((response)=>{
         console.log("Document created successfully");

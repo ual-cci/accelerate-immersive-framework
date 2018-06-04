@@ -1,5 +1,5 @@
 <ul>
   {{#each model as |document|}}
-    <li>{{#link-to "code-editor" (query-params documentName=document.name)}}{{document.name}}{{/link-to}}</li>
+    <li>{{#link-to "code-editor" (query-params docId=document.documentId)}}{{document.name}}{{/link-to}}</li>
   {{/each}}
 </ul>

@@ -3,8 +3,8 @@ import { inject as service } from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 
 export default Controller.extend({
-  queryParams: ['documentName'],
-  documentName: null,
+  queryParams: ['docId'],
+  docId: null,
   websockets: service(),
   socketRef: null,
   con: null,
@@ -88,8 +88,8 @@ export default Controller.extend({
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
-    console.log("document",this.get('documentName'));
-    const doc = con.get('mimicDocs',this.get('documentName'));
+    console.log("document",this.get('docId'));
+    const doc = con.get('mimicDocs',this.get('docId'));
     this.set('doc', doc);
     const editor = this.get('editor');
     const session = editor.getSession();
