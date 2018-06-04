@@ -31,6 +31,7 @@ export default Controller.extend({
       console.log(identification, password);
       this.get('session').authenticate('authenticator:oauth2', identification, password).then((response) => {
         console.log("authenticated", response);
+        this.set('loginErrorMessage', "authenticated");
       }).catch((err) => {
         this.set('loginErrorMessage', err.error_description);
       });

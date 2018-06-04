@@ -74,6 +74,38 @@ var getNewUserId = function(callback)
 	});
 }
 
+var updatePassword = async function(username, token, password)
+{
+	let user = await checkPasswordToken(username, token);
+	console.log('checked token',user);
+	return new Promise((resolve, reject) => {
+		console.log('updating record');
+		if(user)
+		{
+			bcrypt.hash(password, saltRounds).then((hash) => {
+				user.set('password', hash);
+				user.set('passwordResetToken', null);
+				user.set('passwordResetExpiry', new Date());
+				user.save((err, user) => {
+					if(err)
+					{
+						reject(err);
+						return;
+					}
+					else {
+						resolve();
+						return;
+					}
+				});
+			});
+		}
+		else
+		{
+			reject("token bad");
+		}
+	});
+}
+
 var checkPasswordToken = function(username, token)
 {
 	console.log('checkPasswordToken');
@@ -82,40 +114,33 @@ var checkPasswordToken = function(username, token)
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
-				console.log('found user',user);
 				if(token != user.passwordResetToken)
 				{
+					console.log('token checked:bad token',token,user.passwordResetToken);
 					reject();
 					return;
 				}
 				else if (new Date() > user.passwordResetExpiry)
 				{
+					console.log('token checked:bad date');
 					reject();
 					return;
 				}
-				user.set('passwordResetToken', null);
-				user.set('passwordResetExpiry', new Date());
-				user.save((err, user) => {
-					console.log(err);
-					if(err)
-					{
-						reject(err);
-						return;
-					}
-					else {
-						resolve(user);
-						return;
-					}
-				});
+				console.log('token checked:good');
+				resolve(user);
+				return;
 			}
 			else
 			{
-				reject(err);
+				console.log('token checked:bad user');
+				reject();
 				return;
 			}
 		});
 	})
 }
+
+
 
 var requestPasswordReset = function(username) {
 	console.log('requestPasswordReset');
@@ -191,10 +216,17 @@ var getUser = function(username, password, callback) {
 			callback(err);
 			return;
 		}
-		console.log("getting user", user);
 		var hash = user.password;
+		console.log("getting user", password, hash);
 		bcrypt.compare(password, hash).then((res) => {
-			callback(err, user);
+			if(res)
+			{
+				callback(err, user);
+			}
+			else
+			{
+				callback();
+			}
 		});
 	});
 };
@@ -208,7 +240,8 @@ module.exports = {
 	newUser: newUser,
 	init: init,
 	requestPasswordReset: requestPasswordReset,
-	checkPasswordToken: checkPasswordToken
+	checkPasswordToken: checkPasswordToken,
+	updatePassword: updatePassword
 };
 
 //HELPER

@@ -81,6 +81,19 @@ function startAuthAPI()
     });
   });
 
+  app.post('/updatePassword', function(req,res) {
+    console.log(req.body);
+    userAPI.updatePassword(req.body.username, req.body.token, req.body.password)
+    .then( () => {
+      console.log('successfuly updated');
+      res.sendStatus(200);
+    })
+    .catch( (err) =>  {
+      console.log('failed');
+      res.status(400).send(err);
+    });
+  });
+
 }
 
 function startWS(server)
