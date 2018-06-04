@@ -52,7 +52,13 @@ function startAuthAPI()
     let attr = req.body.data.attributes;
     console.log(attr);
     userAPI.newUser(attr.username,attr.password,attr.email)
-    .then( () => res.sendStatus(200))
+    .then( (user) => {
+      res.type('application/vnd.api+json');
+      res.status(200);
+      console.log('resolved with user',user);
+      var json = {data:{id:user.accountId,type:'account',attr:user}};
+      res.json(json);
+    })
     .catch( (err) =>  res.status(400).send(err));
   });
 
@@ -136,13 +142,7 @@ function startDocAPI()
     .then( function(doc){
       res.type('application/vnd.api+json');
       res.status(200);
-      var json = {
-        data:{
-          id:doc.data.documentId,
-          type:'document',
-          attr:doc.data
-        }
-      }
+      var json = {data:{id:doc.data.documentId,type:'document',attr:doc.data}};
       res.json(json);
     },
      function(err) {
@@ -184,7 +184,8 @@ function createDoc(docName,owner,isPrivate) {
             owner:owner,
             isPrivate:isPrivate,
             name:docName,
-            documentId:uuid
+            documentId:uuid,
+            created:new Date()
           },resolve);
           console.log("doc created");
           resolve(doc);

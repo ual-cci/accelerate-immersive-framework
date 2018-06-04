@@ -1,8 +1,9 @@
 module.exports = {
-	account_id: String,
+	accountId: String,
 	username: String,
 	password: String,
 	email:String,
+	created:Date,
 	passwordResetToken:String,
 	passwordResetExpiry:Date
 };

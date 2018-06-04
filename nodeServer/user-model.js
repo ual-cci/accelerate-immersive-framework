@@ -37,17 +37,18 @@ var newUser = function(username, password, email) {
 					getNewUserId((accountId) => {
 						console.log("making user");
 						var user = new userModel({
-							account_id: accountId,
+							accountId: accountId,
 							username: username,
 							password: hash,
-							email: email
+							email: email,
+							created:new Date()
 						});
 						user.save((err, user) => {
 							if (err) {
 								reject("internal error creating user");
-									return;
+								return;
 							}
-							resolve();
+							resolve(user);
 							return;
 						});
 					});
@@ -61,7 +62,7 @@ var getNewUserId = function(callback)
 {
 	var uuid = guid.guid();
 	console.log("uuid",uuid);
-	userModel.find({account_id:uuid}, function(err,user) {
+	userModel.find({accountId:uuid}, function(err,user) {
 		if(user.length > 0 || err) {
 			console.log("collision, generating again");
 			getNewUserId(callback);

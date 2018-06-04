@@ -7,5 +7,5 @@ export default Model.extend({
   password: attr('string'),
   email: attr('string'),
   created: attr('date'),
-  account_id: attr('string')
+  accountId: attr('string')
 });

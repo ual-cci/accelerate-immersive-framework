@@ -45,7 +45,7 @@ export default Controller.extend({
           username: newUsername,
           password: newUserPassword,
           email: newUserEmail,
-          created: Date.now()
+          created: new Date()
         });
         user.save().then(() => {
           console.log("user created");
