@@ -73,7 +73,7 @@ function startWS(server)
 
 function startDocAPI()
 {
-  app.get('/code-documents', (req,res) => {
+  app.get('/documents', (req,res) => {
     let query = connection.createFetchQuery(collectionName,{},[],(err, results) => {
       if(!err)
       {
@@ -87,7 +87,7 @@ function startDocAPI()
             created: null,
             public: res.data.isPrivate ? "false":"true"
           }
-          docs.push({attributes:doc,id:res.id,type:"code-document"});
+          docs.push({attributes:doc,id:res.id,type:"document"});
         }
         res.status(200).send({data:docs});
       }
@@ -98,13 +98,34 @@ function startDocAPI()
     });
   });
 
-  app.post('/code-documents', (req,res) => {
+  app.post('/documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
     createDoc(attr.name, attr.owner,attr.public ? "false":"true")
-    .then( (doc) => res.status(200).end())
-    .catch( (err) =>  res.status(400).send({errors:[err]}));
+    .then( function(doc){sendDocResponse(res,200,attr)},
+     function(err) {sendErrorResponse(res,422,err)});
   });
+}
+
+var sendErrorResponse = function(res, code, error)
+{
+  res.type('application/vnd.api+json');
+  res.status(code);
+  res.json({errors:[error]});
+}
+
+var sendDocResponse = function(res, code, d)
+{
+  res.type('application/vnd.api+json');
+  res.status(code);
+  var json = {
+    data:{
+      id:d.name,
+      type:'document',
+      attr:d
+    }
+  }
+  res.json(json);
 }
 
 function createDoc(docName,owner,isPrivate) {
@@ -112,7 +133,8 @@ function createDoc(docName,owner,isPrivate) {
     var doc = connection.get(collectionName, docName);
     doc.fetch(function(err) {
       if (err) {
-        reject(err);
+        console.log("database error making document");
+        reject("database error making document");
         return;
       }
       if (doc.type === null) {
@@ -121,8 +143,8 @@ function createDoc(docName,owner,isPrivate) {
         resolve(doc);
         return;
       }
-      console.log("doc fetched", doc.id, doc.data);
-      resolve(doc);
+      console.log("document with that name alrady exists");
+      reject("document with that name alrady exists");
       return;
     });
   });

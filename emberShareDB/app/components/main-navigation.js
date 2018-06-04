@@ -6,6 +6,7 @@ export default Component.extend({
   sessionAccount: inject('session-account'),
   docName:"",
   isPrivate:true,
+  feedbackMessage: null,
   actions: {
     login() {
       this.sendAction('onLogin');

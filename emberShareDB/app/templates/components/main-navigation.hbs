@@ -19,6 +19,9 @@
       {{else}}
         <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
       {{/if}}
+      {{#if feedbackMessage}}
+        <label>{{feedbackMessage}}</label>
+        {{/if}}
     </div>
   </div>
 </nav>
