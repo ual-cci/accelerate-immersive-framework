@@ -10,6 +10,7 @@ Router.map(function() {
   this.route('login');
   this.route('code-editor');
   this.route('documents');
+  this.route('password-reset');
 });
 
 export default Router;

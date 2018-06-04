@@ -68,6 +68,19 @@ function startAuthAPI()
       res.status(400).send(err)});
   });
 
+  app.post('/checkPasswordToken', function(req,res) {
+    console.log(req.body);
+    userAPI.checkPasswordToken(req.body.username, req.body.token)
+    .then( () => {
+      console.log('token good');
+      res.sendStatus(200);
+    })
+    .catch( (err) =>  {
+      console.log('token bad');
+      res.status(400).send(err);
+    });
+  });
+
 }
 
 function startWS(server)

@@ -74,6 +74,49 @@ var getNewUserId = function(callback)
 	});
 }
 
+var checkPasswordToken = function(username, token)
+{
+	console.log('checkPasswordToken');
+	return new Promise((resolve, reject) => {
+		userModel.find({username:username}, function(err,users) {
+			if(users.length>0 && !err)
+			{
+				var user = users[0];
+				console.log('found user',user);
+				if(token != user.passwordResetToken)
+				{
+					reject();
+					return;
+				}
+				else if (new Date() > user.passwordResetExpiry)
+				{
+					reject();
+					return;
+				}
+				user.set('passwordResetToken', null);
+				user.set('passwordResetExpiry', new Date());
+				user.save((err, user) => {
+					console.log(err);
+					if(err)
+					{
+						reject(err);
+						return;
+					}
+					else {
+						resolve(user);
+						return;
+					}
+				});
+			}
+			else
+			{
+				reject(err);
+				return;
+			}
+		});
+	})
+}
+
 var requestPasswordReset = function(username) {
 	console.log('requestPasswordReset');
 	return new Promise((resolve, reject) => {
@@ -82,25 +125,28 @@ var requestPasswordReset = function(username) {
 			{
 				var user = users[0];
 				console.log('found user',user);
-				user.set('resetPasswordToken', guid.guid());
+				user.passwordResetToken = guid.guid();
 				var tomorrow = new Date();
 				tomorrow.setDate(tomorrow.getDate() + 1);
-				user.set('resetPasswordExpiry', tomorrow);
+				user.passwordResetExpiry = tomorrow;
 				console.log('updated user',user);
 				user.save((err, user) => {
-					console.log(err);
+					console.log(user);
 					if(err)
 					{
 						reject(err);
+						return;
 					}
 					else {
 						resolve(user);
+						return;
 					}
 				});
 			}
 			else
 			{
 				reject(err);
+				return;
 			}
 		});
 	})
@@ -161,7 +207,8 @@ module.exports = {
 	getUser: getUser,
 	newUser: newUser,
 	init: init,
-	requestPasswordReset :requestPasswordReset
+	requestPasswordReset: requestPasswordReset,
+	checkPasswordToken: checkPasswordToken
 };
 
 //HELPER
@@ -195,6 +242,6 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-//dump();
+dump();
 // dropUsers();
 // dropTokens();
