@@ -27,7 +27,7 @@ module.exports = function(environment) {
       }
     },
     apiHost: 'http://localhost:8080/oauth',
-
+    serverHost: 'http://localhost:8080',
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created

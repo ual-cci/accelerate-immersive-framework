@@ -26,3 +26,13 @@
   {{/if}}
 </form>
 </div>
+<div class = "container">
+<form {{action 'resetPassword' on='submit'}}>
+  <label for="resetUsername">Username</label>
+  {{input id='resetUsername' placeholder='Username' value=resetUsername}}
+  <button type="submit">Reset Password</button>
+  {{#if resetMessage}}
+    <p>{{resetMessage}}</p>
+  {{/if}}
+</form>
+</div>

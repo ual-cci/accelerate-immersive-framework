@@ -74,6 +74,38 @@ var getNewUserId = function(callback)
 	});
 }
 
+var requestPasswordReset = function(username) {
+	console.log('requestPasswordReset');
+	return new Promise((resolve, reject) => {
+		userModel.find({username:username}, function(err,users) {
+			if(users.length>0 && !err)
+			{
+				var user = users[0];
+				console.log('found user',user);
+				user.set('resetPasswordToken', guid.guid());
+				var tomorrow = new Date();
+				tomorrow.setDate(tomorrow.getDate() + 1);
+				user.set('resetPasswordExpiry', tomorrow);
+				console.log('updated user',user);
+				user.save((err, user) => {
+					console.log(err);
+					if(err)
+					{
+						reject(err);
+					}
+					else {
+						resolve(user);
+					}
+				});
+			}
+			else
+			{
+				reject(err);
+			}
+		});
+	})
+}
+
 //AUTH
 
 var getAccessToken = function(bearerToken, callback) {
@@ -128,7 +160,8 @@ module.exports = {
 	saveAccessToken: saveAccessToken,
 	getUser: getUser,
 	newUser: newUser,
-	init: init
+	init: init,
+	requestPasswordReset :requestPasswordReset
 };
 
 //HELPER

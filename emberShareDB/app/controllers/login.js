@@ -5,6 +5,7 @@ import RSVP from 'rsvp';
 export default Controller.extend({
   session: inject('session'),
   sessionAccount: inject('session-account'),
+  passwordReset: inject('password-reset'),
   store: inject(),
   validateRegistration: function() {
     return new RSVP.Promise((resolve, reject) => {
@@ -55,6 +56,11 @@ export default Controller.extend({
       }).catch((err) => {
         this.set('registerMessage', 'Error:' + err);
       });
+    },
+    resetPassword()
+    {
+      let username = this.get('resetUsername');
+      this.get('passwordReset').requestReset(username);
     }
   }
 });

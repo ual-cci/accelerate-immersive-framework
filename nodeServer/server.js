@@ -56,6 +56,18 @@ function startAuthAPI()
     .catch( (err) =>  res.status(400).send(err));
   });
 
+  app.post('/resetPassword', function(req,res) {
+    console.log(req.body);
+    userAPI.requestPasswordReset(req.body.username)
+    .then( () => {
+      console.log('success reset');
+      res.sendStatus(200)
+    })
+    .catch( (err) =>  {
+      console.log('failed reset');
+      res.status(400).send(err)});
+  });
+
 }
 
 function startWS(server)
@@ -82,7 +94,6 @@ function startDocAPI()
         for(var i = 0; i < results.length; i++) {
           docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
         }
-        console.log(docs);
         res.status(200).send({data:docs});
       }
       else
