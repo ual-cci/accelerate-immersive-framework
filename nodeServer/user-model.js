@@ -34,25 +34,45 @@ var newUser = function(username, password, email) {
 			}
 			userModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
-					var user = new userModel({
-						account_id: c,
-						username: username,
-						password: hash,
-						email: email
-					});
-					user.save((err, user) => {
-						if (err) {
-							reject("internal error creating user");
-								return;
-						}
-						resolve();
-						return;
+					getNewUserId((accountId) => {
+						console.log("making user");
+						var user = new userModel({
+							account_id: accountId,
+							username: username,
+							password: hash,
+							email: email
+						});
+						user.save((err, user) => {
+							if (err) {
+								reject("internal error creating user");
+									return;
+							}
+							resolve();
+							return;
+						});
 					});
 				});
 			});
 		});
 	});
 };
+
+var getNewUserId = function(callback)
+{
+	var uuid = guid();
+	console.log("uuid",uuid);
+	userModel.find({account_id:uuid}, function(err,user) {
+		if(user.length > 0 || err) {
+			console.log("collision, generating again");
+			getNewUserId(callback);
+		}
+		else
+		{
+			console.log("returning uuid");
+			callback(uuid);
+		}
+	});
+}
 
 //AUTH
 
@@ -112,6 +132,17 @@ module.exports = {
 };
 
 //HELPER
+
+function guid() {
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
+function s4() {
+  return Math.floor((1 + Math.random()) * 0x10000)
+    .toString(16)
+    .substring(1);
+}
 
 var dropUsers = function() {
 	userModel.remove({},function(err){console.log('cleared all users')});
