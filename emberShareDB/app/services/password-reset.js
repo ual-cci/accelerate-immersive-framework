@@ -5,11 +5,19 @@ import RSVP from 'rsvp';
 export default Service.extend({
   requestReset(username) {
     console.log("reset pword for " + username);
-    $.ajax({
-        type: "POST",
-        url: config.serverHost + "/resetPassword",
-        data: { username: username }
-      });
+    return new RSVP.Promise((resolve, reject) => {
+      $.ajax({
+          type: "POST",
+          url: config.serverHost + "/resetPassword",
+          data: { username: username }
+        }).then((res) => {
+          console.log("success",res);
+          resolve();
+        }).catch((err) => {
+          console.log("error",err);
+          reject(err);
+        });
+    });
   },
   updatePassword(username, token, newPassword) {
     console.log("updatePassword to " + newPassword + " with " + token +" for " + username);

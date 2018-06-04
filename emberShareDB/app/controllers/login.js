@@ -47,7 +47,7 @@ export default Controller.extend({
           email: newUserEmail,
           created: Date.now()
         });
-        user.save().then(function() {
+        user.save().then(() => {
           console.log("user created");
           this.set('registerMessage', 'user created');
         }).catch((err) => {
@@ -61,7 +61,13 @@ export default Controller.extend({
     resetPassword()
     {
       let username = this.get('resetUsername');
-      this.get('passwordReset').requestReset(username);
+      this.get('passwordReset').requestReset(username).then(() => {
+        console.log("password reset");
+        this.set('resetMessage', 'password reset link generated');
+      }).catch((err) => {
+        console.log(err);
+        this.set('resetMessage', 'Error:' + err.errors[0].detail);
+      });
     }
   }
 });

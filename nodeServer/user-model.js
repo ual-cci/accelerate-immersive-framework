@@ -108,7 +108,6 @@ var updatePassword = async function(username, token, password)
 
 var checkPasswordToken = function(username, token)
 {
-	console.log('checkPasswordToken');
 	return new Promise((resolve, reject) => {
 		userModel.find({username:username}, function(err,users) {
 			if(users.length>0 && !err)
@@ -116,23 +115,19 @@ var checkPasswordToken = function(username, token)
 				var user = users[0];
 				if(token != user.passwordResetToken)
 				{
-					console.log('token checked:bad token',token,user.passwordResetToken);
 					reject();
 					return;
 				}
 				else if (new Date() > user.passwordResetExpiry)
 				{
-					console.log('token checked:bad date');
 					reject();
 					return;
 				}
-				console.log('token checked:good');
 				resolve(user);
 				return;
 			}
 			else
 			{
-				console.log('token checked:bad user');
 				reject();
 				return;
 			}
@@ -140,23 +135,17 @@ var checkPasswordToken = function(username, token)
 	})
 }
 
-
-
 var requestPasswordReset = function(username) {
-	console.log('requestPasswordReset');
 	return new Promise((resolve, reject) => {
 		userModel.find({username:username}, function(err,users) {
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
-				console.log('found user',user);
 				user.passwordResetToken = guid.guid();
 				var tomorrow = new Date();
 				tomorrow.setDate(tomorrow.getDate() + 1);
 				user.passwordResetExpiry = tomorrow;
-				console.log('updated user',user);
 				user.save((err, user) => {
-					console.log(user);
 					if(err)
 					{
 						reject(err);
