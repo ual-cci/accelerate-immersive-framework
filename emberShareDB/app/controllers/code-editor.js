@@ -1,16 +1,17 @@
 import Controller from '@ember/controller';
-import { inject as service } from '@ember/service';
+import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 
 export default Controller.extend({
   queryParams: ['docId'],
   docId: null,
-  websockets: service(),
+  websockets: inject('websockets'),
+  sessionAccount: inject('session-account'),
   socketRef: null,
   con: null,
   doc: null,
   editor: null,
-  suppress:false,
+  suppress: false,
   getSession() {
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -63,7 +64,6 @@ export default Controller.extend({
     const doc = self.get('doc');
     if(!surpress)
     {
-      console.log('not surpressed');
       const editor = self.editor;
       const session = editor.getSession();
       const aceDoc = session.getDocument();
@@ -101,7 +101,7 @@ export default Controller.extend({
       console.log(doc.data);
       // const op = {p:['name'],oi:'louis'};
       // doc.submitOp(op);
-
+      this.get('sessionAccount').set('currentDoc',this.get('docId'));
       this.set('surpress', true);
       session.setValue(doc.data.source);
       this.set('surpress', false);

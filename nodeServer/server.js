@@ -9,12 +9,16 @@ var mongoose = require('mongoose');
 var cors = require('express-cors');
 var userAPI = require('./user-model.js');
 var guid = require('./uuid.js');
+var router = express.Router();
+var multiparty = require('connect-multiparty')();
+var fs = require('fs');
+var Gridfs = require('gridfs-stream');
 
-const db = require('sharedb-mongo')('mongodb://localhost:27017/test');
-const backend = new ShareDB({db:db});
-const connection = backend.connect();
 const app = express();
 const collectionName = 'mimicDocs'
+const shareDBMongo = require('sharedb-mongo')('mongodb://localhost:27017/test');
+const shareDB = new ShareDB({db:shareDBMongo});
+const shareDBConnection = shareDB.connect();
 
 startServer();
 
@@ -99,7 +103,45 @@ function startAuthAPI()
       res.status(400).send(err);
     });
   });
+}
 
+function startFSAPI()
+{
+  const db = mongoose.connection.db;
+  const mongoDriver = mongoose.mongo;
+  const gfs = new Gridfs(db, mongoDriver);
+
+  app.post('/asset', multiparty, function(req,res) {
+    console.log(req.body,req.files);
+
+    var writestream = gfs.createWriteStream({
+      filename: req.files.file.name,
+      mode: 'w',
+      content_type: req.files.file.mimetype,
+      metadata: req.body
+    });
+
+    fs.createReadStream(req.files.file.path).pipe(writestream);
+    writestream.on('close', function(file) {
+      res.json(200);
+      let doc = shareDBConnection.get(collectionName,req.body.documentId)
+      console.log(doc);
+      var newAssets = doc.data.assets;
+      newAssets.push({'name':req.files.file.name,"fileId":file._id});
+      console.log(newAssets);
+      doc.submitOp({p:['assets'],oi:newAssets});
+      fs.unlink(req.files.file.path, function(err) {
+         console.log('success!')
+       });
+    });
+  });
+
+  app.get('/asset/:id', function(req, res) {
+   var readstream = gfs.createReadStream({
+      _id: req.params.id
+   });
+   readstream.pipe(res);
+});
 }
 
 function startWS(server)
@@ -112,14 +154,14 @@ function startWS(server)
       console.log('server weboscket message',data);
     });
     console.log('WebSocket connection');
-    backend.listen(stream);
+    shareDB.listen(stream);
   });
 }
 
 function startDocAPI()
 {
   app.get('/documents', (req,res) => {
-    let query = connection.createFetchQuery(collectionName,{},[],(err, results) => {
+    let query = shareDBConnection.createFetchQuery(collectionName,{},[],(err, results) => {
       if(!err)
       {
         let docs = [];
@@ -156,7 +198,7 @@ function startDocAPI()
 function getNewDocumentId(callback)
 {
   const uuid = guid.guid();
-  var doc = connection.get(collectionName, uuid);
+  var doc = shareDBConnection.get(collectionName, uuid);
   doc.fetch(function(err) {
     if (doc.type === null) {
       return callback(uuid);
@@ -171,7 +213,7 @@ function createDoc(docName,owner,isPrivate) {
   return new Promise((resolve, reject) => {
     console.log("creating doc");
     getNewDocumentId(function(uuid) {
-      var doc = connection.get(collectionName, uuid);
+      var doc = shareDBConnection.get(collectionName, uuid);
       doc.fetch(function(err) {
         if (err) {
           console.log("database error making document");
@@ -185,7 +227,9 @@ function createDoc(docName,owner,isPrivate) {
             isPrivate:isPrivate,
             name:docName,
             documentId:uuid,
-            created:new Date()
+            created:new Date(),
+            lastEdited:new Date(),
+            assets:[]
           },resolve);
           console.log("doc created");
           resolve(doc);
@@ -211,9 +255,10 @@ function startServer()
 
   var server = http.createServer(app);
 
-  startWS(server);
   startAuthAPI();
   startDocAPI();
+  startWS(server);
+  startFSAPI();
 
   server.listen(8080);
   console.log('Listening on http://localhost:8080');

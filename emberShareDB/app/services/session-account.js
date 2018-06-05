@@ -6,6 +6,7 @@ export default Service.extend({
   session: inject('session'),
   store: inject(),
   currentUserName:"",
+  currentDoc:"",
   loadCurrentUser() {
     return new RSVP.Promise((resolve, reject) => {
       const currentUserName = this.get('session.data.authenticated.user_id');

@@ -6,5 +6,7 @@ export default DS.Model.extend({
   name:DS.attr('string'),
   created:DS.attr('date'),
   public:DS.attr('boolean'),
-  documentId:DS.attr('string')
+  documentId:DS.attr('string'),
+  lastEdited:DS.attr('date'),
+  assets:DS.attr()
 });
