@@ -10,10 +10,23 @@ export default Controller.extend({
   doc: null,
   editor: null,
   suppress: false,
+  codeTimer: new Date(),
+  renderedSource:"",
   getSession() {
     const editor = this.get('editor');
     const session = editor.getSession();
     return session;
+  },
+  executeCode(self) {
+    if(self.get('codeTimer'))
+    {
+      clearTimeout(self.get('codeTimer'));
+    }
+    self.set('codeTimer', setTimeout(function() {
+      const doc = self.get('doc');
+      self.set('renderedSource', doc.data.source);
+      self.set('codeTimer',null);
+    },1500));
   },
   opTransform(ops, editor) {
     function opToDelta(op) {
@@ -78,8 +91,8 @@ export default Controller.extend({
       }
       const str = delta.lines.join('\n');
       op[action] = str;
-
       doc.submitOp(op);
+      this.executeCode(self);
     }
   },
   initShareDB() {
@@ -89,6 +102,7 @@ export default Controller.extend({
     console.log("document",this.get('model'));
     const doc = con.get('mimicDocs',this.get('model').id);
     this.set('doc', doc);
+    this.set('renderedSource', this.get('model').source);
     const editor = this.get('editor');
     const session = editor.getSession();
 
