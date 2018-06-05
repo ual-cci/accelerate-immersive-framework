@@ -9,7 +9,7 @@ var guid = require('./uuid.js');
 var userAPI = require('./user-model.js');
 
 const collectionName = 'mimicDocs'
-const shareDBMongo = require('sharedb-mongo')('mongodb://localhost:27017/test');
+const shareDBMongo = require('sharedb-mongo')('mongodb://localhost:27017/mimicDocs');
 const shareDB = new ShareDB({db:shareDBMongo});
 const shareDBConnection = shareDB.connect();
 

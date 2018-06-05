@@ -1,14 +1,167 @@
+var oauthserver = require('oauth2-server');
 var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
 let clientModel = require('./mongo/model/client');
 let	tokenModel = require('./mongo/model/token');
 let	userModel = require('./mongo/model/user');
 var bcrypt = require('bcrypt');
+
 const saltRounds = 10;
+
+//AUTH
+
+var getAccessToken = function(bearerToken, callback) {
+	console.log('getting token');
+	tokenModel.findOne({
+		accessToken: bearerToken
+	}, callback);
+};
+
+var getClient = function(clientId, clientSecret, callback) {
+	clientModel.findOne({
+		clientId: clientId,
+		clientSecret: clientSecret
+	}, callback);
+};
+
+var grantTypeAllowed = function(clientId, grantType, callback) {
+	callback(false, grantType === "password");
+};
+
+var saveAccessToken = function(accessToken, clientId, expires, user, callback) {
+	var token = new tokenModel({
+		accessToken: accessToken,
+		expires: expires,
+		clientId: clientId,
+		user: user
+	});
+	token.save(callback);
+};
+
+var getUser = function(username, password, callback) {
+	userModel.findOne({
+		username: username
+	}, (err, user) => {
+		if(err || !user)
+		{
+			callback(err);
+			return;
+		}
+		var hash = user.password;
+		console.log("getting user", password, hash);
+		bcrypt.compare(password, hash).then((res) => {
+			if(res)
+			{
+				callback(err, user);
+			}
+			else
+			{
+				callback();
+			}
+		});
+	});
+};
+
+const model = {
+	getAccessToken: getAccessToken,
+	getClient: getClient,
+	grantTypeAllowed: grantTypeAllowed,
+	saveAccessToken: saveAccessToken,
+	getUser: getUser
+}
 
 //API
 
-var init = function() {
+var initUserAPI = function(app)
+{
+	startAuthAPI(app);
+}
+
+function startAuthAPI(app)
+{
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+  app.use(bodyParser.json());
+
+  var mongoUri = 'mongodb://localhost/oauth';
+  mongoose.connect(mongoUri, function(err, res) {
+    if (err) {
+      return console.error('Error connecting to "%s":', mongoUri, err);
+    }
+    console.log('Connected successfully to "%s"', mongoUri);
+    setup();
+  });
+
+  app.oauth = oauthserver({
+    model: model,
+    grants: ['password'],
+    debug: true
+  });
+
+  app.all('/oauth/token', app.oauth.grant());
+
+  app.get('/', app.oauth.authorise(), function (req, res) {
+    res.send('Congratulations, you are in a secret area!');
+  });
+
+  app.use(app.oauth.errorHandler());
+
+  app.post('/accounts', function (req, res) {
+    //console.log('request for new user', req.body);
+    let attr = req.body.data.attributes;
+    console.log(attr);
+    newUser(attr.username,attr.password,attr.email)
+    .then( (user) => {
+      res.type('application/vnd.api+json');
+      res.status(200);
+      console.log('resolved with user',user);
+      var json = {data:{id:user.accountId,type:'account',attr:user}};
+      res.json(json);
+    })
+    .catch( (err) =>  res.status(400).send(err));
+  });
+
+  app.post('/resetPassword', function(req,res) {
+    console.log(req.body);
+    requestPasswordReset(req.body.username)
+    .then( () => {
+      console.log('success reset');
+      res.sendStatus(200)
+    })
+    .catch( (err) =>  {
+      console.log('failed reset');
+      res.status(400).send(err)});
+  });
+
+  app.post('/checkPasswordToken', function(req,res) {
+    console.log(req.body);
+    checkPasswordToken(req.body.username, req.body.token)
+    .then( () => {
+      console.log('token good');
+      res.sendStatus(200);
+    })
+    .catch( (err) =>  {
+      console.log('token bad');
+      res.status(400).send(err);
+    });
+  });
+
+  app.post('/updatePassword', function(req,res) {
+    console.log(req.body);
+    updatePassword(req.body.username, req.body.token, req.body.password)
+    .then( () => {
+      console.log('successfuly updated');
+      res.sendStatus(200);
+    })
+    .catch( (err) =>  {
+      console.log('failed');
+      res.status(400).send(err);
+    });
+  });
+}
+
+var setup = function() {
 	console.log("checking client");
 	clientModel.find({clientId:"application"}, (err, client) => {
 		if(client.length < 1)
@@ -167,71 +320,9 @@ var requestPasswordReset = function(username) {
 	})
 }
 
-//AUTH
-
-var getAccessToken = function(bearerToken, callback) {
-	console.log('getting token');
-	tokenModel.findOne({
-		accessToken: bearerToken
-	}, callback);
-};
-
-var getClient = function(clientId, clientSecret, callback) {
-	clientModel.findOne({
-		clientId: clientId,
-		clientSecret: clientSecret
-	}, callback);
-};
-
-var grantTypeAllowed = function(clientId, grantType, callback) {
-	callback(false, grantType === "password");
-};
-
-var saveAccessToken = function(accessToken, clientId, expires, user, callback) {
-	var token = new tokenModel({
-		accessToken: accessToken,
-		expires: expires,
-		clientId: clientId,
-		user: user
-	});
-	token.save(callback);
-};
-
-var getUser = function(username, password, callback) {
-	userModel.findOne({
-		username: username
-	}, (err, user) => {
-		if(err || !user)
-		{
-			callback(err);
-			return;
-		}
-		var hash = user.password;
-		console.log("getting user", password, hash);
-		bcrypt.compare(password, hash).then((res) => {
-			if(res)
-			{
-				callback(err, user);
-			}
-			else
-			{
-				callback();
-			}
-		});
-	});
-};
 
 module.exports = {
-	getAccessToken: getAccessToken,
-	getClient: getClient,
-	grantTypeAllowed: grantTypeAllowed,
-	saveAccessToken: saveAccessToken,
-	getUser: getUser,
-	newUser: newUser,
-	init: init,
-	requestPasswordReset: requestPasswordReset,
-	checkPasswordToken: checkPasswordToken,
-	updatePassword: updatePassword
+	initUserAPI:initUserAPI
 };
 
 //HELPER
