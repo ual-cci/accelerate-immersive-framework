@@ -3,5 +3,10 @@
 {{#each model.assets as |asset|}}
   {{asset.name}}
 {{/each}}
-{{ember-ace lines=5 value=value ready=(action 'editorReady')}}
+</div>
+<div style = "float:left;">
+<iframe srcdoc={{model.source}} width='100%' height=300></iframe>
+</div>
+<div>
+{{ember-ace lines=30 value=value ready=(action 'editorReady')}}
 </div>
