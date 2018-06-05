@@ -101,8 +101,8 @@ function startDocAPI(app)
       else
       {
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
-        console.log("returning ",reply);
-        res.status(200).send(reply);
+        console.log("returning ",{data:reply});
+        res.status(200).send({data:reply});
       }
     });
   });
