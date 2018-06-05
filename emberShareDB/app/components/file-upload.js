@@ -6,14 +6,12 @@ import { inject } from '@ember/service';
 export default EmberUploader.FileField.extend({
   sessionAccount:inject('session-account'),
   url:config.serverHost + "/asset",
-  documentId:null,
   filesDidChange(files) {
     const uploader = EmberUploader.Uploader.create({
       url: this.get('url')
     });
-
-    if (!Ember.isEmpty(files)) {
-      // this second argument is optional and can to be sent as extra data with the upload
+    if (!Ember.isEmpty(files))
+    {
       let user = this.get('sessionAccount').currentUserName;
       let doc = this.get('sessionAccount').currentDoc;
       let data = {username:user,documentId:doc};
