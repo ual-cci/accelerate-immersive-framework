@@ -177,6 +177,8 @@ var setup = function() {
 	});
 }
 
+//METHODS
+
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
 		userModel.find({username:username}, function(err,user) {

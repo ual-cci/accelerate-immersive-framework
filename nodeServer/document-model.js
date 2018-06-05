@@ -17,10 +17,10 @@ var initDocAPI = function(server, app)
 {
   startDocAPI(app);
   startWS(server);
-  startFSAPI(app);
+  startAssetAPI(app);
 }
 
-function startFSAPI(app)
+function startAssetAPI(app)
 {
   const gridFSDB = mongoose.connection.db;
   const gridFSDriver = mongoose.mongo;
@@ -44,7 +44,7 @@ function startFSAPI(app)
       var newAssets = doc.data.assets;
       newAssets.push({'name':req.files.file.name,"fileId":file._id});
       console.log(newAssets);
-      doc.submitOp({p:['assets'],oi:newAssets});
+      doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
       fs.unlink(req.files.file.path, function(err) {
          console.log('success!')
        });
@@ -61,14 +61,12 @@ function startFSAPI(app)
 
 function startWS(server)
 {
-  // Connect any incoming WebSocket connection to ShareDB
   var wss = new WebSocket.Server({server: server});
   wss.on('connection', (ws, req) => {
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
-    console.log('WebSocket connection');
     shareDB.listen(stream);
   });
 }
@@ -92,6 +90,23 @@ function startDocAPI(app)
     });
   });
 
+  app.get('/documents/:id', (req,res) => {
+    var doc = shareDBConnection.get(collectionName, req.params.id);
+    doc.fetch(function(err) {
+      if (err) {
+        console.log("database error making document");
+        res.status(400).send("database error making document");
+        return;
+      }
+      else
+      {
+        let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
+        console.log("returning ",reply);
+        res.status(200).send(reply);
+      }
+    });
+  });
+
   app.post('/documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
@@ -109,6 +124,8 @@ function startDocAPI(app)
      });
   });
 }
+
+//METHODS
 
 function getNewDocumentId(callback)
 {

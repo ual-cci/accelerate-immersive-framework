@@ -3,7 +3,6 @@ import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 
 export default Controller.extend({
-  queryParams: ['docId'],
   docId: null,
   websockets: inject('websockets'),
   sessionAccount: inject('session-account'),
@@ -88,7 +87,8 @@ export default Controller.extend({
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
-    console.log("document",this.get('docId'));
+    console.log("document",this.get('model'));
+    this.set('docId',this.get('model').id);
     const doc = con.get('mimicDocs',this.get('docId'));
     this.set('doc', doc);
     const editor = this.get('editor');

@@ -1,4 +1,7 @@
 <div>
 {{file-upload}}
+{{#each model.assets as |asset|}}
+  {{asset.name}}
+{{/each}}
 {{ember-ace lines=5 value=value ready=(action 'editorReady')}}
 </div>

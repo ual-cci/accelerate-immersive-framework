@@ -4,8 +4,6 @@ var userAPI = require('./user-model.js');
 var docAPI = require('./document-model.js');
 var guid = require('./uuid.js');
 var cors = require('express-cors');
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
 
 const app = express();
 startServer();
