@@ -8,8 +8,8 @@ const Router = EmberRouter.extend({
 
 Router.map(function() {
   this.route('login');
-  this.route('code-editor', { path: '/documents/:docId' });
-  this.route('documents');
+  this.route('code-editor', { path: '/d/:documentId' });
+  this.route('documents', { path: '/d' });
   this.route('password-reset');
 });
 

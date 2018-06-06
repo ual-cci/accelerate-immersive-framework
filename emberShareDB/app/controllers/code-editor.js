@@ -110,7 +110,6 @@ export default Controller.extend({
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
     this.set('connection', con);
-    console.log("document",this.get('model'));
     const doc = con.get('mimicDocs',this.get('model').id);
     this.set('doc', doc);
     this.set('renderedSource', this.get('model').source);
@@ -121,9 +120,6 @@ export default Controller.extend({
       if (err) throw err;
 
       const doc = this.get('doc');
-      console.log(doc.data);
-      // const op = {p:['name'],oi:'louis'};
-      // doc.submitOp(op);
       this.get('sessionAccount').set('currentDoc',this.get('model').id);
       this.set('surpress', true);
       this.updateIFrame(this);
@@ -137,19 +133,16 @@ export default Controller.extend({
     doc.on('op',(ops,source) => {
       if(!source)
       {
-        console.log('updating from remote',this.get('surpress'));
         const deltas = this.opTransform(ops, editor);
         this.set('surpress', true);
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
     });
-    console.log("DOC:","type",doc.type,"id", doc.id, "data", doc.data);
     this.set('socketRef', socket);
   },
   actions: {
     editorReady(editor) {
-      console.log("editor ready", editor);
       this.set('editor', editor);
       this.initShareDB();
     }

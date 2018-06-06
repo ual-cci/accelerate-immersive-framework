@@ -19,7 +19,15 @@ export default Controller.extend({
         documentId:"",
       });
       doc.save().then((response)=>{
-        console.log("Document created successfully");
+        console.log("Document created successfully",response);
+        this.get('store').query('document', {
+          filter: {
+            owner: currentUser
+          }
+        }).then((documents) => {
+          console.log(documents.firstObject.documentId);
+          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+        });
         this.set('feedbackMessage',"Document created successfully");
       }).catch((err)=>{
         console.log("Error creating document");

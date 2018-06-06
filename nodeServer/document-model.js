@@ -79,8 +79,13 @@ function startDocAPI(app)
       {
         let docs = [];
         for(var i = 0; i < results.length; i++) {
-          docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
+          let noSource = results[i].data;
+          noSource.source = "";
+          docs.push({attributes:noSource,id:results[i].data.documentId,type:"document"});
         }
+        docs.sort ((a, b) => {
+          return new Date(b.attributes.created) - new Date(a.attributes.created);
+        });
         res.status(200).send({data:docs});
       }
       else
@@ -111,10 +116,10 @@ function startDocAPI(app)
     let attr = req.body.data.attributes;
     console.log(attr);
     createDoc(attr.name, attr.owner, attr.public ? "false":"true")
-    .then( function(doc){
+    .then(function(doc){
       res.type('application/vnd.api+json');
       res.status(200);
-      var json = {data:{id:doc.data.documentId,type:'document',attr:doc.data}};
+      var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
       res.json(json);
     },
      function(err) {
