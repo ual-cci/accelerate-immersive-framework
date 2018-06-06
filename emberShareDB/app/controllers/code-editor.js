@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
+import config from  '../config/environment';
 
 export default Controller.extend({
   websockets: inject('websockets'),
@@ -12,10 +13,21 @@ export default Controller.extend({
   suppress: false,
   codeTimer: new Date(),
   renderedSource:"",
-  getSession() {
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    return session;
+  updateIFrame(self) {
+    const doc = self.get('doc');
+    let toRender = doc.data.source;
+    toRender = self.replaceAssets(toRender, self.get('model').assets);
+    self.set('renderedSource', toRender);
+  },
+  replaceAssets(source, assets) {
+    for(let i = 0; i < assets.length; i++)
+    {
+      console.log(assets[i].name);
+      const toFind = assets[i].name;
+      const url = config.serverHost + "/asset/" + assets[i].fileId;
+      source = source.replace(new RegExp(toFind,"gm"),url);
+    }
+    return source;
   },
   executeCode(self) {
     if(self.get('codeTimer'))
@@ -23,8 +35,7 @@ export default Controller.extend({
       clearTimeout(self.get('codeTimer'));
     }
     self.set('codeTimer', setTimeout(function() {
-      const doc = self.get('doc');
-      self.set('renderedSource', doc.data.source);
+      self.updateIFrame(self);
       self.set('codeTimer',null);
     },1500));
   },
@@ -115,6 +126,7 @@ export default Controller.extend({
       // doc.submitOp(op);
       this.get('sessionAccount').set('currentDoc',this.get('model').id);
       this.set('surpress', true);
+      this.updateIFrame(this);
       session.setValue(doc.data.source);
       this.set('surpress', false);
 
