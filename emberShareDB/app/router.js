@@ -9,7 +9,7 @@ const Router = EmberRouter.extend({
 Router.map(function() {
   this.route('login');
   this.route('code-editor', { path: '/code/:documentId' });
-  this.route('documents', { path: '/d/:search' });
+  this.route('documents', { path: '/d/:search/:page' });
   this.route('password-reset');
 });
 

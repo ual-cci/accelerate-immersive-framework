@@ -9,7 +9,7 @@ export default Controller.extend({
       const searchTerm = this.get('searchTerm');
       if(searchTerm)
       {
-        this.transitionToRoute('documents',searchTerm);
+        this.transitionToRoute('documents', searchTerm, 0);
         this.set('message',"Results");
       }
       else

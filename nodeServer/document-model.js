@@ -75,10 +75,12 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
+  const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
     let params = {};
     console.log("searching for doc",req.query);
     const term = req.query.filter.search;
+    const page = req.query.filter.page;
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
@@ -88,7 +90,10 @@ function startDocAPI(app)
       if(!err)
       {
         let docs = [];
-        for(var i = 0; i < results.length; i++)
+        let startIndex = page * PAGE_SIZE < results.length ? page * PAGE_SIZE : results.length - PAGE_SIZE;
+        startIndex = Math.max(0,startIndex);
+        const endIndex = Math.min(startIndex + PAGE_SIZE, results.length);
+        for(var i = startIndex; i < endIndex; i++)
         {
           docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
         }

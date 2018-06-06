@@ -22,7 +22,8 @@ export default Controller.extend({
         console.log("Document created successfully",response);
         this.get('store').query('document', {
           filter: {
-            owner: currentUser
+            search: currentUser,
+            page:0
           }
         }).then((documents) => {
           console.log(documents.firstObject.documentId);

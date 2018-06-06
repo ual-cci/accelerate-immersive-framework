@@ -15,10 +15,10 @@ export default Route.extend(ApplicationRouteMixin, {
   _loadCurrentUser() {
     this.get('sessionAccount').loadCurrentUser()
     .then(() => {
-      this.transitionTo('documents'," ");
+      this.transitionTo('documents'," ","0");
     })
     .catch(() => {
-      //this.get('session').invalidate();
+      this.get('session').invalidate();
     });
   }
 });
