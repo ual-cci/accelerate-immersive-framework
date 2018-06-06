@@ -1,10 +1,16 @@
 <div class = "container">
 <form {{action 'authenticate' on='submit'}}>
-  <label for="identification">Username</label>
-  {{input id='identification' placeholder='Enter Login' value=identification}}
-  <label for="password">Password</label>
-  {{input id='password' placeholder='Enter Password' type='password' value=password}}
-  <button type="submit">Login</button>
+  <ui class="list-group">
+    <li class="list-group-item">
+      <label for="identification">Username</label>
+      {{input id='identification' placeholder='Enter Login' value=identification}}
+    </li>
+    <li class="list-group-item">
+      <label for="password">Password</label>
+      {{input id='password' placeholder='Enter Password' type='password' value=password}}
+    </li>
+  </ui>
+  <p><button type="submit">Login</button></p>
   {{#if loginErrorMessage}}
     <p>{{loginErrorMessage}}</p>
   {{/if}}
@@ -12,15 +18,25 @@
 </div>
 <div class = "container">
 <form {{action 'createNewUser' on='submit'}}>
-  <label for="newUsername">Username</label>
-  {{input id='newUsername' placeholder='Username' value=newUsername}}
-  <label for="newUserEmail">Email (optional)</label>
-  {{input id='newUserEmail' placeholder='Email' value=newUserEmail}}
-  <label for="newUserPassword">Password</label>
-  {{input id='newUserPassword' placeholder='Enter Password' type='password' value=newUserPassword}}
-  <label for="newUserPasswordAgain">Password (again)</label>
-  {{input id='newUserPasswordAgain' placeholder='Enter Password (again)' type='password' value=newUserPasswordAgain}}
-  <button type="submit">Create New User</button>
+  <ui class="list-group">
+    <li class="list-group-item">
+      <label for="newUsername">Username</label>
+      {{input id='newUsername' placeholder='Username' value=newUsername}}
+    </li>
+    <li class="list-group-item">
+      <label for="newUserEmail">Email (optional)</label>
+      {{input id='newUserEmail' placeholder='Email' value=newUserEmail}}
+    </li>
+    <li class="list-group-item">
+      <label for="newUserPassword">Password</label>
+      {{input id='newUserPassword' placeholder='Enter Password' type='password' value=newUserPassword}}
+    </li>
+    <li class="list-group-item">
+      <label for="newUserPasswordAgain">Password (again)</label>
+      {{input id='newUserPasswordAgain' placeholder='Enter Password (again)' type='password' value=newUserPasswordAgain}}
+    </li>
+  </ui>
+    <p><button type="submit">Create New User</button></p>
   {{#if registerMessage}}
     <p>{{registerMessage}}</p>
   {{/if}}
@@ -28,9 +44,13 @@
 </div>
 <div class = "container">
 <form {{action 'resetPassword' on='submit'}}>
-  <label for="resetUsername">Username</label>
-  {{input id='resetUsername' placeholder='Username' value=resetUsername}}
-  <button type="submit">Reset Password</button>
+  <ui class="list-group">
+    <li class="list-group-item">
+      <label for="resetUsername">Username</label>
+      {{input id='resetUsername' placeholder='Username' value=resetUsername}}
+    </li>
+  </ui>
+  <p><button type="submit">Reset Password</button></p>
   {{#if resetMessage}}
     <p>{{resetMessage}}</p>
   {{/if}}
