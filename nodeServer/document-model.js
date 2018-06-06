@@ -76,14 +76,21 @@ function startWebSockets(server)
 function startDocAPI(app)
 {
   app.get('/documents', (req,res) => {
-    let query = shareDBConnection.createFetchQuery(collectionName,{},[],(err, results) => {
+    let params = {};
+    console.log("searching for doc",req.query);
+    const term = req.query.filter.search;
+    if(term.length > 1)
+    {
+      const rg = {$regex : ".*"+term+".*", $options:"i"};
+      params = { $or: [{name: rg},{tags: rg},{owner: rg}]};
+    }
+    let query = shareDBConnection.createFetchQuery(collectionName,params,[],(err, results) => {
       if(!err)
       {
         let docs = [];
-        for(var i = 0; i < results.length; i++) {
-          let noSource = results[i].data;
-          //noSource.source = "";
-          docs.push({attributes:noSource,id:results[i].data.documentId,type:"document"});
+        for(var i = 0; i < results.length; i++)
+        {
+          docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
         }
         docs.sort ((a, b) => {
           return new Date(b.attributes.created) - new Date(a.attributes.created);

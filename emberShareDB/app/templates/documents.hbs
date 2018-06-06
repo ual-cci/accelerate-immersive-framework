@@ -1,5 +1,16 @@
+<div class = "container">
+<form {{action 'search' on='submit'}}>
+  {{input id='searchTerm' placeholder='Search...' value=searchTerm}}
+  <button type="submit">Search</button>
+  {{#if message}}
+    <p>{{message}}</p>
+  {{/if}}
+</form>
+</div>
+<div class = "container">
 <ul>
   {{#each model as |document|}}
     <li>{{#link-to "code-editor" document.documentId}}{{document.name}}{{/link-to}}</li>
   {{/each}}
 </ul>
+</div>
