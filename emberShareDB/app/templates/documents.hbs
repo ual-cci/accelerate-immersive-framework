@@ -19,9 +19,9 @@
 </form>
 </div>
 <div class = "container">
-<ul>
-  {{#each model as |document|}}
-    <li>{{#link-to "code-editor" document.documentId}}{{document.name}}{{/link-to}}</li>
+  <ul class = "list-group">
+  {{#each model as |document index|}}
+    {{document-list-item document=document index=index}}
   {{/each}}
 </ul>
 </div>

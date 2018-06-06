@@ -129,7 +129,7 @@ function startDocAPI(app)
   app.post('/documents', (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
-    createDoc(attr.name, attr.owner, attr.public ? "false":"true")
+    createDoc(attr.name, attr.owner, attr.isPrivate)
     .then(function(doc){
       res.type('application/vnd.api+json');
       res.status(200);

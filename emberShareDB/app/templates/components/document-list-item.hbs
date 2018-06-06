@@ -1,0 +1,7 @@
+<li class = "list-group-item">
+  {{#link-to "code-editor" document.documentId}}{{document.name}}{{/link-to}}
+  by {{document.owner}}
+  {{#if document.isPrivate}}
+  <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+  {{/if}}
+</li>

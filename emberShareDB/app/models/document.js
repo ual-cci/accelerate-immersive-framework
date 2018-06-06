@@ -5,7 +5,7 @@ export default DS.Model.extend({
   owner:DS.attr('string'),
   name:DS.attr('string'),
   created:DS.attr('date'),
-  public:DS.attr('boolean'),
+  isPrivate:DS.attr('boolean'),
   documentId:DS.attr('string'),
   lastEdited:DS.attr('date'),
   assets:DS.attr(),

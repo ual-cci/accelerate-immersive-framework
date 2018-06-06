@@ -23,7 +23,7 @@ export default Controller.extend({
         let doc = this.get('store').createRecord('document', {
           source:'<some code>',
           owner:currentUser,
-          public:!isPrivate,
+          isPrivate:isPrivate,
           name:docName,
           documentId:"123",
         });
