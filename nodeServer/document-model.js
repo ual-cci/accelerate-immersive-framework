@@ -160,6 +160,11 @@ function getNewDocumentId(callback)
   });
 }
 
+function getDefaultSource()
+{
+  return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n......\n</script>\n</body>"
+}
+
 function createDoc(docName,owner,isPrivate) {
   return new Promise((resolve, reject) => {
     console.log("creating doc");
@@ -173,7 +178,7 @@ function createDoc(docName,owner,isPrivate) {
         }
         if (doc.type === null) {
           doc.create({
-            source:"",
+            source:getDefaultSource(),
             owner:owner,
             isPrivate:isPrivate,
             name:docName,

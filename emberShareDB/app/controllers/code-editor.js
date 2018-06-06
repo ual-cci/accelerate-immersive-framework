@@ -13,6 +13,7 @@ export default Controller.extend({
   suppress: false,
   codeTimer: new Date(),
   renderedSource:"",
+  collapsed: true,
   updateIFrame(self) {
     const doc = self.get('doc');
     let toRender = doc.data.source;
@@ -88,6 +89,7 @@ export default Controller.extend({
     {
       const editor = self.editor;
       const session = editor.getSession();
+
       const aceDoc = session.getDocument();
       const op = {};
       const start = aceDoc.positionToIndex(delta.start);
@@ -115,7 +117,7 @@ export default Controller.extend({
     this.set('renderedSource', this.get('model').source);
     const editor = this.get('editor');
     const session = editor.getSession();
-
+    session.setMode("ace/mode/html");
     doc.subscribe((err) => {
       if (err) throw err;
 
@@ -152,6 +154,9 @@ export default Controller.extend({
       this.set('surpress', true);
       doc.submitOp({p:['tags'],oi:tags},{source:true});
       this.set('surpress', false);
+    },
+    toggle() {
+      this.toggleProperty('collapsed');
     }
   }
 });

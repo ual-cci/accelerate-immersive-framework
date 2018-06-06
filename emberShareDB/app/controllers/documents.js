@@ -5,6 +5,7 @@ import RSVP from 'rsvp';
 export default Controller.extend({
   message:"",
   store:inject(),
+  session:inject('session'),
   docName:"",
   isPrivate:true,
   feedbackMessage: null,

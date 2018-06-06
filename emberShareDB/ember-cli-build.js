@@ -6,9 +6,9 @@ module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
     ace: {
-      themes: ['ambiance', 'chaos'],
-      modes: ['javascript'],
-      workers: ['javascript']
+      themes: ['monokai'],
+      modes: ['html'],
+      workers: ['html']
     },
 
     'ember-bootstrap': {

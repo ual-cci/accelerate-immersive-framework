@@ -1,22 +1,41 @@
-<div>
-{{file-upload}}
+<div class = "container-fluid">
+<h2>{{model.name}}</h2>
+
+<div class="bs-example">
+  {{#bs-button active=notCollapsed onClick=(action "toggle")}}
+    {{#if collapsed}}
+      Settings
+    {{else}}
+      Hide
+    {{/if}}
+  {{/bs-button}}
+  {{#bs-collapse collapsed=collapsed}}
+    <div class="well">
+      <div class = "file-upload-container">
+        Assets:
+        {{#each model.assets as |asset|}}
+          <div class = "asset-token">{{asset.name}}</div>
+        {{/each}}
+        <div class = "file-upload">
+          {{file-upload}}
+        </div>
+      </div>
+      <div>
+        {{tokenfield-input
+          tokens=model.tags
+          allowDuplicates=false
+          placeholder="Enter Tags"
+          tokensChanged=(action 'tagsChanged')
+        }}
+      </div>
+    </div>
+  {{/bs-collapse}}
 </div>
-<div>
-{{#each model.assets as |asset|}}
-  {{asset.name}}
-{{/each}}
+
+<div class = "output-container">
+  <iframe class = "output" srcdoc={{renderedSource}}></iframe>
 </div>
-<div>
-  {{tokenfield-input
-    tokens=model.tags
-    allowDuplicates=false
-    placeholder="Enter Tags"
-    tokensChanged=(action 'tagsChanged')
-  }}
+<div class = "ace-container">
+  {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
 </div>
-<div style = "float:left;">
-  <iframe srcdoc={{renderedSource}} width='100%' height=300></iframe>
-</div>
-<div>
-{{ember-ace lines=30 value=value ready=(action 'editorReady')}}
 </div>
