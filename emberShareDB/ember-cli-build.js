@@ -9,6 +9,12 @@ module.exports = function(defaults) {
       themes: ['ambiance', 'chaos'],
       modes: ['javascript'],
       workers: ['javascript']
+    },
+
+    'ember-bootstrap': {
+      'bootstrapVersion': 3,
+      'importBootstrapFont': true,
+      'importBootstrapCSS': true
     }
   });
 
