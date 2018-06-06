@@ -1,4 +1,15 @@
 <div class = "container">
+<form {{action 'createNewDocument' on='submit'}}>
+  {{input id='docName' placeholder='Doc Name' value=docName}}
+  <label for="isPrivate">Private?</label>
+  {{input type="checkbox" id='isPrivate' checked=true click=(action 'checkboxClicked')}}
+  <button type="submit">Create New Document</button>
+</form>
+{{#if feedbackMessage}}
+  <label>{{feedbackMessage}}</label>
+{{/if}}
+</div>
+<div class = "container">
 <form {{action 'search' on='submit'}}>
   {{input id='searchTerm' placeholder='Search...' value=searchTerm}}
   <button type="submit">Search</button>

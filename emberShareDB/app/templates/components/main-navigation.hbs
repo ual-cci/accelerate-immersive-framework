@@ -10,18 +10,10 @@
         {{#if sessionAccount.currentUserName}}
           <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
         {{/if}}
-        <form {{action 'createNewDoc' on='submit'}}>
-          {{input id='docName' placeholder='Doc Name' value=docName}}
-          <label for="isPrivate">Private?</label>
-          {{input type="checkbox" id='isPrivate' checked=true click=(action 'checkboxClicked')}}
-          <button type="submit">Create New Document</button>
-        </form>
       {{else}}
         <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
       {{/if}}
-      {{#if feedbackMessage}}
-        <label>{{feedbackMessage}}</label>
-        {{/if}}
+
     </div>
   </div>
 </nav>
