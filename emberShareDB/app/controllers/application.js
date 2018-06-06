@@ -6,6 +6,9 @@ export default Controller.extend({
     store: inject(),
     transitionToLoginRoute() {
       this.transitionToRoute('login');
+    },
+    transitionToIndexRoute() {
+      this.transitionToRoute('index');
     }
   }
 });

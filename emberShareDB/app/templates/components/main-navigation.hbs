@@ -1,10 +1,7 @@
 <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
     <div class="navbar-header">
-      {{#link-to 'index' classNames='navbar-brand'}}
-        Home
-      {{/link-to}}
-      {{! display logout button when the session is authenticated, login button otherwise }}
+      <a {{action 'home'}} class="btn navbar-btn navbar-left">Home</a>
       {{#if session.isAuthenticated}}
         <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
         {{#if sessionAccount.currentUserName}}

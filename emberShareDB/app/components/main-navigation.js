@@ -10,6 +10,9 @@ export default Component.extend({
     },
     logout() {
       this.get('session').invalidate();
+    },
+    home() {
+      this.sendAction('onHome')
     }
   }
 });
