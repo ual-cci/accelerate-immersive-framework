@@ -1,0 +1,28 @@
+<div class="uncharted-form-control">
+    <div class="uncharted-token-container">
+        {{#each tokens as |token index|}}
+            {{component tokenComponent
+            token=token
+            index=index
+            existingTokens=tokens
+            allowDuplicates=allowDuplicates
+            selectedTokenIndex=selectedTokenIndex
+            createToken=(action 'createToken')
+            removeToken=(action 'removeToken' token)
+            mouseDown=(action 'selectToken' token index)
+            doubleClick=(action 'editToken' token)}}
+        {{/each}}
+        {{input type='text'
+            class='uncharted-token-input'
+            disabled=disabled
+            id=tokenfieldId
+            placeholder=placeholder
+            value=inputValue}}
+    </div>
+</div>
+{{#if showDuplicateMessage}}
+    <p class="uncharted-duplicate-message">
+        <span class="fa fa-exclamation-circle"></span>
+        Duplicate values are not allowed
+    </p>
+{{/if}}

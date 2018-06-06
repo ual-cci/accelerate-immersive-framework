@@ -145,6 +145,13 @@ export default Controller.extend({
     editorReady(editor) {
       this.set('editor', editor);
       this.initShareDB();
+    },
+    tagsChanged(tags) {
+      console.log("tagsChanged", tags);
+      const doc = this.get('doc');
+      this.set('surpress', true);
+      doc.submitOp({p:['tags'],oi:tags},{source:false});
+      this.set('surpress', false);
     }
   }
 });

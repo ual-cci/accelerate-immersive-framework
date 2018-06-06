@@ -8,5 +8,6 @@ export default DS.Model.extend({
   public:DS.attr('boolean'),
   documentId:DS.attr('string'),
   lastEdited:DS.attr('date'),
-  assets:DS.attr()
+  assets:DS.attr(),
+  tags:DS.attr()
 });

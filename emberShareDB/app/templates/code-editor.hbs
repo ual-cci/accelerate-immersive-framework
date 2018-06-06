@@ -1,8 +1,18 @@
 <div>
 {{file-upload}}
+</div>
+<div>
 {{#each model.assets as |asset|}}
   {{asset.name}}
 {{/each}}
+</div>
+<div>
+  {{tokenfield-input
+    tokens=model.tags
+    allowDuplicates=false
+    placeholder="Enter Tags"
+    tokensChanged=(action 'tagsChanged')
+  }}
 </div>
 <div style = "float:left;">
   <iframe srcdoc={{renderedSource}} width='100%' height=300></iframe>

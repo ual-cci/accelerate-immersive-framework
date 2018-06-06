@@ -16,9 +16,11 @@ const shareDBConnection = shareDB.connect();
 var initDocAPI = function(server, app)
 {
   startDocAPI(app);
-  startWS(server);
+  startWebSockets(server);
   startAssetAPI(app);
 }
+
+// ENDPOINTS
 
 function startAssetAPI(app)
 {
@@ -59,7 +61,7 @@ function startAssetAPI(app)
 });
 }
 
-function startWS(server)
+function startWebSockets(server)
 {
   var wss = new WebSocket.Server({server: server});
   wss.on('connection', (ws, req) => {
@@ -130,7 +132,7 @@ function startDocAPI(app)
   });
 }
 
-//METHODS
+//FUNCTIONS
 
 function getNewDocumentId(callback)
 {
@@ -166,7 +168,8 @@ function createDoc(docName,owner,isPrivate) {
             documentId:uuid,
             created:new Date(),
             lastEdited:new Date(),
-            assets:[]
+            assets:[],
+            tags:[]
           },resolve);
           console.log("doc created");
           resolve(doc);
