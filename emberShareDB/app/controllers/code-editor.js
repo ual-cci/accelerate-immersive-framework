@@ -131,10 +131,10 @@ export default Controller.extend({
       });
     });
     doc.on('op',(ops,source) => {
-      if(!source)
+      if(!source && ops[0].p[0] == "source")
       {
-        const deltas = this.opTransform(ops, editor);
         this.set('surpress', true);
+        const deltas = this.opTransform(ops, editor);
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
@@ -150,7 +150,7 @@ export default Controller.extend({
       console.log("tagsChanged", tags);
       const doc = this.get('doc');
       this.set('surpress', true);
-      doc.submitOp({p:['tags'],oi:tags},{source:false});
+      doc.submitOp({p:['tags'],oi:tags},{source:true});
       this.set('surpress', false);
     }
   }

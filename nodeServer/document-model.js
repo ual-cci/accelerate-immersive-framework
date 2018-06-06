@@ -82,7 +82,7 @@ function startDocAPI(app)
         let docs = [];
         for(var i = 0; i < results.length; i++) {
           let noSource = results[i].data;
-          noSource.source = "";
+          //noSource.source = "";
           docs.push({attributes:noSource,id:results[i].data.documentId,type:"document"});
         }
         docs.sort ((a, b) => {
