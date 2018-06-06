@@ -3,6 +3,7 @@ import config from  '../config/environment';
 import RSVP from 'rsvp';
 
 export default Service.extend({
+  sessionAccount:inject('session-account'),
   requestReset(username) {
     console.log("reset pword for " + username);
     return new RSVP.Promise((resolve, reject) => {

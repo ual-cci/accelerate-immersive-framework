@@ -126,7 +126,7 @@ function startDocAPI(app)
     });
   });
 
-  app.post('/documents', (req,res) => {
+  app.post('/documents', app.oauth.authorise(), (req,res) => {
     let attr = req.body.data.attributes;
     console.log(attr);
     createDoc(attr.name, attr.owner, attr.isPrivate)

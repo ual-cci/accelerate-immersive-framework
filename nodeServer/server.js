@@ -22,6 +22,6 @@ function startServer()
   server.listen(8080);
   userAPI.initUserAPI(app);
   docAPI.initDocAPI(server, app);
-
+  userAPI.initErrorHandling(app);
   console.log('Listening on http://localhost:8080');
 }

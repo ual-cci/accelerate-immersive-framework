@@ -6,6 +6,7 @@ let clientModel = require('./mongo/model/client');
 let	tokenModel = require('./mongo/model/token');
 let	userModel = require('./mongo/model/user');
 var bcrypt = require('bcrypt');
+var OAuthError = require('oauth2-server/lib/error');
 
 const saltRounds = 10;
 
@@ -15,7 +16,10 @@ var getAccessToken = function(bearerToken, callback) {
 	console.log('getting token');
 	tokenModel.findOne({
 		accessToken: bearerToken
-	}, callback);
+	}, function(err, token) {
+		console.log('done getting token',err,token);
+		callback(err, token);
+	});
 };
 
 var getClient = function(clientId, clientSecret, callback) {
@@ -78,6 +82,17 @@ var initUserAPI = function(app)
 	startAuthAPI(app);
 }
 
+var initErrorHandling = function(app)
+{
+	app.use(function (err, req, res, next) {
+		if (err instanceof OAuthError)
+			//console.log('info', err);
+		next(err);
+	});
+
+	app.use(app.oauth.errorHandler());
+}
+
 function startAuthAPI(app)
 {
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -96,16 +111,10 @@ function startAuthAPI(app)
   app.oauth = oauthserver({
     model: model,
     grants: ['password'],
-    debug: true
+    debug: false
   });
 
   app.all('/oauth/token', app.oauth.grant());
-
-  app.get('/', app.oauth.authorise(), function (req, res) {
-    res.send('Congratulations, you are in a secret area!');
-  });
-
-  app.use(app.oauth.errorHandler());
 
   app.post('/accounts', function (req, res) {
     //console.log('request for new user', req.body);
@@ -324,7 +333,8 @@ var requestPasswordReset = function(username) {
 
 
 module.exports = {
-	initUserAPI:initUserAPI
+	initUserAPI:initUserAPI,
+	initErrorHandling:initErrorHandling
 };
 
 //HELPER
@@ -358,6 +368,6 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-// dump();
+dump();
 // dropUsers();
 // dropTokens();
