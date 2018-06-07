@@ -11,6 +11,9 @@ export default Controller.extend({
   feedbackMessage: null,
   sessionAccount: inject('session-account'),
   actions: {
+    openDocument(documentId) {
+      this.transitionToRoute("code-editor", documentId);
+    },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
     },
