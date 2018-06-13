@@ -58,7 +58,24 @@ function startAssetAPI(app)
       _id: req.params.id
    });
    readstream.pipe(res);
-});
+  });
+
+  app.delete('/asset/:id', function(req, res) {
+    gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
+      if (err) return handleError(err);
+      console.log('success deleting asset');
+      let doc = shareDBConnection.get(collectionName,req.body.documentId)
+      console.log(doc);
+      var newAssets = doc.data.assets;
+      newAssets = newAssets.filter(function( asset ) {
+          return asset.fileId !== req.params.id;
+      });
+      console.log(newAssets);
+      doc.submitOp({
+        p:['assets'],oi:newAssets},{source:'server'});
+      res.json(200);
+    });
+  });
 }
 
 function startWebSockets(server)

@@ -7,6 +7,7 @@ import { isEmpty } from '@ember/utils';
 export default Controller.extend({
   websockets: inject('websockets'),
   sessionAccount: inject('session-account'),
+  assetService: inject('assets'),
   socketRef: null,
   con: null,
   doc: null,
@@ -17,7 +18,9 @@ export default Controller.extend({
   collapsed: true,
   isNotEdittingDocName:true,
   canEditDoc:false,
-  allowDelete:false,
+  allowDocDelete:false,
+  allowAssetDelete:false,
+  assetToDelete:"",
   updateIFrame(self) {
     const doc = self.get('doc');
     let toRender = doc.data.source;
@@ -115,14 +118,17 @@ export default Controller.extend({
   initShareDB() {
     const socket = new WebSocket('ws://localhost:8080');
     const con = new ShareDB.Connection(socket);
+    this.set('socketRef', socket);
     this.set('connection', con);
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    session.setMode("ace/mode/html");
+
     const doc = con.get('mimicDocs',this.get('model').id);
     this.set('doc', doc);
     this.set('isPrivate', this.get('model').isPrivate);
     this.set('renderedSource', this.get('model').source);
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    session.setMode("ace/mode/html");
+
     doc.subscribe((err) => {
       if (err) throw err;
 
@@ -139,6 +145,7 @@ export default Controller.extend({
       });
     });
     doc.on('op',(ops,source) => {
+      console.log('update',ops);
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
@@ -146,8 +153,13 @@ export default Controller.extend({
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
+      else if (ops[0].p[0] == "assets")
+      {
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+      }
     });
-    this.set('socketRef', socket);
   },
   setCanEditDoc() {
     const currentUser = this.get('sessionAccount').currentUserName;
@@ -215,10 +227,31 @@ export default Controller.extend({
         });
       }
     },
-    toggleAllowDelete() {
+    deleteAsset()
+    {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('allowDelete');
+        this.get('assetService').deleteAsset(this.get('assetToDelete'))
+        .then(()=> {
+          console.log('deleting asset', this.get('assetToDelete'));
+          this.set('assetToDelete',"");
+          this.toggleProperty('allowAssetDelete');
+        }).catch((err)=>{
+          console.log('ERROR deleting asset', this.get('assetToDelete'));
+        });
+      }
+    },
+    toggleAllowDocDelete() {
+      if(this.get('canEditDoc'))
+      {
+        this.toggleProperty('allowDocDelete');
+      }
+    },
+    toggleAllowAssetDelete(asset) {
+      if(this.get('canEditDoc'))
+      {
+        this.set('assetToDelete',asset);
+        this.toggleProperty('allowAssetDelete');
       }
     },
     toggleCollapsed() {
