@@ -32,68 +32,33 @@ export default Service.extend({
         const fileId = assets[i].fileId;
         const fileName = assets[i].name;
         console.log("fetching asset:"+fileId);
-        $.ajax({
-            type: "GET",
-            url: config.serverHost + "/asset/"+fileId,
-            xhr:function(){
-                var xhr = new XMLHttpRequest();
-                xhr.overrideMimeType= "text/plain; charset=x-user-defined"
-                return xhr;
-            },
-            processData:false,
-            success: function (res, status, xhr) {
-              //console.log("retreived data",this.b64e(xhr.responseText));
-              var str = xhr.responseText;
-              let CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-              let out = "", i = 0, len = str.length, c1, c2, c3;
-              while (i < len) {
-                  c1 = str.charCodeAt(i++) & 0xff;
-                  if (i == len) {
-                      out += CHARS.charAt(c1 >> 2);
-                      out += CHARS.charAt((c1 & 0x3) << 4);
-                      out += "==";
-                      break;
-                  }
-                  c2 = str.charCodeAt(i++);
-                  if (i == len) {
-                      out += CHARS.charAt(c1 >> 2);
-                      out += CHARS.charAt(((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4));
-                      out += CHARS.charAt((c2 & 0xF) << 2);
-                      out += "=";
-                      break;
-                  }
-                  c3 = str.charCodeAt(i++);
-                  out += CHARS.charAt(c1 >> 2);
-                  out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
-                  out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
-                  out += CHARS.charAt(c3 & 0x3F);
-              }
-              console.log(out);
-              // this.get('store').push({
-              //   data:[{
-              //     id:fileId,
-              //     type:"asset",
-              //     attributes:{
-              //       fileId:fileId,
-              //       name:fileName,
-              //       //b64data:btoa(unescape(encodeURIComponent((xhr.responseText)))),
-              //       b64data:this.b64e(res),
-              //       type:"image/png"
-              //     }
-              //   }]
-              // });
-            }
-          }).then((res) => {
+        var xhr = new XMLHttpRequest();
+        var url = config.serverHost + "/asset/"+fileId;
+        xhr.onload = () => {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            this.get('store').push({
+              data:[{
+                id:fileId,
+                type:"asset",
+                attributes:{
+                  fileId:fileId,
+                  name:fileName,
+                  b64data:this.b64e(xhr.responseText),
+                  type:"image/png"
+                }
+              }]
+            });
             ctr--;
             if(ctr == 0)
             {
               resolve();
             }
-          }).catch((err) => {
-            console.log("error",err);
-            reject(err);
-          });
-        }
+          }
+        };
+        xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        xhr.open("GET", url, true);
+        xhr.send(null);
+      }
     });
   },
   b64e: function (str) {
