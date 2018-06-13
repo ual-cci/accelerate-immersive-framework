@@ -23,44 +23,50 @@ export default Service.extend({
         });
     });
   },
-  preloadAssets(assets) {
-    console.log("getting assets");
-    let ctr = assets.length;
-    return new RSVP.Promise((resolve, reject) => {
-      for(var i = 0; i < assets.length; i++)
-      {
-        const fileId = assets[i].fileId;
-        const fileName = assets[i].name;
-        const fileType = assets[i].fileType;
-        console.log("fetching asset:"+fileId);
-        var xhr = new XMLHttpRequest();
-        var url = config.serverHost + "/asset/"+fileId;
-        xhr.onload = () => {
-          if (xhr.readyState == 4 && xhr.status == 200) {
-            this.get('store').push({
-              data:[{
-                id:fileId,
-                type:"asset",
-                attributes:{
-                  fileId:fileId,
-                  name:fileName,
-                  b64data:this.b64e(xhr.responseText),
-                  type:fileType
-                }
-              }]
-            });
-            ctr--;
-            if(ctr == 0)
-            {
-              resolve();
+  fetchAsset(asset, ctr, callback, resolve) {
+    console.log("fetching asset:"+asset);
+    const fileId = asset.fileId;
+    const fileName = asset.name;
+    const fileType = asset.fileType;
+    var xhr = new XMLHttpRequest();
+    var url = config.serverHost + "/asset/"+fileId;
+    xhr.onload = () => {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        console.log("fetched asset:"+fileId);
+        this.get('store').push({
+          data:[{
+            id:fileId,
+            type:"asset",
+            attributes:{
+              fileId:fileId,
+              name:fileName,
+              b64data:this.b64e(xhr.responseText),
+              type:fileType
             }
-          }
-        };
-        xhr.overrideMimeType("text/plain; charset=x-user-defined");
-        xhr.open("GET", url, true);
-        xhr.send(null);
+          }]
+        });
+        callback(ctr, resolve);
       }
-    });
+    };
+    xhr.overrideMimeType("text/plain; charset=x-user-defined");
+    xhr.open("GET", url, true);
+    xhr.send(null);
+  },
+  preloadAssets(assets, callback) {
+    var ctr = 0;
+    console.log("getting assets", assets);
+    var nextItemCallback = function(newCtr, resolve) {
+      newCtr++;
+      console.log('callback',newCtr);
+      if(newCtr == assets.length) {
+        callback();
+      }
+      else
+      {
+        nextItemCallback(newCtr);
+      }
+    }
+    this.fetchAsset(assets[ctr], ctr, nextItemCallback);
   },
   b64e: function (str) {
     // from this SO question

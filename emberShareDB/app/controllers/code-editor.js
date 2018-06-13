@@ -24,12 +24,13 @@ export default Controller.extend({
   assetToDelete:"",
   preloadAssets(self) {
     const doc = self.get('doc');
-    self.get('assetService').preloadAssets(doc.data.assets)
-    .then(()=>{
+    self.get('assetService').preloadAssets(doc.data.assets, ()=> {
+      console.log("completed preloading assets");
       self.updateIFrame(self);
     });
   },
   updateIFrame(self) {
+    console.log("updating iframe");
     const doc = self.get('doc');
     let toRender = doc.data.source;
     toRender = self.replaceAssets(toRender, self.get('model').assets);
@@ -43,6 +44,7 @@ export default Controller.extend({
       const toFind = assets[i].name;
       const fileType = assets[i].fileType;
       const asset = this.get('store').peekRecord('asset',fileId);
+      console.log('asset',asset);
       const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
       source = source.replace(new RegExp(toFind,"gm"),b64);
     }
@@ -142,7 +144,6 @@ export default Controller.extend({
     const doc = con.get('mimicDocs',this.get('model').id);
     this.set('doc', doc);
     this.set('isPrivate', this.get('model').isPrivate);
-    this.set('renderedSource', this.get('model').source);
 
     doc.subscribe((err) => {
       if (err) throw err;
@@ -172,6 +173,7 @@ export default Controller.extend({
         this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
           toChange.set('assets',ops[0].oi);
         });
+        this.preloadAssets(this);
       }
     });
   },
