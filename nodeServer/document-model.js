@@ -162,7 +162,7 @@ function getNewDocumentId(callback)
 
 function getDefaultSource()
 {
-  return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n......\n</script>\n</body>"
+  return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
 }
 
 function createDoc(docName,owner,isPrivate) {

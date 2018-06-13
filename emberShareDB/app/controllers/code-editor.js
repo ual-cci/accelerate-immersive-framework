@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 import config from  '../config/environment';
+import { isEmpty } from '@ember/utils';
 
 export default Controller.extend({
   websockets: inject('websockets'),
@@ -14,6 +15,7 @@ export default Controller.extend({
   codeTimer: new Date(),
   renderedSource:"",
   collapsed: true,
+  isNotEdittingDocName:true,
   updateIFrame(self) {
     const doc = self.get('doc');
     let toRender = doc.data.source;
@@ -143,6 +145,19 @@ export default Controller.extend({
     });
     this.set('socketRef', socket);
   },
+  canEditDoc() {
+    const currentUser = this.get('sessionAccount').currentUserName;
+    if(isEmpty(currentUser))
+    {
+      return false;
+    }
+    const doc = this.get('doc');
+    if(currentUser != doc.data.owner)
+    {
+      return false;
+    }
+    return true;
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -153,6 +168,25 @@ export default Controller.extend({
       const doc = this.get('doc');
       this.set('surpress', true);
       doc.submitOp({p:['tags'],oi:tags},{source:true});
+      this.set('surpress', false);
+    },
+    doEditDocName() {
+      console.log('edit doc name');
+      if(this.canEditDoc())
+      {
+        this.set('isNotEdittingDocName', false);
+        Ember.run.scheduleOnce('afterRender', this, function() {
+          $('#doc-name-input').focus();
+        });
+      }
+    },
+    endEdittingDocName() {
+      this.set('isNotEdittingDocName', true);
+      const doc = this.get('doc');
+      const newName = this.get('model').name;
+      console.log('endEdittingDocName',newName);
+      this.set('surpress', true);
+      doc.submitOp({p:['name'],oi:newName},{source:true});
       this.set('surpress', false);
     },
     toggle() {

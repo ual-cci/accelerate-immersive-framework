@@ -1,6 +1,9 @@
 <div class = "container-fluid">
-<h2>{{model.name}}</h2>
-
+{{#if isNotEdittingDocName}}
+<h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
+{{else}}
+{{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
+{{/if}}
 <div class="bs-example">
   {{#bs-button active=notCollapsed onClick=(action "toggle")}}
     {{#if collapsed}}
