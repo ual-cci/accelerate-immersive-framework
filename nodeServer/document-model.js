@@ -1,6 +1,7 @@
 var ShareDB = require('sharedb');
 var WebSocket = require('ws');
 var WebSocketJSONStream = require('websocket-json-stream');
+var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var multiparty = require('connect-multiparty')();
 var fs = require('fs');
@@ -24,56 +25,56 @@ var initDocAPI = function(server, app)
 
 function startAssetAPI(app)
 {
-  const gridFSDB = mongoose.connection.db;
-  const gridFSDriver = mongoose.mongo;
-  const gridFS = new Gridfs(gridFSDB, gridFSDriver);
+  var db = new mongo.Db('mimicDocs', new mongo.Server("127.0.0.1", 27017));
+  db.open(function (err) {
+    if (err) return handleError(err);
+    const gridFS = Gridfs(db, mongo);
+    console.log('connection opened to mimicAssets');
 
-  app.post('/asset', multiparty, function(req,res) {
-    console.log(req.body,req.files);
-
-    var writestream = gridFS.createWriteStream({
-      filename: req.files.file.name,
-      mode: 'w',
-      content_type: req.files.file.mimetype,
-      metadata: req.body
-    });
-
-    fs.createReadStream(req.files.file.path).pipe(writestream);
-    writestream.on('close', function(file) {
-      res.json(200);
-      let doc = shareDBConnection.get(collectionName,req.body.documentId)
-      console.log(doc);
-      var newAssets = doc.data.assets;
-      newAssets.push({'name':req.files.file.name,"fileId":file._id});
-      console.log(newAssets);
-      doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-      fs.unlink(req.files.file.path, function(err) {
-         console.log('success!')
-       });
-    });
-  });
-
-  app.get('/asset/:id', function(req, res) {
-   var readstream = gridFS.createReadStream({
-      _id: req.params.id
-   });
-   readstream.pipe(res);
-  });
-
-  app.delete('/asset/:id', function(req, res) {
-    gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
-      if (err) return handleError(err);
-      console.log('success deleting asset');
-      let doc = shareDBConnection.get(collectionName,req.body.documentId)
-      console.log(doc);
-      var newAssets = doc.data.assets;
-      newAssets = newAssets.filter(function( asset ) {
-          return asset.fileId !== req.params.id;
+    app.post('/asset', multiparty, function(req,res) {
+      var writestream = gridFS.createWriteStream({
+        filename: req.files.file.name,
+        mode: 'w',
+        content_type: req.files.file.mimetype,
+        metadata: req.body
       });
-      console.log(newAssets);
-      doc.submitOp({
-        p:['assets'],oi:newAssets},{source:'server'});
-      res.json(200);
+
+      fs.createReadStream(req.files.file.path).pipe(writestream);
+      writestream.on('close', function(file) {
+        res.json(200);
+        let doc = shareDBConnection.get(collectionName,req.body.documentId)
+        var newAssets = doc.data.assets;
+        newAssets.push({'name':req.files.file.name,"fileId":file._id});
+        console.log(newAssets);
+        doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+        fs.unlink(req.files.file.path, function(err) {
+           console.log('success!')
+         });
+      });
+    });
+
+    app.get('/asset/:id', function(req, res) {
+     var readstream = gridFS.createReadStream({
+        _id: req.params.id
+     });
+     readstream.pipe(res);
+    });
+
+    app.delete('/asset/:id', function(req, res) {
+      gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
+        if (err) return handleError(err);
+        console.log('success deleting asset');
+        let doc = shareDBConnection.get(collectionName,req.body.documentId)
+        console.log(doc);
+        var newAssets = doc.data.assets;
+        newAssets = newAssets.filter(function( asset ) {
+            return asset.fileId !== req.params.id;
+        });
+        console.log(newAssets);
+        doc.submitOp({
+          p:['assets'],oi:newAssets},{source:'server'});
+        res.json(200);
+      });
     });
   });
 }
