@@ -116,6 +116,7 @@ export default Controller.extend({
     this.set('connection', con);
     const doc = con.get('mimicDocs',this.get('model').id);
     this.set('doc', doc);
+    this.set('isPrivate', this.get('model').isPrivate);
     this.set('renderedSource', this.get('model').source);
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -189,7 +190,14 @@ export default Controller.extend({
       doc.submitOp({p:['name'],oi:newName},{source:true});
       this.set('surpress', false);
     },
-    toggle() {
+    privacyToggled() {
+      this.toggleProperty('isPrivate');
+      const doc = this.get('doc');
+      this.set('surpress', true);
+      doc.submitOp({p:['isPrivate'],oi:this.get('isPrivate')},{source:true});
+      this.set('surpress', false);
+    },
+    toggleCollapsed() {
       this.toggleProperty('collapsed');
     }
   }

@@ -5,7 +5,7 @@
 {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
 {{/if}}
 <div class="bs-example">
-  {{#bs-button active=notCollapsed onClick=(action "toggle")}}
+  {{#bs-button active=notCollapsed onClick=(action "toggleCollapsed")}}
     {{#if collapsed}}
       Settings
     {{else}}
@@ -14,6 +14,8 @@
   {{/bs-button}}
   {{#bs-collapse collapsed=collapsed}}
     <div class="well">
+      <label for="privacyCheckbox">Private?</label>
+      {{input type="checkbox" id='privacyCheckbox' checked=isPrivate click=(action 'privacyToggled')}}
       <div class = "file-upload-container">
         Assets:
         {{#each model.assets as |asset|}}
