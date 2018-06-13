@@ -23,8 +23,7 @@ export default Service.extend({
         });
     });
   },
-  fetchAsset(asset, ctr, callback, resolve) {
-    console.log("fetching asset:"+asset);
+  fetchAsset(asset, ctr, callback) {
     const fileId = asset.fileId;
     const fileName = asset.name;
     const fileType = asset.fileType;
@@ -45,7 +44,7 @@ export default Service.extend({
             }
           }]
         });
-        callback(ctr, resolve);
+        callback(ctr);
       }
     };
     xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -54,16 +53,14 @@ export default Service.extend({
   },
   preloadAssets(assets, callback) {
     var ctr = 0;
-    console.log("getting assets", assets);
-    var nextItemCallback = function(newCtr, resolve) {
+    var nextItemCallback = (newCtr)=> {
       newCtr++;
-      console.log('callback',newCtr);
       if(newCtr == assets.length) {
         callback();
       }
       else
       {
-        nextItemCallback(newCtr);
+        this.fetchAsset(assets[newCtr], newCtr, nextItemCallback);
       }
     }
     this.fetchAsset(assets[ctr], ctr, nextItemCallback);

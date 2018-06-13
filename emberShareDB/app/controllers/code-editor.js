@@ -30,7 +30,6 @@ export default Controller.extend({
     });
   },
   updateIFrame(self) {
-    console.log("updating iframe");
     const doc = self.get('doc');
     let toRender = doc.data.source;
     toRender = self.replaceAssets(toRender, self.get('model').assets);
@@ -39,16 +38,14 @@ export default Controller.extend({
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
     {
-      console.log("replacing :" + assets[i].name);
+      console.log("replacing instances of:" + assets[i].name);
       const fileId = assets[i].fileId;
       const toFind = assets[i].name;
       const fileType = assets[i].fileType;
       const asset = this.get('store').peekRecord('asset',fileId);
-      console.log('asset',asset);
       const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
       source = source.replace(new RegExp(toFind,"gm"),b64);
     }
-    console.log(source);
     return source;
   },
   executeCode(self) {
