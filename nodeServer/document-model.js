@@ -42,9 +42,11 @@ function startAssetAPI(app)
       fs.createReadStream(req.files.file.path).pipe(writestream);
       writestream.on('close', function(file) {
         res.json(200);
+        const content_type = req.files.file.headers["content-type"];
+        console.log("UPLOADED FILE OF TYPE:",content_type);
         let doc = shareDBConnection.get(collectionName,req.body.documentId)
         var newAssets = doc.data.assets;
-        newAssets.push({'name':req.files.file.name,"fileId":file._id});
+        newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
         console.log(newAssets);
         doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
         fs.unlink(req.files.file.path, function(err) {

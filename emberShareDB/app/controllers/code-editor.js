@@ -41,8 +41,9 @@ export default Controller.extend({
       console.log("replacing :" + assets[i].name);
       const fileId = assets[i].fileId;
       const toFind = assets[i].name;
+      const fileType = assets[i].fileType;
       const asset = this.get('store').peekRecord('asset',fileId);
-      const b64 = "data:" + asset.type + ";charset=utf-8;base64," + asset.b64data;
+      const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
       source = source.replace(new RegExp(toFind,"gm"),b64);
     }
     console.log(source);

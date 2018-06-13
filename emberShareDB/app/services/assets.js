@@ -31,6 +31,7 @@ export default Service.extend({
       {
         const fileId = assets[i].fileId;
         const fileName = assets[i].name;
+        const fileType = assets[i].fileType;
         console.log("fetching asset:"+fileId);
         var xhr = new XMLHttpRequest();
         var url = config.serverHost + "/asset/"+fileId;
@@ -44,7 +45,7 @@ export default Service.extend({
                   fileId:fileId,
                   name:fileName,
                   b64data:this.b64e(xhr.responseText),
-                  type:"image/png"
+                  type:fileType
                 }
               }]
             });
