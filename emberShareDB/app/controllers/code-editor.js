@@ -16,6 +16,8 @@ export default Controller.extend({
   renderedSource:"",
   collapsed: true,
   isNotEdittingDocName:true,
+  canEditDoc:false,
+  allowDelete:false,
   updateIFrame(self) {
     const doc = self.get('doc');
     let toRender = doc.data.source;
@@ -125,6 +127,7 @@ export default Controller.extend({
       if (err) throw err;
 
       const doc = this.get('doc');
+      this.setCanEditDoc();
       this.get('sessionAccount').set('currentDoc',this.get('model').id);
       this.set('surpress', true);
       this.updateIFrame(this);
@@ -146,18 +149,20 @@ export default Controller.extend({
     });
     this.set('socketRef', socket);
   },
-  canEditDoc() {
+  setCanEditDoc() {
     const currentUser = this.get('sessionAccount').currentUserName;
     if(isEmpty(currentUser))
     {
-      return false;
+      this.set('canEditDoc',false);
+      return;
     }
     const doc = this.get('doc');
     if(currentUser != doc.data.owner)
     {
-      return false;
+      this.set('canEditDoc',false);
+      return;
     }
-    return true;
+    this.set('canEditDoc',true);
   },
   actions: {
     editorReady(editor) {
@@ -173,7 +178,7 @@ export default Controller.extend({
     },
     doEditDocName() {
       console.log('edit doc name');
-      if(this.canEditDoc())
+      if(this.get('canEditDoc'))
       {
         this.set('isNotEdittingDocName', false);
         Ember.run.scheduleOnce('afterRender', this, function() {
@@ -191,11 +196,30 @@ export default Controller.extend({
       this.set('surpress', false);
     },
     privacyToggled() {
-      this.toggleProperty('isPrivate');
-      const doc = this.get('doc');
-      this.set('surpress', true);
-      doc.submitOp({p:['isPrivate'],oi:this.get('isPrivate')},{source:true});
-      this.set('surpress', false);
+      if(this.get('canEditDoc'))
+      {
+        this.toggleProperty('isPrivate');
+        const doc = this.get('doc');
+        this.set('surpress', true);
+        doc.submitOp({p:['isPrivate'],oi:this.get('isPrivate')},{source:true});
+        this.set('surpress', false);
+      }
+    },
+    deleteDoc() {
+      if(this.get('canEditDoc'))
+      {
+        const doc = this.get('doc');
+        doc.del([],(err)=>{
+          console.log(err);
+          this.transitionToRoute('documents'," ",0);
+        });
+      }
+    },
+    toggleAllowDelete() {
+      if(this.get('canEditDoc'))
+      {
+        this.toggleProperty('allowDelete');
+      }
     },
     toggleCollapsed() {
       this.toggleProperty('collapsed');

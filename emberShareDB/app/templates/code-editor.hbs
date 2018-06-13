@@ -14,8 +14,24 @@
   {{/bs-button}}
   {{#bs-collapse collapsed=collapsed}}
     <div class="well">
+      {{#if canEditDoc}}
       <label for="privacyCheckbox">Private?</label>
       {{input type="checkbox" id='privacyCheckbox' checked=isPrivate click=(action 'privacyToggled')}}
+      {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "toggleAllowDelete")}}
+        Delete
+      {{/bs-button}}
+      {{#if allowDelete}}
+      <div>
+        Are you sure?
+        {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "deleteDoc")}}
+          Yes
+        {{/bs-button}}
+        {{#bs-button type="primary" onClick=(action "toggleAllowDelete")}}
+          No
+        {{/bs-button}}
+      </div>
+      {{/if}}
+      {{/if}}
       <div class = "file-upload-container">
         Assets:
         {{#each model.assets as |asset|}}
