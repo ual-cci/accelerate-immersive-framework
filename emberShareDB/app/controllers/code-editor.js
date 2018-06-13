@@ -8,6 +8,7 @@ export default Controller.extend({
   websockets: inject('websockets'),
   sessionAccount: inject('session-account'),
   assetService: inject('assets'),
+  store: inject('store'),
   socketRef: null,
   con: null,
   doc: null,
@@ -21,6 +22,13 @@ export default Controller.extend({
   allowDocDelete:false,
   allowAssetDelete:false,
   assetToDelete:"",
+  preloadAssets(self) {
+    const doc = self.get('doc');
+    self.get('assetService').preloadAssets(doc.data.assets)
+    .then(()=>{
+      self.updateIFrame(self);
+    });
+  },
   updateIFrame(self) {
     const doc = self.get('doc');
     let toRender = doc.data.source;
@@ -30,11 +38,14 @@ export default Controller.extend({
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
     {
-      console.log(assets[i].name);
+      console.log("replacing :" + assets[i].name);
+      const fileId = assets[i].fileId;
       const toFind = assets[i].name;
-      const url = config.serverHost + "/asset/" + assets[i].fileId;
-      source = source.replace(new RegExp(toFind,"gm"),url);
+      const asset = this.get('store').peekRecord('asset',fileId);
+      const b64 = "data:" + asset.type + ";charset=utf-8;base64," + asset.b64data;
+      source = source.replace(new RegExp(toFind,"gm"),b64);
     }
+    console.log(source);
     return source;
   },
   executeCode(self) {
@@ -137,9 +148,9 @@ export default Controller.extend({
 
       const doc = this.get('doc');
       this.setCanEditDoc();
+      this.preloadAssets(this);
       this.get('sessionAccount').set('currentDoc',this.get('model').id);
       this.set('surpress', true);
-      this.updateIFrame(this);
       session.setValue(doc.data.source);
       this.set('surpress', false);
 

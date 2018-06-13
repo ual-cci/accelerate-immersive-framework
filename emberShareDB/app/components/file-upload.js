@@ -25,6 +25,8 @@ export default EmberUploader.FileField.extend({
       uploader.on('didError', (jqXHR, textStatus, errorThrown) => {
         console.log('didError',errorThrown);
       });
+      var reader = new FileReader();
+      console.log(reader.readDataAsURL(files[0]));
       uploader.upload(files[0], data);
     }
   }
