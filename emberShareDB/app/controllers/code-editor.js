@@ -94,9 +94,12 @@ export default Controller.extend({
     const doc = self.get('doc');
     if(!surpress)
     {
+      this.set('surpress', true);
+      doc.submitOp({p:['lastEdited'],oi:new Date()},{source:true});
+      this.set('surpress', false);
+
       const editor = self.editor;
       const session = editor.getSession();
-
       const aceDoc = session.getDocument();
       const op = {};
       const start = aceDoc.positionToIndex(delta.start);
@@ -145,7 +148,6 @@ export default Controller.extend({
       });
     });
     doc.on('op',(ops,source) => {
-      console.log('update',ops);
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
