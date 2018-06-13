@@ -16,7 +16,7 @@
     <div class="well">
       {{#if canEditDoc}}
       <label for="privacyCheckbox">Private?</label>
-      {{input type="checkbox" id='privacyCheckbox' checked=isPrivate click=(action 'privacyToggled')}}
+      {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
       {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "toggleAllowDocDelete")}}
         Delete
       {{/bs-button}}

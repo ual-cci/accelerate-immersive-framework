@@ -210,10 +210,10 @@ export default Controller.extend({
     privacyToggled() {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('isPrivate');
+        this.toggleProperty('model.isPrivate');
         const doc = this.get('doc');
         this.set('surpress', true);
-        doc.submitOp({p:['isPrivate'],oi:this.get('isPrivate')},{source:true});
+        doc.submitOp({p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
         this.set('surpress', false);
       }
     },
@@ -256,6 +256,9 @@ export default Controller.extend({
     },
     toggleCollapsed() {
       this.toggleProperty('collapsed');
+    },
+    cleanUp() {
+      this.get('doc').destroy();
     }
   }
 });
