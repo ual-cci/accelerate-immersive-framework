@@ -31,7 +31,7 @@ function startServer()
 
   var server = http.createServer(app);
   server.listen(config.serverPort);
-  userAPI.initUserAPI(app);
+  userAPI.initUserAPI(app, config);
   docAPI.initDocAPI(server, app, config);
   userAPI.initErrorHandling(app);
   console.log('Listening on http://'+ config.serverIP + ':'+ config.serverPort);

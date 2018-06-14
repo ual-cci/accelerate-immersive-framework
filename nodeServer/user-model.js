@@ -7,7 +7,8 @@ let	tokenModel = require('./mongo/model/token');
 let	userModel = require('./mongo/model/user');
 var bcrypt = require('bcrypt');
 var OAuthError = require('oauth2-server/lib/error');
-
+var mongoIP = "";
+var mongoPort = "";
 const saltRounds = 10;
 
 //AUTH
@@ -77,8 +78,10 @@ const model = {
 
 //API
 
-var initUserAPI = function(app)
+var initUserAPI = function(app, config)
 {
+	mongoIP = config.mongoIP;
+  mongoPort = config.mongoPort;
 	startAuthAPI(app);
 }
 
@@ -99,7 +102,7 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  var mongoUri = 'mongodb://localhost/oauth';
+  var mongoUri = 'mongodb://' + mongoIP +'/oauth';
   mongoose.connect(mongoUri, function(err, res) {
     if (err) {
       return console.error('Error connecting to "%s":', mongoUri, err);
