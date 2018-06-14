@@ -142,7 +142,7 @@ export default Controller.extend({
     }
   },
   initShareDB() {
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket('ws://'+config.serverHost);
     const con = new ShareDB.Connection(socket);
     this.set('socketRef', socket);
     this.set('connection', con);

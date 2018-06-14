@@ -8,8 +8,8 @@ import { makeArray } from '@ember/array';
 import { assign } from '@ember/polyfills';
 
 export default OAuth2PasswordGrant.extend({
-  serverTokenEndpoint: `${config.apiHost}/token`,
-  serverTokenRevocationEndpoint: `${config.apiHost}/revoke`,
+  serverTokenEndpoint: `${config.oauthHost}/token`,
+  serverTokenRevocationEndpoint: `${config.oauthHost}/revoke`,
   authenticate(identification, password, scope = [], headers = {}) {
     return new RSVP.Promise((resolve, reject) => {
       const data = { 'grant_type': 'password', username: identification, password };

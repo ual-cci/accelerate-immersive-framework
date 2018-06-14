@@ -8,14 +8,22 @@ var fs = require('fs');
 var Gridfs = require('gridfs-stream');
 var guid = require('./uuid.js');
 var userAPI = require('./user-model.js');
+var mongoIP = ""
+var mongoPort = ""
+var collectionName = 'mimicDocs'
+var shareDBMongo;
+var shareDB;
+var shareDBConnection;
 
-const collectionName = 'mimicDocs'
-const shareDBMongo = require('sharedb-mongo')('mongodb://localhost:27017/mimicDocs');
-const shareDB = new ShareDB({db:shareDBMongo});
-const shareDBConnection = shareDB.connect();
-
-var initDocAPI = function(server, app)
+var initDocAPI = function(server, app, config)
 {
+  mongoIP = config.mongoIP;
+  mongoPort = config.mongoPort;
+
+  shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/mimicDocs');
+  shareDB = new ShareDB({db:shareDBMongo});
+  shareDBConnection = shareDB.connect();
+
   startDocAPI(app);
   startWebSockets(server);
   startAssetAPI(app);
@@ -25,7 +33,7 @@ var initDocAPI = function(server, app)
 
 function startAssetAPI(app)
 {
-  var db = new mongo.Db('mimicDocs', new mongo.Server("127.0.0.1", 27017));
+  var db = new mongo.Db('mimicDocs', new mongo.Server(mongoIP, mongoPort));
   db.open(function (err) {
     if (err) return handleError(err);
     const gridFS = Gridfs(db, mongo);
