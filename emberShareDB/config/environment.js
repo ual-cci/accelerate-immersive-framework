@@ -26,10 +26,6 @@ module.exports = function(environment) {
         Date: false
       }
     },
-    contentDBName:'sharedb_docs',
-    oauthHost: 'http://localhost:8080/oauth',
-    serverHost: 'http://localhost:8080',
-    wsHost: 'ws://localhost:8080',
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
@@ -37,11 +33,10 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.contentDBName = 'sharedb_docs';
+    ENV.oauthHost = 'http://localhost:8080/oauth';
+    ENV.serverHost = 'http://localhost:8080';
+    ENV.wsHost = 'ws://localhost:8080';
   }
 
   if (environment === 'test') {
@@ -58,6 +53,10 @@ module.exports = function(environment) {
 
   if (environment === 'production') {
     // here you can enable a production-specific feature
+    ENV.contentDBName ='sharedb_docs';
+    ENV.oauthHost = 'http://172.19.102.105:8080/oauth';
+    ENV.serverHost = 'http://172.19.102.105:8080';
+    ENV.wsHost = 'ws://172.19.102.105:8080';
   }
 
   return ENV;
