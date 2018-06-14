@@ -4,17 +4,7 @@ var userAPI = require('./user-model.js');
 var docAPI = require('./document-model.js');
 var guid = require('./uuid.js');
 var cors = require('express-cors');
-
-const config = {
-  emberIP : "localhost",
-  emberPort : 4200,
-  serverIP : "localhost",
-  serverPort : 8080,
-  mongoIP: "localhost",
-  mongoPort : 27017,
-  contentDBName : 'mimicDocs',
-  oauthDBName: 'oauth'
-}
+var config = require('./config.js');
 
 const app = express();
 

@@ -26,7 +26,7 @@ module.exports = function(environment) {
         Date: false
       }
     },
-    contentDBName:'mimicDocs',
+    contentDBName:'sharedb_docs',
     oauthHost: 'http://localhost:8080/oauth',
     serverHost: 'http://localhost:8080',
     wsHost: 'ws://localhost:8080',
