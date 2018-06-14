@@ -31,6 +31,11 @@ var initDocAPI = function(server, app, config)
 
 // ENDPOINTS
 
+function handleError(err)
+{
+  console.log("error:"+err);
+}
+
 function startAssetAPI(app)
 {
   var db = new mongo.Db('mimicDocs', new mongo.Server(mongoIP, mongoPort));
