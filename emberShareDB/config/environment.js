@@ -26,6 +26,7 @@ module.exports = function(environment) {
         Date: false
       }
     },
+    contentDBName:'mimicDocs',
     oauthHost: 'http://localhost:8080/oauth',
     serverHost: 'http://localhost:8080',
     APP: {

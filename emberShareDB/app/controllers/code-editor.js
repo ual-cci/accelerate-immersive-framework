@@ -150,7 +150,7 @@ export default Controller.extend({
     const session = editor.getSession();
     session.setMode("ace/mode/html");
 
-    const doc = con.get('mimicDocs',this.get('model').id);
+    const doc = con.get(config.contentDBName,this.get('model').id);
     this.set('doc', doc);
     this.set('isPrivate', this.get('model').isPrivate);
 
