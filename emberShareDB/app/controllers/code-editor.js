@@ -135,14 +135,14 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       doc.submitOp(op);
-      if(this.get('audoRender'))
+      if(this.get('autoRender'))
       {
         this.autoExecuteCode(self);
       }
     }
   },
   initShareDB() {
-    const socket = new WebSocket('ws://'+config.serverHost);
+    const socket = new WebSocket(config.wsHost);
     const con = new ShareDB.Connection(socket);
     this.set('socketRef', socket);
     this.set('connection', con);
