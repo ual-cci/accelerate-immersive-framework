@@ -1,6 +1,7 @@
 import Service, { inject } from '@ember/service';
 import config from  '../config/environment';
 import RSVP from 'rsvp';
+import { isEmpty } from '@ember/utils';
 
 export default Service.extend({
   sessionAccount:inject('session-account'),
@@ -27,6 +28,13 @@ export default Service.extend({
     const fileId = asset.fileId;
     const fileName = asset.name;
     const fileType = asset.fileType;
+    const inStoreAsset = this.get('store').peekRecord('asset',fileId);
+    if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
+    {
+        console.log("asset already preloaded:"+fileId);
+        callback(ctr);
+        return;
+    }
     var xhr = new XMLHttpRequest();
     var url = config.serverHost + "/asset/"+fileId;
     xhr.onload = () => {
@@ -53,7 +61,7 @@ export default Service.extend({
   },
   preloadAssets(assets, callback) {
     var ctr = 0;
-    var nextItemCallback = (newCtr)=> {
+    var nextItemCallback = (newCtr) => {
       newCtr++;
       if(newCtr == assets.length) {
         callback();
