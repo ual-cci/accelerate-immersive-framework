@@ -11,7 +11,8 @@ const config = {
   serverIP : "localhost",
   serverPort : 8080,
   mongoIP: "localhost",
-  mongoPort : 27017
+  mongoPort : 27017,
+  collectionName : 'mimicDocs'
 }
 
 const app = express();

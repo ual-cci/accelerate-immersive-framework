@@ -10,7 +10,7 @@ var guid = require('./uuid.js');
 var userAPI = require('./user-model.js');
 var mongoIP = ""
 var mongoPort = ""
-var collectionName = 'mimicDocs'
+var collectionName = ''
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -19,7 +19,7 @@ var initDocAPI = function(server, app, config)
 {
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-
+  collectionName = config.collectionName;
   shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/mimicDocs');
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();
