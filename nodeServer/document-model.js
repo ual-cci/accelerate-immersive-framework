@@ -8,9 +8,9 @@ var fs = require('fs');
 var Gridfs = require('gridfs-stream');
 var guid = require('./uuid.js');
 var userAPI = require('./user-model.js');
-var mongoIP = ""
-var mongoPort = ""
-var contentDBName = ''
+var mongoIP = "";
+var mongoPort = "";
+var contentDBName = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -42,7 +42,7 @@ function startAssetAPI(app)
   db.open(function (err) {
     if (err) return handleError(err);
     const gridFS = Gridfs(db, mongo);
-    console.log('connection opened to mimicAssets');
+    console.log('connection opened to ' + contentDBName);
 
     app.post('/asset', multiparty, function(req,res) {
       var writestream = gridFS.createWriteStream({
@@ -57,7 +57,7 @@ function startAssetAPI(app)
         res.json(200);
         const content_type = req.files.file.headers["content-type"];
         console.log("UPLOADED FILE OF TYPE:",content_type);
-        let doc = shareDBConnection.get(collectionName,req.body.documentId)
+        let doc = shareDBConnection.get(contentDBName,req.body.documentId)
         var newAssets = doc.data.assets;
         newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
         console.log(newAssets);
@@ -79,7 +79,7 @@ function startAssetAPI(app)
       gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
         if (err) return handleError(err);
         console.log('success deleting asset');
-        let doc = shareDBConnection.get(collectionName,req.body.documentId)
+        let doc = shareDBConnection.get(contentDBName,req.body.documentId)
         console.log(doc);
         var newAssets = doc.data.assets;
         newAssets = newAssets.filter(function( asset ) {
@@ -119,7 +119,7 @@ function startDocAPI(app)
       const rg = {$regex : ".*"+term+".*", $options:"i"};
       params = { $or: [{name: rg},{tags: rg},{owner: rg}]};
     }
-    let query = shareDBConnection.createFetchQuery(collectionName,params,[],(err, results) => {
+    let query = shareDBConnection.createFetchQuery(contentDBName,params,[],(err, results) => {
       if(!err)
       {
         let docs = [];
@@ -143,7 +143,7 @@ function startDocAPI(app)
   });
 
   app.get('/documents/:id', (req,res) => {
-    var doc = shareDBConnection.get(collectionName, req.params.id);
+    var doc = shareDBConnection.get(contentDBName, req.params.id);
     doc.fetch(function(err) {
       if (err) {
         console.log("database error making document");
@@ -182,7 +182,7 @@ function startDocAPI(app)
 function getNewDocumentId(callback)
 {
   const uuid = guid.guid();
-  var doc = shareDBConnection.get(collectionName, uuid);
+  var doc = shareDBConnection.get(contentDBName, uuid);
   doc.fetch(function(err) {
     if (doc.type === null) {
       return callback(uuid);
@@ -202,7 +202,7 @@ function createDoc(docName,owner,isPrivate) {
   return new Promise((resolve, reject) => {
     console.log("creating doc");
     getNewDocumentId(function(uuid) {
-      var doc = shareDBConnection.get(collectionName, uuid);
+      var doc = shareDBConnection.get(contentDBName, uuid);
       doc.fetch(function(err) {
         if (err) {
           console.log("database error making document");
