@@ -27,7 +27,7 @@ export default Controller.extend({
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
     {
-      self.get('assetService').preloadAssets(doc.data.assets, ()=> {
+      self.get('assetService').preloadAssets(doc.data.assets).then(()=> {
         console.log("completed preloading assets");
         self.updateIFrame(self);
       });

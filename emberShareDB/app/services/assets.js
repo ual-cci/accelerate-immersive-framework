@@ -24,7 +24,7 @@ export default Service.extend({
         });
     });
   },
-  fetchAsset(asset, ctr, callback) {
+  _fetchAsset(asset, ctr, callback) {
     const fileId = asset.fileId;
     const fileName = asset.name;
     const fileType = asset.fileType;
@@ -47,7 +47,7 @@ export default Service.extend({
             attributes:{
               fileId:fileId,
               name:fileName,
-              b64data:this.b64e(xhr.responseText),
+              b64data:this._b64e(xhr.responseText),
               type:fileType
             }
           }]
@@ -55,25 +55,33 @@ export default Service.extend({
         callback(ctr);
       }
     };
+    xhr.onerror = () => {
+      console.log("error fetching/converting asset:"+fileId);
+      callback(ctr);
+    };
     xhr.overrideMimeType("text/plain; charset=x-user-defined");
     xhr.open("GET", url, true);
     xhr.send(null);
   },
-  preloadAssets(assets, callback) {
-    var ctr = 0;
-    var nextItemCallback = (newCtr) => {
-      newCtr++;
-      if(newCtr == assets.length) {
-        callback();
+  preloadAssets(assets) {
+    return new RSVP.Promise((resolve, reject) => {
+      var ctr = 0;
+      var callback = (newCtr) => {
+        newCtr++;
+        if(newCtr == assets.length)
+        {
+          resolve();
+        }
+        else
+        {
+          this._fetchAsset(assets[newCtr], newCtr, callback);
+        }
       }
-      else
-      {
-        this.fetchAsset(assets[newCtr], newCtr, nextItemCallback);
-      }
-    }
-    this.fetchAsset(assets[ctr], ctr, nextItemCallback);
+      this._fetchAsset(assets[ctr], ctr, callback);
+    })
   },
-  b64e: function (str) {
+  _b64e(str) {
+    console.log("converting to base64");
     // from this SO question
     // http://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
       let CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
