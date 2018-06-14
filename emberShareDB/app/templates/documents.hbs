@@ -13,10 +13,13 @@
 </div>
 <div class = "container">
 <form {{action 'search' on='submit'}}>
-  {{input id='searchTerm' placeholder='Search...' value=searchTerm}}
+  {{input id='searchTerm' placeholder='Search...' value=searchTerm key-press="search"}}
   <button type="submit">Search</button>
   {{#if message}}
-    <p>{{message}}</p>
+    <p style = "text-align:center;">{{message}}</p>
+  {{/if}}
+  {{#if hasNoDocuments}}
+    <h2 style = "text-align:center;">No Results</h2>
   {{/if}}
 </form>
 </div>

@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
 import RSVP from 'rsvp';
+import EmberObject, { computed } from '@ember/object';
 
 export default Controller.extend({
   message:"",
@@ -10,6 +11,9 @@ export default Controller.extend({
   isPrivate:true,
   feedbackMessage: null,
   sessionAccount: inject('session-account'),
+  hasNoDocuments:computed('model', function() {
+    return this.get('model').length == 0;
+  }),
   actions: {
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);

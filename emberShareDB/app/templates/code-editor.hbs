@@ -1,71 +1,71 @@
 <div class = "container-fluid">
-{{#if isNotEdittingDocName}}
-<h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
-{{else}}
-{{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
-{{/if}}
-<div class="bs-example">
-  {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}
-  {{/bs-button}}
-  {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
-  <label for="autoRenderCheckbox">Auto Render?</label>
-  {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-  {{#bs-collapse collapsed=collapsed}}
-    <div class="well">
-      {{#if canEditDoc}}
-      <label for="privacyCheckbox">Private?</label>
-      {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
-      {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
-        Delete
-      {{/bs-button}}
-      {{#if allowDocDelete}}
-      <div>
-        Are you sure?
-        {{#bs-button class = "btn-confirm" type="success" onClick=(action "deleteDoc")}}
-          Yes
-        {{/bs-button}}
-        {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowDocDelete")}}
-          No
-        {{/bs-button}}
-      </div>
-      {{/if}}
-      {{/if}}
-      <div class = "file-upload-container">
-        Assets:
-        {{#each model.assets as |asset|}}
-          <button {{action "toggleAllowAssetDelete" asset.fileId}}>{{asset.name}} (x)</button>
-        {{/each}}
-        {{#if allowAssetDelete}}
-        <div>
-          Are you sure you want to delete this asset?
-          {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-delete" onClick=(action "deleteAsset")}}
-            Yes
+  {{#if isNotEdittingDocName}}
+    <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
+  {{else}}
+    {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
+  {{/if}}
+  <div class="bs-example">
+    {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}
+    {{/bs-button}}
+    {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+    <label for="autoRenderCheckbox">Auto Render?</label>
+    {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+    {{#bs-collapse collapsed=collapsed}}
+      <div class="well">
+        {{#if canEditDoc}}
+          <label for="privacyCheckbox">Private?</label>
+          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
+          {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
+            Delete
           {{/bs-button}}
-          {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
-            No
-          {{/bs-button}}
-        </div>
+          {{#if allowDocDelete}}
+            <div>
+              Are you sure?
+              {{#bs-button class = "btn-confirm" type="success" onClick=(action "deleteDoc")}}
+                Yes
+              {{/bs-button}}
+              {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowDocDelete")}}
+                No
+              {{/bs-button}}
+            </div>
+          {{/if}}
         {{/if}}
-        <div class = "file-upload">
-          {{file-upload}}
+        <div class = "file-upload-container">
+          Assets:
+          {{#each model.assets as |asset|}}
+            <button {{action "toggleAllowAssetDelete" asset.fileId}}>{{asset.name}} (x)</button>
+          {{/each}}
+          {{#if allowAssetDelete}}
+            <div>
+              Are you sure you want to delete this asset?
+              {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-delete" onClick=(action "deleteAsset")}}
+                Yes
+              {{/bs-button}}
+              {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
+                No
+              {{/bs-button}}
+            </div>
+          {{/if}}
+          <div class = "file-upload">
+            {{file-upload}}
+          </div>
+        </div>
+        <div>
+          {{tokenfield-input
+            tokens=model.tags
+            allowDuplicates=false
+            placeholder="Enter Tags"
+            tokensChanged=(action 'tagsChanged')
+          }}
         </div>
       </div>
-      <div>
-        {{tokenfield-input
-          tokens=model.tags
-          allowDuplicates=false
-          placeholder="Enter Tags"
-          tokensChanged=(action 'tagsChanged')
-        }}
-      </div>
-    </div>
-  {{/bs-collapse}}
-</div>
+    {{/bs-collapse}}
+  </div>
 
-<div class = "output-container">
-  <iframe class = "output" srcdoc={{renderedSource}}></iframe>
-</div>
-<div class = "ace-container">
-  {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
-</div>
+  <div class = "output-container">
+    <iframe class = "output" srcdoc={{renderedSource}}></iframe>
+  </div>
+  <div class = "ace-container">
+    {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
+  </div>
 </div>
