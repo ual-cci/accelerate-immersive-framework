@@ -22,12 +22,21 @@ export default Controller.extend({
   allowDocDelete:false,
   allowAssetDelete:false,
   assetToDelete:"",
+  autoRender:true,
   preloadAssets(self) {
     const doc = self.get('doc');
-    self.get('assetService').preloadAssets(doc.data.assets, ()=> {
-      console.log("completed preloading assets");
+    if(!isEmpty(doc.data.assets))
+    {
+      self.get('assetService').preloadAssets(doc.data.assets, ()=> {
+        console.log("completed preloading assets");
+        self.updateIFrame(self);
+      });
+    }
+    else
+    {
+      console.log("no assets to preload");
       self.updateIFrame(self);
-    });
+    }
   },
   updateIFrame(self) {
     const doc = self.get('doc');
@@ -48,7 +57,7 @@ export default Controller.extend({
     }
     return source;
   },
-  executeCode(self) {
+  autoExecuteCode(self) {
     if(self.get('codeTimer'))
     {
       clearTimeout(self.get('codeTimer'));
@@ -126,7 +135,10 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       doc.submitOp(op);
-      this.executeCode(self);
+      if(this.get('audoRender'))
+      {
+        this.autoExecuteCode(self);
+      }
     }
   },
   initShareDB() {
@@ -269,6 +281,12 @@ export default Controller.extend({
     },
     toggleCollapsed() {
       this.toggleProperty('collapsed');
+    },
+    renderCode() {
+      this.updateIFrame(this);
+    },
+    toggleAutoRender() {
+      this.toggleProperty('autoRender');
     },
     cleanUp() {
       this.get('doc').destroy();

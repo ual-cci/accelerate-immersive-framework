@@ -5,28 +5,26 @@
 {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
 {{/if}}
 <div class="bs-example">
-  {{#bs-button active=notCollapsed onClick=(action "toggleCollapsed")}}
-    {{#if collapsed}}
-      Settings
-    {{else}}
-      Hide
-    {{/if}}
+  {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}
   {{/bs-button}}
+  {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+  <label for="autoRenderCheckbox">Auto Render?</label>
+  {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
   {{#bs-collapse collapsed=collapsed}}
     <div class="well">
       {{#if canEditDoc}}
       <label for="privacyCheckbox">Private?</label>
       {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
-      {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "toggleAllowDocDelete")}}
+      {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
         Delete
       {{/bs-button}}
       {{#if allowDocDelete}}
       <div>
         Are you sure?
-        {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "deleteDoc")}}
+        {{#bs-button class = "btn-confirm" type="success" onClick=(action "deleteDoc")}}
           Yes
         {{/bs-button}}
-        {{#bs-button type="primary" onClick=(action "toggleAllowDocDelete")}}
+        {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowDocDelete")}}
           No
         {{/bs-button}}
       </div>
@@ -40,10 +38,10 @@
         {{#if allowAssetDelete}}
         <div>
           Are you sure you want to delete this asset?
-          {{#bs-button type="danger" icon="glyphicon glyphicon-delete" onClick=(action "deleteAsset")}}
+          {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-delete" onClick=(action "deleteAsset")}}
             Yes
           {{/bs-button}}
-          {{#bs-button type="primary" onClick=(action "toggleAllowAssetDelete")}}
+          {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
             No
           {{/bs-button}}
         </div>

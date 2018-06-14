@@ -12,6 +12,10 @@
   color:white;
 }
 
+.btn-confirm {
+  margin:4px 4px 4px 4px;
+}
+
 .document-list-item {
   padding:4px 4px 4px 4px;
   border-radius: 5px;
