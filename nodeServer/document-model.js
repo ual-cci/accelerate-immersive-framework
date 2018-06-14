@@ -10,7 +10,7 @@ var guid = require('./uuid.js');
 var userAPI = require('./user-model.js');
 var mongoIP = ""
 var mongoPort = ""
-var collectionName = ''
+var contentDBName = ''
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -19,8 +19,8 @@ var initDocAPI = function(server, app, config)
 {
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-  collectionName = config.contentDBName;
-  shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/mimicDocs');
+  contentDBName = config.contentDBName;
+  shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName);
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();
 
@@ -38,7 +38,7 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  var db = new mongo.Db('mimicDocs', new mongo.Server(mongoIP, mongoPort));
+  var db = new mongo.Db(contentDBName, new mongo.Server(mongoIP, mongoPort));
   db.open(function (err) {
     if (err) return handleError(err);
     const gridFS = Gridfs(db, mongo);
