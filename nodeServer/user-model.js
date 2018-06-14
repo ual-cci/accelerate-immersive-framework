@@ -9,6 +9,7 @@ var bcrypt = require('bcrypt');
 var OAuthError = require('oauth2-server/lib/error');
 var mongoIP = "";
 var mongoPort = "";
+var oauthDBName = "";
 const saltRounds = 10;
 
 //AUTH
@@ -82,6 +83,7 @@ var initUserAPI = function(app, config)
 {
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
+	oauthDBName = config.oauthDBName;
 	startAuthAPI(app);
 }
 
@@ -102,7 +104,7 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  var mongoUri = 'mongodb://' + mongoIP +'/oauth';
+  var mongoUri = 'mongodb://' + mongoIP +'/' + oauthDBName;
   mongoose.connect(mongoUri, function(err, res) {
     if (err) {
       return console.error('Error connecting to "%s":', mongoUri, err);

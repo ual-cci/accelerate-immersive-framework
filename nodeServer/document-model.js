@@ -19,7 +19,7 @@ var initDocAPI = function(server, app, config)
 {
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-  collectionName = config.collectionName;
+  collectionName = config.contentDBName;
   shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/mimicDocs');
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();

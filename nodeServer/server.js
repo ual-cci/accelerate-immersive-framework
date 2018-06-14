@@ -12,7 +12,8 @@ const config = {
   serverPort : 8080,
   mongoIP: "localhost",
   mongoPort : 27017,
-  collectionName : 'mimicDocs'
+  contentDBName : 'mimicDocs',
+  oauthDBName: 'oauth'
 }
 
 const app = express();
