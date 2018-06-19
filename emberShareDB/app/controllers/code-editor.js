@@ -24,6 +24,10 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:true,
+  init: function () {
+    this._super();
+    console.log("code-editor controller init");
+  },
   preloadAssets(self) {
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
@@ -311,6 +315,10 @@ export default Controller.extend({
     },
     cleanUp() {
       this.get('doc').destroy();
+    },
+    refresh() {
+      this.get('doc').destroy();
+      this.initShareDB();
     }
   }
 });

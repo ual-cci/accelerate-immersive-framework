@@ -132,7 +132,6 @@ function startDocAPI(app)
         while(docs.length < PAGE_SIZE && startIndex + i < results.length)
         {
           const data = results[i].data;
-          console.log(data.isPrivate,data.owner,currentUser)
           if(!data.isPrivate || data.owner == currentUser)
           {
             docs.push({attributes:data,id:data.documentId,type:"document"});
@@ -142,6 +141,7 @@ function startDocAPI(app)
         docs.sort ((a, b) => {
           return new Date(b.attributes.created) - new Date(a.attributes.created);
         });
+        console.log('returning ' + docs.length + ' docs');
         res.status(200).send({data:docs});
       }
       else

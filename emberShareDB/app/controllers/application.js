@@ -9,6 +9,9 @@ export default Controller.extend({
     },
     transitionToIndexRoute() {
       this.transitionToRoute('index');
+    },
+    transitionToDoc(doc) {
+      this.transitionToRoute('code-editor', doc);
     }
   }
 });
