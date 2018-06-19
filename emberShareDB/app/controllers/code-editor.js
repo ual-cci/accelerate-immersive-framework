@@ -3,6 +3,7 @@ import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
+import { computed } from '@ember/object';
 
 export default Controller.extend({
   websockets: inject('websockets'),
@@ -24,10 +25,9 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:true,
-  init: function () {
-    this._super();
-    console.log("code-editor controller init");
-  },
+  myComputed:computed('model', function() {
+    console.log('computed',this.get('model'));
+  }),
   preloadAssets(self) {
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
@@ -153,27 +153,33 @@ export default Controller.extend({
     this.set('connection', con);
     const editor = this.get('editor');
     const session = editor.getSession();
+    session.on('change',(delta)=>{
+      this.onSessionChange(this, delta);
+    });
     session.setMode("ace/mode/html");
-
+    this.initDoc();
+  },
+  initDoc() {
+    const con = this.get('connection');
     const doc = con.get(config.contentDBName,this.get('model').id);
     this.set('doc', doc);
-
+    console.log("setting doc",this.get('model').id);
+    const editor = this.get('editor');
+    const session = editor.getSession();
     doc.subscribe((err) => {
       if (err) throw err;
-
       const doc = this.get('doc');
-      this.setCanEditDoc();
-      console.log("read only?",!this.get('canEditDoc'));
-      editor.setReadOnly(!this.get('canEditDoc'));
-      this.preloadAssets(this);
-      this.get('sessionAccount').set('currentDoc',this.get('model').id);
-      this.set('surpress', true);
-      session.setValue(doc.data.source);
-      this.set('surpress', false);
-
-      session.on('change',(delta)=>{
-        this.onSessionChange(this, delta);
-      });
+      if(!isEmpty(doc.data))
+      {
+        this.setCanEditDoc();
+        console.log("read only?",!this.get('canEditDoc'));
+        editor.setReadOnly(!this.get('canEditDoc'));
+        this.preloadAssets(this);
+        this.get('sessionAccount').set('currentDoc',this.get('model').id);
+        this.set('surpress', true);
+        session.setValue(doc.data.source);
+        this.set('surpress', false);
+      }
     });
     doc.on('op',(ops,source) => {
       if(!source && ops[0].p[0] == "source")
@@ -194,13 +200,13 @@ export default Controller.extend({
   },
   setCanEditDoc() {
     const currentUser = this.get('sessionAccount').currentUserName;
-    if(isEmpty(currentUser))
+    const doc = this.get('doc');
+    if(isEmpty(currentUser) || isEmpty(doc.data))
     {
       this.set('canEditDoc', false);
       this.set('isOwner', false);
       return;
     }
-    const doc = this.get('doc');
     if(currentUser != doc.data.owner)
     {
       this.set('isOwner', false);
@@ -317,8 +323,13 @@ export default Controller.extend({
       this.get('doc').destroy();
     },
     refresh() {
-      this.get('doc').destroy();
-      this.initShareDB();
+      console.log('refreshing');
+      const doc = this.get('doc');
+      if(!isEmpty(doc))
+      {
+        this.get('doc').destroy();
+        this.initDoc();
+      }
     }
   }
 });

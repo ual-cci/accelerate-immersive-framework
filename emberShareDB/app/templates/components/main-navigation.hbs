@@ -1,44 +1,21 @@
-<!-- <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <a {{action 'home'}} class="btn navbar-btn navbar-left">Home</a>
-      {{#if session.isAuthenticated}}
-          <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
-        {{#if sessionAccount.currentUserName}}
-          <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
-        {{/if}}
-        <div onloadedmetadata=""class="dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          My Douments
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          {{#each ownedDocuments as |doc|}}
-              <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
-          {{/each}}
-        </div>
-      </div>
-      {{else}}
-        <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
-      {{/if}}
-  </div>
-</nav> -->
 {{#bs-nav type="pills" as |nav|}}
-   {{#nav.item}}{{#nav.link-to "index"}}Home{{/nav.link-to}}{{/nav.item}}
-   {{#if session.isAuthenticated}}
-      <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
-     {{#if sessionAccount.currentUserName}}
-       <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
-     {{/if}}
-     {{#nav.dropdown as |dd|}}
-       {{#dd.toggle}}My Documents <span class="caret"></span>{{/dd.toggle}}
-       {{#dd.menu as |ddm|}}
-         {{#each ownedDocuments as |doc|}}
-         {{#ddm.item}}
-             <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
-         {{/ddm.item}}
-         {{/each}}
-       {{/dd.menu}}
-     {{/nav.dropdown}}
-   {{else}}
-     <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
+ {{#nav.item}}{{#nav.link-to "index"}}Home{{/nav.link-to}}{{/nav.item}}
+ {{#if session.isAuthenticated}}
+    <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
+   {{#if sessionAccount.currentUserName}}
+     <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
    {{/if}}
- {{/bs-nav}}
+   {{#nav.dropdown as |dd|}}
+     {{#dd.toggle}}My Documents <span class="caret"></span>{{/dd.toggle}}
+     {{#dd.menu as |ddm|}}
+       {{#each ownedDocuments as |doc|}}
+       {{#ddm.item}}
+           <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
+       {{/ddm.item}}
+       {{/each}}
+     {{/dd.menu}}
+   {{/nav.dropdown}}
+ {{else}}
+   <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
+ {{/if}}
+{{/bs-nav}}
