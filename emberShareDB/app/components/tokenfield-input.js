@@ -26,6 +26,7 @@ export default Ember.Component.extend({
     placeholder: null,
     addTokenOnBlur: true,
     allowDuplicates: false,
+    editable:true,
     tokenComponent: 'base-token',
 
     tokenfieldId: Ember.computed('elementId', function () {

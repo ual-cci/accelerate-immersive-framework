@@ -19,6 +19,7 @@ export default Controller.extend({
   collapsed: true,
   isNotEdittingDocName:true,
   canEditDoc:false,
+  isOwner:false,
   allowDocDelete:false,
   allowAssetDelete:false,
   assetToDelete:"",
@@ -152,13 +153,14 @@ export default Controller.extend({
 
     const doc = con.get(config.contentDBName,this.get('model').id);
     this.set('doc', doc);
-    this.set('isPrivate', this.get('model').isPrivate);
 
     doc.subscribe((err) => {
       if (err) throw err;
 
       const doc = this.get('doc');
       this.setCanEditDoc();
+      console.log("read only?",!this.get('canEditDoc'));
+      editor.setReadOnly(!this.get('canEditDoc'));
       this.preloadAssets(this);
       this.get('sessionAccount').set('currentDoc',this.get('model').id);
       this.set('surpress', true);
@@ -190,16 +192,25 @@ export default Controller.extend({
     const currentUser = this.get('sessionAccount').currentUserName;
     if(isEmpty(currentUser))
     {
-      this.set('canEditDoc',false);
+      this.set('canEditDoc', false);
+      this.set('isOwner', false);
       return;
     }
     const doc = this.get('doc');
     if(currentUser != doc.data.owner)
     {
-      this.set('canEditDoc',false);
-      return;
+      this.set('isOwner', false);
+      if(doc.data.readOnly)
+      {
+        this.set('canEditDoc', false);
+        return;
+      }
     }
-    this.set('canEditDoc',true);
+    else
+    {
+      this.set('isOwner', true);
+    }
+    this.set('canEditDoc', true);
   },
   actions: {
     editorReady(editor) {
@@ -239,6 +250,16 @@ export default Controller.extend({
         const doc = this.get('doc');
         this.set('surpress', true);
         doc.submitOp({p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
+        this.set('surpress', false);
+      }
+    },
+    readOnlyToggled() {
+      if(this.get('canEditDoc'))
+      {
+        this.toggleProperty('model.readOnly');
+        const doc = this.get('doc');
+        this.set('surpress', true);
+        doc.submitOp({p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
         this.set('surpress', false);
       }
     },

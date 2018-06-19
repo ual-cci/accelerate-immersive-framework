@@ -12,12 +12,14 @@
             mouseDown=(action 'selectToken' token index)
             doubleClick=(action 'editToken' token)}}
         {{/each}}
+        {{#if editable}}
         {{input type='text'
             class='uncharted-token-input'
             disabled=disabled
             id=tokenfieldId
             placeholder=placeholder
             value=inputValue}}
+          {{/if}}
     </div>
 </div>
 {{#if showDuplicateMessage}}

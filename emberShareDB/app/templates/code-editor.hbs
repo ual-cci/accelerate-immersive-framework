@@ -12,9 +12,11 @@
     {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">
-        {{#if canEditDoc}}
+        {{#if isOwner}}
           <label for="privacyCheckbox">Private?</label>
           {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
+          <label for="readOnlyCheckbox">Read Only?</label>
+          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'readOnlyToggled')}}
           {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
             Delete
           {{/bs-button}}
@@ -46,15 +48,18 @@
               {{/bs-button}}
             </div>
           {{/if}}
+          {{#if canEditDoc}}
           <div class = "file-upload">
             {{file-upload}}
           </div>
+          {{/if}}
         </div>
         <div>
           {{tokenfield-input
             tokens=model.tags
             allowDuplicates=false
             placeholder="Enter Tags"
+            editable=canEditDoc
             tokensChanged=(action 'tagsChanged')
           }}
         </div>
