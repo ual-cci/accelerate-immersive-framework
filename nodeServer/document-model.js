@@ -154,9 +154,10 @@ function startDocAPI(app)
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
-      if (err) {
+      console.log(doc.data);
+      if (err || !doc.data) {
         console.log("database error making document");
-        res.status(400).send("database error making document");
+        res.status(404).send("database error making document");
         return;
       }
       else

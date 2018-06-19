@@ -25,9 +25,6 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:true,
-  myComputed:computed('model', function() {
-    console.log('computed',this.get('model'));
-  }),
   preloadAssets(self) {
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
@@ -278,8 +275,8 @@ export default Controller.extend({
       {
         const doc = this.get('doc');
         doc.del([],(err)=>{
-          console.log(err);
-          this.transitionToRoute('documents'," ",0);
+          console.log("deleted doc");
+          this.transitionToRoute('application');
         });
       }
     },

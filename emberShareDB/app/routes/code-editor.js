@@ -1,29 +1,29 @@
 import Route from '@ember/routing/route';
 
 export default Route.extend({
-  model(params) {
-    console.log("code-editor model hook");
-
+  model: function(params) {
     return this.get('store').findRecord('document', params.documentId);
   },
   setupController: function(controller, model){
     this._super(controller, model);
-    if(controller)
+    console.log("setupController",model);
+    if(model)
     {
       controller.send('refresh');
     }
-  },
-  afterModel() {
-    this._super();
-    console.log("code-editor aftermodel hook");
-  },
-  activate: function() {
-    this._super();
-    console.log("entering code-editor");
   },
   deactivate: function() {
     console.log("leaving code-editor");
     this._super();
     this.get('controller').send('cleanUp');
   },
+  actions: {
+    error(error, transition) {
+      if (error.errors[0].status === '404') {
+          this.replaceWith('application');
+      } else {
+        return true;
+      }
+    }
+  }
 });

@@ -8,7 +8,7 @@
    {{#nav.dropdown as |dd|}}
      {{#dd.toggle}}My Documents <span class="caret"></span>{{/dd.toggle}}
      {{#dd.menu as |ddm|}}
-       {{#each ownedDocuments as |doc|}}
+       {{#each model as |doc|}}
        {{#ddm.item}}
            <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
        {{/ddm.item}}

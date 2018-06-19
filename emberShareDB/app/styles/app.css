@@ -13,7 +13,11 @@
 }
 
 .btn-confirm {
-  margin:4px 4px 4px 4px;
+  margin:10px 10px 10px 10px;
+}
+
+.navbar-right {
+  margin:10px 10px 10px 10px;
 }
 
 .document-list-item {

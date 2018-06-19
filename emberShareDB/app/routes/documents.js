@@ -12,7 +12,18 @@ export default Route.extend({
     const filter = {
       filter:{search:params.search,page:params.page,currentUser:currentUser}
     }
-    console.log(filter);
+    console.log('reloading document model');
     return this.get('store').query('document', filter);
+  },
+  actions: {
+    error(error, transition) {
+      console.log("ERROR", error.status);
+      if (error.errors[0].status === '404') {
+          console.log("ERROR 404");
+          this.replaceWith('application');
+      } else {
+        return true;
+      }
+    }
   }
 });

@@ -15,6 +15,7 @@ export default Route.extend(ApplicationRouteMixin, {
   sessionAuthenticated() {
     this._super(...arguments);
     this._loadCurrentUser();
+    this.refresh();
   },
   _loadCurrentUser() {
     console.log('loading curret user');
@@ -25,5 +26,17 @@ export default Route.extend(ApplicationRouteMixin, {
     .catch(() => {
       this.get('session').invalidate();
     });
+  },
+  model() {
+    let currentUser = this.get('sessionAccount').currentUserName;
+    if(!currentUser)
+    {
+      currentUser = "";
+    }
+    const filter = {
+      filter:{search:currentUser,page:0,currentUser:currentUser}
+    }
+    console.log('loading application model');
+    return this.get('store').query('document', filter);
   }
 });
