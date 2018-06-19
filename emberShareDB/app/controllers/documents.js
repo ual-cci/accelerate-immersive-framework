@@ -37,8 +37,9 @@ export default Controller.extend({
         });
         doc.save().then((response)=>{
           this.get('store').query('document', {
-            filter: {search: currentUser, page: 0}
+            filter: {search: currentUser, page: 0, currentUser:currentUser}
           }).then((documents) => {
+            console.log("new doc created",documents);
             this.transitionToRoute('code-editor',documents.firstObject.documentId);
           });
           this.set('feedbackMessage',"Document created successfully");

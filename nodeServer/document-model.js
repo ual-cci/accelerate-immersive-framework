@@ -173,6 +173,7 @@ function startDocAPI(app)
     console.log(attr);
     createDoc(attr.name, attr.owner, attr.isPrivate)
     .then(function(doc){
+      console.log("doc created",doc);
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
@@ -231,7 +232,6 @@ function createDoc(docName,owner,isPrivate) {
             assets:[],
             tags:[]
           },resolve);
-          console.log("doc created");
           resolve(doc);
           return;
         }

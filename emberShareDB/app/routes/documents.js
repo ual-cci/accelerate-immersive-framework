@@ -9,9 +9,10 @@ export default Route.extend({
     {
       currentUser = "";
     }
-    console.log(params);
-    return this.get('store').query('document', {
+    const filter = {
       filter:{search:params.search,page:params.page,currentUser:currentUser}
-    });
+    }
+    console.log(filter);
+    return this.get('store').query('document', filter);
   }
 });
