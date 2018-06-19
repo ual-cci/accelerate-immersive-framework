@@ -134,8 +134,8 @@ export default Controller.extend({
       }
       const str = delta.lines.join('\n');
       op[action] = str;
-      doc.submitOp(op);
       if(this.get('autoRender'))
+      doc.submitOp(op);
       {
         this.autoExecuteCode(self);
       }

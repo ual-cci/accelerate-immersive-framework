@@ -116,6 +116,7 @@ function startDocAPI(app)
     console.log("searching for doc",req.query);
     const term = req.query.filter.search;
     const page = req.query.filter.page;
+    const currentUser = req.query.filter.currentUser;
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
@@ -127,10 +128,16 @@ function startDocAPI(app)
         let docs = [];
         let startIndex = page * PAGE_SIZE < results.length ? page * PAGE_SIZE : results.length - PAGE_SIZE;
         startIndex = Math.max(0,startIndex);
-        const endIndex = Math.min(startIndex + PAGE_SIZE, results.length);
-        for(var i = startIndex; i < endIndex; i++)
+        let i = 0;
+        while(docs.length < PAGE_SIZE && startIndex + i < results.length)
         {
-          docs.push({attributes:results[i].data,id:results[i].data.documentId,type:"document"});
+          const data = results[i].data;
+          console.log(data.isPrivate,data.owner,currentUser)
+          if(!data.isPrivate || data.owner == currentUser)
+          {
+            docs.push({attributes:data,id:data.documentId,type:"document"});
+          }
+          i++;
         }
         docs.sort ((a, b) => {
           return new Date(b.attributes.created) - new Date(a.attributes.created);
@@ -216,6 +223,7 @@ function createDoc(docName,owner,isPrivate) {
             source:getDefaultSource(),
             owner:owner,
             isPrivate:isPrivate,
+            readOnly:true,
             name:docName,
             documentId:uuid,
             created:new Date(),

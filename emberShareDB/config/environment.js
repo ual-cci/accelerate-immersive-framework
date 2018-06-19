@@ -53,7 +53,7 @@ module.exports = function(environment) {
 
   if (environment === 'production') {
     // here you can enable a production-specific feature
-    ENV.contentDBName ='sharedb_docs';
+    ENV.contentDBName = 'sharedb_docs';
     ENV.oauthHost = 'http://172.19.102.105:8080/oauth';
     ENV.serverHost = 'http://172.19.102.105:8080';
     ENV.wsHost = 'ws://172.19.102.105:8080';
