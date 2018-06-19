@@ -40,11 +40,13 @@ export default Controller.extend({
             filter: {search: currentUser, page: 0, currentUser:currentUser}
           }).then((documents) => {
             console.log("new doc created",documents);
+            this.get('sessionAccount').updateOwnedDocuments();
             this.transitionToRoute('code-editor',documents.firstObject.documentId);
           });
           this.set('feedbackMessage',"Document created successfully");
         }).catch((err)=>{
           doc.deleteRecord();
+          this.get('sessionAccount').updateOwnedDocuments();
           this.set('feedbackMessage',err.errors[0]);
         });
       }

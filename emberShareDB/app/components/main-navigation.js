@@ -5,7 +5,9 @@ export default Component.extend({
   session: inject('session'),
   sessionAccount: inject('session-account'),
   store: inject('store'),
-  model:null,
+  ownedDocuments: Ember.computed('sessionAccount.ownedDocuments', function(){
+    return this.get('sessionAccount').ownedDocuments;
+  }),
   actions: {
     login() {
       this.sendAction('onLogin');

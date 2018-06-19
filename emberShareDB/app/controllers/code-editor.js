@@ -276,6 +276,7 @@ export default Controller.extend({
         const doc = this.get('doc');
         doc.del([],(err)=>{
           console.log("deleted doc");
+          this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('application');
         });
       }
