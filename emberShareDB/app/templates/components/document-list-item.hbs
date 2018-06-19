@@ -4,4 +4,8 @@
   {{#if document.readOnly}}
   <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
   {{/if}}
+  {{#if document.isPrivate}}
+  <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+  {{/if}}
+
 </div>
