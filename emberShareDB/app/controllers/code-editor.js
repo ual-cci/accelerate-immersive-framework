@@ -27,6 +27,12 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:true,
+  aceX:300,
+  aceStyle: Ember.computed('aceX', function() {
+    const aceX = this.get('aceX');
+    const box = document.querySelector('.main-container');
+    return Ember.String.htmlSafe("left: " + aceX + "px; width: " + (box.clientWidth-aceX) + "px;");
+  }),
   preloadAssets(self) {
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
@@ -337,6 +343,14 @@ export default Controller.extend({
       {
         this.get('doc').destroy();
         this.initDoc();
+      }
+    },
+    drag(e) {
+      const box = document.querySelector('.main-container');
+      const newW = box.clientWidth-e.screenX;
+      if(e.screenX>0 && newW > 200)
+      {
+        this.set('aceX',e.screenX);
       }
     },
     forkDocument() {

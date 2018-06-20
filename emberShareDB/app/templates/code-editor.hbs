@@ -69,10 +69,14 @@
     {{/bs-collapse}}
   </div>
 
-  <div class = "output-container">
-    <iframe class = "output" srcdoc={{renderedSource}}></iframe>
+  <div class = "main-container container-fluid">
+    <div class = "output-container">
+    <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
+    </div>
+    <div class = "ace-container" style = {{aceStyle}}>
+      <div class = "drag-button" draggable="true" ondrag={{action "drag"}}></div>
+      {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
+    </div>
   </div>
-  <div class = "ace-container">
-    {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
-  </div>
+
 </div>
