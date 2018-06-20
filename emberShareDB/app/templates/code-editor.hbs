@@ -9,7 +9,9 @@
     {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
     <label for="autoRenderCheckbox">Auto Render?</label>
     {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-    {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+    {{#if session.isAuthenticated}}
+      {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+    {{/if}}
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">
         {{#if isOwner}}

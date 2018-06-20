@@ -11,6 +11,7 @@ export default Controller.extend({
   sessionAccount: inject('session-account'),
   assetService: inject('assets'),
   store: inject('store'),
+  session:inject('session'),
   socketRef: null,
   con: null,
   doc: null,
@@ -28,11 +29,9 @@ export default Controller.extend({
   autoRender:true,
   preloadAssets(self) {
     const doc = self.get('doc');
-    console.log("preloading assets",doc.data.assets);
     if(!isEmpty(doc.data.assets))
     {
       self.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        console.log("completed preloading assets");
         self.updateIFrame(self);
       });
     }
@@ -49,10 +48,8 @@ export default Controller.extend({
     self.set('renderedSource', toRender);
   },
   replaceAssets(source, assets) {
-    console.log(assets);
     for(let i = 0; i < assets.length; i++)
     {
-      console.log("replacing instances of:" + assets[i].name);
       const fileId = assets[i].fileId;
       const toFind = assets[i].name;
       const fileType = assets[i].fileType;
@@ -225,34 +222,6 @@ export default Controller.extend({
     }
     this.set('canEditDoc', true);
   },
-  _makeNewDoc() {
-    const currentUser = this.get('sessionAccount').currentUserName;
-    const doc = this.get('doc');
-    let newDoc = this.get('store').createRecord('document', {
-      source:doc.data.source,
-      owner:currentUser,
-      isPrivate:doc.data.isPrivate,
-      name:doc.data.name,
-      documentId:null,
-      forkedFrom:doc.data.owner,
-      assets:doc.data.assets,
-      tags:doc.data.tags
-    });
-    newDoc.save().then((response)=>{
-      this.get('store').query('document', {
-        filter: {search: currentUser, page: 0, currentUser:currentUser}
-      }).then((documents) => {
-        console.log("new doc created",documents);
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('code-editor',documents.firstObject.documentId);
-      });
-      this.set('feedbackMessage',"Document created successfully");
-    }).catch((err)=>{
-      newDoc.deleteRecord();
-      this.get('sessionAccount').updateOwnedDocuments();
-      this.set('feedbackMessage',err.errors[0]);
-    });
-  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -371,7 +340,32 @@ export default Controller.extend({
       }
     },
     forkDocument() {
-      this._makeNewDoc();
+      const currentUser = this.get('sessionAccount').currentUserName;
+      const doc = this.get('doc');
+      let newDoc = this.get('store').createRecord('document', {
+        source:doc.data.source,
+        owner:currentUser,
+        isPrivate:doc.data.isPrivate,
+        name:doc.data.name,
+        documentId:null,
+        forkedFrom:doc.id,
+        assets:doc.data.assets,
+        tags:doc.data.tags
+      });
+      newDoc.save().then((response)=>{
+        this.get('store').query('document', {
+          filter: {search: currentUser, page: 0, currentUser:currentUser}
+        }).then((documents) => {
+          console.log("new doc created",documents);
+          this.get('sessionAccount').updateOwnedDocuments();
+          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+        });
+        this.set('feedbackMessage',"Document created successfully");
+      }).catch((err)=>{
+        newDoc.deleteRecord();
+        this.get('sessionAccount').updateOwnedDocuments();
+        this.set('feedbackMessage',err.errors[0]);
+      });
     },
   }
 });
