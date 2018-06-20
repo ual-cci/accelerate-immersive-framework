@@ -1,9 +1,0 @@
-{
-  "name": "ember-share-db",
-  "dependencies": {
-    "jquery": ">=2.1.0",
-    "jquery-ui": "~1.11.4",
-    "lodash": "^4.13.1",
-    "jquery.ui.touch-punch": "^0.3.0"
-  }
-}
