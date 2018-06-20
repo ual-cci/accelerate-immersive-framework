@@ -1,6 +1,5 @@
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
-import RSVP from 'rsvp';
 import EmberObject, { computed } from '@ember/object';
 
 export default Controller.extend({

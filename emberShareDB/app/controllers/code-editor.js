@@ -4,6 +4,7 @@ import ShareDB from 'npm:sharedb/lib/client';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { computed } from '@ember/object';
+import RSVP from 'rsvp';
 
 export default Controller.extend({
   websockets: inject('websockets'),
@@ -307,10 +308,17 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         const doc = this.get('doc');
-        doc.del([],(err)=>{
-          console.log("deleted doc");
-          this.get('sessionAccount').updateOwnedDocuments();
-          this.transitionToRoute('application');
+        let fn = (asset)=>
+        {
+          return this.get('assetService').deleteAsset(asset.fileId)
+        }
+        var actions = doc.data.assets.map(fn);
+        Promise.all(actions).then(()=> {
+          doc.del([],(err)=>{
+            console.log("deleted doc");
+            this.get('sessionAccount').updateOwnedDocuments();
+            this.transitionToRoute('application');
+          });
         });
       }
     },

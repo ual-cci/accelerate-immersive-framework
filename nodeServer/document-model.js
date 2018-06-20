@@ -83,12 +83,10 @@ function startAssetAPI(app)
         if (err) return handleError(err);
         console.log('success deleting asset');
         let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-        console.log(doc);
         var newAssets = doc.data.assets;
         newAssets = newAssets.filter(function( asset ) {
             return asset.fileId !== req.params.id;
         });
-        console.log(newAssets);
         doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
         res.json(200);
       });
@@ -207,7 +205,6 @@ function startDocAPI(app)
         copyAssets(attr.assets).then((newAssets)=>{
           console.log("has copied assets",newAssets,doc);
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-          console.log(doc);
           json.data.attr.assets = newAssets;
           res.json(json);
         });
