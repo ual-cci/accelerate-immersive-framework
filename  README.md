@@ -2,7 +2,7 @@
 
 ## To run locally:
 
-Install Mongo, Node.js, npm, Bower (will look to remove this in future)
+Install Mongo, Node.js, npm
 
 Install Ember CLI
 ```
@@ -61,7 +61,6 @@ PLEASE ONLY DO THIS FOR DEVELOPMENT ENVIRONMENT
 Then run 
 ```
 npm install
-bower install
 ```
 
 and 
