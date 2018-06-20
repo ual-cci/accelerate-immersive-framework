@@ -5,11 +5,13 @@
     {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
   {{/if}}
   <div class="bs-example">
-    {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}
-    {{/bs-button}}
+    {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
     {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
     <label for="autoRenderCheckbox">Auto Render?</label>
     {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+    {{#if session.isAuthenticated}}
+      {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+    {{/if}}
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">
         {{#if isOwner}}

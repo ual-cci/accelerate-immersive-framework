@@ -25,6 +25,7 @@ export default Service.extend({
     });
   },
   _fetchAsset(asset, ctr, callback) {
+    console.log("fetching asset:"+asset);
     const fileId = asset.fileId;
     const fileName = asset.name;
     const fileType = asset.fileType;
@@ -48,7 +49,7 @@ export default Service.extend({
               fileId:fileId,
               name:fileName,
               b64data:this._b64e(xhr.responseText),
-              type:fileType
+              fileType:fileType
             }
           }]
         });
@@ -64,6 +65,7 @@ export default Service.extend({
     xhr.send(null);
   },
   preloadAssets(assets) {
+    console.log("preloadAssets:"+assets);
     return new RSVP.Promise((resolve, reject) => {
       var ctr = 0;
       var callback = (newCtr) => {
