@@ -89,8 +89,7 @@ function startAssetAPI(app)
             return asset.fileId !== req.params.id;
         });
         console.log(newAssets);
-        doc.submitOp({
-          p:['assets'],oi:newAssets},{source:'server'});
+        doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
         res.json(200);
       });
     });
@@ -99,6 +98,7 @@ function startAssetAPI(app)
 
 function copyAssets(assets)
 {
+  console.log("copying assets", assets);
   var copyAsset = function(asset) {
     return new Promise((resolve, reject) => {
       var writestream = gridFS.createWriteStream({
@@ -109,6 +109,7 @@ function copyAssets(assets)
       var readstream = gridFS.createReadStream({
          _id: asset.fileId
       });
+      console.log("copying asset",asset);
       readstream.pipe(writestream);
       writestream.on('close', function(file) {
         var newAsset = {'name':asset.name,"fileId":file._id,fileType:asset.fileType};
@@ -188,6 +189,7 @@ function startDocAPI(app)
       {
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
         console.log("returning ",{data:reply});
+        console.log("assets ",doc.data.assets);
         res.status(200).send({data:reply});
       }
     });
@@ -197,13 +199,15 @@ function startDocAPI(app)
     let attr = req.body.data.attributes;
     createDoc(attr)
     .then(function(doc){
-      console.log("doc created",doc);
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
       if(doc.data.forkedFrom)
       {
-        copyAssets(doc.data.assets).then((newAssets)=>{
+        copyAssets(attr.assets).then((newAssets)=>{
+          console.log("has copied assets",newAssets,doc);
+          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+          console.log(doc);
           json.data.attr.assets = newAssets;
           res.json(json);
         });
@@ -255,6 +259,7 @@ function createDoc(attr) {
         }
         if (doc.type === null) {
           const src = attr.source ? attr.source:getDefaultSource();
+          const tags = attr.tags ? attr.tags:[];
           doc.create({
             source:src,
             owner:attr.owner,
@@ -265,7 +270,7 @@ function createDoc(attr) {
             created:new Date(),
             lastEdited:new Date(),
             assets:[],
-            tags:[],
+            tags:tags,
             forkedFrom:attr.forkedFrom
           },resolve);
           resolve(doc);

@@ -27,6 +27,7 @@ export default Controller.extend({
   autoRender:true,
   preloadAssets(self) {
     const doc = self.get('doc');
+    console.log("preloading assets",doc.data.assets);
     if(!isEmpty(doc.data.assets))
     {
       self.get('assetService').preloadAssets(doc.data.assets).then(()=> {
@@ -47,6 +48,7 @@ export default Controller.extend({
     self.set('renderedSource', toRender);
   },
   replaceAssets(source, assets) {
+    console.log(assets);
     for(let i = 0; i < assets.length; i++)
     {
       console.log("replacing instances of:" + assets[i].name);
@@ -54,8 +56,11 @@ export default Controller.extend({
       const toFind = assets[i].name;
       const fileType = assets[i].fileType;
       const asset = this.get('store').peekRecord('asset',fileId);
-      const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-      source = source.replace(new RegExp(toFind,"gm"),b64);
+      if(!isEmpty(asset))
+      {
+        const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+        source = source.replace(new RegExp(toFind,"gm"),b64);
+      }
     }
     return source;
   },
@@ -159,17 +164,17 @@ export default Controller.extend({
   initDoc() {
     const con = this.get('connection');
     const doc = con.get(config.contentDBName,this.get('model').id);
-    this.set('doc', doc);
     console.log("setting doc",this.get('model').id);
     const editor = this.get('editor');
     const session = editor.getSession();
     doc.subscribe((err) => {
       if (err) throw err;
-      const doc = this.get('doc');
       if(!isEmpty(doc.data))
       {
+        this.set('doc', doc);
         this.setCanEditDoc();
         console.log("read only?",!this.get('canEditDoc'));
+        console.log(doc.data);
         editor.setReadOnly(!this.get('canEditDoc'));
         this.preloadAssets(this);
         this.get('sessionAccount').set('currentDoc',this.get('model').id);
@@ -218,6 +223,34 @@ export default Controller.extend({
       this.set('isOwner', true);
     }
     this.set('canEditDoc', true);
+  },
+  _makeNewDoc() {
+    const currentUser = this.get('sessionAccount').currentUserName;
+    const doc = this.get('doc');
+    let newDoc = this.get('store').createRecord('document', {
+      source:doc.data.source,
+      owner:currentUser,
+      isPrivate:doc.data.isPrivate,
+      name:doc.data.name,
+      documentId:null,
+      forkedFrom:doc.data.owner,
+      assets:doc.data.assets,
+      tags:doc.data.tags
+    });
+    newDoc.save().then((response)=>{
+      this.get('store').query('document', {
+        filter: {search: currentUser, page: 0, currentUser:currentUser}
+      }).then((documents) => {
+        console.log("new doc created",documents);
+        this.get('sessionAccount').updateOwnedDocuments();
+        this.transitionToRoute('code-editor',documents.firstObject.documentId);
+      });
+      this.set('feedbackMessage',"Document created successfully");
+    }).catch((err)=>{
+      newDoc.deleteRecord();
+      this.get('sessionAccount').updateOwnedDocuments();
+      this.set('feedbackMessage',err.errors[0]);
+    });
   },
   actions: {
     editorReady(editor) {
@@ -328,6 +361,9 @@ export default Controller.extend({
         this.get('doc').destroy();
         this.initDoc();
       }
-    }
+    },
+    forkDocument() {
+      this._makeNewDoc();
+    },
   }
 });

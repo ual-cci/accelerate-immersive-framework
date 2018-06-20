@@ -46,13 +46,6 @@ export default Controller.extend({
     checkboxClicked() {
       this.toggleProperty('isPrivate');
     },
-    forkDocument() {
-      const documentId = this.get('sessionAccount').currentDoc;
-      this.get('store').peekRecord('document', documentId)
-      .then((toFork)=> {
-        this._makeNewDoc(toFork.name, isPrivate, toFork.source, toFork.owner);
-      });
-    },
     createNewDocument() {
       let docName = this.get('docName');
       docName = docName.replace(/\s/g, "-");
