@@ -348,7 +348,6 @@ export default Controller.extend({
     drag(e) {
       const box = document.querySelector('.main-container');
       const newW = box.clientWidth-e.screenX;
-      console.log(e.screenX);
       const aceX = this.get('aceX')
       const diff = aceX - e.screenX;
       if(diff < 50 && newW > 50)
