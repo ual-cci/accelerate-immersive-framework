@@ -5,7 +5,7 @@ export default Component.extend({
   session: inject('session'),
   sessionAccount: inject('session-account'),
   store: inject('store'),
-  ownedDocuments: Ember.computed('sessionAccount.ownedDocuments', function(){
+  ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
   }),
   actions: {

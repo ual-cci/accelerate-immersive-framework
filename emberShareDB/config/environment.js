@@ -6,16 +6,6 @@ module.exports = function(environment) {
     environment,
     rootURL: '/',
     locationType: 'auto',
-    contentSecurityPolicy: {
-     'default-src': "'none'",
-     'script-src': "'self' 'unsafe-inline' 'unsafe-eval'",
-     'font-src': "'self'",
-     'connect-src': "'self' ws://localhost:8080 localhost:8080",
-     'img-src': "'self'",
-     'report-uri':"'localhost'",
-     'style-src': "'self' 'unsafe-inline'",
-     'frame-src': "'none'"
-    },
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
@@ -34,9 +24,9 @@ module.exports = function(environment) {
 
   if (environment === 'development') {
     ENV.contentDBName = 'sharedb_docs';
-    ENV.oauthHost = 'http://localhost:8080/oauth';
-    ENV.serverHost = 'http://localhost:8080';
-    ENV.wsHost = 'ws://localhost:8080';
+    ENV.oauthHost = "http://localhost:8080/oauth";
+    ENV.serverHost = "http://localhost:8080";
+    ENV.wsHost = "ws://localhost:8080";
   }
 
   if (environment === 'test') {
@@ -54,9 +44,20 @@ module.exports = function(environment) {
   if (environment === 'production') {
     // here you can enable a production-specific feature
     ENV.contentDBName = 'sharedb_docs';
-    ENV.oauthHost = 'http://172.19.102.105:8080/oauth';
-    ENV.serverHost = 'http://172.19.102.105:8080';
-    ENV.wsHost = 'ws://172.19.102.105:8080';
+    ENV.oauthHost = "http://172.19.102.105:8080/oauth";
+    ENV.serverHost = "http://172.19.102.105:8080";
+    ENV.wsHost = "ws://172.19.102.105:8080";
+  }
+
+  ENV.contentSecurityPolicy = {
+   'default-src': "'none'",
+   'script-src': "'self' 'unsafe-inline' 'unsafe-eval'",
+   'font-src': "'self'",
+   'connect-src': "'self' " + ENV.wsHost + " " + ENV.serverHost,
+   'img-src': "'self'",
+   'report-uri':"'localhost'",
+   'style-src': "'self' 'unsafe-inline'",
+   'frame-src': "'none'"
   }
 
   return ENV;
