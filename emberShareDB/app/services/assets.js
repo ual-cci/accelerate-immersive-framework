@@ -48,7 +48,7 @@ export default Service.extend({
               fileId:fileId,
               name:fileName,
               b64data:this._b64e(xhr.responseText),
-              type:fileType
+              fileType:fileType
             }
           }]
         });

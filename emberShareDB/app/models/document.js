@@ -10,5 +10,6 @@ export default DS.Model.extend({
   documentId:DS.attr('string'),
   lastEdited:DS.attr('date'),
   assets:DS.attr(),
-  tags:DS.attr()
+  tags:DS.attr(),
+  forkedFrom:DS.attr('string')
 });

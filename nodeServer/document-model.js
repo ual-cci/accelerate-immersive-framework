@@ -15,6 +15,7 @@ var contentCollectionName = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
+var gridFS;
 
 var initDocAPI = function(server, app, config)
 {
@@ -43,7 +44,7 @@ function startAssetAPI(app)
   var db = new mongo.Db(contentDBName, new mongo.Server(mongoIP, mongoPort));
   db.open(function (err) {
     if (err) return handleError(err);
-    const gridFS = Gridfs(db, mongo);
+    gridFS = Gridfs(db, mongo);
     console.log('connection opened to ' + contentDBName);
 
     app.post('/asset', multiparty, function(req,res) {
@@ -94,6 +95,29 @@ function startAssetAPI(app)
       });
     });
   });
+}
+
+function copyAssets(assets)
+{
+  var copyAsset = function(asset) {
+    return new Promise((resolve, reject) => {
+      var writestream = gridFS.createWriteStream({
+        filename: asset.name,
+        mode: 'w',
+        content_type: asset.fileType
+      });
+      var readstream = gridFS.createReadStream({
+         _id: asset.fileId
+      });
+      readstream.pipe(writestream);
+      writestream.on('close', function(file) {
+        var newAsset = {'name':asset.name,"fileId":file._id,fileType:asset.fileType};
+        console.log("COPIED FILE",newAsset);
+        resolve(newAsset);
+      });
+    });
+  };
+  return Promise.all(assets.map(copyAsset));
 }
 
 function startWebSockets(server)
@@ -171,14 +195,23 @@ function startDocAPI(app)
 
   app.post('/documents', app.oauth.authorise(), (req,res) => {
     let attr = req.body.data.attributes;
-    console.log(attr);
-    createDoc(attr.name, attr.owner, attr.isPrivate)
+    createDoc(attr)
     .then(function(doc){
       console.log("doc created",doc);
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      res.json(json);
+      if(doc.data.forkedFrom)
+      {
+        copyAssets(doc.data.assets).then((newAssets)=>{
+          json.data.attr.assets = newAssets;
+          res.json(json);
+        });
+      }
+      else
+      {
+        res.json(json);
+      }
     },
      function(err) {
        res.type('application/vnd.api+json');
@@ -209,9 +242,9 @@ function getDefaultSource()
   return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
 }
 
-function createDoc(docName,owner,isPrivate) {
+function createDoc(attr) {
   return new Promise((resolve, reject) => {
-    console.log("creating doc");
+    console.log("creating doc", attr);
     getNewDocumentId(function(uuid) {
       var doc = shareDBConnection.get(contentCollectionName, uuid);
       doc.fetch(function(err) {
@@ -221,17 +254,19 @@ function createDoc(docName,owner,isPrivate) {
           return;
         }
         if (doc.type === null) {
+          const src = attr.source ? attr.source:getDefaultSource();
           doc.create({
-            source:getDefaultSource(),
-            owner:owner,
-            isPrivate:isPrivate,
+            source:src,
+            owner:attr.owner,
+            isPrivate:attr.isPrivate,
             readOnly:true,
-            name:docName,
+            name:attr.name,
             documentId:uuid,
             created:new Date(),
             lastEdited:new Date(),
             assets:[],
-            tags:[]
+            tags:[],
+            forkedFrom:attr.forkedFrom
           },resolve);
           resolve(doc);
           return;
