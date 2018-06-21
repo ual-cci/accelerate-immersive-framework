@@ -4,7 +4,7 @@
   {{else}}
     {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
   {{/if}}
-  <div class="bs-example">
+  <div class="settings">
     {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
     {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
     <label for="autoRenderCheckbox">Auto Render?</label>
@@ -74,7 +74,12 @@
     <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
     </div>
     <div class = "ace-container" style = {{aceStyle}}>
-      <div class = "drag-button" draggable="true" ondrag={{action "drag"}}></div>
+      {{#if showCode}}
+        {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+      {{else}}
+        {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+      {{/if}}
+      <div class = "drag-button" draggable="true" ondrag={{action "drag"}} ondragstart={{action "dragStart"}}></div>
       {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
     </div>
   </div>
