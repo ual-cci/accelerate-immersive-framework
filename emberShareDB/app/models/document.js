@@ -11,5 +11,6 @@ export default DS.Model.extend({
   lastEdited:DS.attr('date'),
   assets:DS.attr(),
   tags:DS.attr(),
-  forkedFrom:DS.attr('string')
+  forkedFrom:DS.attr('string'),
+  savedVals:DS.attr()
 });

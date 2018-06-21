@@ -268,7 +268,8 @@ function createDoc(attr) {
             lastEdited:new Date(),
             assets:[],
             tags:tags,
-            forkedFrom:attr.forkedFrom
+            forkedFrom:attr.forkedFrom,
+            savedVals:{}
           },resolve);
           resolve(doc);
           return;

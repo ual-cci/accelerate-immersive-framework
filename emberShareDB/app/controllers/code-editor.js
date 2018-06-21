@@ -26,7 +26,7 @@ export default Controller.extend({
   allowDocDelete:false,
   allowAssetDelete:false,
   assetToDelete:"",
-  autoRender:true,
+  autoRender:false,
   showCode:true,
   isDragging:false,
   startWidth:0,
@@ -51,13 +51,61 @@ export default Controller.extend({
     }
   },
   updateIFrame(self) {
+    console.log("updating iframe");
     const doc = self.get('doc');
     let toRender = doc.data.source;
     toRender = self.replaceAssets(toRender, self.get('model').assets);
+    toRender = self.insertStatefullCallbacks(self, toRender);
+    console.log("output", toRender);
     self.set('renderedSource', toRender);
   },
-  insert(self) {
-    //const extra =
+  insertStatefullCallbacks(self, source) {
+    let newSource = "";
+    const words = source.split(/[\s\n]+/);
+    let ptr = 0;
+    while(ptr < words.length-4)
+    {
+      const isVar = words[ptr];
+      const name = words[ptr + 1];
+      const isEquals = words[ptr + 2];
+      const val = words[ptr + 3];
+      if(name.substring(0,2) == "p_" &&
+        isEquals == "=")
+      {
+        newSource = newSource + isVar + " ";
+        newSource = newSource + name + " = ";
+        if(isVar == "let" || isVar == "var")
+        {
+          const doc = this.get('doc');
+          const savedVal = doc.data.savedVals[name];
+          if(savedVal)
+          {
+            newSource = newSource + savedVal + ";";
+          }
+          else
+          {
+            newSource = newSource + val;
+          }
+        }
+        else
+        {
+          newSource = newSource + val;
+          const noSC = val.replace(";","");
+          newSource = newSource + "parent.postMessage([\"" + name + "\"," + noSC + "], \"*\");";
+        }
+        ptr =  ptr + 4;
+      }
+      else
+      {
+        newSource = newSource + isVar + " ";
+        ptr++;
+      }
+    }
+    for(var i = ptr; i < words.length; i++)
+    {
+      newSource = newSource + words[i] + " ";
+    }
+    return newSource;
   },
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
@@ -151,8 +199,8 @@ export default Controller.extend({
       }
       const str = delta.lines.join('\n');
       op[action] = str;
-      if(this.get('autoRender'))
       doc.submitOp(op);
+      if(this.get('autoRender'))
       {
         this.autoExecuteCode(self);
       }
@@ -169,10 +217,10 @@ export default Controller.extend({
       this.onSessionChange(this, delta);
     });
     session.setMode("ace/mode/html");
-    this.addWindowListener();
     this.initDoc();
+    this.addWindowListener(this);
   },
-  addWindowListener() {
+  addWindowListener(self) {
     var eventMethod = window.addEventListener
 			? "addEventListener"
 			: "attachEvent";
@@ -180,7 +228,9 @@ export default Controller.extend({
   	var messageEvent = eventMethod === "attachEvent"
   		? "onmessage"
   		: "message";
-  	eventer(messageEvent, this.handleWindowEvent);
+  	eventer(messageEvent, function(e) {
+      self.handleWindowEvent(e,self)
+    });
   },
   removeWindowListener() {
     var eventMethod = window.removeEventListener
@@ -190,11 +240,20 @@ export default Controller.extend({
     var messageEvent = eventMethod === "detachEvent"
   		? "onmessage"
   		: "message";
-  	eventer(messageEvent,this.handleWindowEvent);
+      eventer(messageEvent, function(e) {
+        self.handleWindowEvent(e,self)
+      });
   },
-  handleWindowEvent(e) {
-    if (e.origin !== config.localOrigin) return;
-    console.log(e.data);
+  handleWindowEvent(e, self) {
+    if (e.origin === config.localOrigin)
+    {
+      const doc = self.get('doc');
+      let savedVals = doc.data.savedVals;
+      savedVals[e.data[0]] = e.data[1];
+      self.set('surpress', true);
+      doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
+      self.set('surpress', false);
+    }
   },
   initDoc() {
     const con = this.get('connection');
