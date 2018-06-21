@@ -68,12 +68,12 @@ export default Controller.extend({
       const isVar = words[ptr];
       const name = words[ptr + 1];
       const isEquals = words[ptr + 2];
-      const val = words[ptr + 3];
       if(name.substring(0,2) == "p_" &&
         isEquals == "=")
       {
         newSource = newSource + isVar + " ";
         newSource = newSource + name + " = ";
+        ptr =  ptr + 3;
         if(isVar == "let" || isVar == "var")
         {
           const doc = this.get('doc');
@@ -81,19 +81,29 @@ export default Controller.extend({
           if(savedVal)
           {
             newSource = newSource + savedVal + ";";
+            ptr++;
           }
           else
           {
-            newSource = newSource + val;
+            while(words[ptr].indexOf(";") == -1)
+            {
+              newSource = newSource + " " + words[ptr];
+              ptr++;
+            }
+            newSource = newSource + " " + words[ptr];
+            ptr++;
           }
-          ptr =  ptr + 4;
         }
         else
         {
-          newSource = newSource + val;
-          const noSC = val.replace(";","");
-          newSource = newSource + "parent.postMessage([\"" + name + "\"," + noSC + "], \"*\");";
-          ptr =  ptr + 3;
+          while(words[ptr].indexOf(";") == -1)
+          {
+            newSource = newSource + " " + words[ptr];
+            ptr++;
+          }
+          newSource = newSource + " " + words[ptr];
+          ptr++;
+          newSource = newSource + "parent.postMessage([\"" + name + "\"," + name + "], \"*\");";
         }
       }
       else
