@@ -31,7 +31,7 @@ export default Controller.extend({
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:0,
+  aceW:700,
   aceStyle: Ember.computed('aceW', function() {
     const aceW = this.get('aceW');
     return Ember.String.htmlSafe("width: " + aceW + "px;");
@@ -354,13 +354,13 @@ export default Controller.extend({
       const startX = e.clientX;
       this.set('startWidth', startWidth);
       this.set('startX', startX);
-      let overlay = document.querySelector('.resizing-overlay');
+      let overlay = document.querySelector('.output-container');
       overlay.style["pointer-events"] = "auto";
       console.log('mouse down',startWidth);
     },
     mouseUp(e) {
       this.set('isDragging', false);
-      let overlay = document.querySelector('.resizing-overlay');
+      let overlay = document.querySelector('.output-container');
       overlay.style["pointer-events"] = "none";
       // let dragButton = document.querySelector('.drag-button');
       // dragButton.style["pointer-events"] = "auto";
