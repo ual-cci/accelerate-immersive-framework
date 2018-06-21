@@ -356,32 +356,27 @@ export default Controller.extend({
       this.set('startX', startX);
       let overlay = document.querySelector('.output-container');
       overlay.style["pointer-events"] = "auto";
-      console.log('mouse down',startWidth);
     },
     mouseUp(e) {
       this.set('isDragging', false);
       let overlay = document.querySelector('.output-container');
       overlay.style["pointer-events"] = "none";
-      // let dragButton = document.querySelector('.drag-button');
-      // dragButton.style["pointer-events"] = "auto";
-      console.log('mouse up');
     },
     mouseMove(e) {
       if(this.get('isDragging'))
       {
-        console.log(e);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
     hideCode() {
       var hide = ()=> {
-        let aceX = this.get('aceX')
-        if(aceX <1.0)
+        let aceW = this.get('aceW')
+        if(aceW > 0.0)
         {
           setTimeout(()=> {
-            this.set('aceX',Math.min(1.0,aceX+0.05));
+            this.set('aceW',Math.max(0.0,aceW-10));
             hide();
-          },10);
+          },2);
         }
         else
         {
@@ -392,13 +387,13 @@ export default Controller.extend({
     },
     showCode() {
       var show = ()=> {
-        let aceX = this.get('aceX')
-        if(aceX >0.5)
+        let aceW = this.get('aceW')
+        if(aceW < 700)
         {
           setTimeout(()=> {
-            this.set('aceX',Math.max(0.5,aceX-0.05));
+            this.set('aceW',Math.min(700,aceW+10));
             show();
-          },10);
+          },2);
         }
         else
         {
