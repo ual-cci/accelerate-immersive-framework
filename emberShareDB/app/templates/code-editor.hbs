@@ -1,4 +1,4 @@
-<div class = "container-fluid">
+<div class>
   {{#if isNotEdittingDocName}}
     <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
   {{else}}
@@ -69,18 +69,18 @@
     {{/bs-collapse}}
   </div>
 
-  <div class = "main-container container-fluid">
-    <div class = "output-container">
-    <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
+  <div class = "main-container">
+    <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+      <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
     </div>
-    <div class = "ace-container" style = {{aceStyle}}>
+    <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
       {{#if showCode}}
         {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
       {{else}}
         {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
       {{/if}}
-      <div class = "drag-button" draggable="true" ondrag={{action "drag"}} ondragstart={{action "dragStart"}}></div>
-      {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
+      <div class = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+      {{ember-ace lines=50 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
     </div>
   </div>
 

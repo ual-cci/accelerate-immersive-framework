@@ -1,13 +1,3 @@
-.uncharted-token-label {
-  float:left;
-  padding:4px 4px 4px 4px;
-  border-radius: 2px;
-  border-width: 1px;
-  border-color: black;
-  background-color: lightgray;
-  margin: 10px 10px 0px 0px;
-}
-
 .document-link {
   color:white;
 }
@@ -35,61 +25,78 @@
 
 .hide-code-btn {
   position:absolute;
+  display:inline-block;
   top: 0;
-  left: -40px;
-  height:40px;
-  width:40px;
+  left: 0;
+  height:2em;
+  width: 2em;
+  z-index: 20;
 }
 
 .drag-button {
   position:absolute;
-  top: 0;
-  left: 0;
+  top: 40;
+  left: 40;
   z-index: 20;
   height:100%;
   width:40px;
   opacity:0.0;
   cursor:col-resize;
   background-color:white;
-}
-
-.drag-button:hover {
-  opacity: 0.5;
+  pointer-events: auto;
 }
 
 .main-container {
-  width:85vw;
-  height:70vh;
-  position:absolute;
+  width:100vw;
+  height:80vh;
+  display:inline-block;
+  position:relative;
   overflow:hidden;
 }
 
 .output-container {
-  position:absolute;
+  width: 100%;
+  height: 100%;
+  position: relative;
   top: 0;
   left: 0;
-  width:100%;
-  height:100%;
   z-index: 1;
+  pointer-events: none;
 }
 
 .output-iframe {
   width:100%;
-  height:100%
+  height:100%;
+  pointer-events: none;
 }
 
 .ace-container {
   top: 0;
-  left: 300px;
+  right: 0;
   opacity:0.9;
-  position:absolute;
-  width:50%;
-  height:100%;
   z-index: 10;
+  width: 70vw;
+  /* max-width: 90vw;
+  min-width: 40vw; */
+  position: absolute;
+  padding-left: 2em;
+  height: 100%;
+  overflow-x: visible;
+  overflow-y: scroll;
 }
 
 .asset-token {
   display: inline;
+  padding:4px 4px 4px 4px;
+  border-radius: 2px;
+  border-width: 1px;
+  border-color: black;
+  background-color: lightgray;
+  margin: 10px 10px 0px 0px;
+}
+
+.uncharted-token-label {
+  float:left;
   padding:4px 4px 4px 4px;
   border-radius: 2px;
   border-width: 1px;
@@ -127,11 +134,11 @@
 }
 
 .uncharted-token-label:hover{
-    background-color: yellow;
+  background-color: yellow;
 }
 
 .uncharted-token-label:focus{
-    background-color: blue;
+  background-color: blue;
 }
 
 .container {
