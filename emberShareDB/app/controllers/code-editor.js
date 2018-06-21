@@ -28,11 +28,13 @@ export default Controller.extend({
   assetToDelete:"",
   autoRender:true,
   showCode:true,
-  aceX:0.5,
-  aceStyle: Ember.computed('aceX', function() {
-    const box = document.querySelector('.main-container');
-    const aceX = this.get('aceX') * box.clientWidth;
-    return Ember.String.htmlSafe("left: " + aceX + "px; width: " + (box.clientWidth-aceX) + "px;");
+  isDragging:false,
+  startWidth:0,
+  startX:0,
+  aceW:0,
+  aceStyle: Ember.computed('aceW', function() {
+    const aceW = this.get('aceW');
+    return Ember.String.htmlSafe("width: " + aceW + "px;");
   }),
   preloadAssets(self) {
     const doc = self.get('doc');
@@ -346,19 +348,29 @@ export default Controller.extend({
         this.initDoc();
       }
     },
-    dragStart(e) {
-      const dragHandle = document.querySelector('.drag-button');
-      dragHandle.style.opacity = 0.0;
-      console.log(e.target.style.opacity);
+    mouseDown(e) {
+      this.set('isDragging', true);
+      const startWidth = document.querySelector('.ace-container').clientWidth;
+      const startX = e.clientX;
+      this.set('startWidth', startWidth);
+      this.set('startX', startX);
+      let overlay = document.querySelector('.resizing-overlay');
+      overlay.style["pointer-events"] = "auto";
+      console.log('mouse down',startWidth);
     },
-    drag(e) {
-      const box = document.querySelector('.main-container');
-      const newW = box.clientWidth-e.screenX;
-      const aceX = this.get('aceX')
-      const diff = (aceX * box.clientWidth) - e.screenX;
-      if(diff < 50 && newW > 50)
+    mouseUp(e) {
+      this.set('isDragging', false);
+      let overlay = document.querySelector('.resizing-overlay');
+      overlay.style["pointer-events"] = "none";
+      // let dragButton = document.querySelector('.drag-button');
+      // dragButton.style["pointer-events"] = "auto";
+      console.log('mouse up');
+    },
+    mouseMove(e) {
+      if(this.get('isDragging'))
       {
-        this.set('aceX',e.screenX/box.clientWidth);
+        console.log(e);
+        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
     hideCode() {

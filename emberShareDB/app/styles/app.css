@@ -52,6 +52,7 @@
   opacity:0.0;
   cursor:col-resize;
   background-color:white;
+  pointer-events: auto;
 }
 
 .main-container {
@@ -62,10 +63,19 @@
   overflow:hidden;
 }
 
-.output-container {
-  resize: both;
-  width: 100%;
+.resizing-overlay {
+  width: 100vw;
   height: 100vh;
+  position: relative;
+  top: 0;
+  left: 0;
+  display:block;
+  pointer-events: none;
+}
+
+.output-container {
+  width: 100%;
+  height: 100%;
   position: relative;
   top: 0;
   left: 0;
@@ -74,11 +84,12 @@
 
 .output-iframe {
   width:100%;
-  height:100%
+  height:100%;
 }
 
 .ace-container {
   top: 0;
+  right: 0;
   opacity:0.9;
   z-index: 10;
   width: 70vw;
