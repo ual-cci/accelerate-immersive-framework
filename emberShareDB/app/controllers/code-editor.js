@@ -56,6 +56,9 @@ export default Controller.extend({
     toRender = self.replaceAssets(toRender, self.get('model').assets);
     self.set('renderedSource', toRender);
   },
+  insert(self) {
+    //const extra =
+  },
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
     {
@@ -166,7 +169,32 @@ export default Controller.extend({
       this.onSessionChange(this, delta);
     });
     session.setMode("ace/mode/html");
+    this.addWindowListener();
     this.initDoc();
+  },
+  addWindowListener() {
+    var eventMethod = window.addEventListener
+			? "addEventListener"
+			: "attachEvent";
+  	var eventer = window[eventMethod];
+  	var messageEvent = eventMethod === "attachEvent"
+  		? "onmessage"
+  		: "message";
+  	eventer(messageEvent, this.handleWindowEvent);
+  },
+  removeWindowListener() {
+    var eventMethod = window.removeEventListener
+      ? "removeEventListener"
+      : "detachEvent";
+    var eventer = window[eventMethod];
+    var messageEvent = eventMethod === "detachEvent"
+  		? "onmessage"
+  		: "message";
+  	eventer(messageEvent,this.handleWindowEvent);
+  },
+  handleWindowEvent(e) {
+    if (e.origin !== config.localOrigin) return;
+    console.log(e.data);
   },
   initDoc() {
     const con = this.get('connection');
@@ -337,13 +365,16 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     cleanUp() {
+      this.set('renderedSource',"");
       this.get('doc').destroy();
+      this.removeWindowListener();
     },
     refresh() {
       console.log('refreshing');
       const doc = this.get('doc');
       if(!isEmpty(doc))
       {
+        this.set('renderedSource',"");
         this.get('doc').destroy();
         this.initDoc();
       }
@@ -429,6 +460,6 @@ export default Controller.extend({
         this.get('sessionAccount').updateOwnedDocuments();
         this.set('feedbackMessage',err.errors[0]);
       });
-    },
+    }
   }
 });

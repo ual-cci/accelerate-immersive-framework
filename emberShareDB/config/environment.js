@@ -27,6 +27,7 @@ module.exports = function(environment) {
     ENV.oauthHost = "http://localhost:8080/oauth";
     ENV.serverHost = "http://localhost:8080";
     ENV.wsHost = "ws://localhost:8080";
+    ENV.localOrigin = "http://localhost:4200";
   }
 
   if (environment === 'test') {
@@ -47,6 +48,7 @@ module.exports = function(environment) {
     ENV.oauthHost = "http://172.19.102.105:8080/oauth";
     ENV.serverHost = "http://172.19.102.105:8080";
     ENV.wsHost = "ws://172.19.102.105:8080";
+    ENV.localOrigin = "http://localhost:4200";
   }
 
   ENV.contentSecurityPolicy = {
