@@ -1,4 +1,4 @@
-<div class = "container-fluid">
+<div class>
   {{#if isNotEdittingDocName}}
     <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
   {{else}}
@@ -69,7 +69,7 @@
     {{/bs-collapse}}
   </div>
 
-  <div class = "main-container container-fluid">
+  <div class = "main-container">
     <div class = "output-container">
     <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
     </div>
@@ -80,7 +80,7 @@
         {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
       {{/if}}
       <div class = "drag-button" draggable="true" ondrag={{action "drag"}} ondragstart={{action "dragStart"}}></div>
-      {{ember-ace lines=30 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
+      {{ember-ace lines=50 value=value ready=(action 'editorReady') theme='ace/theme/monokai'}}
     </div>
   </div>
 
