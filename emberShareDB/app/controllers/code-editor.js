@@ -86,14 +86,15 @@ export default Controller.extend({
           {
             newSource = newSource + val;
           }
+          ptr =  ptr + 4;
         }
         else
         {
           newSource = newSource + val;
           const noSC = val.replace(";","");
           newSource = newSource + "parent.postMessage([\"" + name + "\"," + noSC + "], \"*\");";
+          ptr =  ptr + 3;
         }
-        ptr =  ptr + 4;
       }
       else
       {
