@@ -33,14 +33,28 @@
   margin: 10px 10px 10px 10px;
 }
 
+.hide-code-btn {
+  position:absolute;
+  top: 0;
+  left: -40px;
+  height:40px;
+  width:40px;
+}
+
 .drag-button {
   position:absolute;
   top: 0;
   left: 0;
   z-index: 20;
   height:100%;
-  width:50px;
+  width:40px;
   opacity:0.0;
+  cursor:col-resize;
+  background-color:white;
+}
+
+.drag-button:hover {
+  opacity: 0.5;
 }
 
 .main-container {

@@ -27,10 +27,11 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:true,
-  aceX:300,
+  showCode:true,
+  aceX:0.5,
   aceStyle: Ember.computed('aceX', function() {
-    const aceX = this.get('aceX');
     const box = document.querySelector('.main-container');
+    const aceX = this.get('aceX') * box.clientWidth;
     return Ember.String.htmlSafe("left: " + aceX + "px; width: " + (box.clientWidth-aceX) + "px;");
   }),
   preloadAssets(self) {
@@ -345,15 +346,54 @@ export default Controller.extend({
         this.initDoc();
       }
     },
+    dragStart(e) {
+      const dragHandle = document.querySelector('.drag-button');
+      dragHandle.style.opacity = 0.0;
+      console.log(e.target.style.opacity);
+    },
     drag(e) {
       const box = document.querySelector('.main-container');
       const newW = box.clientWidth-e.screenX;
       const aceX = this.get('aceX')
-      const diff = aceX - e.screenX;
+      const diff = (aceX * box.clientWidth) - e.screenX;
       if(diff < 50 && newW > 50)
       {
-        this.set('aceX',e.screenX);
+        this.set('aceX',e.screenX/box.clientWidth);
       }
+    },
+    hideCode() {
+      var hide = ()=> {
+        let aceX = this.get('aceX')
+        if(aceX <1.0)
+        {
+          setTimeout(()=> {
+            this.set('aceX',Math.min(1.0,aceX+0.05));
+            hide();
+          },10);
+        }
+        else
+        {
+          this.set('showCode',false);
+        }
+      }
+      hide();
+    },
+    showCode() {
+      var show = ()=> {
+        let aceX = this.get('aceX')
+        if(aceX >0.5)
+        {
+          setTimeout(()=> {
+            this.set('aceX',Math.max(0.5,aceX-0.05));
+            show();
+          },10);
+        }
+        else
+        {
+          this.set('showCode',true);
+        }
+      }
+      show();
     },
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
