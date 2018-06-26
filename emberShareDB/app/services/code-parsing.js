@@ -50,11 +50,12 @@ export default Service.extend({
   },
   insert(source, item)
   {
+    console.log("inserting",item);
     return source + "\n" + item;
   },
   parseNode(node, savedVals, script)
   {
-    console.log(node);
+    //console.log(node);
     let newSource = "";
     let added = false;
     if(node.type == "VariableDeclaration"  && node.declarations)
@@ -110,7 +111,7 @@ export default Service.extend({
       {
         newSource = newSource + this.parseNode(node.body.body[i], savedVals, script);
       }
-      newSource = newSource + "\n}"
+      newSource = this.insert(newSource,"}")
       added = true;
     }
     else if(node.body)
@@ -124,17 +125,28 @@ export default Service.extend({
     }
     else if (node.consequent)
     {
-      console.log("consequent");
+      console.log("consequent", node);
+      const alt = node.alternate;
       const test = "if(" + script.script.substring(node.test.start, node.test.end) + ") {\n";
       newSource = this.insert(newSource, test);
       newSource = newSource + this.parseNode(node.consequent, savedVals, script);
-      newSource = newSource + "\n}"
-      if (node.alternate)
+      newSource = this.insert(newSource,"}")
+      if (alt)
       {
-        console.log("alternate");
-        newSource = this.insert(newSource, "else {\n");
-        newSource = newSource + this.parseNode(node.alternate, savedVals, script);
-        newSource = newSource + "\n}"
+        console.log("alternate",node);
+        //ELSE IF
+        if(alt.test)
+        {
+          const test = "if(" + script.script.substring(alt.test.start, alt.test.end) + ") {\n";
+          newSource = this.insert(newSource, "else " + test);
+          newSource = newSource + this.parseNode(alt.alternate, savedVals, script);
+        }
+        else
+        {
+          newSource = this.insert(newSource, "else {\n");
+          newSource = newSource + this.parseNode(alt, savedVals, script);
+        }
+        newSource = this.insert(newSource,"}")
       }
       added = true;
     }
