@@ -53,14 +53,12 @@ export default Service.extend({
     console.log("inserting",item);
     return source + "\n" + item;
   },
-  parseNode(node, savedVals, script)
+  parseNode(node, savedVals, script, fromAlt = false)
   {
-    //console.log(node);
     let newSource = "";
     let added = false;
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
-      console.log("VariableDeclaration");
       newSource = this.insert(newSource,node.kind+" ");
       for(var i = 0; i < node.declarations.length; i++)
       {
@@ -82,7 +80,6 @@ export default Service.extend({
     {
       if(node.expression.type == "AssignmentExpression")
       {
-        console.log("AssignmentExpression");
         const exp = script.script.substring(node.start, node.end);
         newSource = this.insert(newSource,exp);
         const name = node.expression.left.name;
@@ -93,7 +90,6 @@ export default Service.extend({
     }
     else if(node.params && node.body)
     {
-      console.log("FunctionDeclaration");
       newSource = this.insert(newSource, "function " + node.id.name + "(");
       if(node.params.length > 0)
       {
@@ -116,7 +112,6 @@ export default Service.extend({
     }
     else if(node.body)
     {
-      console.log("OtherBody");
       for(var i = 0; i < node.body.length; i++)
       {
         newSource = newSource + this.parseNode(node.body[i], savedVals, script);
@@ -125,28 +120,27 @@ export default Service.extend({
     }
     else if (node.consequent)
     {
-      console.log("consequent", node);
       const alt = node.alternate;
-      const test = "if(" + script.script.substring(node.test.start, node.test.end) + ") {\n";
+      let test = "if(" + script.script.substring(node.test.start, node.test.end) + ") {\n";
+      if(fromAlt)
+      {
+        test = "else " + test;
+      }
       newSource = this.insert(newSource, test);
       newSource = newSource + this.parseNode(node.consequent, savedVals, script);
       newSource = this.insert(newSource,"}")
       if (alt)
       {
-        console.log("alternate",node);
-        //ELSE IF
-        if(alt.test)
+        if(!alt.test)
         {
-          const test = "if(" + script.script.substring(alt.test.start, alt.test.end) + ") {\n";
-          newSource = this.insert(newSource, "else " + test);
-          newSource = newSource + this.parseNode(alt.alternate, savedVals, script);
+          newSource = this.insert(newSource, "else {\n");
+          newSource = newSource + this.parseNode(alt, savedVals, script, true);
+          newSource = this.insert(newSource,"}")
         }
         else
         {
-          newSource = this.insert(newSource, "else {\n");
-          newSource = newSource + this.parseNode(alt, savedVals, script);
+          newSource = newSource + this.parseNode(alt, savedVals, script, true);
         }
-        newSource = this.insert(newSource,"}")
       }
       added = true;
     }
@@ -179,7 +173,7 @@ export default Service.extend({
       }
       newSource = newSource + script.post;
     }
-    console.log(newSource);
+    //console.log(newSource);
     return newSource;
   },
   opTransform(ops, editor) {
