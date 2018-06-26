@@ -50,7 +50,7 @@ export default Service.extend({
   },
   insert(source, item)
   {
-    console.log("inserting", item);
+    //console.log("inserting", item);
     return source + "\n" + item;
   },
   insertStatefullCallbacks(source, savedVals) {
@@ -68,18 +68,16 @@ export default Service.extend({
         if(item.type = "VariableDeclaration"  && item.declarations)
         {
           const name = item.declarations[0].id.name;
-          if(name.substring(0,2) == "p_")
+          const init = item.declarations[0].init;
+          const savedVal = savedVals[name];
+          let exp = script.script.substring(item.start, item.end);
+          if(name.substring(0,2) == "p_" && !init && savedVal)
           {
-            let exp = script.script.substring(item.start, item.end);
-            const savedVal = savedVals[name];
-            if(savedVal)
-            {
-              const kind = item.kind;
-              exp = kind + " " + name + " = " + savedVal + ";";
-            }
-            newSource = this.insert(newSource,exp);
-            added = true;
+            const kind = item.kind;
+            exp = kind + " " + name + " = " + savedVal + ";";
           }
+          newSource = this.insert(newSource,exp);
+          added = true;
         }
         else if (item.type = "VariableDeclaration" && item.expression)
         {
