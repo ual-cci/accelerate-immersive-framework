@@ -65,19 +65,25 @@ export default Service.extend({
       {
         let added = false;
         const item = parsed.body[j];
+        //console.log(item);
         if(item.type = "VariableDeclaration"  && item.declarations)
         {
-          const name = item.declarations[0].id.name;
-          const init = item.declarations[0].init;
-          const savedVal = savedVals[name];
-          let exp = script.script.substring(item.start, item.end);
-          if(name.substring(0,2) == "p_" && !init && savedVal)
+          newSource = this.insert(newSource,item.kind+" ");
+          for(var k = 0; k < item.declarations.length; k++)
           {
-            const kind = item.kind;
-            exp = kind + " " + name + " = " + savedVal + ";";
+            const dec = item.declarations[k];
+            const name = dec.id.name;
+            const init = dec.init;
+            const savedVal = savedVals[name];
+            let exp = script.script.substring(dec.start, dec.end);
+            if(name.substring(0,2) == "p_" && !init && savedVal)
+            {
+              const delim = k >= item.declarations.length - 1 ? ";" : ","
+              exp = name + " = " + savedVal + delim;
+            }
+            newSource = newSource + exp;
+            added = true;
           }
-          newSource = this.insert(newSource,exp);
-          added = true;
         }
         else if (item.type = "VariableDeclaration" && item.expression)
         {
@@ -99,6 +105,7 @@ export default Service.extend({
       }
       newSource = newSource + script.post;
     }
+    console.log(newSource);
     return newSource;
   },
   opTransform(ops, editor) {
