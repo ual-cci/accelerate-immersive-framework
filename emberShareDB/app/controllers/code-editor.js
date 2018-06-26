@@ -12,6 +12,7 @@ export default Controller.extend({
   assetService: inject('assets'),
   store: inject('store'),
   session:inject('session'),
+  codeParser:inject('code-parsing'),
   socketRef: null,
   con: null,
   doc: null,
@@ -54,84 +55,10 @@ export default Controller.extend({
     console.log("updating iframe");
     const doc = self.get('doc');
     let toRender = doc.data.source;
-    toRender = self.replaceAssets(toRender, self.get('model').assets);
-    toRender = self.insertStatefullCallbacks(self, toRender);
-    console.log("output", toRender);
+    toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
+    toRender = self.get('codeParser').insertStatefullCallbacks(toRender, doc.data.savedVals);
+    //console.log("output", toRender);
     self.set('renderedSource', toRender);
-  },
-  insertStatefullCallbacks(self, source) {
-    let newSource = "";
-    const words = source.split(/[\s\n]+/);
-    let ptr = 0;
-    while(ptr < words.length-4)
-    {
-      const isVar = words[ptr];
-      const name = words[ptr + 1];
-      const isEquals = words[ptr + 2];
-      if(name.substring(0,2) == "p_" &&
-        isEquals == "=")
-      {
-        newSource = newSource + isVar + " ";
-        newSource = newSource + name + " = ";
-        ptr =  ptr + 3;
-        if(isVar == "let" || isVar == "var")
-        {
-          const doc = this.get('doc');
-          const savedVal = doc.data.savedVals[name];
-          if(savedVal)
-          {
-            newSource = newSource + savedVal + ";";
-            ptr++;
-          }
-          else
-          {
-            while(words[ptr].indexOf(";") == -1)
-            {
-              newSource = newSource + " " + words[ptr];
-              ptr++;
-            }
-            newSource = newSource + " " + words[ptr];
-            ptr++;
-          }
-        }
-        else
-        {
-          while(words[ptr].indexOf(";") == -1)
-          {
-            newSource = newSource + " " + words[ptr];
-            ptr++;
-          }
-          newSource = newSource + " " + words[ptr];
-          ptr++;
-          newSource = newSource + "parent.postMessage([\"" + name + "\"," + name + "], \"*\");";
-        }
-      }
-      else
-      {
-        newSource = newSource + isVar + " ";
-        ptr++;
-      }
-    }
-    for(var i = ptr; i < words.length; i++)
-    {
-      newSource = newSource + words[i] + " ";
-    }
-    return newSource;
-  },
-  replaceAssets(source, assets) {
-    for(let i = 0; i < assets.length; i++)
-    {
-      const fileId = assets[i].fileId;
-      const toFind = assets[i].name;
-      const fileType = assets[i].fileType;
-      const asset = this.get('store').peekRecord('asset',fileId);
-      if(!isEmpty(asset))
-      {
-        const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-        source = source.replace(new RegExp(toFind,"gm"),b64);
-      }
-    }
-    return source;
   },
   autoExecuteCode(self) {
     if(self.get('codeTimer'))
@@ -142,48 +69,6 @@ export default Controller.extend({
       self.updateIFrame(self);
       self.set('codeTimer',null);
     },1500));
-  },
-  opTransform(ops, editor) {
-    function opToDelta(op) {
-      const index = op.p[op.p.length - 1];
-      const session = editor.getSession();
-      const pos = session.doc.indexToPosition(index, 0);
-      const start = pos;
-      let action;
-      let lines;
-      let end;
-      if ('sd' in op) {
-        action = 'remove';
-        lines = op.sd.split('\n');
-        const count = lines.reduce((total, line) => total + line.length, lines.length - 1);
-        end = session.doc.indexToPosition(index + count, 0);
-      } else if ('si' in op) {
-        action = 'insert';
-        lines = op.si.split('\n');
-        if (lines.length === 1) {
-          end = {
-            row: start.row,
-            column: start.column + op.si.length,
-          };
-        } else {
-          end = {
-            row: start.row + (lines.length - 1),
-            column: lines[lines.length - 1].length,
-          };
-        }
-      } else {
-        throw new Error(`Invalid Operation: ${JSON.stringify(op)}`);
-      }
-      const delta = {
-        start,
-        end,
-        action,
-        lines,
-      };
-      return delta;
-    }
-    const deltas = ops.map(opToDelta);
-    return deltas;
   },
   onSessionChange(self, delta) {
     const surpress = self.get('surpress');
@@ -292,7 +177,7 @@ export default Controller.extend({
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
-        const deltas = this.opTransform(ops, editor);
+        const deltas = this.get('codeParser').opTransform(ops, editor);
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
