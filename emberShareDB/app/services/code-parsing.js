@@ -57,7 +57,7 @@ export default Service.extend({
     console.log(node);
     let newSource = "";
     let added = false;
-    if(node.type = "VariableDeclaration"  && node.declarations)
+    if(node.type == "VariableDeclaration"  && node.declarations)
     {
       console.log("VariableDeclaration");
       newSource = this.insert(newSource,node.kind+" ");
@@ -129,12 +129,13 @@ export default Service.extend({
       newSource = this.insert(newSource, test);
       newSource = newSource + this.parseNode(node.consequent, savedVals, script);
       newSource = newSource + "\n}"
-      added = true;
-    }
-    else if (node.alternate)
-    {
-      console.log("alternate");
-      newSource = newSource + this.parseNode(node.alternate, savedVals, script);
+      if (node.alternate)
+      {
+        console.log("alternate");
+        newSource = this.insert(newSource, "else {\n");
+        newSource = newSource + this.parseNode(node.alternate, savedVals, script);
+        newSource = newSource + "\n}"
+      }
       added = true;
     }
     if(!added)
