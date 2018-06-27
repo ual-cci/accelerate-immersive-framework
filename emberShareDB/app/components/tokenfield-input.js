@@ -1,5 +1,11 @@
 import Ember from 'ember';
 import layout from '../templates/components/tokenfield-input';
+import Component from '@ember/component';
+import { computed, observer } from '@ember/object';
+import { isNone, isEmpty } from '@ember/utils';
+import { schedule } from '@ember/runloop';
+import { A } from '@ember/array';
+import { notEmpty } from '@ember/object/computed';
 
 export const KEYCODE = {
     ENTER: 13,
@@ -13,7 +19,7 @@ export const KEYCODE = {
     COMMA: 188
 };
 
-export default Ember.Component.extend({
+export default Component.extend({
     // Component properties
     layout,
     classNames: ['uncharted-tokenfield-input'],
@@ -29,21 +35,21 @@ export default Ember.Component.extend({
     editable:true,
     tokenComponent: 'base-token',
 
-    tokenfieldId: Ember.computed('elementId', function () {
+    tokenfieldId: computed('elementId', function () {
         return `${this.elementId}-tokenfield`;
     }),
 
     // State
     inputValue: null,
     isFocused: null,
-    hasTokens: Ember.computed.notEmpty('tokens'),
+    hasTokens: notEmpty('tokens'),
     selectedTokenIndex: null,
     showDuplicateMessage: false,
 
     // Lifecycle
     init() {
         this._super(...arguments);
-        if (Ember.isNone(this.get('tokens'))) {
+        if (isNone(this.get('tokens'))) {
             this.set('tokens', Ember.A());
         }
     },
@@ -100,13 +106,13 @@ export default Ember.Component.extend({
         }
     },
 
-    _onDisabledChanged: Ember.observer('disabled', function () {
+    _onDisabledChanged: observer('disabled', function () {
         if (this.get('disabled')) {
             this._blurComponent();
         }
     }),
 
-    _onInputValueChanged: Ember.observer('inputValue', function () {
+    _onInputValueChanged: observer('inputValue', function () {
         const value = this.get('inputValue');
         if (value.indexOf(',') > -1) {
             const values = value.split(',');
@@ -120,7 +126,7 @@ export default Ember.Component.extend({
     _keydownHandler(e) {
         const wasEnterKey = e.which === KEYCODE.ENTER;
         const wasTabKey = e.which === KEYCODE.TAB;
-        const hasValue = !Ember.isEmpty(this.get('inputValue'));
+        const hasValue = !isEmpty(this.get('inputValue'));
         const shouldCreateToken = wasEnterKey || (wasTabKey && hasValue);
 
         if (this.get('showDuplicateMessage')) {
@@ -141,7 +147,7 @@ export default Ember.Component.extend({
         // Highlight text hit backspace wtf?!?!
         const cursorIndex = e.target.selectionStart;
         const cursorIsAtStart = cursorIndex === 0;
-        const hasSelectedToken = !Ember.isNone(this.get('selectedTokenIndex'));
+        const hasSelectedToken = !isNone(this.get('selectedTokenIndex'));
         switch (e.which) {
             case KEYCODE.BACKSPACE:
                 if (hasSelectedToken) {
@@ -153,7 +159,7 @@ export default Ember.Component.extend({
                     } else {
                         this._focusTextInput();
                     }
-                } else if (Ember.isEmpty(this.get('inputValue')) && cursorIsAtStart) {
+                } else if (isEmpty(this.get('inputValue')) && cursorIsAtStart) {
                     this._setSelectedTokenIndex(this.get('tokens.length') - 1);
                     e.preventDefault();
                 }
@@ -162,7 +168,7 @@ export default Ember.Component.extend({
                 if (hasSelectedToken) {
                     const tokenValue = this.get('tokens').objectAt(this.get('selectedTokenIndex'));
                     this._editToken(tokenValue);
-                } else if (!Ember.isEmpty(this.get('inputValue'))) {
+                } else if (!isEmpty(this.get('inputValue'))) {
                     this._createToken(this.get('inputValue'));
                 }
                 break;
@@ -172,13 +178,13 @@ export default Ember.Component.extend({
                     if (prevTokenIndex > -1) {
                         this._setSelectedTokenIndex(prevTokenIndex);
                     }
-                } else if (Ember.isEmpty(this.get('inputValue'))) {
+                } else if (isEmpty(this.get('inputValue'))) {
                     this._setSelectedTokenIndex(this.get('tokens.length') - 1);
                 }
                 break;
             case KEYCODE.RIGHT_ARROW: {
                 const selectedTokenIndex = this.get('selectedTokenIndex');
-                if (Ember.isNone(selectedTokenIndex)) {
+                if (isNone(selectedTokenIndex)) {
                     break;
                 }
 
@@ -194,7 +200,7 @@ export default Ember.Component.extend({
             case KEYCODE.TAB:
                 if (hasSelectedToken) {
                     this._blurComponent();
-                } else if (!Ember.isEmpty(this.get('inputValue'))) {
+                } else if (!isEmpty(this.get('inputValue'))) {
                     this._createToken(this.get('inputValue'));
                 }
                 break;
@@ -208,7 +214,7 @@ export default Ember.Component.extend({
         this.set('isFocused', true);
         if (e.target === this.element) {
             // Div focus event
-            if (Ember.isNone(this.get('selectedTokenIndex'))) {
+            if (isNone(this.get('selectedTokenIndex'))) {
                 this._focusTextInput();
             }
         } else {
@@ -223,7 +229,7 @@ export default Ember.Component.extend({
     },
 
     _inputWasBlurred() {
-        if (Ember.isNone(this.get('selectedTokenIndex'))) {
+        if (isNone(this.get('selectedTokenIndex'))) {
             this._blurComponent();
         }
     },
@@ -238,7 +244,7 @@ export default Ember.Component.extend({
     },
 
     _blurComponent() {
-        if (this.get('addTokenOnBlur') && !Ember.isEmpty(this.get('inputValue'))) {
+        if (this.get('addTokenOnBlur') && !isEmpty(this.get('inputValue'))) {
             this._addToken(this.get('inputValue'));
         }
         this.set('isFocused', false);
@@ -248,7 +254,7 @@ export default Ember.Component.extend({
     _setSelectedTokenIndex(index) {
         this.set('selectedTokenIndex', index);
         this._textInputElement.blur();
-        if (!Ember.isNone(index)) {
+        if (!isNone(index)) {
             this._focusComponent();
         }
     },
@@ -260,13 +266,13 @@ export default Ember.Component.extend({
     },
 
     _addToken(value) {
-        if (!Ember.isNone(value)) {
+        if (!isNone(value)) {
             value = value.trim();
             const isDuplicate = this.get('tokens')
                 .map(token => token.toLowerCase())
                 .includes(value.toLowerCase());
             const allowDuplicates = this.get('allowDuplicates');
-            const hasValue = !Ember.isEmpty(value);
+            const hasValue = !isEmpty(value);
             const willAdd = hasValue && (allowDuplicates || !isDuplicate);
 
             if (willAdd) {
@@ -281,11 +287,11 @@ export default Ember.Component.extend({
 
     _editToken(value) {
         this._removeToken(value);
-        if (!Ember.isNone(this.get('inputValue'))) {
+        if (!isNone(this.get('inputValue'))) {
             this._addToken(this.get('inputValue'));
         }
         this.set('inputValue', value);
-        Ember.run.schedule('afterRender', this, function () {
+        schedule('afterRender', this, function () {
             this._textInputElement.focus();
             this._textInputElement.select();
         });

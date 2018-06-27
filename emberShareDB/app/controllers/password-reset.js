@@ -34,7 +34,7 @@ export default Controller.extend({
   },
   actions: {
     resetPassword() {
-      let { password, passwordAgain } = this.getProperties('password', 'passwordAgain');
+      let password = this.getProperties('password', 'passwordAgain');
       this.validatePasswords().then(() => {
         let username = this.get('username');
         let token = this.get('token');

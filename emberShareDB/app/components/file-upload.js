@@ -1,7 +1,7 @@
-import Component from '@ember/component';
 import EmberUploader from 'ember-uploader';
 import config from  '../config/environment';
 import { inject } from '@ember/service';
+import { isEmpty } from '@ember/utils';
 
 export default EmberUploader.FileField.extend({
   sessionAccount:inject('session-account'),
@@ -10,7 +10,7 @@ export default EmberUploader.FileField.extend({
     const uploader = EmberUploader.Uploader.create({
       url: this.get('url')
     });
-    if (!Ember.isEmpty(files))
+    if (!isEmpty(files))
     {
       let user = this.get('sessionAccount').currentUserName;
       let doc = this.get('sessionAccount').currentDoc;

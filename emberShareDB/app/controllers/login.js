@@ -9,7 +9,7 @@ export default Controller.extend({
   store: inject(),
   validateRegistration: function() {
     return new RSVP.Promise((resolve, reject) => {
-      let { newUsername, newUserEmail, newUserPassword, newUserPasswordAgain } =
+      let { newUsername, newUserPassword, newUserPasswordAgain } =
       this.getProperties('newUsername', 'newUserEmail', 'newUserPassword', 'newUserPasswordAgain');
       if(!newUsername || !newUserPassword || !newUserPasswordAgain)
       {

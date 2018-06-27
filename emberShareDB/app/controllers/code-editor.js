@@ -3,8 +3,9 @@ import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
+import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
-import RSVP from 'rsvp';
+import { scheduleOnce } from '@ember/runloop';
 
 export default Controller.extend({
   websockets: inject('websockets'),
@@ -33,9 +34,9 @@ export default Controller.extend({
   startWidth:0,
   startX:0,
   aceW:700,
-  aceStyle: Ember.computed('aceW', function() {
+  aceStyle: computed('aceW', function() {
     const aceW = this.get('aceW');
-    return Ember.String.htmlSafe("width: " + aceW + "px;");
+    return htmlSafe("width: " + aceW + "px;");
   }),
   preloadAssets(self) {
     const doc = self.get('doc');
@@ -117,28 +118,20 @@ export default Controller.extend({
     this.addWindowListener(this);
   },
   addWindowListener(self) {
-    var eventMethod = window.addEventListener
-			? "addEventListener"
-			: "attachEvent";
+    var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
-  	var messageEvent = eventMethod === "attachEvent"
-  		? "onmessage"
-  		: "message";
+  	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
   	eventer(messageEvent, function(e) {
       self.handleWindowEvent(e,self)
     });
   },
   removeWindowListener() {
-    var eventMethod = window.removeEventListener
-      ? "removeEventListener"
-      : "detachEvent";
+    var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
-    var messageEvent = eventMethod === "detachEvent"
-  		? "onmessage"
-  		: "message";
-      eventer(messageEvent, function(e) {
-        self.handleWindowEvent(e,self)
-      });
+    var messageEvent = eventMethod === "detachEvent"? "onmessage":"message";
+    eventer(messageEvent, function(e) {
+      self.handleWindowEvent(e,self)
+    });
   },
   handleWindowEvent(e, self) {
     if (e.origin === config.localOrigin)
@@ -231,7 +224,7 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         this.set('isNotEdittingDocName', false);
-        Ember.run.scheduleOnce('afterRender', this, function() {
+        scheduleOnce('afterRender', this, function() {
           $('#doc-name-input').focus();
         });
       }
@@ -276,7 +269,7 @@ export default Controller.extend({
         var actions = doc.data.assets.map(fn);
         Promise.all(actions).then(()=> {
           doc.del([],(err)=>{
-            console.log("deleted doc");
+            console.log("deleted doc",err);
             this.get('sessionAccount').updateOwnedDocuments();
             this.transitionToRoute('application');
           });
@@ -293,7 +286,7 @@ export default Controller.extend({
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
         }).catch((err)=>{
-          console.log('ERROR deleting asset', this.get('assetToDelete'));
+          console.log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
       }
     },
@@ -405,7 +398,7 @@ export default Controller.extend({
         this.get('store').query('document', {
           filter: {search: currentUser, page: 0, currentUser:currentUser}
         }).then((documents) => {
-          console.log("new doc created",documents);
+          console.log("new doc created", response, documents);
           this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('code-editor',documents.firstObject.documentId);
         });

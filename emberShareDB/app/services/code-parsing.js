@@ -1,4 +1,5 @@
 import Service, { inject } from '@ember/service';
+import { isEmpty } from '@ember/utils';
 import acorn from 'npm:acorn'
 
 export default Service.extend({
@@ -59,7 +60,7 @@ export default Service.extend({
   {
     const script = this.get('script');
     let newSource = "";
-    let added = false;
+    let parsed = false;
     console.log(node);
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
@@ -69,15 +70,29 @@ export default Service.extend({
         const dec = node.declarations[i];
         const name = dec.id.name;
         const init = dec.init;
-        const savedVal = this.get('savedVals')[name];
+        let savedVal = this.get('savedVals')[name];
         const delim = i >= node.declarations.length - 1 ? ";" : ","
         let exp = script.script.substring(dec.start, dec.end) + delim;
-        if(name.substring(0,2) == "p_" && !init && savedVal)
+        if(name.substring(0,2) == "p_")
         {
-          exp = name + " = " + savedVal + delim;
+          if(!init)
+          {
+            savedVal = savedVal ? savedVal:0;
+            exp = name + " = " + savedVal + delim;
+            newSource = newSource + exp;
+          }
+          else
+          {
+            newSource = newSource + exp;
+            const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+            newSource = this.insert(newSource, msg);
+          }
         }
-        newSource = newSource + exp;
-        added = true;
+        else
+        {
+          newSource = newSource + exp;
+        }
+        parsed = true;
       }
     }
     else if(node.type == "ForStatement")
@@ -89,7 +104,7 @@ export default Service.extend({
       newSource = this.insert(newSource,exp);
       newSource = newSource + this.parseNode(node.body);
       newSource = this.insert(newSource,"\n}");
-      added = true;
+      parsed = true;
     }
     else if(node.type == "WhileStatement")
     {
@@ -98,7 +113,7 @@ export default Service.extend({
       newSource = this.insert(newSource,exp);
       newSource = newSource + this.parseNode(node.body);
       newSource = this.insert(newSource,"\n}");
-      added = true;
+      parsed = true;
     }
     else if (node.expression)
     {
@@ -125,7 +140,7 @@ export default Service.extend({
           const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
           newSource = this.insert(newSource, msg);
         }
-        added = true;
+        parsed = true;
       }
     }
     else if(node.params && node.body)
@@ -148,7 +163,7 @@ export default Service.extend({
         newSource = newSource + this.parseNode(node.body.body[i]);
       }
       newSource = this.insert(newSource,"}")
-      added = true;
+      parsed = true;
     }
     else if(node.body)
     {
@@ -156,7 +171,7 @@ export default Service.extend({
       {
         newSource = newSource + this.parseNode(node.body[i]);
       }
-      added = true;
+      parsed = true;
     }
     else if (node.consequent)
     {
@@ -182,9 +197,9 @@ export default Service.extend({
           newSource = newSource + this.parseNode(alt, true);
         }
       }
-      added = true;
+      parsed = true;
     }
-    if(!added)
+    if(!parsed)
     {
       const exp = script.script.substring(node.start, node.end);
       newSource = this.insert(newSource, exp);

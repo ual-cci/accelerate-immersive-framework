@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
-import EmberObject, { computed } from '@ember/object';
+import { computed } from '@ember/object';
 
 export default Controller.extend({
   message:"",
@@ -27,7 +27,7 @@ export default Controller.extend({
       this.get('store').query('document', {
         filter: {search: currentUser, page: 0, currentUser:currentUser}
       }).then((documents) => {
-        console.log("new doc created",documents);
+        console.log("new doc created", documents, response);
         this.get('sessionAccount').updateOwnedDocuments();
         this.transitionToRoute('code-editor',documents.firstObject.documentId);
       });
