@@ -3,6 +3,8 @@ import acorn from 'npm:acorn'
 
 export default Service.extend({
   store:inject('store'),
+  script:"",
+  savedVals:null,
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
     {
@@ -53,8 +55,9 @@ export default Service.extend({
     console.log("inserting",item);
     return source + "\n" + item;
   },
-  parseNode(node, savedVals, script, fromAlt = false)
+  parseNode(node, fromAlt = false)
   {
+    const script = this.get('script');
     let newSource = "";
     let added = false;
     if(node.type == "VariableDeclaration"  && node.declarations)
@@ -65,7 +68,7 @@ export default Service.extend({
         const dec = node.declarations[i];
         const name = dec.id.name;
         const init = dec.init;
-        const savedVal = savedVals[name];
+        const savedVal = this.get('savedVals')[name];
         const delim = i >= node.declarations.length - 1 ? ";" : ","
         let exp = script.script.substring(dec.start, dec.end) + delim;
         if(name.substring(0,2) == "p_" && !init && savedVal)
@@ -76,15 +79,42 @@ export default Service.extend({
         added = true;
       }
     }
+    else if(node.type == "ForStatement")
+    {
+      let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
+      exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
+      exp = exp + script.script.substring(node.update.start, node.update.end);
+      exp = exp + ")\n{\n";
+      newSource = this.insert(newSource,exp);
+      newSource = newSource + this.parseNode(node.body);
+      newSource = this.insert(newSource,"\n}");
+      added = true;
+    }
     else if (node.expression)
     {
       if(node.expression.type == "AssignmentExpression")
       {
+        console.log(node);
         const exp = script.script.substring(node.start, node.end);
         newSource = this.insert(newSource,exp);
-        const name = node.expression.left.name;
-        const msg = "parent.postMessage([\"" + name + "\"," + name + "], \"*\");"
-        newSource = this.insert(newSource, msg);
+        let left = node.expression.left;
+        let name = left.name;
+        while(!name)
+        {
+          if(left.object)
+          {
+            left = left.object;
+          }
+          else
+          {
+            name = left.name
+          }
+        }
+        if(name.substring(0,2)=="p_")
+        {
+          const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+          newSource = this.insert(newSource, msg);
+        }
         added = true;
       }
     }
@@ -105,7 +135,7 @@ export default Service.extend({
       newSource = newSource + ") {\n";
       for(var i = 0; i < node.body.body.length; i++)
       {
-        newSource = newSource + this.parseNode(node.body.body[i], savedVals, script);
+        newSource = newSource + this.parseNode(node.body.body[i]);
       }
       newSource = this.insert(newSource,"}")
       added = true;
@@ -114,7 +144,7 @@ export default Service.extend({
     {
       for(var i = 0; i < node.body.length; i++)
       {
-        newSource = newSource + this.parseNode(node.body[i], savedVals, script);
+        newSource = newSource + this.parseNode(node.body[i]);
       }
       added = true;
     }
@@ -127,19 +157,19 @@ export default Service.extend({
         test = "else " + test;
       }
       newSource = this.insert(newSource, test);
-      newSource = newSource + this.parseNode(node.consequent, savedVals, script);
+      newSource = newSource + this.parseNode(node.consequent);
       newSource = this.insert(newSource,"}")
       if (alt)
       {
         if(!alt.test)
         {
           newSource = this.insert(newSource, "else {\n");
-          newSource = newSource + this.parseNode(alt, savedVals, script, true);
+          newSource = newSource + this.parseNode(alt, true);
           newSource = this.insert(newSource,"}")
         }
         else
         {
-          newSource = newSource + this.parseNode(alt, savedVals, script, true);
+          newSource = newSource + this.parseNode(alt, true);
         }
       }
       added = true;
@@ -153,10 +183,12 @@ export default Service.extend({
   },
   insertStatefullCallbacks(source, savedVals) {
     let newSource = "";
+    this.set('savedVals', savedVals);
     const scripts = this.getScripts(source);
     for(var i = 0; i < scripts.length; i++)
     {
       const script  = scripts[i];
+      this.set('script', script);
       newSource = newSource + script.preamble;
       let parsed;
       try {
@@ -168,12 +200,12 @@ export default Service.extend({
       {
         for(var j = 0; j < parsed.body.length; j++)
         {
-          newSource = newSource + this.parseNode(parsed.body[j], savedVals, script);
+          newSource = newSource + this.parseNode(parsed.body[j]);
         }
       }
       newSource = newSource + script.post;
     }
-    //console.log(newSource);
+    console.log(newSource);
     return newSource;
   },
   opTransform(ops, editor) {
