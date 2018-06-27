@@ -60,6 +60,7 @@ export default Service.extend({
     const script = this.get('script');
     let newSource = "";
     let added = false;
+    console.log(node);
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
       newSource = this.insert(newSource,node.kind+" ");
@@ -90,11 +91,19 @@ export default Service.extend({
       newSource = this.insert(newSource,"\n}");
       added = true;
     }
+    else if(node.type == "WhileStatement")
+    {
+      let exp = "while(" + script.script.substring(node.test.start, node.test.end);
+      exp = exp + ")\n{\n";
+      newSource = this.insert(newSource,exp);
+      newSource = newSource + this.parseNode(node.body);
+      newSource = this.insert(newSource,"\n}");
+      added = true;
+    }
     else if (node.expression)
     {
       if(node.expression.type == "AssignmentExpression")
       {
-        console.log(node);
         const exp = script.script.substring(node.start, node.end);
         newSource = this.insert(newSource,exp);
         let left = node.expression.left;
@@ -110,6 +119,7 @@ export default Service.extend({
             name = left.name
           }
         }
+        //If an object or a property of it is changed, update with a JSON version of the WHOLE object
         if(name.substring(0,2)=="p_")
         {
           const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
