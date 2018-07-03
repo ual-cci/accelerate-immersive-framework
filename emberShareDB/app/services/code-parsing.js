@@ -58,7 +58,6 @@ export default Service.extend({
     const script = this.get('script');
     let newSource = "";
     let parsed = false;
-    console.log(node);
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
       newSource = this.insert(newSource,node.kind+" ");
@@ -89,7 +88,8 @@ export default Service.extend({
         {
           if(init)
           {
-            if(init.type == "FunctionExpression")
+            if(init.type == "FunctionExpression" ||
+               init.type == "ArrowFunctionExpression")
             {
               newSource = newSource + name + " = ";
               newSource = newSource + this.parseNode(init);
@@ -151,11 +151,50 @@ export default Service.extend({
         }
         parsed = true;
       }
+      else if (node.expression.type == "CallExpression")
+      {
+        let callee = node.expression.callee;
+        let name = callee.name;
+        let exp = "";
+        if(!name)
+        {
+          let object = callee;
+          while(!name)
+          {
+            exp = "." + object.property.name + exp;
+            object = object.object;
+            name= object.name
+          }
+          exp = object.name + exp;
+        }
+        else
+        {
+          exp = name;
+        }
+        exp = exp + "(";
+        let args = node.expression.arguments;
+        for(let i = 0; i < args.length; i++)
+        {
+          const delim = i < args.length-1 ? ",":"";
+          if(args[i].type == "FunctionExpression" || args[i].type == "ArrowFunctionExpression")
+          {
+            exp = exp + this.parseNode(args[i]) + delim;
+          }
+          else
+          {
+            exp = exp + script.script.substring(args[i].start, args[i].end) + delim;
+          }
+        }
+        exp = exp + ");";
+        newSource = this.insert(newSource, exp);
+        parsed = true;
+      }
     }
     else if(node.params && node.body)
     {
-      console.log(node.type);
-      let exp = "function ";
+      const arrowFn = node.type == "ArrowFunctionExpression" ||
+                      node.type == "ArrowFunctionDeclaration";
+      let exp = arrowFn ? "":"function ";
       if(node.id)
       {
         exp = exp + node.id.name;
@@ -173,7 +212,12 @@ export default Service.extend({
           }
         }
       }
-      newSource = newSource + ") {\n";
+      newSource = newSource + ")";
+      if(arrowFn)
+      {
+        newSource = newSource + " => ";
+      }
+      newSource = newSource + " {\n";
       for(let i = 0; i < node.body.body.length; i++)
       {
         newSource = newSource + this.parseNode(node.body.body[i]);
