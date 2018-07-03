@@ -113,7 +113,7 @@ export default Service.extend({
             newSrc = newSrc + this.parseNode(init);
             parsed = true;
           }
-          if(init.type == "ObjectExpression")
+          else if(init.type == "ObjectExpression")
           {
             newSrc = newSrc + name + " = {";
             for(let j = 0; j < init.properties.length; j++)
@@ -124,6 +124,14 @@ export default Service.extend({
               newSrc = newSrc + ",";
             }
             newSrc = newSrc + "}";
+            parsed = true;
+          }
+          else if(init.type == "NewExpression")
+          {
+            const constructorName = this.getName(init.callee);
+            let exp = name + " = new " + constructorName;
+            exp = exp + this.parseArgs(init.arguments);
+            newSrc = newSrc + exp;
             parsed = true;
           }
         }
@@ -162,13 +170,10 @@ export default Service.extend({
     }
     return newSrc;
   },
-  parseCallExpression(node, newSrc)
+  parseArgs(args)
   {
     const script = this.get('script');
-    let callee = node.expression.callee;
-    let exp = this.getName(callee);
-    exp = exp + "(";
-    let args = node.expression.arguments;
+    let exp = "(";
     for(let i = 0; i < args.length; i++)
     {
       if(args[i].type == "FunctionExpression" ||
@@ -184,6 +189,14 @@ export default Service.extend({
       exp = exp + delim;
     }
     exp = exp + ");";
+    return exp;
+  },
+  parseCallExpression(node, newSrc)
+  {
+    const script = this.get('script');
+    let callee = node.expression.callee;
+    let exp = this.getName(callee);
+    exp = exp + this.parseArgs(node.expression.arguments);
     newSrc = this.insert(newSrc, exp);
     return newSrc;
   },
@@ -251,10 +264,10 @@ export default Service.extend({
   },
   parseNode(node, fromAlt = false)
   {
+    console.log(node);
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
-    console.log(node);
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
       newSrc = newSrc + this.parseDeclaration(node, newSrc);
