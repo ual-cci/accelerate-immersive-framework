@@ -53,6 +53,26 @@ export default Service.extend({
     //console.log("inserting",item);
     return source + "\n" + item;
   },
+  getName(node) {
+    let name = node.name;
+    let exp = "";
+    if(!name)
+    {
+      let object = node;
+      while(!name)
+      {
+        exp = "." + object.property.name + exp;
+        object = object.object;
+        name = object.name
+      }
+      exp = object.name + exp;
+    }
+    else
+    {
+      exp = name;
+    }
+    return exp;
+  },
   parseNode(node, fromAlt = false)
   {
     const script = this.get('script');
@@ -112,7 +132,27 @@ export default Service.extend({
       exp = exp + ")\n{\n";
       newSource = this.insert(newSource,exp);
       newSource = newSource + this.parseNode(node.body);
-      newSource = this.insert(newSource,"\n}");
+      newSource = this.insert(newSource,"}");
+      parsed = true;
+    }
+    else if(node.type == "ForInStatement")
+    {
+      const right = this.getName(node.right);
+      const left = node.left.kind + " " + node.left.declarations[0].id.name;
+      let exp = "for(" + left + " in " + right + ")\n{"
+      newSource = this.insert(newSource,exp);
+      newSource = newSource + this.parseNode(node.body);
+      newSource = this.insert(newSource,"}");
+      parsed = true;
+    }
+    else if(node.type == "DoWhileStatement")
+    {
+      newSource = this.insert(newSource,"do {");
+      newSource = newSource + this.parseNode(node.body);
+      newSource = this.insert(newSource,"}");
+      newSource = this.insert(newSource,"while(");
+      newSource = newSource + script.script.substring(node.test.start, node.test.end);
+      newSource = newSource + ")";
       parsed = true;
     }
     else if(node.type == "WhileStatement")
@@ -121,7 +161,23 @@ export default Service.extend({
       exp = exp + ")\n{\n";
       newSource = this.insert(newSource,exp);
       newSource = newSource + this.parseNode(node.body);
-      newSource = this.insert(newSource,"\n}");
+      newSource = this.insert(newSource,"}");
+      parsed = true;
+    }
+    else if (node.type == "TryStatement")
+    {
+      newSource = this.insert(newSource,"try {\n");
+      newSource = newSource + this.parseNode(node.block);
+      newSource = this.insert(newSource,"\n} catch(");
+      newSource = newSource + node.handler.param.name + ") {\n";
+      newSource = newSource + this.parseNode(node.handler.body);
+      newSource = this.insert(newSource,"}");
+      if(node.finalizer)
+      {
+        newSource = this.insert(newSource,"finally {\n");
+        newSource = newSource + this.parseNode(node.finalizer);
+        newSource = this.insert(newSource,"}");
+      }
       parsed = true;
     }
     else if (node.expression)
@@ -154,23 +210,7 @@ export default Service.extend({
       else if (node.expression.type == "CallExpression")
       {
         let callee = node.expression.callee;
-        let name = callee.name;
-        let exp = "";
-        if(!name)
-        {
-          let object = callee;
-          while(!name)
-          {
-            exp = "." + object.property.name + exp;
-            object = object.object;
-            name = object.name
-          }
-          exp = object.name + exp;
-        }
-        else
-        {
-          exp = name;
-        }
+        let exp = this.getName(callee);
         exp = exp + "(";
         let args = node.expression.arguments;
         for(let i = 0; i < args.length; i++)
@@ -226,14 +266,6 @@ export default Service.extend({
       newSource = this.insert(newSource,"}")
       parsed = true;
     }
-    else if(node.body && node.type == "BlockStatement")
-    {
-      for(let i = 0; i < node.body.length; i++)
-      {
-        newSource = newSource + this.parseNode(node.body[i]);
-      }
-      parsed = true;
-    }
     else if (node.consequent)
     {
       const alt = node.alternate;
@@ -257,6 +289,14 @@ export default Service.extend({
         {
           newSource = newSource + this.parseNode(alt, true);
         }
+      }
+      parsed = true;
+    }
+    else if(node.body && node.type == "BlockStatement")
+    {
+      for(let i = 0; i < node.body.length; i++)
+      {
+        newSource = newSource + this.parseNode(node.body[i]);
       }
       parsed = true;
     }
