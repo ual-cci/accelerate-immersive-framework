@@ -1,6 +1,7 @@
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import acorn from 'npm:acorn'
+import walk from "npm:acorn/dist/walk";
 
 export default Service.extend({
   store:inject('store'),
@@ -22,13 +23,9 @@ export default Service.extend({
     return source;
   },
   getScripts(source) {
-    let searchIndex = 0;
-    let index = 0;
+    let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0, startIndex = 0;
     let searchStrs = ['<script',">","</script>"];
-    let ptr = 0;
-    let startIndex = 0;
     let scripts = [];
-    let prevEnd = 0;
     let preamble = "";
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         searchIndex = index + searchStrs[ptr].length;
@@ -53,7 +50,7 @@ export default Service.extend({
   },
   insert(source, item)
   {
-    console.log("inserting",item);
+    //console.log("inserting",item);
     return source + "\n" + item;
   },
   parseNode(node, fromAlt = false)
@@ -65,7 +62,7 @@ export default Service.extend({
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
       newSource = this.insert(newSource,node.kind+" ");
-      for(var i = 0; i < node.declarations.length; i++)
+      for(let i = 0; i < node.declarations.length; i++)
       {
         const dec = node.declarations[i];
         const name = dec.id.name;
@@ -90,7 +87,19 @@ export default Service.extend({
         }
         else
         {
-          newSource = newSource + exp;
+          if(init)
+          {
+            if(init.type == "FunctionExpression")
+            {
+              newSource = newSource + name + " = ";
+              newSource = newSource + this.parseNode(init);
+              parsed = true;
+            }
+          }
+          if(!parsed)
+          {
+            newSource = newSource + exp;
+          }
         }
         parsed = true;
       }
@@ -145,10 +154,17 @@ export default Service.extend({
     }
     else if(node.params && node.body)
     {
-      newSource = this.insert(newSource, "function " + node.id.name + "(");
+      console.log(node.type);
+      let exp = "function ";
+      if(node.id)
+      {
+        exp = exp + node.id.name;
+      }
+      exp = exp + "(";
+      newSource = this.insert(newSource, exp);
       if(node.params.length > 0)
       {
-        for(var i = 0; i < node.params.length; i++)
+        for(let i = 0; i < node.params.length; i++)
         {
           newSource = newSource + node.params[i].name;
           if(i < node.params.length - 1)
@@ -158,7 +174,7 @@ export default Service.extend({
         }
       }
       newSource = newSource + ") {\n";
-      for(var i = 0; i < node.body.body.length; i++)
+      for(let i = 0; i < node.body.body.length; i++)
       {
         newSource = newSource + this.parseNode(node.body.body[i]);
       }
@@ -167,7 +183,7 @@ export default Service.extend({
     }
     else if(node.body)
     {
-      for(var i = 0; i < node.body.length; i++)
+      for(let i = 0; i < node.body.length; i++)
       {
         newSource = newSource + this.parseNode(node.body[i]);
       }
@@ -210,7 +226,7 @@ export default Service.extend({
     let newSource = "";
     this.set('savedVals', savedVals);
     const scripts = this.getScripts(source);
-    for(var i = 0; i < scripts.length; i++)
+    for(let i = 0; i < scripts.length; i++)
     {
       const script  = scripts[i];
       this.set('script', script);
@@ -223,7 +239,7 @@ export default Service.extend({
       }
       if(parsed)
       {
-        for(var j = 0; j < parsed.body.length; j++)
+        for(let j = 0; j < parsed.body.length; j++)
         {
           newSource = newSource + this.parseNode(parsed.body[j]);
         }
