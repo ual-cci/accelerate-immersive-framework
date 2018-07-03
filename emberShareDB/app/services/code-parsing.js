@@ -163,7 +163,7 @@ export default Service.extend({
           {
             exp = "." + object.property.name + exp;
             object = object.object;
-            name= object.name
+            name = object.name
           }
           exp = object.name + exp;
         }
@@ -175,15 +175,16 @@ export default Service.extend({
         let args = node.expression.arguments;
         for(let i = 0; i < args.length; i++)
         {
-          const delim = i < args.length-1 ? ",":"";
           if(args[i].type == "FunctionExpression" || args[i].type == "ArrowFunctionExpression")
           {
-            exp = exp + this.parseNode(args[i]) + delim;
+            exp = exp + this.parseNode(args[i]);
           }
           else
           {
-            exp = exp + script.script.substring(args[i].start, args[i].end) + delim;
+            exp = exp + script.script.substring(args[i].start, args[i].end);
           }
+          const delim = i < args.length - 1 ? "," : "";
+          exp = exp + delim;
         }
         exp = exp + ");";
         newSource = this.insert(newSource, exp);
@@ -225,7 +226,7 @@ export default Service.extend({
       newSource = this.insert(newSource,"}")
       parsed = true;
     }
-    else if(node.body)
+    else if(node.body && node.type == "BlockStatement")
     {
       for(let i = 0; i < node.body.length; i++)
       {
