@@ -7,20 +7,33 @@ export default Service.extend({
   script:"",
   savedVals:null,
   hasPVals:false,
-  replaceAssets(source, assets) {
-    for(let i = 0; i < assets.length; i++)
+  insertStatefullCallbacks(src, savedVals) {
+    let newSrc = "";
+    this.set('savedVals', savedVals);
+    this.set('hasPVals', false);
+    const scripts = this.getScripts(src);
+    for(let i = 0; i < scripts.length; i++)
     {
-      const fileId = assets[i].fileId;
-      const toFind = assets[i].name;
-      const fileType = assets[i].fileType;
-      const asset = this.get('store').peekRecord('asset',fileId);
-      if(!isEmpty(asset))
-      {
-        const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-        source = source.replace(new RegExp(toFind,"gm"),b64);
+      const script  = scripts[i];
+      this.set('script', script);
+      newSrc = newSrc + script.preamble;
+      let parsed;
+      try {
+        parsed = acorn.parse(script.script);
+      } catch (err) {
+        console.log("Error parsing script", err);
       }
+      if(parsed)
+      {
+        for(let j = 0; j < parsed.body.length; j++)
+        {
+          newSrc = newSrc + this.parseNode(parsed.body[j]);
+        }
+      }
+      newSrc = newSrc + script.post;
     }
-    return source;
+    console.log(newSrc);
+    return this.get('hasPVals') ? newSrc : src;
   },
   getScripts(source) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0, startIndex = 0;
@@ -50,6 +63,144 @@ export default Service.extend({
       scripts[scripts.length-1].post = scripts[scripts.length-1].post + source.substr(prevEnd);
     }
     return scripts;
+  },
+  parseNode(node, fromAlt = false)
+  {
+    console.log(node)
+    const script = this.get('script');
+    let newSrc = "";
+    let parsed = false;
+    if(node.type == "VariableDeclaration"  && node.declarations)
+    {
+      console.log("VariableDeclaration");
+      newSrc = newSrc + this.parseDeclaration(node, newSrc);
+      parsed = true;
+    }
+    else if (node.expression)
+    {
+      newSrc = newSrc + this.parseNode(node.expression, newSrc);
+      parsed = true;
+    }
+    else if(node.type == "AssignmentExpression")
+    {
+      console.log("AssignmentExpression");
+      newSrc = newSrc + this.parseAssignment(node, newSrc);
+      parsed = true;
+    }
+    else if (node.type == "CallExpression")
+    {
+      console.log("CallExpression");
+      newSrc = newSrc + this.parseCallExpression(node, newSrc);
+      parsed = true;
+    }
+    else if(node.type == "ReturnStatement")
+    {
+      console.log("ReturnStatement");
+      newSrc = newSrc + this.parseReturnStatement(node, newSrc);
+      parsed = true;
+    }
+    else if(node.params && node.body)
+    {
+      console.log("Function");
+      newSrc = newSrc + this.parseFunction(node, newSrc);
+      parsed = true;
+    }
+    else if (node.type.includes("Expression") && !node.expression)
+    {
+      console.log("Expression");
+      newSrc = newSrc + this.parseExpression(node, newSrc);
+      parsed = true;
+    }
+    else if (node.consequent)
+    {
+      console.log("Conditional");
+      newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
+      parsed = true;
+    }
+    else if(node.type == "ForStatement")
+    {
+      console.log("ForStatement");
+      let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
+      exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
+      exp = exp + script.script.substring(node.update.start, node.update.end);
+      exp = exp + ")\n{\n";
+      newSrc = this.insert(newSrc,exp);
+      newSrc = newSrc + this.parseNode(node.body);
+      newSrc = this.insert(newSrc,"}");
+      parsed = true;
+    }
+    else if(node.type == "ForInStatement")
+    {
+      console.log("ForInStatement");
+      const right = this.getName(node.right);
+      const left = node.left.kind + " " + node.left.declarations[0].id.name;
+      let exp = "for(" + left + " in " + right + ")\n{"
+      newSrc = this.insert(newSrc,exp);
+      newSrc = newSrc + this.parseNode(node.body);
+      newSrc = this.insert(newSrc,"}");
+      parsed = true;
+    }
+    else if(node.type == "DoWhileStatement")
+    {
+      console.log("DoWhileStatement");
+      newSrc = this.insert(newSrc,"do {");
+      newSrc = newSrc + this.parseNode(node.body);
+      newSrc = this.insert(newSrc,"}");
+      newSrc = this.insert(newSrc,"while(");
+      newSrc = newSrc + script.script.substring(node.test.start, node.test.end);
+      newSrc = newSrc + ")";
+      parsed = true;
+    }
+    else if(node.type == "WhileStatement")
+    {
+      console.log("WhileStatement");
+      let exp = "while(" + script.script.substring(node.test.start, node.test.end);
+      exp = exp + ")\n{\n";
+      newSrc = this.insert(newSrc,exp);
+      newSrc = newSrc + this.parseNode(node.body);
+      newSrc = this.insert(newSrc,"}");
+      parsed = true;
+    }
+    else if (node.type == "TryStatement")
+    {
+      console.log("TryStatement");
+      newSrc = this.insert(newSrc,"try {\n");
+      newSrc = newSrc + this.parseNode(node.block);
+      newSrc = this.insert(newSrc,"\n} catch(");
+      newSrc = newSrc + node.handler.param.name + ") {\n";
+      newSrc = newSrc + this.parseNode(node.handler.body);
+      newSrc = this.insert(newSrc,"}");
+      if(node.finalizer)
+      {
+        newSrc = this.insert(newSrc,"finally {\n");
+        newSrc = newSrc + this.parseNode(node.finalizer);
+        newSrc = this.insert(newSrc,"}");
+      }
+      parsed = true;
+    }
+    else if(node.body && node.type == "BlockStatement")
+    {
+      console.log("BlockStatement");
+      for(let i = 0; i < node.body.length; i++)
+      {
+        newSrc = newSrc + this.parseNode(node.body[i]);
+      }
+      parsed = true;
+    }
+    else if (node.type == "Literal")
+    {
+      console.log("Literal");
+      newSrc = newSrc + node.raw;
+      parsed = true;
+    }
+    //If not parsed, insert verbatim
+    if(!parsed)
+    {
+      console.log("Not parsed");
+      const exp = script.script.substring(node.start, node.end);
+      newSrc = newSrc + exp;
+    }
+    return newSrc;
   },
   insert(source, item)
   {
@@ -295,171 +446,20 @@ export default Service.extend({
     }
     return newSrc;
   },
-  parseNode(node, fromAlt = false)
-  {
-    console.log(node)
-    const script = this.get('script');
-    let newSrc = "";
-    let parsed = false;
-    if(node.type == "VariableDeclaration"  && node.declarations)
+  replaceAssets(source, assets) {
+    for(let i = 0; i < assets.length; i++)
     {
-      console.log("VariableDeclaration");
-      newSrc = newSrc + this.parseDeclaration(node, newSrc);
-      parsed = true;
-    }
-    else if (node.expression)
-    {
-      newSrc = newSrc + this.parseNode(node.expression, newSrc);
-      parsed = true;
-    }
-    else if(node.type == "AssignmentExpression")
-    {
-      console.log("AssignmentExpression");
-      newSrc = newSrc + this.parseAssignment(node, newSrc);
-      parsed = true;
-    }
-    else if (node.type == "CallExpression")
-    {
-      console.log("CallExpression");
-      newSrc = newSrc + this.parseCallExpression(node, newSrc);
-      parsed = true;
-    }
-    else if(node.type == "ReturnStatement")
-    {
-      console.log("ReturnStatement");
-      newSrc = newSrc + this.parseReturnStatement(node, newSrc);
-      parsed = true;
-    }
-    else if(node.params && node.body)
-    {
-      console.log("Function");
-      newSrc = newSrc + this.parseFunction(node, newSrc);
-      parsed = true;
-    }
-    else if (node.type.includes("Expression") && !node.expression)
-    {
-      console.log("Expression");
-      newSrc = newSrc + this.parseExpression(node, newSrc);
-      parsed = true;
-    }
-    else if (node.consequent)
-    {
-      console.log("Conditional");
-      newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
-      parsed = true;
-    }
-    else if(node.type == "ForStatement")
-    {
-      console.log("ForStatement");
-      let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
-      exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
-      exp = exp + script.script.substring(node.update.start, node.update.end);
-      exp = exp + ")\n{\n";
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if(node.type == "ForInStatement")
-    {
-      console.log("ForInStatement");
-      const right = this.getName(node.right);
-      const left = node.left.kind + " " + node.left.declarations[0].id.name;
-      let exp = "for(" + left + " in " + right + ")\n{"
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if(node.type == "DoWhileStatement")
-    {
-      console.log("DoWhileStatement");
-      newSrc = this.insert(newSrc,"do {");
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      newSrc = this.insert(newSrc,"while(");
-      newSrc = newSrc + script.script.substring(node.test.start, node.test.end);
-      newSrc = newSrc + ")";
-      parsed = true;
-    }
-    else if(node.type == "WhileStatement")
-    {
-      console.log("WhileStatement");
-      let exp = "while(" + script.script.substring(node.test.start, node.test.end);
-      exp = exp + ")\n{\n";
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if (node.type == "TryStatement")
-    {
-      console.log("TryStatement");
-      newSrc = this.insert(newSrc,"try {\n");
-      newSrc = newSrc + this.parseNode(node.block);
-      newSrc = this.insert(newSrc,"\n} catch(");
-      newSrc = newSrc + node.handler.param.name + ") {\n";
-      newSrc = newSrc + this.parseNode(node.handler.body);
-      newSrc = this.insert(newSrc,"}");
-      if(node.finalizer)
+      const fileId = assets[i].fileId;
+      const toFind = assets[i].name;
+      const fileType = assets[i].fileType;
+      const asset = this.get('store').peekRecord('asset',fileId);
+      if(!isEmpty(asset))
       {
-        newSrc = this.insert(newSrc,"finally {\n");
-        newSrc = newSrc + this.parseNode(node.finalizer);
-        newSrc = this.insert(newSrc,"}");
+        const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+        source = source.replace(new RegExp(toFind,"gm"),b64);
       }
-      parsed = true;
     }
-    else if(node.body && node.type == "BlockStatement")
-    {
-      console.log("BlockStatement");
-      for(let i = 0; i < node.body.length; i++)
-      {
-        newSrc = newSrc + this.parseNode(node.body[i]);
-      }
-      parsed = true;
-    }
-    else if (node.type == "Literal")
-    {
-      console.log("Literal");
-      newSrc = newSrc + node.raw;
-      parsed = true;
-    }
-    //If not parsed, insert verbatim
-    if(!parsed)
-    {
-      console.log("Not parsed");
-      const exp = script.script.substring(node.start, node.end);
-      newSrc = newSrc + exp;
-    }
-    return newSrc;
-  },
-  insertStatefullCallbacks(src, savedVals) {
-    let newSrc = "";
-    this.set('savedVals', savedVals);
-    this.set('hasPVals', false);
-    const scripts = this.getScripts(src);
-    for(let i = 0; i < scripts.length; i++)
-    {
-      const script  = scripts[i];
-      this.set('script', script);
-      newSrc = newSrc + script.preamble;
-      let parsed;
-      try {
-        parsed = acorn.parse(script.script);
-      } catch (err) {
-        console.log("Error parsing script", err);
-      }
-      if(parsed)
-      {
-        for(let j = 0; j < parsed.body.length; j++)
-        {
-          newSrc = newSrc + this.parseNode(parsed.body[j]);
-        }
-      }
-      newSrc = newSrc + script.post;
-    }
-    console.log(newSrc);
-    return this.get('hasPVals') ? newSrc : src;
+    return source;
   },
   opTransform(ops, editor) {
     function opToDelta(op) {
