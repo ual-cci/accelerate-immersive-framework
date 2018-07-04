@@ -45,7 +45,10 @@ export default Service.extend({
         }
         ptr = (ptr + 1) % searchStrs.length;
     }
-    scripts[scripts.length-1].post = scripts[scripts.length-1].post + source.substr(prevEnd);
+    if(scripts.length > 0)
+    {
+      scripts[scripts.length-1].post = scripts[scripts.length-1].post + source.substr(prevEnd);
+    }
     return scripts;
   },
   insert(source, item)
