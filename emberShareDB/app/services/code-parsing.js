@@ -133,10 +133,6 @@ export default Service.extend({
     if(node.type == "FunctionExpression" ||
        node.type == "ArrowFunctionExpression")
     {
-      if(name)
-      {
-        newSrc = newSrc + name + " = ";
-      }
       newSrc = newSrc + this.parseNode(node);
     }
     else if(node.type == "ObjectExpression")
@@ -212,19 +208,11 @@ export default Service.extend({
     let exp = "(";
     for(let i = 0; i < args.length; i++)
     {
-      if(args[i].type == "FunctionExpression" ||
-         args[i].type == "ArrowFunctionExpression")
-      {
-        exp = exp + this.parseNode(args[i]);
-      }
-      else
-      {
-        exp = exp + script.script.substring(args[i].start, args[i].end);
-      }
+      exp = exp + this.parseNode(args[i]);
       const delim = i < args.length - 1 ? "," : "";
       exp = exp + delim;
     }
-    exp = exp + ");";
+    exp = exp + ")";
     return exp;
   },
   parseCallExpression(node, newSrc)
@@ -433,7 +421,7 @@ export default Service.extend({
     else if (node.type == "Literal")
     {
       console.log("Literal");
-      newSrc = newSrc + node.value;
+      newSrc = newSrc + node.raw;
       parsed = true;
     }
     //If not parsed, insert verbatim
