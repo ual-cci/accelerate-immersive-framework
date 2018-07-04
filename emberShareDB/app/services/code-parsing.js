@@ -50,7 +50,6 @@ export default Service.extend({
   },
   insert(source, item)
   {
-    //console.log("inserting",item);
     return source + "\n" + item;
   },
   getName(node) {
@@ -61,7 +60,16 @@ export default Service.extend({
       let object = node;
       while(!name)
       {
-        exp = "." + object.property.name + exp;
+        const prop = object.property;
+        const propName = prop.name ? prop.name : prop.value;
+        if(object.computed)
+        {
+          exp = "[" + propName + "]" + exp;
+        }
+        else
+        {
+          exp = "." + propName + exp;
+        }
         object = object.object;
         name = object.name
       }
@@ -121,7 +129,8 @@ export default Service.extend({
               const prop = init.properties[j]
               newSrc = newSrc + prop.key.name + ":";
               newSrc = newSrc + this.parseNode(prop.value);
-              newSrc = newSrc + ",";
+              const delim = j < init.properties.length - 1 ? "," : "";
+              newSrc = newSrc + delim;
             }
             newSrc = newSrc + "}";
             parsed = true;
@@ -132,6 +141,19 @@ export default Service.extend({
             let exp = name + " = new " + constructorName;
             exp = exp + this.parseArgs(init.arguments);
             newSrc = newSrc + exp;
+            parsed = true;
+          }
+          else if(init.type == "ArrayExpression")
+          {
+            newSrc = newSrc + name + " = ["
+            for(let j = 0; j < init.elements.length; j++)
+            {
+              const element = init.elements[j];
+              newSrc = newSrc + this.parseNode(element);
+              const delim = j < init.elements.length - 1 ? "," : "";
+              newSrc = newSrc + delim;
+            }
+            newSrc = newSrc + "]"
             parsed = true;
           }
         }
