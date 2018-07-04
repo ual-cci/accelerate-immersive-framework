@@ -84,7 +84,7 @@ export default Service.extend({
   parseDeclaration(node, newSrc)
   {
     const script = this.get('script');
-    newSrc = this.insert(newSrc,node.kind+" ");
+    newSrc = this.insert(newSrc, node.kind + " ");
     for(let i = 0; i < node.declarations.length; i++)
     {
       const dec = node.declarations[i];
@@ -111,57 +111,80 @@ export default Service.extend({
       }
       else
       {
-        let parsed = false;
         if(init)
         {
-          if(init.type == "FunctionExpression" ||
-             init.type == "ArrowFunctionExpression")
+          const parsed = this.parseExpression(init, name);
+          if(parsed)
           {
-            newSrc = newSrc + name + " = ";
-            newSrc = newSrc + this.parseNode(init);
-            parsed = true;
+            newSrc = newSrc + parsed;
           }
-          else if(init.type == "ObjectExpression")
+          else
           {
-            newSrc = newSrc + name + " = {";
-            for(let j = 0; j < init.properties.length; j++)
-            {
-              const prop = init.properties[j]
-              newSrc = newSrc + prop.key.name + ":";
-              newSrc = newSrc + this.parseNode(prop.value);
-              const delim = j < init.properties.length - 1 ? "," : "";
-              newSrc = newSrc + delim;
-            }
-            newSrc = newSrc + "}";
-            parsed = true;
-          }
-          else if(init.type == "NewExpression")
-          {
-            const constructorName = this.getName(init.callee);
-            let exp = name + " = new " + constructorName;
-            exp = exp + this.parseArgs(init.arguments);
             newSrc = newSrc + exp;
-            parsed = true;
-          }
-          else if(init.type == "ArrayExpression")
-          {
-            newSrc = newSrc + name + " = ["
-            for(let j = 0; j < init.elements.length; j++)
-            {
-              const element = init.elements[j];
-              newSrc = newSrc + this.parseNode(element);
-              const delim = j < init.elements.length - 1 ? "," : "";
-              newSrc = newSrc + delim;
-            }
-            newSrc = newSrc + "]"
-            parsed = true;
           }
         }
-        if(!parsed)
+        else
         {
           newSrc = newSrc + exp;
         }
       }
+    }
+    return newSrc;
+  },
+  parseExpression(node, name)
+  {
+    let newSrc = "";
+    if(node.type == "FunctionExpression" ||
+       node.type == "ArrowFunctionExpression")
+    {
+      if(name)
+      {
+        newSrc = newSrc + name + " = ";
+      }
+      newSrc = newSrc + this.parseNode(node);
+    }
+    else if(node.type == "ObjectExpression")
+    {
+      if(name)
+      {
+        newSrc = newSrc + name + " = {";
+      }
+      for(let j = 0; j < node.properties.length; j++)
+      {
+        const prop = node.properties[j]
+        newSrc = newSrc + prop.key.name + ":";
+        newSrc = newSrc + this.parseNode(prop.value);
+        const delim = j < node.properties.length - 1 ? "," : "";
+        newSrc = newSrc + delim;
+      }
+      newSrc = newSrc + "}";
+    }
+    else if(node.type == "NewExpression")
+    {
+      const constructorName = this.getName(node.callee);
+      let exp = name ? name + " = " : "";
+      exp = exp + "new " + constructorName;
+      exp = exp + this.parseArgs(node.arguments);
+      newSrc = newSrc + exp;
+    }
+    else if(node.type == "ArrayExpression")
+    {
+      if(name)
+      {
+        newSrc = newSrc + name + " = ["
+      }
+      for(let j = 0; j < node.elements.length; j++)
+      {
+        const element = node.elements[j];
+        newSrc = newSrc + this.parseNode(element);
+        const delim = j < node.elements.length - 1 ? "," : "";
+        newSrc = newSrc + delim;
+      }
+      newSrc = newSrc + "]"
+    }
+    else
+    {
+      return null;
     }
     return newSrc;
   },
@@ -284,9 +307,17 @@ export default Service.extend({
     }
     return newSrc;
   },
+  parseReturnStatement(node, newSrc)
+  {
+    newSrc = this.insert(newSrc, "return ");
+    if(node.argument)
+    {
+      newSrc = newSrc + this.parseExpression(node.argument)
+    }
+    return newSrc;
+  },
   parseNode(node, fromAlt = false)
   {
-    console.log(node);
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
@@ -307,6 +338,11 @@ export default Service.extend({
         newSrc = newSrc + this.parseCallExpression(node, newSrc);
         parsed = true;
       }
+    }
+    else if(node.type == "ReturnStatement")
+    {
+      newSrc = newSrc + this.parseReturnStatement(node, newSrc);
+      parsed = true;
     }
     else if(node.params && node.body)
     {
@@ -404,7 +440,7 @@ export default Service.extend({
       try {
         parsed = acorn.parse(script.script);
       } catch (err) {
-        console.log("Error parsing script", script);
+        console.log("Error parsing script", err);
       }
       if(parsed)
       {
