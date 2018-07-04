@@ -116,15 +116,8 @@ export default Service.extend({
       {
         if(init)
         {
-          const parsed = this.parseExpression(init, name);
-          if(parsed)
-          {
-            newSrc = newSrc + parsed;
-          }
-          else
-          {
-            newSrc = newSrc + exp;
-          }
+          newSrc = newSrc + name + " = ";
+          newSrc = newSrc + this.parseNode(init);
         }
         else
         {
@@ -134,7 +127,7 @@ export default Service.extend({
     }
     return newSrc;
   },
-  parseExpression(node, name)
+  parseExpression(node)
   {
     let newSrc = "";
     if(node.type == "FunctionExpression" ||
@@ -148,10 +141,7 @@ export default Service.extend({
     }
     else if(node.type == "ObjectExpression")
     {
-      if(name)
-      {
-        newSrc = newSrc + name + " = {";
-      }
+      newSrc = newSrc + " {";
       for(let j = 0; j < node.properties.length; j++)
       {
         const prop = node.properties[j]
@@ -165,17 +155,13 @@ export default Service.extend({
     else if(node.type == "NewExpression")
     {
       const constructorName = this.getName(node.callee);
-      let exp = name ? name + " = " : "";
-      exp = exp + "new " + constructorName;
+      let exp = " new " + constructorName;
       exp = exp + this.parseArgs(node.arguments);
       newSrc = newSrc + exp;
     }
     else if(node.type == "ArrayExpression")
     {
-      if(name)
-      {
-        newSrc = newSrc + name + " = ["
-      }
+      newSrc = newSrc + " ["
       for(let j = 0; j < node.elements.length; j++)
       {
         const element = node.elements[j];
@@ -187,7 +173,9 @@ export default Service.extend({
     }
     else
     {
-      return null;
+      const script = this.get('script');
+      const exp = script.script.substring(node.start, node.end);
+      newSrc = this.insert(newSrc,exp);
     }
     return newSrc;
   },
@@ -196,7 +184,7 @@ export default Service.extend({
     const script = this.get('script');
     const exp = script.script.substring(node.start, node.end);
     newSrc = this.insert(newSrc,exp);
-    let left = node.expression.left;
+    let left = node.left;
     let name = left.name;
     while(!name)
     {
@@ -242,9 +230,9 @@ export default Service.extend({
   parseCallExpression(node, newSrc)
   {
     const script = this.get('script');
-    let callee = node.expression.callee;
+    let callee = node.callee;
     let exp = this.getName(callee);
-    exp = exp + this.parseArgs(node.expression.arguments);
+    exp = exp + this.parseArgs(node.arguments);
     newSrc = this.insert(newSrc, exp);
     return newSrc;
   },
@@ -315,50 +303,66 @@ export default Service.extend({
     newSrc = this.insert(newSrc, "return ");
     if(node.argument)
     {
-      newSrc = newSrc + this.parseExpression(node.argument)
+      newSrc = newSrc + this.parseNode(node.argument);
     }
     return newSrc;
   },
   parseNode(node, fromAlt = false)
   {
+    console.log(node)
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
     if(node.type == "VariableDeclaration"  && node.declarations)
     {
+      console.log("VariableDeclaration");
       newSrc = newSrc + this.parseDeclaration(node, newSrc);
       parsed = true;
     }
     else if (node.expression)
     {
-      if(node.expression.type == "AssignmentExpression")
-      {
-        newSrc = newSrc + this.parseAssignment(node, newSrc);
-        parsed = true;
-      }
-      else if (node.expression.type == "CallExpression")
-      {
-        newSrc = newSrc + this.parseCallExpression(node, newSrc);
-        parsed = true;
-      }
+      newSrc = newSrc + this.parseNode(node.expression, newSrc);
+      parsed = true;
+    }
+    else if(node.type == "AssignmentExpression")
+    {
+      console.log("AssignmentExpression");
+      newSrc = newSrc + this.parseAssignment(node, newSrc);
+      parsed = true;
+    }
+    else if (node.type == "CallExpression")
+    {
+      console.log("CallExpression");
+      newSrc = newSrc + this.parseCallExpression(node, newSrc);
+      parsed = true;
     }
     else if(node.type == "ReturnStatement")
     {
+      console.log("ReturnStatement");
       newSrc = newSrc + this.parseReturnStatement(node, newSrc);
       parsed = true;
     }
     else if(node.params && node.body)
     {
+      console.log("Function");
       newSrc = newSrc + this.parseFunction(node, newSrc);
+      parsed = true;
+    }
+    else if (node.type.includes("Expression") && !node.expression)
+    {
+      console.log("Expression");
+      newSrc = newSrc + this.parseExpression(node, newSrc);
       parsed = true;
     }
     else if (node.consequent)
     {
+      console.log("Conditional");
       newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
       parsed = true;
     }
     else if(node.type == "ForStatement")
     {
+      console.log("ForStatement");
       let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
       exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
       exp = exp + script.script.substring(node.update.start, node.update.end);
@@ -370,6 +374,7 @@ export default Service.extend({
     }
     else if(node.type == "ForInStatement")
     {
+      console.log("ForInStatement");
       const right = this.getName(node.right);
       const left = node.left.kind + " " + node.left.declarations[0].id.name;
       let exp = "for(" + left + " in " + right + ")\n{"
@@ -380,6 +385,7 @@ export default Service.extend({
     }
     else if(node.type == "DoWhileStatement")
     {
+      console.log("DoWhileStatement");
       newSrc = this.insert(newSrc,"do {");
       newSrc = newSrc + this.parseNode(node.body);
       newSrc = this.insert(newSrc,"}");
@@ -390,6 +396,7 @@ export default Service.extend({
     }
     else if(node.type == "WhileStatement")
     {
+      console.log("WhileStatement");
       let exp = "while(" + script.script.substring(node.test.start, node.test.end);
       exp = exp + ")\n{\n";
       newSrc = this.insert(newSrc,exp);
@@ -399,6 +406,7 @@ export default Service.extend({
     }
     else if (node.type == "TryStatement")
     {
+      console.log("TryStatement");
       newSrc = this.insert(newSrc,"try {\n");
       newSrc = newSrc + this.parseNode(node.block);
       newSrc = this.insert(newSrc,"\n} catch(");
@@ -415,17 +423,25 @@ export default Service.extend({
     }
     else if(node.body && node.type == "BlockStatement")
     {
+      console.log("BlockStatement");
       for(let i = 0; i < node.body.length; i++)
       {
         newSrc = newSrc + this.parseNode(node.body[i]);
       }
       parsed = true;
     }
+    else if (node.type == "Literal")
+    {
+      console.log("Literal");
+      newSrc = newSrc + node.value;
+      parsed = true;
+    }
     //If not parsed, insert verbatim
     if(!parsed)
     {
+      console.log("Not parsed");
       const exp = script.script.substring(node.start, node.end);
-      newSrc = this.insert(newSrc, exp);
+      newSrc = newSrc + exp;
     }
     return newSrc;
   },
