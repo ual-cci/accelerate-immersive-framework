@@ -30,6 +30,7 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
+  showShare:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -46,6 +47,15 @@ export default Controller.extend({
   showName:true,
   displayEditor: computed('hideEditor', function() {
     return this.get('hideEditor') != "true";
+  }),
+  editLink: computed('model', function() {
+    return config.localOrigin + "/code/" + this.get('model').id;;
+  }),
+  embedLink: computed('editLink', function() {
+    return this.get('editLink') + "?embed=true";
+  }),
+  displayLink: computed('editLink', function() {
+    return this.get('editLink') + "?hideEditor=true";
   }),
   initShareDB() {
     const socket = new WebSocket(config.wsHost);
@@ -329,6 +339,10 @@ export default Controller.extend({
     },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
+    },
+    toggleShowShare()
+    {
+      this.toggleProperty('showShare');
     },
     cleanUp() {
       this.set('renderedSource',"");

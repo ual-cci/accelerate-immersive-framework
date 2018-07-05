@@ -1,4 +1,4 @@
-<div class>
+<div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
       <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
@@ -37,6 +37,19 @@
             </div>
           {{/if}}
         {{/if}}
+        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
+          Share
+        {{/bs-button}}
+        <div>
+        {{#if showShare}}
+        <label for="edit-link">Editable Link</label>
+        {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}
+        <label for="display-link">Just Display Link</label>
+        {{input value=displayLink type="form-control" id="display-link" name="display-link"}}
+        <label for="embed-link">Embed Link</label>
+        {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
+        {{/if}}
+      </div>
         <div class = "file-upload-container">
           Assets:
           {{#each model.assets as |asset|}}
