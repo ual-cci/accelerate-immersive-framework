@@ -49,7 +49,7 @@ export default Controller.extend({
     return this.get('hideEditor') != "true";
   }),
   editLink: computed('model', function() {
-    return config.localOrigin + "/code/" + this.get('model').id;;
+    return config.localOrigin + "/code/" + this.get('model').id;
   }),
   embedLink: computed('editLink', function() {
     return this.get('editLink') + "?embed=true";
