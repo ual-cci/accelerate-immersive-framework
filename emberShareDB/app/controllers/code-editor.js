@@ -15,7 +15,7 @@ export default Controller.extend({
   store: inject('store'),
   session:inject('session'),
   codeParser:inject('code-parsing'),
-  socketRef: null,
+  modalsManager: inject('modalsManager'),
   con: null,
   doc: null,
   editor: null,
@@ -31,6 +31,8 @@ export default Controller.extend({
   assetToDelete:"",
   autoRender:false,
   showShare:false,
+  showAssets:false,
+  showPreview:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -318,6 +320,25 @@ export default Controller.extend({
         });
       }
     },
+    previewAsset(asset)
+    {
+      var url = config.serverHost + "/asset/"+asset.fileId;
+      console.log(asset.fileType);
+      const isImage = asset.fileType.includes("image");
+      const isAudio = asset.fileType.includes("audio");
+      const isVideo = asset.fileType.includes("video");
+      this.get('modalsManager')
+        .alert({title: asset.name,
+                bodyComponent: 'modal-preview-body',
+                assetURL:url,
+                isImage:isImage,
+                isAudio:isAudio,
+                isVideo:isVideo})
+        .then(() => {
+
+        });
+      this.toggleProperty('showPreview');
+    },
     toggleAllowDocDelete() {
       if(this.get('canEditDoc'))
       {
@@ -343,6 +364,10 @@ export default Controller.extend({
     toggleShowShare()
     {
       this.toggleProperty('showShare');
+    },
+    toggleShowAssets()
+    {
+      this.toggleProperty('showAssets');
     },
     cleanUp() {
       this.set('renderedSource',"");

@@ -1,0 +1,15 @@
+{{#if options.isImage}}
+<img class = "preview-image" src = {{options.assetURL}}/>
+{{/if}}
+{{#if options.isAudio}}
+<audio controls>
+ <source src={{options.assetURL}}>
+Your browser does not support the audio element.
+</audio>
+{{/if}}
+{{#if options.isVideo}}
+<video class = "preview-video" controls>
+  <source src={{options.assetURL}}>
+  Your browser does not support the video tag.
+</video>
+{{/if}}
