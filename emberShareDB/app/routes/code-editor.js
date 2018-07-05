@@ -3,7 +3,10 @@ import Route from '@ember/routing/route';
 export default Route.extend({
   queryParams: {
     hideEditor: {
-      refreshModel: true
+      replace:true
+    },
+    embed: {
+      replace:true
     }
   },
   model: function(params) {

@@ -8,7 +8,7 @@ import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 
 export default Controller.extend({
-  queryParams:["hideEditor"],
+  queryParams:["hideEditor","embed"],
   websockets: inject('websockets'),
   sessionAccount: inject('session-account'),
   assetService: inject('assets'),
@@ -42,10 +42,75 @@ export default Controller.extend({
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   hideEditor:'false',
+  embed:'false',
+  showName:true,
   displayEditor: computed('hideEditor', function() {
-    const hideEditor = this.get('hideEditor');
-    return hideEditor != "true";
+    return this.get('hideEditor') != "true";
   }),
+  initShareDB() {
+    const socket = new WebSocket(config.wsHost);
+    const con = new ShareDB.Connection(socket);
+    this.set('socketRef', socket);
+    this.set('connection', con);
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    session.on('change',(delta)=>{
+      this.onSessionChange(this, delta);
+    });
+    session.setMode("ace/mode/html");
+    this.initDoc();
+    this.addWindowListener(this);
+  },
+  initDoc() {
+    const con = this.get('connection');
+    const doc = con.get(config.contentDBName,this.get('model').id);
+    console.log("setting doc",this.get('model').id);
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    const embed = this.get('embed') == "true";
+    $("#mimic-navbar").css("display", embed ? "none" : "block");
+    if(embed)
+    {
+      this.set('displayEditor', !embed);
+      this.set('showName', !embed);
+    }
+    doc.subscribe((err) => {
+      if (err) throw err;
+      if(!isEmpty(doc.data))
+      {
+        this.set('doc', doc);
+        this.setCanEditDoc();
+        console.log("read only?",!this.get('canEditDoc'));
+        console.log(doc.data);
+        editor.setReadOnly(!this.get('canEditDoc'));
+        this.preloadAssets(this);
+        this.get('sessionAccount').set('currentDoc',this.get('model').id);
+        this.set('surpress', true);
+        session.setValue(doc.data.source);
+        this.set('surpress', false);
+      }
+    });
+    doc.on('op',(ops,source) => {
+      const embed = this.get('embed') == "true";
+      if(!embed)
+      {
+        if(!source && ops[0].p[0] == "source")
+        {
+          this.set('surpress', true);
+          const deltas = this.get('codeParser').opTransform(ops, editor);
+          session.getDocument().applyDeltas(deltas);
+          this.set('surpress', false);
+        }
+        else if (ops[0].p[0] == "assets")
+        {
+          this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+            toChange.set('assets',ops[0].oi);
+          });
+          this.preloadAssets(this);
+        }
+      }
+    });
+  },
   preloadAssets(self) {
     const doc = self.get('doc');
     if(!isEmpty(doc.data.assets))
@@ -111,20 +176,6 @@ export default Controller.extend({
       }
     }
   },
-  initShareDB() {
-    const socket = new WebSocket(config.wsHost);
-    const con = new ShareDB.Connection(socket);
-    this.set('socketRef', socket);
-    this.set('connection', con);
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    session.on('change',(delta)=>{
-      this.onSessionChange(this, delta);
-    });
-    session.setMode("ace/mode/html");
-    this.initDoc();
-    this.addWindowListener(this);
-  },
   addWindowListener(self) {
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
@@ -142,7 +193,8 @@ export default Controller.extend({
     });
   },
   handleWindowEvent(e, self) {
-    if (e.origin === config.localOrigin)
+    const embed = this.get('embed') == "true";
+    if (e.origin === config.localOrigin && !embed)
     {
       const doc = self.get('doc');
       let savedVals = doc.data.savedVals;
@@ -151,45 +203,6 @@ export default Controller.extend({
       doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
       self.set('surpress', false);
     }
-  },
-  initDoc() {
-    const con = this.get('connection');
-    const doc = con.get(config.contentDBName,this.get('model').id);
-    console.log("setting doc",this.get('model').id);
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    doc.subscribe((err) => {
-      if (err) throw err;
-      if(!isEmpty(doc.data))
-      {
-        this.set('doc', doc);
-        this.setCanEditDoc();
-        console.log("read only?",!this.get('canEditDoc'));
-        console.log(doc.data);
-        editor.setReadOnly(!this.get('canEditDoc'));
-        this.preloadAssets(this);
-        this.get('sessionAccount').set('currentDoc',this.get('model').id);
-        this.set('surpress', true);
-        session.setValue(doc.data.source);
-        this.set('surpress', false);
-      }
-    });
-    doc.on('op',(ops,source) => {
-      if(!source && ops[0].p[0] == "source")
-      {
-        this.set('surpress', true);
-        const deltas = this.get('codeParser').opTransform(ops, editor);
-        session.getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-      }
-      else if (ops[0].p[0] == "assets")
-      {
-        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-          toChange.set('assets',ops[0].oi);
-        });
-        this.preloadAssets(this);
-      }
-    });
   },
   setCanEditDoc() {
     const currentUser = this.get('sessionAccount').currentUserName;
@@ -221,14 +234,12 @@ export default Controller.extend({
       this.initShareDB();
     },
     tagsChanged(tags) {
-      console.log("tagsChanged", tags);
       const doc = this.get('doc');
       this.set('surpress', true);
       doc.submitOp({p:['tags'],oi:tags},{source:true});
       this.set('surpress', false);
     },
     doEditDocName() {
-      console.log('edit doc name');
       if(this.get('canEditDoc'))
       {
         this.set('isNotEdittingDocName', false);
@@ -241,7 +252,6 @@ export default Controller.extend({
       this.set('isNotEdittingDocName', true);
       const doc = this.get('doc');
       const newName = this.get('model').name;
-      console.log('endEdittingDocName',newName);
       this.set('surpress', true);
       doc.submitOp({p:['name'],oi:newName},{source:true});
       this.set('surpress', false);
@@ -361,13 +371,13 @@ export default Controller.extend({
         if(aceW > 0.0)
         {
           setTimeout(()=> {
-            this.set('aceW',Math.max(0.0,aceW-10));
+            this.set('aceW', Math.max(0.0, aceW - 10));
             hide();
-          },2);
+          }, 2);
         }
         else
         {
-          this.set('isShowingCode',false);
+          this.set('isShowingCode', false);
         }
       }
       hide();
@@ -378,9 +388,9 @@ export default Controller.extend({
         if(aceW < 700)
         {
           setTimeout(()=> {
-            this.set('aceW',Math.min(700,aceW+10));
+            this.set('aceW', Math.min(700, aceW + 10));
             show();
-          },2);
+          }, 2);
         }
         else
         {

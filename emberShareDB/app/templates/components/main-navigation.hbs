@@ -1,3 +1,4 @@
+<div id = "mimic-navbar">
 {{#bs-nav type="pills" as |nav|}}
  {{#nav.item}}{{#nav.link-to "index"}}Home{{/nav.link-to}}{{/nav.item}}
  {{#if session.isAuthenticated}}
@@ -19,3 +20,4 @@
    <a {{action 'login'}} class="btn btn-success navbar-btn navbar-right">Login</a>
  {{/if}}
 {{/bs-nav}}
+</div>
