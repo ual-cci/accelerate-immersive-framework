@@ -37,7 +37,9 @@ export default Controller.extend({
   aceW:700,
   aceStyle: computed('aceW', function() {
     const aceW = this.get('aceW');
-    return htmlSafe("width: " + aceW + "px;");
+    const displayEditor = this.get('displayEditor');
+    const display = displayEditor ? "inline" : "none"
+    return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   hideEditor:'false',
   displayEditor: computed('hideEditor', function() {
