@@ -331,6 +331,7 @@ export default Controller.extend({
         .alert({title: asset.name,
                 bodyComponent: 'modal-preview-body',
                 assetURL:url,
+                assetType:asset.fileType,
                 isImage:isImage,
                 isAudio:isAudio,
                 isVideo:isVideo})

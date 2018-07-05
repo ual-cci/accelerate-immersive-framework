@@ -8,7 +8,7 @@ Your browser does not support the audio element.
 </audio>
 {{/if}}
 {{#if options.isVideo}}
-<video class = "preview-video" controls>
+<video class = "preview-video" loop autoplay controls="true" type={{options.assetType}}>
   <source src={{options.assetURL}}>
   Your browser does not support the video tag.
 </video>
