@@ -4,6 +4,7 @@
   {{else}}
     {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
   {{/if}}
+  {{#if displayEditor}}
   <div class="settings">
     {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
     {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
@@ -68,7 +69,7 @@
       </div>
     {{/bs-collapse}}
   </div>
-
+  {{/if}}
   <div class = "main-container">
     <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
       <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>

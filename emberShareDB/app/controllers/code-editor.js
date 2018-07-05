@@ -35,7 +35,7 @@ export default Controller.extend({
   startWidth:0,
   startX:0,
   aceW:700,
-  aceStyle: computed('aceW', function() {
+  aceStyle: computed('aceW','displayEditor', function() {
     const aceW = this.get('aceW');
     const displayEditor = this.get('displayEditor');
     const display = displayEditor ? "inline" : "none"
@@ -213,7 +213,7 @@ export default Controller.extend({
     {
       this.set('isOwner', true);
     }
-    this.set('canEditDoc', true);
+    this.set('canEditDoc', this.get('displayEditor'));
   },
   actions: {
     editorReady(editor) {
