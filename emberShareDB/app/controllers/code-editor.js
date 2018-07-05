@@ -8,6 +8,7 @@ import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 
 export default Controller.extend({
+  queryParams:["hideEditor"],
   websockets: inject('websockets'),
   sessionAccount: inject('session-account'),
   assetService: inject('assets'),
@@ -29,7 +30,7 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
-  showCode:true,
+  isShowingCode:true,
   isDragging:false,
   startWidth:0,
   startX:0,
@@ -37,6 +38,11 @@ export default Controller.extend({
   aceStyle: computed('aceW', function() {
     const aceW = this.get('aceW');
     return htmlSafe("width: " + aceW + "px;");
+  }),
+  hideEditor:'false',
+  displayEditor: computed('hideEditor', function() {
+    const hideEditor = this.get('hideEditor');
+    return hideEditor != "true";
   }),
   preloadAssets(self) {
     const doc = self.get('doc');
@@ -359,7 +365,7 @@ export default Controller.extend({
         }
         else
         {
-          this.set('showCode',false);
+          this.set('isShowingCode',false);
         }
       }
       hide();
@@ -376,7 +382,7 @@ export default Controller.extend({
         }
         else
         {
-          this.set('showCode',true);
+          this.set('isShowingCode',true);
         }
       }
       show();
