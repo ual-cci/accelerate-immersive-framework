@@ -154,20 +154,29 @@ export default Controller.extend({
     doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
     self.set('surpress', false);
   },
+  getSelectedText(self)
+  {
+    const editor = self.get('editor');
+    let selectionRange = editor.getSelectionRange();
+    if(selectionRange.start.row == selectionRange.end.row &&
+      selectionRange.start.column == selectionRange.end.column)
+      {
+        selectionRange.start.column = 0;
+        selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
+      }
+    const content = editor.session.getTextRange(selectionRange);
+    return content;
+  },
   updateIFrame(self, selection = false) {
     console.log("updating iframe");
     self.updateSavedVals(self);
     const savedVals = self.get('savedVals');
     const doc = self.get('doc');
-    const editor = self.get('editor');
-    const selectionRange = editor.getSelectionRange();
-    const content = editor.session.getTextRange(selectionRange);
-    let toRender = selection ? content : doc.data.source;
+    let toRender = selection ? self.getSelectedText(self) : doc.data.source;
     toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
     toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     if(selection)
     {
-      console.log(toRender);
       document.getElementById("output-iframe").contentWindow.eval(toRender);
     }
     else
