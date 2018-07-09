@@ -70,117 +70,124 @@ export default Service.extend({
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
-    if(node.type == "VariableDeclaration"  && node.declarations)
-    {
-      //console.log("VariableDeclaration");
-      newSrc = newSrc + this.parseDeclaration(node, newSrc);
-      parsed = true;
-    }
-    else if(node.params && node.type.includes("Function"))
-    {
-      //console.log("Function");
-      newSrc = newSrc + this.parseFunction(node, newSrc);
-      parsed = true;
-    }
-    else if (node.type.includes("Expression"))
-    {
-      if (node.expression)
+    try {
+      if(node.type == "VariableDeclaration"  && node.declarations)
       {
-        newSrc = newSrc + this.parseNode(node.expression, newSrc);
+        //console.log("VariableDeclaration");
+        newSrc = newSrc + this.parseDeclaration(node, newSrc);
+        parsed = true;
       }
-      else
+      else if(node.params && node.type.includes("Function"))
       {
-        newSrc = newSrc + this.parseExpression(node, newSrc);
+        //console.log("Function");
+        newSrc = newSrc + this.parseFunction(node, newSrc);
+        parsed = true;
       }
-      parsed = true;
-    }
-    else if (node.consequent)
-    {
-      //console.log("Conditional");
-      newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
-      parsed = true;
-    }
-    else if(node.type == "ReturnStatement")
-    {
-      //console.log("ReturnStatement");
-      newSrc = newSrc + this.parseReturnStatement(node, newSrc);
-      parsed = true;
-    }
-    else if(node.type == "ForStatement")
-    {
-      //console.log("ForStatement");
-      let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
-      exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
-      exp = exp + script.script.substring(node.update.start, node.update.end);
-      exp = exp + ")\n{\n";
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if(node.type == "ForInStatement")
-    {
-      //console.log("ForInStatement");
-      const right = this.getName(node.right);
-      const left = node.left.kind + " " + node.left.declarations[0].id.name;
-      let exp = "for(" + left + " in " + right + ")\n{"
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if(node.type == "DoWhileStatement")
-    {
-      //console.log("DoWhileStatement");
-      newSrc = this.insert(newSrc,"do {");
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      newSrc = this.insert(newSrc,"while(");
-      newSrc = newSrc + script.script.substring(node.test.start, node.test.end);
-      newSrc = newSrc + ")";
-      parsed = true;
-    }
-    else if(node.type == "WhileStatement")
-    {
-      //console.log("WhileStatement");
-      let exp = "while(" + script.script.substring(node.test.start, node.test.end);
-      exp = exp + ")\n{\n";
-      newSrc = this.insert(newSrc,exp);
-      newSrc = newSrc + this.parseNode(node.body);
-      newSrc = this.insert(newSrc,"}");
-      parsed = true;
-    }
-    else if (node.type == "TryStatement")
-    {
-      //console.log("TryStatement");
-      newSrc = this.insert(newSrc,"try {\n");
-      newSrc = newSrc + this.parseNode(node.block);
-      newSrc = this.insert(newSrc,"\n} catch(");
-      newSrc = newSrc + node.handler.param.name + ") {\n";
-      newSrc = newSrc + this.parseNode(node.handler.body);
-      newSrc = this.insert(newSrc,"}");
-      if(node.finalizer)
+      else if (node.type.includes("Expression"))
       {
-        newSrc = this.insert(newSrc,"finally {\n");
-        newSrc = newSrc + this.parseNode(node.finalizer);
+        if (node.expression)
+        {
+          newSrc = newSrc + this.parseNode(node.expression, newSrc);
+        }
+        else
+        {
+          newSrc = newSrc + this.parseExpression(node, newSrc);
+        }
+        parsed = true;
+      }
+      else if (node.consequent)
+      {
+        //console.log("Conditional");
+        newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
+        parsed = true;
+      }
+      else if(node.type == "ReturnStatement")
+      {
+        //console.log("ReturnStatement");
+        newSrc = newSrc + this.parseReturnStatement(node, newSrc);
+        parsed = true;
+      }
+      else if(node.type == "ForStatement")
+      {
+        //console.log("ForStatement");
+        let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
+        exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
+        exp = exp + script.script.substring(node.update.start, node.update.end);
+        exp = exp + ")\n{\n";
+        newSrc = this.insert(newSrc,exp);
+        newSrc = newSrc + this.parseNode(node.body);
         newSrc = this.insert(newSrc,"}");
+        parsed = true;
       }
-      parsed = true;
-    }
-    else if(node.body && node.type == "BlockStatement")
-    {
-      //console.log("BlockStatement");
-      for(let i = 0; i < node.body.length; i++)
+      else if(node.type == "ForInStatement")
       {
-        newSrc = newSrc + this.parseNode(node.body[i]);
+        //console.log("ForInStatement");
+        const right = this.getName(node.right);
+        const left = node.left.kind + " " + node.left.declarations[0].id.name;
+        let exp = "for(" + left + " in " + right + ")\n{"
+        newSrc = this.insert(newSrc,exp);
+        newSrc = newSrc + this.parseNode(node.body);
+        newSrc = this.insert(newSrc,"}");
+        parsed = true;
       }
-      parsed = true;
+      else if(node.type == "DoWhileStatement")
+      {
+        //console.log("DoWhileStatement");
+        newSrc = this.insert(newSrc,"do {");
+        newSrc = newSrc + this.parseNode(node.body);
+        newSrc = this.insert(newSrc,"}");
+        newSrc = this.insert(newSrc,"while(");
+        newSrc = newSrc + script.script.substring(node.test.start, node.test.end);
+        newSrc = newSrc + ")";
+        parsed = true;
+      }
+      else if(node.type == "WhileStatement")
+      {
+        //console.log("WhileStatement");
+        let exp = "while(" + script.script.substring(node.test.start, node.test.end);
+        exp = exp + ")\n{\n";
+        newSrc = this.insert(newSrc,exp);
+        newSrc = newSrc + this.parseNode(node.body);
+        newSrc = this.insert(newSrc,"}");
+        parsed = true;
+      }
+      else if (node.type == "TryStatement")
+      {
+        //console.log("TryStatement");
+        newSrc = this.insert(newSrc,"try {\n");
+        newSrc = newSrc + this.parseNode(node.block);
+        newSrc = this.insert(newSrc,"\n} catch(");
+        newSrc = newSrc + node.handler.param.name + ") {\n";
+        newSrc = newSrc + this.parseNode(node.handler.body);
+        newSrc = this.insert(newSrc,"}");
+        if(node.finalizer)
+        {
+          newSrc = this.insert(newSrc,"finally {\n");
+          newSrc = newSrc + this.parseNode(node.finalizer);
+          newSrc = this.insert(newSrc,"}");
+        }
+        parsed = true;
+      }
+      else if(node.body && node.type == "BlockStatement")
+      {
+        //console.log("BlockStatement");
+        for(let i = 0; i < node.body.length; i++)
+        {
+          newSrc = newSrc + this.parseNode(node.body[i]);
+        }
+        parsed = true;
+      }
+      else if (node.type == "Literal")
+      {
+        //console.log("Literal");
+        newSrc = newSrc + node.raw;
+        parsed = true;
+      }
     }
-    else if (node.type == "Literal")
+    catch (err)
     {
-      //console.log("Literal");
-      newSrc = newSrc + node.raw;
-      parsed = true;
+      console.log(node, err);
+      parsed = false;
     }
     //If not parsed, insert verbatim
     if(!parsed)

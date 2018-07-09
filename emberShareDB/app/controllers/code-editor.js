@@ -88,6 +88,12 @@ export default Controller.extend({
     const editor = this.get('editor');
     const session = editor.getSession();
     const embed = this.get('embed') == "true";
+    this.set('allowDocDelete', false);
+    this.set('allowAssetDelete', false);
+    this.set('showAssets', false);
+    this.set('showPreview', false);
+    this.set('collapsed', false);
+    this.set('showShare', false);
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
     {

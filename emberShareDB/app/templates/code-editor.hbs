@@ -29,9 +29,11 @@
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
           Share
         {{/bs-button}}
-        {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
-          Delete
-        {{/bs-button}}
+        {{#if isOwner}}
+          {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
+            Delete
+          {{/bs-button}}
+        {{/if}}
         <div>
         {{#if showShare}}
           <label for="edit-link">Editable Link</label>
