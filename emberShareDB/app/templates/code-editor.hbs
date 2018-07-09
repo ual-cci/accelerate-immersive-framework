@@ -46,6 +46,17 @@
           <label for="embed-link">Embed Link</label>
           {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
         {{/if}}
+        {{#if showTokens}}
+        <div>
+          {{tokenfield-input
+            tokens=model.tags
+            allowDuplicates=false
+            placeholder="Enter Tags"
+            editable=canEditDoc
+            tokensChanged=(action 'tagsChanged')
+          }}
+          </div>
+        {{/if}}
         {{#if allowDocDelete}}
           <div>
             Are you sure?
@@ -85,17 +96,6 @@
             </div>
             {{/if}}
           </div>
-        {{/if}}
-        {{#if showTokens}}
-        <div>
-          {{tokenfield-input
-            tokens=model.tags
-            allowDuplicates=false
-            placeholder="Enter Tags"
-            editable=canEditDoc
-            tokensChanged=(action 'tagsChanged')
-          }}
-        </div>
         {{/if}}
       </div>
     {{/bs-collapse}}

@@ -11,6 +11,8 @@ Router.map(function() {
   this.route('code-editor', { path: '/code/:documentId' });
   this.route('documents', { path: '/d/:search/:page' });
   this.route('password-reset');
+  this.route('about');
+  this.route('terms');
 });
 
 export default Router;

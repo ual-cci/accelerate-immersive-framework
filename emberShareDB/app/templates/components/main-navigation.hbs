@@ -1,6 +1,8 @@
 <div id = "mimic-navbar">
 {{#bs-nav type="pills" as |nav|}}
  {{#nav.item}}{{#nav.link-to "index"}}Home{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item}}{{#nav.link-to "about"}}About{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item}}{{#nav.link-to "terms"}}Terms{{/nav.link-to}}{{/nav.item}}
  {{#if session.isAuthenticated}}
     <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
    {{#if sessionAccount.currentUserName}}

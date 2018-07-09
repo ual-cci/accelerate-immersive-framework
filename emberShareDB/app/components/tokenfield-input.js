@@ -112,6 +112,9 @@ export default Component.extend({
     }),
 
     _onInputValueChanged: observer('inputValue', function () {
+      if (!this.get('editable')) {
+        return;
+      }
         const value = this.get('inputValue');
         if (value.indexOf(',') > -1) {
             const values = value.split(',');
@@ -123,6 +126,9 @@ export default Component.extend({
 
     // Event handlers
     _keydownHandler(e) {
+      if (!this.get('editable')) {
+        return;
+      }
         const wasEnterKey = e.which === KEYCODE.ENTER;
         const wasTabKey = e.which === KEYCODE.TAB;
         const hasValue = !isEmpty(this.get('inputValue'));
@@ -224,6 +230,9 @@ export default Component.extend({
     },
 
     _componentWasBlurred() {
+      if (!this.get('editable')) {
+        return;
+      }
         this.set('isFocused', false);
         this.set('selectedTokenIndex', null);
     },
@@ -240,10 +249,16 @@ export default Component.extend({
     },
 
     _focusTextInput() {
+      if (!this.get('editable')) {
+        return;
+      }
         this._textInputElement.focus();
     },
 
     _blurComponent() {
+      if (!this.get('editable')) {
+        return;
+      }
         if (this.get('addTokenOnBlur') && !isEmpty(this.get('inputValue'))) {
             this._addToken(this.get('inputValue'));
         }
@@ -252,6 +267,9 @@ export default Component.extend({
     },
 
     _setSelectedTokenIndex(index) {
+      if (!this.get('editable')) {
+        return;
+      }
         this.set('selectedTokenIndex', index);
         this._textInputElement.blur();
         if (!isNone(index)) {
@@ -260,12 +278,18 @@ export default Component.extend({
     },
 
     _removeToken(value) {
+      if (!this.get('editable')) {
+        return;
+      }
         this.get('tokens').removeObject(value);
         this.set('selectedTokenIndex', null);
         this.get('tokensChanged')(this.get('tokens'));
     },
 
     _addToken(value) {
+      if (!this.get('editable')) {
+        return;
+      }
         if (!isNone(value)) {
             value = value.trim();
             const isDuplicate = this.get('tokens')
@@ -286,6 +310,9 @@ export default Component.extend({
     },
 
     _editToken(value) {
+      if (!this.get('editable')) {
+        return;
+      }
         this._removeToken(value);
         if (!isNone(this.get('inputValue'))) {
             this._addToken(this.get('inputValue'));
