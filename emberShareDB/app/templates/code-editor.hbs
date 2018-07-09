@@ -10,6 +10,7 @@
   <div class="settings">
     {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
     {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+    {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
     <label for="autoRenderCheckbox">Auto Render?</label>
     {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
     {{#if session.isAuthenticated}}

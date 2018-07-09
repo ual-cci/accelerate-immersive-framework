@@ -416,6 +416,9 @@ export default Controller.extend({
     renderCode() {
       this.updateIFrame(this);
     },
+    pauseCode() {
+      this.set('renderedSource', "");
+    },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
