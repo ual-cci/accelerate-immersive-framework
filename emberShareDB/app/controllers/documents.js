@@ -8,8 +8,15 @@ export default Controller.extend({
   session:inject('session'),
   docName:"",
   isPrivate:true,
+  page:0,
   feedbackMessage: null,
   sessionAccount: inject('session-account'),
+  canGoBack:computed('page', function() {
+    return this.get('page') > 0;
+  }),
+  canGoForwards:computed('model', function() {
+    return this.get('model').length >= 20;
+  }),
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
@@ -38,6 +45,16 @@ export default Controller.extend({
       this.set('feedbackMessage',err.errors[0]);
     });
   },
+  updateResults()
+  {
+    let searchTerm = this.get('searchTerm');
+    if(!searchTerm)
+    {
+      searchTerm = " ";
+    }
+    this.transitionToRoute('documents', searchTerm, this.get('page'));
+    this.set('message',"Results");
+  },
   actions: {
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
@@ -55,16 +72,16 @@ export default Controller.extend({
       }
     },
     search() {
-      const searchTerm = this.get('searchTerm');
-      if(searchTerm)
-      {
-        this.transitionToRoute('documents', searchTerm, 0);
-        this.set('message',"Results");
-      }
-      else
-      {
-          this.set('message',"Type Something!");
-      }
-    }
+      this.set('page',0);
+      this.updateResults();
+    },
+    nextPage() {
+      this.incrementProperty('page');
+      this.updateResults();
+    },
+    prevPage() {
+      this.decrementProperty('page');
+      this.updateResults();
+    },
   }
 });

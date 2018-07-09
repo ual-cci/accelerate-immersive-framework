@@ -29,4 +29,10 @@
         {{document-list-item document=document index=index onOpen=(action 'openDocument' document.documentId)}}
     {{/each}}
   </div>
+  {{#if canGoBack}}
+    <button {{action "prevPage"}}>Prev Page</button>
+  {{/if}}
+  {{#if canGoForwards}}
+    <button {{action "nextPage"}}>Next Page</button>
+  {{/if}}
 </div>
