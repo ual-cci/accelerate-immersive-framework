@@ -67,6 +67,13 @@ export default Controller.extend({
     this.set('connection', con);
     const editor = this.get('editor');
     const session = editor.getSession();
+    editor.commands.addCommand({
+      name: "executeLines",
+      exec: ()=>{
+        this.updateIFrame(this, true)
+      },
+      bindKey: {mac: "shift-enter", win: "shift-enter"}
+    })
     session.on('change',(delta)=>{
       this.onSessionChange(this, delta);
     });
@@ -147,16 +154,26 @@ export default Controller.extend({
     doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
     self.set('surpress', false);
   },
-  updateIFrame(self) {
+  updateIFrame(self, selection = false) {
     console.log("updating iframe");
     self.updateSavedVals(self);
     const savedVals = self.get('savedVals');
     const doc = self.get('doc');
-    let toRender = doc.data.source;
+    const editor = self.get('editor');
+    const selectionRange = editor.getSelectionRange();
+    const content = editor.session.getTextRange(selectionRange);
+    let toRender = selection ? content : doc.data.source;
     toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
     toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    //console.log("output", toRender);
-    self.set('renderedSource', toRender);
+    if(selection)
+    {
+      console.log(toRender);
+      document.getElementById("output-iframe").contentWindow.eval(toRender);
+    }
+    else
+    {
+      self.set('renderedSource', toRender);
+    }
   },
   autoExecuteCode(self) {
     if(self.get('codeTimer'))
@@ -397,6 +414,7 @@ export default Controller.extend({
       }
     },
     mouseDown(e) {
+      //console.log('mouseDown',e.target);
       this.set('isDragging', true);
       const startWidth = document.querySelector('.ace-container').clientWidth;
       const startX = e.clientX;
@@ -406,13 +424,15 @@ export default Controller.extend({
       overlay.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
+      //console.log('mouseup',e.target);
       this.set('isDragging', false);
       let overlay = document.querySelector('.output-container');
-      overlay.style["pointer-events"] = "none";
+      //overlay.style["pointer-events"] = "none";
     },
     mouseMove(e) {
       if(this.get('isDragging'))
       {
+        //console.log('mouseMove',e.target);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
