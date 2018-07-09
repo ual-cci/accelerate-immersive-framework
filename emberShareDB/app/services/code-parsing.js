@@ -198,7 +198,7 @@ export default Service.extend({
   getName(node) {
     let name = node.name;
     let exp = "";
-    if(!name)
+    if(!name && node.property)
     {
       let object = node;
       while(!name)

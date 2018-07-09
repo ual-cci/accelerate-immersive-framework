@@ -168,7 +168,6 @@ export default Controller.extend({
     return content;
   },
   updateIFrame(self, selection = false) {
-    console.log("updating iframe");
     self.updateSavedVals(self);
     const savedVals = self.get('savedVals');
     const doc = self.get('doc');
