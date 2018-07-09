@@ -139,6 +139,7 @@ function startDocAPI(app)
     console.log("searching for doc",req.query);
     const term = req.query.filter.search;
     const page = req.query.filter.page;
+    const sortBy = req.query.filter.sortBy;
     const currentUser = req.query.filter.currentUser;
     if(term.length > 1)
     {
@@ -161,9 +162,45 @@ function startDocAPI(app)
           }
           i++;
         }
-        docs.sort ((a, b) => {
-          return new Date(b.attributes.created) - new Date(a.attributes.created);
-        });
+        if(sortBy == "views")
+        {
+          console.log("sorting by views");
+          docs.sort ((a, b) => {
+            let b_views = 0;
+            let a_views = 0;
+            if(b.attributes.stats)
+            {
+              b_views = b.attributes.stats.views;
+            }
+            if(a.attributes.stats)
+            {
+              a_views = a.attributes.stats.views;
+            }
+            return b_views - a_views;
+          });
+        }
+        else if (sortBy == "forks")
+        {
+          docs.sort ((a, b) => {
+            let b_forks = 0;
+            let a_forks = 0;
+            if(b.attributes.stats)
+            {
+              b_forks = b.attributes.stats.forks;
+            }
+            if(a.attributes.stats)
+            {
+              a_forks = a.attributes.stats.forks;
+            }
+            return b_forks - a_forks;
+          });
+        }
+        else
+        {
+          docs.sort ((a, b) => {
+            return new Date(b.attributes.created) - new Date(a.attributes.created);
+          });
+        }
         console.log('returning ' + docs.length + ' docs');
         res.status(200).send({data:docs});
       }
@@ -271,6 +308,7 @@ function createDoc(attr) {
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
+            stats:{views:0,forks:0}
           },resolve);
           resolve(doc);
           return;

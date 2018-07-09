@@ -3,9 +3,9 @@ import { inject } from '@ember/service';
 import { computed } from '@ember/object';
 
 export default Controller.extend({
-  message:"",
   store:inject(),
   session:inject('session'),
+  message:"",
   docName:"",
   isPrivate:true,
   page:0,

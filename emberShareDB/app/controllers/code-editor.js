@@ -109,8 +109,11 @@ export default Controller.extend({
         this.set('savedVals', doc.data.savedVals);
         this.set('doc', doc);
         this.setCanEditDoc();
-        console.log("read only?",!this.get('canEditDoc'));
-        console.log(doc.data);
+        this.set('surpress', true);
+        let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+        stats.views = stats.views + 1;
+        doc.submitOp({p:['stats'],oi:stats},{source:true});
+        this.set('surpress', false);
         editor.setReadOnly(!this.get('canEditDoc'));
         this.preloadAssets(this);
         this.get('sessionAccount').set('currentDoc',this.get('model').id);
@@ -512,6 +515,13 @@ export default Controller.extend({
       show();
     },
     forkDocument() {
+      
+      this.set('surpress', true);
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+      stats.forks = stats.forks + 1;
+      doc.submitOp({p:['stats'],oi:stats},{source:true});
+      this.set('surpress', false);
+
       const currentUser = this.get('sessionAccount').currentUserName;
       const doc = this.get('doc');
       let newDoc = this.get('store').createRecord('document', {

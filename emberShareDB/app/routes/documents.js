@@ -10,7 +10,12 @@ export default Route.extend({
       currentUser = "";
     }
     const filter = {
-      filter:{search:params.search,page:params.page,currentUser:currentUser}
+      filter:{
+        search:params.search,
+        page:params.page,
+        currentUser:currentUser,
+        sortBy:"views"
+      }
     }
     console.log('reloading document model');
     return this.get('store').query('document', filter);
