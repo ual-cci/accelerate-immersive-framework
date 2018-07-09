@@ -421,13 +421,6 @@ export default Controller.extend({
         this.initDoc();
       }
     },
-    iframeMouseDown(e)
-    {
-      if(this.get('isDragging'))
-      {
-        return false;
-      }
-    },
     mouseDown(e) {
       //console.log('mouseDown',e.target);
       this.set('isDragging', true);
