@@ -38,6 +38,7 @@ export default Controller.extend({
   startWidth:0,
   startX:0,
   aceW:700,
+  savedVals:null,
   aceStyle: computed('aceW','displayEditor', function() {
     const aceW = this.get('aceW');
     const displayEditor = this.get('displayEditor');
@@ -90,6 +91,7 @@ export default Controller.extend({
       if (err) throw err;
       if(!isEmpty(doc.data))
       {
+        this.set('savedVals', doc.data.savedVals);
         this.set('doc', doc);
         this.setCanEditDoc();
         console.log("read only?",!this.get('canEditDoc'));
@@ -104,7 +106,7 @@ export default Controller.extend({
     });
     doc.on('op',(ops,source) => {
       const embed = this.get('embed') == "true";
-      if(!embed)
+      if(!embed && ops.length > 0)
       {
         if(!source && ops[0].p[0] == "source")
         {
@@ -137,12 +139,22 @@ export default Controller.extend({
       self.updateIFrame(self);
     }
   },
+  updateSavedVals(self)
+  {
+    const doc = self.get('doc');
+    const savedVals = self.get('savedVals');
+    self.set('surpress', true);
+    doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
+    self.set('surpress', false);
+  },
   updateIFrame(self) {
     console.log("updating iframe");
+    self.updateSavedVals(self);
+    const savedVals = self.get('savedVals');
     const doc = self.get('doc');
     let toRender = doc.data.source;
     toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
-    toRender = self.get('codeParser').insertStatefullCallbacks(toRender, doc.data.savedVals);
+    toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     //console.log("output", toRender);
     self.set('renderedSource', toRender);
   },
@@ -209,11 +221,9 @@ export default Controller.extend({
     if (e.origin === config.localOrigin && !embed)
     {
       const doc = self.get('doc');
-      let savedVals = doc.data.savedVals;
+      let savedVals = this.get('savedVals');
       savedVals[e.data[0]] = e.data[1];
-      self.set('surpress', true);
-      doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
-      self.set('surpress', false);
+      this.set('savedVals', savedVals);
     }
   },
   setCanEditDoc() {
@@ -371,6 +381,7 @@ export default Controller.extend({
       this.toggleProperty('showAssets');
     },
     cleanUp() {
+      this.updateSavedVals(this);
       this.set('renderedSource',"");
       this.get('doc').destroy();
       this.removeWindowListener();
