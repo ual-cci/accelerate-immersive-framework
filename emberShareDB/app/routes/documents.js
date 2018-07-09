@@ -17,12 +17,16 @@ export default Route.extend({
   },
   actions: {
     error(error, transition) {
-      console.log("ERROR", error.status);
-      if (error.errors[0].status === '404') {
-          console.log("ERROR 404");
-          this.replaceWith('application');
-      } else {
-        return true;
+      console.log("ERROR", error);
+      const err = error.errors ? error.errors :error;
+      if(error)
+      {
+        if (err.status === '404') {
+            console.log("ERROR 404");
+            this.replaceWith('application');
+        } else {
+          return true;
+        }
       }
     }
   }

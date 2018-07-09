@@ -155,9 +155,15 @@ export default Controller.extend({
   {
     const doc = self.get('doc');
     const savedVals = self.get('savedVals');
-    self.set('surpress', true);
-    doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
-    self.set('surpress', false);
+    try {
+      self.set('surpress', true);
+      doc.submitOp({p:['savedVals'],oi:savedVals},{source:true});
+      self.set('surpress', false);
+    } catch (err)
+    {
+      console.log(err);
+    }
+
   },
   getSelectedText(self)
   {
