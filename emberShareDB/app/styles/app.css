@@ -61,11 +61,13 @@
   top: 0;
   left: 0;
   z-index: 1;
+  pointer-events: none;
 }
 
-#output-iframe {
+.output-iframe {
   width:100%;
   height:100%;
+  pointer-events: none;
 }
 
 .ace-container {

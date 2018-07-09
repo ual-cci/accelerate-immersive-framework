@@ -421,6 +421,13 @@ export default Controller.extend({
         this.initDoc();
       }
     },
+    iframeMouseDown(e)
+    {
+      if(this.get('isDragging'))
+      {
+        return false;
+      }
+    },
     mouseDown(e) {
       //console.log('mouseDown',e.target);
       this.set('isDragging', true);
@@ -428,14 +435,18 @@ export default Controller.extend({
       const startX = e.clientX;
       this.set('startWidth', startWidth);
       this.set('startX', startX);
-      let overlay = document.querySelector('.output-container');
-      overlay.style["pointer-events"] = "auto";
+      let overlay = document.querySelector('.output-iframe');
+      overlay.style["pointer-events"] = "none";
+      let overlay2 = document.querySelector('.output-container');
+      overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
       //console.log('mouseup',e.target);
       this.set('isDragging', false);
-      let overlay = document.querySelector('.output-container');
-      //overlay.style["pointer-events"] = "none";
+      let overlay = document.querySelector('.output-iframe');
+      overlay.style["pointer-events"] = "auto";
+      let overlay2 = document.querySelector('.output-container');
+      overlay2.style["pointer-events"] = "none";
     },
     mouseMove(e) {
       if(this.get('isDragging'))
