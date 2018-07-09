@@ -29,6 +29,9 @@
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
           Share
         {{/bs-button}}
+        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowTokens")}}
+          Tags
+        {{/bs-button}}
         {{#if isOwner}}
           {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
             Delete
@@ -83,6 +86,7 @@
             {{/if}}
           </div>
         {{/if}}
+        {{#if showTokens}}
         <div>
           {{tokenfield-input
             tokens=model.tags
@@ -92,6 +96,7 @@
             tokensChanged=(action 'tagsChanged')
           }}
         </div>
+        {{/if}}
       </div>
     {{/bs-collapse}}
   </div>

@@ -23,7 +23,7 @@ export default Component.extend({
     // Component properties
     layout,
     classNames: ['uncharted-tokenfield-input'],
-    classNameBindings: ['isFocused:uncharted-focus', 'disabled'],
+    classNameBindings: ['isFocused:uncharted-focus'],
     attributeBindings: ['tabindex'],
     tabindex: 0,
 
@@ -57,9 +57,8 @@ export default Component.extend({
     didInsertElement() {
         this._super(...arguments);
 
-        const textInput = this.$(`#${this.get('tokenfieldId')}`);
+        const textInput = $(".uncharted-token-input");
         this._textInputElement = textInput;
-
         textInput
             .on('keydown', this._keydownHandler.bind(this))
             .on('focus', this._focusHandler.bind(this))
@@ -107,7 +106,7 @@ export default Component.extend({
     },
 
     _onDisabledChanged: observer('disabled', function () {
-        if (this.get('disabled')) {
+        if (!this.get('editable')) {
             this._blurComponent();
         }
     }),
@@ -141,7 +140,7 @@ export default Component.extend({
     },
 
     _tokenNavigationHandler(e) {
-        if (!this.get('isFocused') || this.get('disabled')) {
+        if (!this.get('editable')) {
             return;
         }
         // Highlight text hit backspace wtf?!?!
@@ -165,11 +164,12 @@ export default Component.extend({
                 }
                 break;
             case KEYCODE.ENTER:
+
                 if (hasSelectedToken) {
                     const tokenValue = this.get('tokens').objectAt(this.get('selectedTokenIndex'));
                     this._editToken(tokenValue);
                 } else if (!isEmpty(this.get('inputValue'))) {
-                    this._createToken(this.get('inputValue'));
+                    this._addToken(this.get('inputValue'));
                 }
                 break;
             case KEYCODE.LEFT_ARROW:
@@ -201,14 +201,14 @@ export default Component.extend({
                 if (hasSelectedToken) {
                     this._blurComponent();
                 } else if (!isEmpty(this.get('inputValue'))) {
-                    this._createToken(this.get('inputValue'));
+                    this._addToken(this.get('inputValue'));
                 }
                 break;
         }
     },
 
     _focusHandler(e) {
-        if (this.get('disabled')) {
+        if (!this.get('editable')) {
             return;
         }
         this.set('isFocused', true);

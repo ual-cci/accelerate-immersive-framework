@@ -33,6 +33,7 @@ export default Controller.extend({
   showShare:false,
   showAssets:false,
   showPreview:false,
+  showTokens:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -94,6 +95,7 @@ export default Controller.extend({
     this.set('showPreview', false);
     this.set('collapsed', false);
     this.set('showShare', false);
+    this.set('showTokens', false);
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
     {
@@ -420,6 +422,10 @@ export default Controller.extend({
     toggleShowShare()
     {
       this.toggleProperty('showShare');
+    },
+    toggleShowTokens()
+    {
+      this.toggleProperty('showTokens');
     },
     toggleShowAssets()
     {
