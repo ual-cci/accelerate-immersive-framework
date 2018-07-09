@@ -129,6 +129,11 @@ export default Controller.extend({
           });
           this.preloadAssets(this);
         }
+        else if (!source && ops[0].p[0] == "newEval")
+        {
+          console.log(ops[0]);
+          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
+        }
       }
     });
   },
@@ -176,6 +181,9 @@ export default Controller.extend({
     toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     if(selection)
     {
+      this.set('surpress', true);
+      doc.submitOp({p:['newEval'],oi:toRender},{source:true});
+      this.set('surpress', false);
       document.getElementById("output-iframe").contentWindow.eval(toRender);
     }
     else
@@ -428,7 +436,7 @@ export default Controller.extend({
       const startX = e.clientX;
       this.set('startWidth', startWidth);
       this.set('startX', startX);
-      let overlay = document.querySelector('.output-iframe');
+      let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "none";
       let overlay2 = document.querySelector('.output-container');
       overlay2.style["pointer-events"] = "auto";
@@ -436,7 +444,7 @@ export default Controller.extend({
     mouseUp(e) {
       //console.log('mouseup',e.target);
       this.set('isDragging', false);
-      let overlay = document.querySelector('.output-iframe');
+      let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
       let overlay2 = document.querySelector('.output-container');
       overlay2.style["pointer-events"] = "none";

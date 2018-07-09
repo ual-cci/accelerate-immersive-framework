@@ -12,5 +12,6 @@ export default DS.Model.extend({
   assets:DS.attr(),
   tags:DS.attr(),
   forkedFrom:DS.attr('string'),
-  savedVals:DS.attr()
+  savedVals:DS.attr(),
+  newEval:DS.attr('string')
 });

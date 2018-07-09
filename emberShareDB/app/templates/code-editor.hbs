@@ -98,7 +98,7 @@
   {{/if}}
   <div class = "main-container">
     <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-      <iframe class = "output-iframe" srcdoc={{renderedSource}}></iframe>
+      <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
     </div>
       <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         {{#if isShowingCode}}

@@ -269,7 +269,8 @@ function createDoc(attr) {
             assets:[],
             tags:tags,
             forkedFrom:attr.forkedFrom,
-            savedVals:{}
+            savedVals:{},
+            newEval:"",
           },resolve);
           resolve(doc);
           return;
