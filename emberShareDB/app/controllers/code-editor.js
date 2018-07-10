@@ -174,7 +174,7 @@ export default Controller.extend({
     this.setCanEditDoc();
     this.set('surpress', true);
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
-    stats.views = stats.views + 1;
+    stats.views = parseInt(stats.views) + 1;
     this.submitOp(this,{p:['stats'],oi:stats},{source:true});
     this.set('surpress', false);
     editor.setReadOnly(!this.get('canEditDoc'));
@@ -578,7 +578,7 @@ export default Controller.extend({
     forkDocument() {
       this.set('surpress', true);
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
-      stats.forks = stats.forks + 1;
+      stats.forks = parseInt(stats.forks) + 1;
       this.submitOp(this, {p:['stats'],oi:stats},{source:true});
       this.set('surpress', false);
 

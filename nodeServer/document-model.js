@@ -127,8 +127,7 @@ function startWebSockets(server)
 function startDocAPI(app)
 {
 
-  app.post('/submitOp', (req,res) => {
-
+  app.post('/submitOp', app.oauth.authorise(), (req,res) => {
     try {
       const op = req.body.op;
       if(op.p)
@@ -148,6 +147,8 @@ function startDocAPI(app)
         } catch(err)
         {
           console.log(err);
+          res.status(400);
+          res.json({errors:[err]});
         }
       });
     }
