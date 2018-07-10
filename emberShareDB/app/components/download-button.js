@@ -6,6 +6,7 @@ import { inject }  from '@ember/service';
 
 export default Component.extend(FileSaverMixin, {
   doc:null,
+  classNames: ['inline-view'],
   assetService: inject('assets'),
   store: inject('store'),
   actions: {

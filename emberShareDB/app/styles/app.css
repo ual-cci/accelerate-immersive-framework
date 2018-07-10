@@ -151,6 +151,10 @@
   background-color: yellow;
 }
 
+.inline-view {
+  display: inline;
+}
+
 .uncharted-token-label:focus{
   background-color: blue;
 }
