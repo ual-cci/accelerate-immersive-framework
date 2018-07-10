@@ -45,8 +45,6 @@ function startAssetAPI(app)
   db.open(function (err) {
     if (err) return handleError(err);
     gridFS = Gridfs(db, mongo);
-    console.log('connection opened to ' + contentDBName);
-
     app.post('/asset', multiparty, function(req,res) {
       var writestream = gridFS.createWriteStream({
         filename: req.files.file.name,
@@ -59,11 +57,9 @@ function startAssetAPI(app)
       writestream.on('close', function(file) {
         res.json(200);
         const content_type = req.files.file.headers["content-type"];
-        console.log("UPLOADED FILE OF TYPE:",content_type);
         let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
         var newAssets = doc.data.assets;
         newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
-        console.log(newAssets);
         doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
         fs.unlink(req.files.file.path, function(err) {
            console.log('success!')
@@ -96,7 +92,6 @@ function startAssetAPI(app)
 
 function copyAssets(assets)
 {
-  console.log("copying assets", assets);
   var copyAsset = function(asset) {
     return new Promise((resolve, reject) => {
       var writestream = gridFS.createWriteStream({
@@ -107,11 +102,9 @@ function copyAssets(assets)
       var readstream = gridFS.createReadStream({
          _id: asset.fileId
       });
-      console.log("copying asset",asset);
       readstream.pipe(writestream);
       writestream.on('close', function(file) {
         var newAsset = {'name':asset.name,"fileId":file._id,fileType:asset.fileType};
-        console.log("COPIED FILE",newAsset);
         resolve(newAsset);
       });
     });
@@ -133,10 +126,43 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
+
+  app.post('/submitOp', (req,res) => {
+
+    try {
+      const op = req.body.op;
+      if(op.p)
+      {
+        const asInt = parseInt(op.p[1]);
+        if(!isNaN(asInt))
+        {
+          op.p[1] = asInt;
+        }
+      }
+      const docId = req.body.documentId;
+      const doc = shareDBConnection.get(contentCollectionName, docId);
+      doc.fetch((err)=>{
+        console.log('submitting op', op);
+        try {
+          doc.submitOp(op);
+        } catch(err)
+        {
+          console.log(err);
+        }
+      });
+    }
+    catch (err)
+    {
+      console.log(err);
+      res.status(400);
+      res.json({errors:[err]});
+    }
+    res.sendStatus(200);
+  });
+
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
     let params = {};
-    console.log("searching for doc",req.query);
     const term = req.query.filter.search;
     const page = req.query.filter.page;
     const sortBy = req.query.filter.sortBy;
@@ -164,7 +190,6 @@ function startDocAPI(app)
         }
         if(sortBy == "views")
         {
-          console.log("sorting by views");
           docs.sort ((a, b) => {
             let b_views = 0;
             let a_views = 0;
@@ -201,7 +226,6 @@ function startDocAPI(app)
             return new Date(b.attributes.created) - new Date(a.attributes.created);
           });
         }
-        console.log('returning ' + docs.length + ' docs');
         res.status(200).send({data:docs});
       }
       else
@@ -214,17 +238,13 @@ function startDocAPI(app)
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
-      console.log(doc.data);
       if (err || !doc.data) {
-        console.log("database error making document");
         res.status(404).send("database error making document");
         return;
       }
       else
       {
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
-        console.log("returning ",{data:reply});
-        console.log("assets ",doc.data.assets);
         res.status(200).send({data:reply});
       }
     });
@@ -240,7 +260,6 @@ function startDocAPI(app)
       if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
-          console.log("has copied assets",newAssets,doc);
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
           json.data.attr.assets = newAssets;
           res.json(json);
@@ -313,7 +332,6 @@ function createDoc(attr) {
           resolve(doc);
           return;
         }
-        console.log("document with that name alrady exists");
         reject("document with that name alrady exists");
         return;
       });
