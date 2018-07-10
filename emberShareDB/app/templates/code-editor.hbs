@@ -17,6 +17,7 @@
     {{/if}}
     {{#if session.isAuthenticated}}
       {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+      {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
     {{/if}}
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">

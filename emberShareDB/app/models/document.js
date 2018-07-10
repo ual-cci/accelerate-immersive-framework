@@ -14,5 +14,6 @@ export default DS.Model.extend({
   forkedFrom:DS.attr('string'),
   savedVals:DS.attr(),
   newEval:DS.attr('string'),
-  stats:DS.attr()
+  stats:DS.attr(),
+  flags:DS.attr('number')
 });

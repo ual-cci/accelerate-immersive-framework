@@ -20,4 +20,22 @@ export default Service.extend({
         });
     });
   },
+  flagDoc() {
+    const doc = this.get('sessionAccount').currentDoc;
+    const user = this.get('sessionAccount').currentUserName;
+    const token = "Bearer " + this.get('sessionAccount').bearerToken;
+    const params = "?user=" + user + "&documentId=" + doc;
+    console.log('flagging doc', { user: user , documentId: doc})
+    return new RSVP.Promise((resolve, reject) => {
+      $.ajax({
+          type: "GET",
+          url: config.serverHost + "/canFlag" + params,
+          beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
+        }).then((res) => {
+          resolve();
+        }).catch((err) => {
+          reject(err);
+        });
+    });
+  }
 });

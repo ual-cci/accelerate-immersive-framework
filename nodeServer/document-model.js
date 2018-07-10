@@ -126,7 +126,6 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
-
   app.post('/submitOp', app.oauth.authorise(), (req,res) => {
     try {
       const op = req.body.op;
@@ -328,7 +327,8 @@ function createDoc(attr) {
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
-            stats:{views:0,forks:0}
+            stats:{views:0,forks:0},
+            flags:0
           },resolve);
           resolve(doc);
           return;

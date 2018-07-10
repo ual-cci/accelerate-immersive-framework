@@ -358,6 +358,21 @@ export default Controller.extend({
     }
     this.set('canEditDoc', this.get('displayEditor'));
   },
+  deleteCurrentDocument() {
+    const doc = this.get('doc');
+    let fn = (asset)=>
+    {
+      return this.get('assetService').deleteAsset(asset.fileId)
+    }
+    var actions = doc.data.assets.map(fn);
+    Promise.all(actions).then(()=> {
+      doc.del([],(err)=>{
+        console.log("deleted doc",err);
+        this.get('sessionAccount').updateOwnedDocuments();
+        this.transitionToRoute('application');
+      });
+    });
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -409,19 +424,7 @@ export default Controller.extend({
     deleteDoc() {
       if(this.get('canEditDoc'))
       {
-        const doc = this.get('doc');
-        let fn = (asset)=>
-        {
-          return this.get('assetService').deleteAsset(asset.fileId)
-        }
-        var actions = doc.data.assets.map(fn);
-        Promise.all(actions).then(()=> {
-          doc.del([],(err)=>{
-            console.log("deleted doc",err);
-            this.get('sessionAccount').updateOwnedDocuments();
-            this.transitionToRoute('application');
-          });
-        });
+        this.deleteCurrentDocument();
       }
     },
     deleteAsset()
@@ -575,15 +578,34 @@ export default Controller.extend({
       }
       show();
     },
+    flagDocument() {
+      this.get('documents').flagDoc()
+      .then(()=> {
+        const doc = this.get('doc');
+        let flags = parseInt(doc.data.flags);
+        if(flags < 2)
+        {
+          flags = flags + 1;
+          this.set('surpress', true);
+          this.submitOp(this, {p:['flags'],oi:flags},{source:true});
+          this.set('surpress', false);
+        }
+        else
+        {
+          this.deleteCurrentDocument();
+        }
+      }).catch((err) => {
+        alert("Already flagged");
+      });
+    },
     forkDocument() {
+      const currentUser = this.get('sessionAccount').currentUserName;
+      const doc = this.get('doc');
       this.set('surpress', true);
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
       stats.forks = parseInt(stats.forks) + 1;
       this.submitOp(this, {p:['stats'],oi:stats},{source:true});
       this.set('surpress', false);
-
-      const currentUser = this.get('sessionAccount').currentUserName;
-      const doc = this.get('doc');
       let newDoc = this.get('store').createRecord('document', {
         source:doc.data.source,
         owner:currentUser,

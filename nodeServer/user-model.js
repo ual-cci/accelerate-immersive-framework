@@ -161,7 +161,7 @@ function startAuthAPI(app)
     });
   });
 
-  app.post('/updatePassword', function(req,res) {
+  app.post('/updatePassword', (req,res)=> {
     console.log(req.body);
     updatePassword(req.body.username, req.body.token, req.body.password)
     .then( () => {
@@ -173,6 +173,41 @@ function startAuthAPI(app)
       res.status(400).send(err);
     });
   });
+
+	app.get('/canFlag', app.oauth.authorise(), (req, res) => {
+		const username = req.query.user;
+		const doc = req.query.documentId;
+		userModel.findOne({
+			username: username
+		}, (err, user) => {
+			if(err)
+			{
+				res.status(400).send(err);
+			}
+			else
+			{
+				flagged = user.flaggedDocs;
+				if(flagged.includes(doc))
+				{
+					res.status(400).send("already flagged");
+				}
+				else
+				{
+					flagged.push(doc);
+					user.set('flaggedDocs', flagged);
+					user.save((err, user) => {
+						if(err)
+						{
+							res.status(400).send();
+						}
+						else {
+							res.status(200).send();
+						}
+					});
+				}
+			}
+		});
+	})
 }
 
 var setup = function() {
@@ -373,6 +408,6 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-// dump();
+dump();
 // dropUsers();
 // dropTokens();
