@@ -19,7 +19,7 @@ export default Controller.extend({
   session:inject('session'),
   codeParser:inject('code-parsing'),
   modalsManager: inject('modalsManager'),
-  documents: inject('documents'),
+  documentService: inject('documents'),
 
   //Parameters
   con: null,
@@ -193,7 +193,7 @@ export default Controller.extend({
     }
     else
     {
-      this.get('documents').submitOp(op)
+      this.get('documentService').submitOp(op)
       .then(()=> {
         console.log("submitted");
       }).catch(()=> {
@@ -578,8 +578,11 @@ export default Controller.extend({
       }
       show();
     },
+    download() {
+      this.get('assetService').zip();
+    },
     flagDocument() {
-      this.get('documents').flagDoc()
+      this.get('documentService').flagDoc()
       .then(()=> {
         const doc = this.get('doc');
         let flags = parseInt(doc.data.flags);
