@@ -123,10 +123,14 @@ export default Controller.extend({
       console.log("setting doc",this.get('model').id);
       const editor = this.get('editor');
       const session = editor.getSession();
+      console.log("subscribing to doc");
       doc.subscribe((err) => {
+        console.log("error = ", err);
         if (err) throw err;
+        console.log("no error");
         if(!isEmpty(doc.data))
         {
+          console.log("doc.data not empty", doc.data);
           this.set('doc', doc);
           this.didReceiveDoc();
         }
@@ -167,6 +171,7 @@ export default Controller.extend({
     }
   },
   didReceiveDoc() {
+    console.log("did receive doc");
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
