@@ -220,6 +220,18 @@ function startDocAPI(app)
             return b_forks - a_forks;
           });
         }
+        else if (sortBy == "size")
+        {
+          docs.sort ((a, b) => {
+            return b.data.source.length - a.data.source.length;
+          });
+        }
+        else if (sortBy == "edits")
+        {
+          docs.sort ((a, b) => {
+            return b.data.source.length - a.data.source.length;
+          });
+        }
         else
         {
           docs.sort ((a, b) => {

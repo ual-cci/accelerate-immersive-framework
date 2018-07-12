@@ -219,6 +219,10 @@ export default Controller.extend({
   {
     const doc = self.get('doc');
     const savedVals = self.get('savedVals');
+    if(!savedVals)
+    {
+      return;
+    }
     const vals = Object.keys(savedVals).map(key => savedVals[key]);
     const hasVals = vals.length > 0;
     try {
@@ -486,17 +490,26 @@ export default Controller.extend({
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
-    toggleShowShare()
-    {
+    toggleShowShare() {
       this.toggleProperty('showShare');
     },
-    toggleShowTokens()
-    {
+    toggleShowTokens() {
       this.toggleProperty('showTokens');
     },
-    toggleShowAssets()
-    {
+    toggleShowAssets() {
       this.toggleProperty('showAssets');
+    },
+    enterFullscreen() {
+      var target = document.getElementById("output-iframe");
+      if (target.requestFullscreen) {
+        target.requestFullscreen();
+      } else if (target.msRequestFullscreen) {
+        target.msRequestFullscreen();
+      } else if (target.mozRequestFullScreen) {
+        target.mozRequestFullScreen();
+      } else if (target.webkitRequestFullscreen) {
+        target.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
     },
     cleanUp() {
       this.updateSavedVals(this);
