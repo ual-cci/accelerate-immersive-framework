@@ -23,10 +23,10 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.contentDBName = 'sharedb_docs';
-    ENV.oauthHost = "http://localhost:8080/oauth";
-    ENV.serverHost = "http://localhost:8080";
-    ENV.wsHost = "ws://localhost:8080";
+    ENV.contentDBName = 'docs';
+    ENV.oauthHost = "http://localhost:3000/oauth";
+    ENV.serverHost = "http://localhost:3000";
+    ENV.wsHost = "ws://localhost:3000";
     ENV.localOrigin = "http://localhost:4200";
   }
 

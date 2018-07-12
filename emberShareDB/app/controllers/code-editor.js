@@ -127,7 +127,7 @@ export default Controller.extend({
       doc.subscribe((err) => {
         console.log("error = ", err);
         if (err) throw err;
-        console.log("no error");
+          console.log("no error", doc);
         if(!isEmpty(doc.data))
         {
           console.log("doc.data not empty", doc.data);
