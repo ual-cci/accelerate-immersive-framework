@@ -23,10 +23,10 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.contentDBName = 'docs';
-    ENV.oauthHost = "http://localhost:3000/oauth";
-    ENV.serverHost = "http://localhost:3000";
-    ENV.wsHost = "ws://localhost:3000";
+    ENV.contentCollectionName = 'docs';
+    ENV.oauthHost = "http://172.16.101.238:4001/oauth";
+    ENV.serverHost = "http://172.16.101.238:4001";
+    ENV.wsHost = "ws://172.16.101.238:4001";
     ENV.localOrigin = "http://localhost:4200";
   }
 

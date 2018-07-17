@@ -83,7 +83,6 @@ export default Controller.extend({
     {
       this.set('wsAvailable', false);
     }
-
     const editor = this.get('editor');
     const session = editor.getSession();
     editor.commands.addCommand({
@@ -119,7 +118,7 @@ export default Controller.extend({
     if(this.get('wsAvailable'))
     {
       const con = this.get('connection');
-      const doc = con.get(config.contentDBName,this.get('model').id);
+      const doc = con.get(config.contentCollectionName,this.get('model').id);
       console.log("setting doc",this.get('model').id);
       const editor = this.get('editor');
       const session = editor.getSession();
@@ -127,7 +126,7 @@ export default Controller.extend({
       doc.subscribe((err) => {
         console.log("error = ", err);
         if (err) throw err;
-          console.log("no error", doc);
+        console.log("no error", doc);
         if(!isEmpty(doc.data))
         {
           console.log("doc.data not empty", doc.data);
