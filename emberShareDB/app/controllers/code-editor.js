@@ -73,16 +73,59 @@ export default Controller.extend({
 
   //Functions
   initShareDB() {
+
+    let socket;
     try {
-      const socket = new WebSocket(config.wsHost);
-      const con = new ShareDB.Connection(socket);
+      socket = new WebSocket(config.wsHost);
       this.set('socketRef', socket);
-      this.set('connection', con);
+      socket.onopen = () => {
+        console.log("web socket open");
+        this.set('wsAvailable', true);
+        this.initDoc();
+      }
+
+      socket.onerror = () => {
+        console.log("web socket error");
+        this.set('wsAvailable', false);
+        this.initDoc();
+      }
+
+      socket.onclose = () =>  {
+        console.log("web socket close");
+        this.set('wsAvailable', false);
+        if(!this.get('doc'))
+        {
+          this.initDoc();
+        }
+      }
+
+      socket.onmessage = (event) =>  {
+        console.log("web socket message", event);
+      }
+
+      console.log("socket",socket);
+
     }
     catch (err)
     {
+      console.log("web sockets not available");
       this.set('wsAvailable', false);
+      if(!this.get('doc'))
+      {
+        this.initDoc();
+      }
     }
+
+    if(isEmpty(socket))
+    {
+      console.log("web sockets not available");
+      this.set('wsAvailable', false);
+      if(!this.get('doc'))
+      {
+        this.initDoc();
+      }
+    }
+
     const editor = this.get('editor');
     const session = editor.getSession();
     editor.commands.addCommand({
@@ -104,7 +147,6 @@ export default Controller.extend({
       this.onSessionChange(this, delta);
     });
     session.setMode("ace/mode/html");
-    this.initDoc();
     this.addWindowListener(this);
 
     this.set('allowDocDelete', false);
@@ -125,7 +167,15 @@ export default Controller.extend({
   initDoc() {
     if(this.get('wsAvailable'))
     {
-      const con = this.get('connection');
+      const socket = this.get('socketRef');
+      const con = new ShareDB.Connection(socket);
+      console.log("connection",con);
+      if(isEmpty(con) || con.state == "disconnected")
+      {
+        console.log("web sockets not available");
+        this.set('wsAvailable', false);
+      }
+      this.set('connection', con);
       const doc = con.get(config.contentCollectionName,this.get('model').id);
       console.log("setting doc",this.get('model').id);
       const editor = this.get('editor');
@@ -529,6 +579,7 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         this.get('doc').destroy();
+        this.set('doc', null);
       }
       this.removeWindowListener();
     },
