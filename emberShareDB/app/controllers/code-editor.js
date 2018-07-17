@@ -91,7 +91,15 @@ export default Controller.extend({
         this.updateIFrame(this, true)
       },
       bindKey: {mac: "shift-enter", win: "shift-enter"}
-    })
+    });
+    editor.commands.addCommand({
+      name: "pause",
+      exec: ()=>{
+        console.log("pause")
+        this.set('renderedSource', "");
+      },
+      bindKey: {mac: "cmd-.", win: "."}
+    });
     session.on('change',(delta)=>{
       this.onSessionChange(this, delta);
     });
