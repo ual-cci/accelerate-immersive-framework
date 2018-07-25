@@ -264,8 +264,6 @@ function startDocAPI(app)
   app.get('/documents/ops/:id', (req,res) => {
     console.log("fetching ops for", contentCollectionName, req.params.id);
     const callback = function (err, results) {
-      console.log("error", err);
-      console.log(results);
       res.status(200).send({data:results});
     };
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
