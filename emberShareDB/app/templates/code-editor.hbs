@@ -24,6 +24,7 @@
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">
         {{#if isOwner}}
+          {{ops-player onSkip = (action 'skipOp')}}
           <label for="privacyCheckbox">Private?</label>
           {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
           <label for="readOnlyCheckbox">Read Only?</label>

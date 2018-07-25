@@ -2,7 +2,6 @@ var ShareDB = require('sharedb');
 var WebSocket = require('ws');
 var WebSocketJSONStream = require('websocket-json-stream');
 var mongo = require('mongodb');
-var mongoose = require('mongoose');
 var multiparty = require('connect-multiparty')();
 var fs = require('fs');
 var Gridfs = require('gridfs-stream');
@@ -260,6 +259,16 @@ function startDocAPI(app)
         res.status(200).send({data:reply});
       }
     });
+  });
+
+  app.get('/documents/ops/:id', (req,res) => {
+    console.log("fetching ops for", contentCollectionName, req.params.id);
+    const callback = function (err, results) {
+      console.log("error", err);
+      console.log(results);
+      res.status(200).send({data:results});
+    };
+    shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
   app.post('/documents', app.oauth.authorise(), (req,res) => {

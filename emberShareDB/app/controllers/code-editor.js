@@ -20,6 +20,7 @@ export default Controller.extend({
   codeParser:inject('code-parsing'),
   modalsManager: inject('modalsManager'),
   documentService: inject('documents'),
+  opsPlayer: inject('ops-player'),
 
   //Parameters
   con: null,
@@ -28,7 +29,7 @@ export default Controller.extend({
   suppress: false,
   codeTimer: new Date(),
   renderedSource:"",
-  collapsed: true,
+  collapsed: false,
   isNotEdittingDocName:true,
   canEditDoc:false,
   isOwner:false,
@@ -73,7 +74,51 @@ export default Controller.extend({
 
   //Functions
   initShareDB() {
-
+    this.initWebSockets();
+    this.initAceEditor();
+    this.addWindowListener(this);
+    this.initUI();
+  },
+  initUI() {
+    this.set('allowDocDelete', false);
+    this.set('allowAssetDelete', false);
+    this.set('showAssets', false);
+    this.set('showPreview', false);
+    this.set('collapsed', false);
+    this.set('showShare', false);
+    this.set('showTokens', false);
+    const embed = this.get('embed') == "true";
+    $("#mimic-navbar").css("display", embed ? "none" : "block");
+    if(embed)
+    {
+      this.set('displayEditor', !embed);
+      this.set('showName', !embed);
+    }
+  },
+  initAceEditor() {
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    editor.commands.addCommand({
+      name: "executeLines",
+      exec: ()=>{
+        this.updateIFrame(this, true)
+      },
+      bindKey: {mac: "shift-enter", win: "shift-enter"}
+    });
+    editor.commands.addCommand({
+      name: "pause",
+      exec: ()=>{
+        console.log("pause")
+        this.set('renderedSource', "");
+      },
+      bindKey: {mac: "cmd-.", win: "."}
+    });
+    session.on('change',(delta)=>{
+      this.onSessionChange(this, delta);
+    });
+    session.setMode("ace/mode/html");
+  },
+  initWebSockets() {
     let socket;
     try {
       socket = new WebSocket(config.wsHost);
@@ -81,13 +126,19 @@ export default Controller.extend({
       socket.onopen = () => {
         console.log("web socket open");
         this.set('wsAvailable', true);
-        this.initDoc();
+        if(!this.get('doc'))
+        {
+          this.initDoc();
+        }
       }
 
       socket.onerror = () => {
         console.log("web socket error");
         this.set('wsAvailable', false);
-        this.initDoc();
+        if(!this.get('doc'))
+        {
+          this.initDoc();
+        }
       }
 
       socket.onclose = () =>  {
@@ -125,51 +176,16 @@ export default Controller.extend({
         this.initDoc();
       }
     }
-
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    editor.commands.addCommand({
-      name: "executeLines",
-      exec: ()=>{
-        this.updateIFrame(this, true)
-      },
-      bindKey: {mac: "shift-enter", win: "shift-enter"}
-    });
-    editor.commands.addCommand({
-      name: "pause",
-      exec: ()=>{
-        console.log("pause")
-        this.set('renderedSource', "");
-      },
-      bindKey: {mac: "cmd-.", win: "."}
-    });
-    session.on('change',(delta)=>{
-      this.onSessionChange(this, delta);
-    });
-    session.setMode("ace/mode/html");
-    this.addWindowListener(this);
-
-    this.set('allowDocDelete', false);
-    this.set('allowAssetDelete', false);
-    this.set('showAssets', false);
-    this.set('showPreview', false);
-    this.set('collapsed', false);
-    this.set('showShare', false);
-    this.set('showTokens', false);
-    const embed = this.get('embed') == "true";
-    $("#mimic-navbar").css("display", embed ? "none" : "block");
-    if(embed)
-    {
-      this.set('displayEditor', !embed);
-      this.set('showName', !embed);
-    }
   },
   initDoc() {
     if(this.get('wsAvailable'))
     {
       const socket = this.get('socketRef');
-      const con = new ShareDB.Connection(socket);
-      console.log("connection",con);
+      let con = this.get('connection')
+      if(!con)
+      {
+        con = new ShareDB.Connection(socket);
+      }
       if(isEmpty(con) || con.state == "disconnected")
       {
         console.log("web sockets not available");
@@ -177,17 +193,14 @@ export default Controller.extend({
       }
       this.set('connection', con);
       const doc = con.get(config.contentCollectionName,this.get('model').id);
-      console.log("setting doc",this.get('model').id);
       const editor = this.get('editor');
       const session = editor.getSession();
-      console.log("subscribing to doc");
       doc.subscribe((err) => {
         console.log("error = ", err);
         if (err) throw err;
-        console.log("no error", doc);
+        //console.log("no error", doc);
         if(!isEmpty(doc.data))
         {
-          console.log("doc.data not empty", doc.data);
           this.set('doc', doc);
           this.didReceiveDoc();
         }
@@ -221,14 +234,13 @@ export default Controller.extend({
     else
     {
       this.get('store').findRecord('document',this.get('model').id).then((doc) => {
-        console.log(doc.data);
+        //console.log(doc.data);
         this.set('doc',doc);
         this.didReceiveDoc();
       });
     }
   },
   didReceiveDoc() {
-    console.log("did receive doc");
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -257,7 +269,7 @@ export default Controller.extend({
     {
       this.get('documentService').submitOp(op)
       .then(()=> {
-        console.log("submitted");
+        //console.log("submitted");
       }).catch(()=> {
         console.log("ERROR Not submitted");
       });
@@ -320,6 +332,7 @@ export default Controller.extend({
     let toRender = selection ? self.getSelectedText(self) : doc.data.source;
     toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
     toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+    //console.log(toRender);
     if(selection)
     {
       this.set('surpress', true);
@@ -584,12 +597,13 @@ export default Controller.extend({
       this.removeWindowListener();
     },
     refresh() {
-      console.log('refreshing');
       const doc = this.get('doc');
+      console.log('refreshing',doc);
       if(!isEmpty(doc))
       {
+        this.get('opsPlayer').reset();
         this.set('renderedSource',"");
-        this.get('doc').destroy();
+        doc.destroy();
         this.initDoc();
       }
     },
@@ -709,6 +723,26 @@ export default Controller.extend({
         this.get('sessionAccount').updateOwnedDocuments();
         this.set('feedbackMessage',err.errors[0]);
       });
+    },
+    skipOp(prev) {
+      const editor = this.get('editor');
+      const doc = this.get('doc').id;
+      const fn = (deltas) => {
+        this.set('surpress', true);
+        editor.session.getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+      }
+      if(prev)
+      {
+        this.get('opsPlayer').prevOp(editor)
+        .then((deltas)=>{fn(deltas)});
+      }
+      else
+      {
+        this.get('opsPlayer').nextOp(editor)
+        .then((deltas)=>{fn(deltas)});
+      }
+
     }
   }
 });

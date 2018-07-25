@@ -21,7 +21,7 @@ export default Service.extend({
       try {
         parsed = acorn.parse(script.script);
       } catch (err) {
-        console.log("Error parsing script", err);
+        console.log("Error parsing script", script.script);
       }
       if(parsed)
       {

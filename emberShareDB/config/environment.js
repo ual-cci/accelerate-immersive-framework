@@ -23,10 +23,15 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.contentCollectionName = 'docs';
-    ENV.oauthHost = "http://172.16.101.238:4001/oauth";
-    ENV.serverHost = "http://172.16.101.238:4001";
-    ENV.wsHost = "ws://172.16.101.238:4001";
+    // ENV.contentCollectionName = 'docs';
+    // ENV.oauthHost = "http://dev.codecircle.gold.ac.uk:4001/oauth";
+    // ENV.serverHost = "http://dev.codecircle.gold.ac.uk:4001";
+    // ENV.wsHost = "ws://dev.codecircle.gold.ac.uk:4001";
+    // ENV.localOrigin = "http://localhost:4200";
+    ENV.contentCollectionName = 'sharedb_docs';
+    ENV.oauthHost = "http://localhost:8080/oauth";
+    ENV.serverHost = "http://localhost:8080";
+    ENV.wsHost = "ws://localhost:8080";
     ENV.localOrigin = "http://localhost:4200";
   }
 
