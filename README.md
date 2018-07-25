@@ -8,6 +8,7 @@ Install Ember CLI
 ```
 npm install -g ember-cli
 ```
+Start Mongo if not already running
 
 The project contains two folders, one for the ember frontend and one for the node server
 
@@ -20,8 +21,6 @@ The project contains two folders, one for the ember frontend and one for the nod
 ```javascript
 
 module.exports = {
-    emberIP : "localhost",
-    emberPort : 4200,
     serverIP : "localhost",
     serverPort : 8080,
     mongoIP: "localhost",
@@ -46,17 +45,15 @@ node server
 
 * The config for this project is stored in config->environment.js
 
-* You should edit the details for 
+* You should edit the details for the following entries in the environment === 'development' section
 
 ```javascript
 
-ENV.contentDBName = 'docs';
+ENV.contentCollectionName = 'docs';
 ENV.oauthHost = "http://localhost:8080/oauth";
 ENV.serverHost = "http://localhost:8080";
 ENV.wsHost = "ws://localhost:8080";
 ```
-
-PLEASE ONLY DO THIS FOR DEVELOPMENT ENVIRONMENT
 
 Then run 
 ```
