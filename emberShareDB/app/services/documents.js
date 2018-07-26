@@ -41,6 +41,7 @@ export default Service.extend({
               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
             }).then((res) => {
               console.log('deleted', docId);
+              doc.deleteRecord();
               this.get('sessionAccount').updateOwnedDocuments();
               resolve();
             }).catch((err) => {
