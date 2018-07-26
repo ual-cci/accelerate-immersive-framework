@@ -313,11 +313,6 @@ function getNewDocumentId(callback)
   });
 }
 
-function getDefaultSource()
-{
-  return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
-}
-
 function createDoc(attr) {
   return new Promise((resolve, reject) => {
     console.log("creating doc", attr);
@@ -330,10 +325,9 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          const src = attr.source ? attr.source:getDefaultSource();
           const tags = attr.tags ? attr.tags:[];
           doc.create({
-            source:src,
+            source:"",
             owner:attr.owner,
             isPrivate:attr.isPrivate,
             readOnly:true,
@@ -348,7 +342,15 @@ function createDoc(attr) {
             newEval:"",
             stats:{views:0,forks:0},
             flags:0
-          },resolve);
+          },()=> {
+            console.log("callback");
+            let op = {};
+            op.p = ['source',0];
+            op.si = attr.source;
+            console.log("submitting FIRST op", op);
+            doc.submitOp(op);
+            resolve(doc);
+          });
           resolve(doc);
           return;
         }

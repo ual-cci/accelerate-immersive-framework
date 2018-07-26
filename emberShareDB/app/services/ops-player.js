@@ -35,7 +35,7 @@ export default Service.extend({
       const fetch = () => {
         if(rewind)
         {
-          this.set('ptr', 1);
+          this.set('ptr', 0);
         }
         this.updateOps(prev);
         resolve(this.getTransform(editor));
@@ -54,14 +54,13 @@ export default Service.extend({
   },
   inBounds:function(ptr) {
     const ops = this.get('ops');
-    const inBounds = ptr >= 1 && ptr < ops.length;
+    const inBounds = ptr >= 0 && ptr < ops.length;
     return inBounds;
   },
   updateOps(prev)
   {
     this.set('opsToApply', null);
     let newPtr = this.get('ptr');
-    console.log('newPtr', newPtr);
     if(!isEmpty(this.get('prevDir')))
     {
       if(prev != this.get('prevDir'))

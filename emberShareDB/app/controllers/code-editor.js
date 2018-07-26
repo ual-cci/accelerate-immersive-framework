@@ -354,6 +354,7 @@ export default Controller.extend({
     const doc = self.get('doc');
     if(!surpress)
     {
+      this.get('opsPlayer').reset();
       self.submitOp(self, {p:['lastEdited'],oi:new Date()},{source:true});
 
       const editor = self.editor;
@@ -732,8 +733,8 @@ export default Controller.extend({
     },
     rewindOps() {
       this.set('surpress', true);
-      this.get('editor').session.setValue(this.getDefaultSource());
-      this.set('renderedSource', this.getDefaultSource());
+      this.get('editor').session.setValue("");
+      this.set('renderedSource', "");
       this.set('surpress', false);
       this.skipOp(false, true);
     },

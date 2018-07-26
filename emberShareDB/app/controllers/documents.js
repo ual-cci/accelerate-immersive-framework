@@ -55,6 +55,10 @@ export default Controller.extend({
     this.transitionToRoute('documents', searchTerm, this.get('page'));
     this.set('message',"Results");
   },
+  getDefaultSource:function()
+  {
+    return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
+  },
   actions: {
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
@@ -68,7 +72,7 @@ export default Controller.extend({
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
-        this._makeNewDoc(docName, isPrivate, null, null);
+        this._makeNewDoc(docName, isPrivate, this.getDefaultSource(), null);
       }
     },
     search() {
