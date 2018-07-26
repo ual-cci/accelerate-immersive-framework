@@ -9,6 +9,7 @@ export default Service.extend({
   ops:null,
   opsToApply:null,
   ptr:0,
+  prevDir:null,
   reset: function() {
     this.set('ptr', 0);
     this.set('ops', null);
@@ -54,46 +55,52 @@ export default Service.extend({
   updateOps(prev)
   {
     this.set('opsToApply', null);
-    let newPtr = this.get('ptr')
+    let newPtr = this.get('ptr');
+    if(!isEmpty(this.get('prevDir')))
+    {
+      if(prev != this.get('prevDir'))
+      {
+        newPtr = prev ? newPtr + 1 : newPtr - 1;
+      }
+    }
+    this.set('prevDir', prev);
     while(this.inBounds(newPtr) && isEmpty(this.get('opsToApply')))
     {
-      const ops = this.get('ops')[newPtr];
-      for(let j = 0; j < ops.op.length; j++)
+      newPtr = prev ? newPtr - 1 : newPtr + 1;
+      if(this.inBounds(newPtr))
       {
-        let op = ops.op[j];
-        let toApply = [];
-        if(op.p[0] == "source")
+        const ops = this.get('ops')[newPtr];
+        for(let j = 0; j < ops.op.length; j++)
         {
-          //INVERT
-          if(prev)
+          let op = ops.op[j];
+          let toApply = [];
+          if(op.p[0] == "source")
           {
-            if(op.si)
+            //INVERT
+            if(prev)
             {
-              op = {p:op.p, sd:op.si};
+              if(op.si)
+              {
+                op = {p:op.p, sd:op.si};
+              }
+              else if(op.sd)
+              {
+                op = {p:op.p, si:op.sd};
+              }
             }
-            else if(op.sd)
-            {
-              op = {p:op.p, si:op.sd};
-            }
+            toApply.push(op);
           }
-          toApply.push(op);
-        }
-        if(toApply.length > 0)
-        {
-          this.set('opsToApply', toApply);
+          if(toApply.length > 0)
+          {
+            this.set('opsToApply', toApply);
+          }
         }
       }
-      newPtr = prev ? newPtr - 1 : newPtr + 1;
     }
-    if(newPtr < 1)
-    {
-      newPtr = 1;
-    }
-    else if (newPtr >= this.get('ops').length)
-    {
-      newPtr = this.get('ops').length - 1;
-    }
-    this.set('ptr', newPtr);
+    this.set('ptr', this.clamp(newPtr, 1, this.get('ops').length - 1));
+  },
+  clamp(num, min, max) {
+    return num <= min ? min : num >= max ? max : num;
   },
   prevOp:function(editor) {
     return this.shift(true, editor);
