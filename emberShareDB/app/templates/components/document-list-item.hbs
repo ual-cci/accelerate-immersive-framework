@@ -7,5 +7,6 @@
   {{#if document.isPrivate}}
   <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
   {{/if}}
-
+  {{#bs-button icon="glyphicon glyphicon-remove" onClick=(action 'toggleDontPlay')}}{{/bs-button}}
+  {{#bs-button icon="glyphicon glyphicon-trash" onClick=(action 'delete')}}{{/bs-button}}
 </div>

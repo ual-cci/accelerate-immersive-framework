@@ -440,17 +440,11 @@ export default Controller.extend({
   },
   deleteCurrentDocument: function() {
     const doc = this.get('doc');
-    let fn = (asset)=>
-    {
-      return this.get('assetService').deleteAsset(asset.fileId)
-    }
-    var actions = doc.data.assets.map(fn);
-    Promise.all(actions).then(()=> {
-      doc.del([],(err)=>{
-        console.log("deleted doc",err);
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('application');
-      });
+    this.get('documentService').deleteDoc(doc.id)
+    .then(() => {
+      this.transitionToRoute('application');
+    }).catch((err) => {
+      console.log("error deleting doc");
     });
   },
   skipOp:function(prev, rewind = false) {

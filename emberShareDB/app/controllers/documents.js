@@ -63,6 +63,12 @@ export default Controller.extend({
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
     },
+    deleteDocument(documentId) {
+      
+    },
+    toggleDontPlay(documentId) {
+
+    },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
     },

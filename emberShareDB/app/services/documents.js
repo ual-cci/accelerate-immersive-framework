@@ -1,8 +1,11 @@
 import Service, { inject } from '@ember/service';
 import config from  '../config/environment';
 import RSVP from 'rsvp';
+import { isEmpty } from '@ember/utils';
 
 export default Service.extend({
+  assetService: inject('assets'),
+  store: inject('store'),
   sessionAccount:inject('session-account'),
   submitOp(op) {
     const doc = this.get('sessionAccount').currentDoc;
@@ -18,6 +21,34 @@ export default Service.extend({
         }).catch((err) => {
           reject(err);
         });
+    });
+  },
+  deleteDoc(docId) {
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId)
+      .then((doc) => {
+        let fn = (asset)=>
+        {
+          return this.get('assetService').deleteAsset(asset.fileId)
+        }
+        var actions = doc.data.assets.map(fn);
+        Promise.all(actions).then(()=> {
+          const token = "Bearer " + this.get('sessionAccount').bearerToken;
+          console.log('deleting doc', docId);
+          $.ajax({
+              type: "DELETE",
+              url: config.serverHost + "/documents/" + docId,
+              beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
+            }).then((res) => {
+              console.log('deleted', docId);
+              this.get('sessionAccount').updateOwnedDocuments();
+              resolve();
+            }).catch((err) => {
+              console.log('error deleting', docId);
+              reject(err);
+            });
+        });
+      });
     });
   },
   flagDoc() {

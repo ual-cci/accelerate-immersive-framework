@@ -24,10 +24,10 @@ module.exports = function(environment) {
 
   if (environment === 'development') {
     // ENV.contentCollectionName = 'docs';
-    // ENV.oauthHost = "http://dev.codecircle.gold.ac.uk:4001/oauth";
-    // ENV.serverHost = "http://dev.codecircle.gold.ac.uk:4001";
-    // ENV.wsHost = "ws://dev.codecircle.gold.ac.uk:4001";
-    // ENV.localOrigin = "http://localhost:4200";
+    // ENV.oauthHost = "https://dev.codecircle.gold.ac.uk/api/oauth";
+    // ENV.serverHost = "https://dev.codecircle.gold.ac.uk/api";
+    // ENV.wsHost = "wss://dev.codecircle.gold.ac.uk";
+    // ENV.localOrigin = "https://localhost:4200";
     ENV.contentCollectionName = 'sharedb_docs';
     ENV.oauthHost = "http://localhost:8080/oauth";
     ENV.serverHost = "http://localhost:8080";
@@ -52,7 +52,7 @@ module.exports = function(environment) {
     ENV.contentDBName = 'sharedb_docs';
     ENV.oauthHost = "http://172.19.102.105:8080/oauth";
     ENV.serverHost = "http://172.19.102.105:8080";
-    ENV.wsHost = "ws://172.19.102.105:8080";
+    ENV.wsHost = "wss://172.19.102.105:8080";
     ENV.localOrigin = "http://localhost:4200";
   }
 

@@ -7,6 +7,12 @@ export default Component.extend({
     open() {
       console.log(this.get('document').documentId);
       this.get('onOpen')(this.get('document').documentId);
+    },
+    delete() {
+      this.get('onDelete')(this.get('document').documentId);
+    },
+    toggleDontPlay() {
+      this.get('toggleDontPlay')(this.get('document').documentId);
     }
   }
 });
