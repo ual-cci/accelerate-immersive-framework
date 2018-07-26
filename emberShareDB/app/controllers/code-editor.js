@@ -73,13 +73,13 @@ export default Controller.extend({
   }),
 
   //Functions
-  initShareDB() {
+  initShareDB: function() {
     this.initWebSockets();
     this.initAceEditor();
-    this.addWindowListener(this);
+    this.addWindowListener();
     this.initUI();
   },
-  initUI() {
+  initUI: function() {
     this.set('allowDocDelete', false);
     this.set('allowAssetDelete', false);
     this.set('showAssets', false);
@@ -95,13 +95,13 @@ export default Controller.extend({
       this.set('showName', !embed);
     }
   },
-  initAceEditor() {
+  initAceEditor: function() {
     const editor = this.get('editor');
     const session = editor.getSession();
     editor.commands.addCommand({
       name: "executeLines",
       exec: ()=>{
-        this.updateIFrame(this, true)
+        this.updateIFrame( true)
       },
       bindKey: {mac: "shift-enter", win: "shift-enter"}
     });
@@ -114,11 +114,11 @@ export default Controller.extend({
       bindKey: {mac: "cmd-.", win: "."}
     });
     session.on('change',(delta)=>{
-      this.onSessionChange(this, delta);
+      this.onSessionChange( delta);
     });
     session.setMode("ace/mode/html");
   },
-  initWebSockets() {
+  initWebSockets: function() {
     let socket;
     try {
       socket = new WebSocket(config.wsHost);
@@ -177,7 +177,8 @@ export default Controller.extend({
       }
     }
   },
-  initDoc() {
+  initDoc: function() {
+    this.get('opsPlayer').reset();
     if(this.get('wsAvailable'))
     {
       const socket = this.get('socketRef');
@@ -221,7 +222,7 @@ export default Controller.extend({
             this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
               toChange.set('assets',ops[0].oi);
             });
-            this.preloadAssets(this);
+            this.preloadAssets();
           }
           else if (!source && ops[0].p[0] == "newEval")
           {
@@ -240,7 +241,7 @@ export default Controller.extend({
       });
     }
   },
-  didReceiveDoc() {
+  didReceiveDoc: function() {
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -248,18 +249,18 @@ export default Controller.extend({
     this.setCanEditDoc();
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
     stats.views = parseInt(stats.views) + 1;
-    this.submitOp(this,{p:['stats'],oi:stats},{source:true});
+    this.submitOp({p:['stats'],oi:stats},{source:true});
     editor.setReadOnly(!this.get('canEditDoc'));
-    this.preloadAssets(this);
+    this.preloadAssets();
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
     this.set('surpress', true);
     session.setValue(doc.data.source);
     this.set('surpress', false);
   },
-  submitOp(self, op)
+  submitOp: function(op)
   {
-    const doc = self.get('doc');
-    if(self.get('wsAvailable'))
+    const doc = this.get('doc');
+    if(this.get('wsAvailable'))
     {
       doc.submitOp(op);
     }
@@ -273,24 +274,24 @@ export default Controller.extend({
       });
     }
   },
-  preloadAssets(self) {
-    const doc = self.get('doc');
+  preloadAssets: function() {
+    const doc = this.get('doc');
     if(!isEmpty(doc.data.assets))
     {
-      self.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        self.updateIFrame(self);
+      this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
+        this.updateIFrame();
       });
     }
     else
     {
       console.log("no assets to preload");
-      self.updateIFrame(self);
+      this.updateIFrame();
     }
   },
-  updateSavedVals(self)
+  updateSavedVals: function()
   {
-    const doc = self.get('doc');
-    const savedVals = self.get('savedVals');
+    const doc = this.get('doc');
+    const savedVals = this.get('savedVals');
     if(!savedVals)
     {
       return;
@@ -300,7 +301,7 @@ export default Controller.extend({
     try {
       if(hasVals)
       {
-        self.submitOp(self, {p:['savedVals'],oi:savedVals},{source:true});
+        this.submitOp( {p:['savedVals'],oi:savedVals},{source:true});
       }
     } catch (err)
     {
@@ -308,9 +309,9 @@ export default Controller.extend({
     }
 
   },
-  getSelectedText(self)
+  getSelectedText: function()
   {
-    const editor = self.get('editor');
+    const editor = this.get('editor');
     let selectionRange = editor.getSelectionRange();
     if(selectionRange.start.row == selectionRange.end.row &&
       selectionRange.start.column == selectionRange.end.column)
@@ -321,44 +322,51 @@ export default Controller.extend({
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
-  updateIFrame(self, selection = false) {
-    self.updateSavedVals(self);
-    const savedVals = self.get('savedVals');
-    const doc = self.get('doc');
-    let toRender = selection ? self.getSelectedText(self) : doc.data.source;
-    toRender = self.get('codeParser').replaceAssets(toRender, self.get('model').assets);
-    toRender = self.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+  updateIFrame: function(selection = false) {
+    this.updateSavedVals();
+    const savedVals = this.get('savedVals');
+    const doc = this.get('doc');
+    let toRender = selection ? this.getSelectedText() : doc.data.source;
+    toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
+    toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     //console.log(toRender);
     if(selection)
     {
-      self.submitOp(self, {p:['newEval'],oi:toRender},{source:true});
+      this.submitOp( {p:['newEval'],oi:toRender},{source:true});
       document.getElementById("output-iframe").contentWindow.eval(toRender);
     }
     else
     {
-      self.set('renderedSource', toRender);
+      this.set('renderedSource', toRender);
     }
   },
-  autoExecuteCode(self) {
-    if(self.get('codeTimer'))
+  autoExecuteCode: function() {
+    if(this.get('codeTimer'))
     {
-      clearTimeout(self.get('codeTimer'));
+      clearTimeout(this.get('codeTimer'));
     }
-    self.set('codeTimer', setTimeout(function() {
-      self.updateIFrame(self);
-      self.set('codeTimer',null);
+    this.set('codeTimer', setTimeout(function() {
+      this.updateIFrame();
+      this.set('codeTimer',null);
     },1500));
   },
-  onSessionChange(self, delta) {
-    const surpress = self.get('surpress');
-    const doc = self.get('doc');
+  onSessionChange:function(delta) {
+    const surpress = this.get('surpress');
+    const doc = this.get('doc');
     if(!surpress)
     {
-      this.get('opsPlayer').reset();
-      self.submitOp(self, {p:['lastEdited'],oi:new Date()},{source:true});
-
-      const editor = self.editor;
+      const editor = this.editor;
       const session = editor.getSession();
+
+      if(!this.get('opsPlayer').atHead())
+      {
+        console.log("not at head");
+        this.submitOp({p: ["source", 0], sd: doc.data.source});
+        this.submitOp({p: ["source", 0], si: session.getValue()});
+      }
+      this.get('opsPlayer').reset();
+      this.submitOp( {p:['lastEdited'],oi:new Date()},{source:true});
+
       const aceDoc = session.getDocument();
       const op = {};
       const start = aceDoc.positionToIndex(delta.start);
@@ -373,40 +381,40 @@ export default Controller.extend({
       }
       const str = delta.lines.join('\n');
       op[action] = str;
-      self.submitOp(self, op);
+      this.submitOp(op);
       if(this.get('autoRender'))
       {
-        this.autoExecuteCode(self);
+        this.autoExecuteCode();
       }
     }
   },
-  addWindowListener(self) {
+  addWindowListener: function() {
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
   	eventer(messageEvent, function(e) {
-      self.handleWindowEvent(e,self)
+      this.handleWindowEvent(e)
     });
   },
-  removeWindowListener() {
+  removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
     var messageEvent = eventMethod === "detachEvent"? "onmessage":"message";
     eventer(messageEvent, function(e) {
-      self.handleWindowEvent(e,self)
+      this.handleWindowEvent(e)
     });
   },
-  handleWindowEvent(e, self) {
+  handleWindowEvent: function(e) {
     const embed = this.get('embed') == "true";
     if (e.origin === config.localOrigin && !embed)
     {
-      const doc = self.get('doc');
+      const doc = this.get('doc');
       let savedVals = this.get('savedVals');
       savedVals[e.data[0]] = e.data[1];
       this.set('savedVals', savedVals);
     }
   },
-  setCanEditDoc() {
+  setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
     const doc = this.get('doc');
     if(isEmpty(currentUser) || isEmpty(doc.data))
@@ -430,7 +438,7 @@ export default Controller.extend({
     }
     this.set('canEditDoc', this.get('displayEditor'));
   },
-  deleteCurrentDocument() {
+  deleteCurrentDocument: function() {
     const doc = this.get('doc');
     let fn = (asset)=>
     {
@@ -475,13 +483,13 @@ export default Controller.extend({
     },
     tagsChanged(tags) {
       const doc = this.get('doc');
-      this.submitOp(this, {p:['tags'],oi:tags},{source:true});
+      this.submitOp({p:['tags'],oi:tags},{source:true});
     },
     doEditDocName() {
       if(this.get('canEditDoc'))
       {
         this.set('isNotEdittingDocName', false);
-        scheduleOnce('afterRender', this, function() {
+        scheduleOnce('afterRender',  function() {
           $('#doc-name-input').focus();
         });
       }
@@ -490,14 +498,14 @@ export default Controller.extend({
       this.set('isNotEdittingDocName', true);
       const doc = this.get('doc');
       const newName = this.get('model').name;
-      this.submitOp(this, {p:['name'],oi:newName},{source:true});
+      this.submitOp({p:['name'],oi:newName},{source:true});
     },
     privacyToggled() {
       if(this.get('canEditDoc'))
       {
         this.toggleProperty('model.isPrivate');
         const doc = this.get('doc');
-        this.submitOp(this, {p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
+        this.submitOp( {p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
       }
     },
     readOnlyToggled() {
@@ -505,7 +513,7 @@ export default Controller.extend({
       {
         this.toggleProperty('model.readOnly');
         const doc = this.get('doc');
-        this.submitOp(this, {p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
+        this.submitOp( {p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
       }
     },
     deleteDoc() {
@@ -565,7 +573,7 @@ export default Controller.extend({
       this.toggleProperty('collapsed');
     },
     renderCode() {
-      this.updateIFrame(this);
+      this.updateIFrame();
     },
     pauseCode() {
       this.set('renderedSource', "");
@@ -595,7 +603,7 @@ export default Controller.extend({
       }
     },
     cleanUp() {
-      this.updateSavedVals(this);
+      this.updateSavedVals();
       this.set('renderedSource',"");
       if(this.get('wsAvailable'))
       {
@@ -687,7 +695,7 @@ export default Controller.extend({
         if(flags < 2)
         {
           flags = flags + 1;
-          this.submitOp(this, {p:['flags'],oi:flags},{source:true});
+          this.submitOp( {p:['flags'],oi:flags},{source:true});
         }
         else
         {
@@ -702,7 +710,7 @@ export default Controller.extend({
       const doc = this.get('doc');
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
       stats.forks = parseInt(stats.forks) + 1;
-      this.submitOp(this, {p:['stats'],oi:stats},{source:true});
+      this.submitOp( {p:['stats'],oi:stats},{source:true});
       let newDoc = this.get('store').createRecord('document', {
         source:doc.data.source,
         owner:currentUser,
@@ -752,7 +760,7 @@ export default Controller.extend({
         {
           clearInterval(this.get('opsInterval'));
         }
-      }, 300));
+      }, 100));
     }
   }
 });

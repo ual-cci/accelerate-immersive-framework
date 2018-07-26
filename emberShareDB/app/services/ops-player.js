@@ -6,10 +6,21 @@ import config from  '../config/environment';
 export default Service.extend({
   parser:inject('code-parsing'),
   sessionAccount:inject('session-account'),
-  ops:null,
-  opsToApply:null,
-  ptr:0,
-  prevDir:null,
+  ops: null,
+  opsToApply: null,
+  ptr: 0,
+  prevDir: null,
+  atHead: function() {
+    const ptr = this.get('ptr');
+    if(isEmpty(this.get('ops')))
+    {
+      return true;
+    }
+    else
+    {
+      return ptr >= this.get('ops').length - 1;
+    }
+  },
   reset: function() {
     this.set('ptr', 0);
     this.set('ops', null);
@@ -22,7 +33,7 @@ export default Service.extend({
           url: config.serverHost + "/documents/ops/" + doc,
         }).then((res) => {
           this.set('ops', res.data);
-          this.set('ptr', this.get('ops').length - 1);
+          this.set('ptr', this.get('ops').length);
           resolve(res.data);
         }).catch((err) => {
           reject(err);
@@ -35,6 +46,7 @@ export default Service.extend({
       const fetch = () => {
         if(rewind)
         {
+          this.set('prevDir', null);
           this.set('ptr', 0);
         }
         this.updateOps(prev);
@@ -57,8 +69,7 @@ export default Service.extend({
     const inBounds = ptr >= 0 && ptr < ops.length;
     return inBounds;
   },
-  updateOps(prev)
-  {
+  updateOps(prev) {
     this.set('opsToApply', null);
     let newPtr = this.get('ptr');
     if(!isEmpty(this.get('prevDir')))
@@ -69,37 +80,45 @@ export default Service.extend({
       }
     }
     this.set('prevDir', prev);
-    while(this.inBounds(newPtr) && isEmpty(this.get('opsToApply')))
+    let hasHitBounds = false;
+    while(!hasHitBounds && isEmpty(this.get('opsToApply')))
     {
       newPtr = prev ? newPtr - 1 : newPtr + 1;
       if(this.inBounds(newPtr))
       {
         const ops = this.get('ops')[newPtr];
-        for(let j = 0; j < ops.op.length; j++)
+        if(!isEmpty(ops.op))
         {
-          let op = ops.op[j];
           let toApply = [];
-          if(op.p[0] == "source")
+          for(let j = 0; j < ops.op.length; j++)
           {
-            //INVERT
-            if(prev)
+            let op = ops.op[j];
+            if(op.p[0] == "source")
             {
-              if(op.si)
+              //INVERT
+              if(prev)
               {
-                op = {p:op.p, sd:op.si};
+                if(op.si)
+                {
+                  op = {p:op.p, sd:op.si};
+                }
+                else if(op.sd)
+                {
+                  op = {p:op.p, si:op.sd};
+                }
               }
-              else if(op.sd)
-              {
-                op = {p:op.p, si:op.sd};
-              }
+              toApply.push(op);
             }
-            toApply.push(op);
           }
           if(toApply.length > 0)
           {
             this.set('opsToApply', toApply);
           }
         }
+      }
+      else
+      {
+        hasHitBounds = true;
       }
     }
     if(this.inBounds(newPtr))
