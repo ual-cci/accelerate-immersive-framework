@@ -246,11 +246,9 @@ export default Controller.extend({
     const session = editor.getSession();
     this.set('savedVals', doc.data.savedVals);
     this.setCanEditDoc();
-    this.set('surpress', true);
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
     stats.views = parseInt(stats.views) + 1;
     this.submitOp(this,{p:['stats'],oi:stats},{source:true});
-    this.set('surpress', false);
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets(this);
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
@@ -302,9 +300,7 @@ export default Controller.extend({
     try {
       if(hasVals)
       {
-        self.set('surpress', true);
         self.submitOp(self, {p:['savedVals'],oi:savedVals},{source:true});
-        self.set('surpress', false);
       }
     } catch (err)
     {
@@ -335,9 +331,7 @@ export default Controller.extend({
     //console.log(toRender);
     if(selection)
     {
-      this.set('surpress', true);
       self.submitOp(self, {p:['newEval'],oi:toRender},{source:true});
-      this.set('surpress', false);
       document.getElementById("output-iframe").contentWindow.eval(toRender);
     }
     else
@@ -360,9 +354,7 @@ export default Controller.extend({
     const doc = self.get('doc');
     if(!surpress)
     {
-      this.set('surpress', true);
       self.submitOp(self, {p:['lastEdited'],oi:new Date()},{source:true});
-      this.set('surpress', false);
 
       const editor = self.editor;
       const session = editor.getSession();
@@ -452,6 +444,29 @@ export default Controller.extend({
       });
     });
   },
+  skipOp:function(prev, rewind = false) {
+    const editor = this.get('editor');
+    const doc = this.get('doc').id;
+    const fn = (deltas) => {
+      this.set('surpress', true);
+      editor.session.getDocument().applyDeltas(deltas);
+      this.set('surpress', false);
+    }
+    if(prev)
+    {
+      this.get('opsPlayer').prevOp(editor, rewind)
+      .then((deltas)=>{fn(deltas)});
+    }
+    else
+    {
+      this.get('opsPlayer').nextOp(editor, rewind)
+      .then((deltas)=>{fn(deltas)});
+    }
+  },
+  getDefaultSource:function()
+  {
+    return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -459,9 +474,7 @@ export default Controller.extend({
     },
     tagsChanged(tags) {
       const doc = this.get('doc');
-      this.set('surpress', true);
       this.submitOp(this, {p:['tags'],oi:tags},{source:true});
-      this.set('surpress', false);
     },
     doEditDocName() {
       if(this.get('canEditDoc'))
@@ -476,18 +489,14 @@ export default Controller.extend({
       this.set('isNotEdittingDocName', true);
       const doc = this.get('doc');
       const newName = this.get('model').name;
-      this.set('surpress', true);
       this.submitOp(this, {p:['name'],oi:newName},{source:true});
-      this.set('surpress', false);
     },
     privacyToggled() {
       if(this.get('canEditDoc'))
       {
         this.toggleProperty('model.isPrivate');
         const doc = this.get('doc');
-        this.set('surpress', true);
         this.submitOp(this, {p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
-        this.set('surpress', false);
       }
     },
     readOnlyToggled() {
@@ -495,9 +504,7 @@ export default Controller.extend({
       {
         this.toggleProperty('model.readOnly');
         const doc = this.get('doc');
-        this.set('surpress', true);
         this.submitOp(this, {p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
-        this.set('surpress', false);
       }
     },
     deleteDoc() {
@@ -679,9 +686,7 @@ export default Controller.extend({
         if(flags < 2)
         {
           flags = flags + 1;
-          this.set('surpress', true);
           this.submitOp(this, {p:['flags'],oi:flags},{source:true});
-          this.set('surpress', false);
         }
         else
         {
@@ -694,11 +699,9 @@ export default Controller.extend({
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
       const doc = this.get('doc');
-      this.set('surpress', true);
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
       stats.forks = parseInt(stats.forks) + 1;
       this.submitOp(this, {p:['stats'],oi:stats},{source:true});
-      this.set('surpress', false);
       let newDoc = this.get('store').createRecord('document', {
         source:doc.data.source,
         owner:currentUser,
@@ -725,24 +728,30 @@ export default Controller.extend({
       });
     },
     skipOp(prev) {
-      const editor = this.get('editor');
-      const doc = this.get('doc').id;
-      const fn = (deltas) => {
-        this.set('surpress', true);
-        editor.session.getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-      }
-      if(prev)
+      this.skipOp(prev);
+    },
+    rewindOps() {
+      this.set('surpress', true);
+      this.get('editor').session.setValue(this.getDefaultSource());
+      this.set('renderedSource', this.getDefaultSource());
+      this.set('surpress', false);
+      this.skipOp(false, true);
+    },
+    playOps() {
+      if(this.get('opsInterval'))
       {
-        this.get('opsPlayer').prevOp(editor)
-        .then((deltas)=>{fn(deltas)});
+        clearInterval(this.get('opsInterval'));
       }
-      else
-      {
-        this.get('opsPlayer').nextOp(editor)
-        .then((deltas)=>{fn(deltas)});
-      }
-
+      this.set('opsInterval', setInterval(()=> {
+        if(!this.get('opsPlayer').reachedEnd)
+        {
+          this.skipOp(false);
+        }
+        else
+        {
+          clearInterval(this.get('opsInterval'));
+        }
+      }, 300));
     }
   }
 });

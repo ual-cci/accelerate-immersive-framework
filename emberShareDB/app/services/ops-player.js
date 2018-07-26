@@ -29,9 +29,14 @@ export default Service.extend({
         });
     });
   },
-  shift:function(prev, editor) {
+  shift:function(prev, editor, rewind = false) {
+    this.set('reachedEnd', false);
     return new RSVP.Promise((resolve, reject) => {
       const fetch = () => {
+        if(rewind)
+        {
+          this.set('ptr', 1);
+        }
         this.updateOps(prev);
         resolve(this.getTransform(editor));
       }
@@ -39,7 +44,7 @@ export default Service.extend({
       {
         this.loadOps()
         .then(() => {fetch()})
-        .catch(() => {reject()});
+        .catch((err) => {reject(err)});
       }
       else
       {
@@ -56,6 +61,7 @@ export default Service.extend({
   {
     this.set('opsToApply', null);
     let newPtr = this.get('ptr');
+    console.log('newPtr', newPtr);
     if(!isEmpty(this.get('prevDir')))
     {
       if(prev != this.get('prevDir'))
@@ -97,16 +103,23 @@ export default Service.extend({
         }
       }
     }
-    this.set('ptr', this.clamp(newPtr, 1, this.get('ops').length - 1));
+    if(this.inBounds(newPtr))
+    {
+      this.set('ptr', newPtr);
+    }
+    else
+    {
+      this.set('reachedEnd', true);
+    }
   },
   clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
   },
-  prevOp:function(editor) {
-    return this.shift(true, editor);
+  prevOp:function(editor, rewind = false) {
+    return this.shift(true, editor, rewind);
   },
-  nextOp:function(editor) {
-    return this.shift(false, editor);
+  nextOp:function(editor, rewind = false) {
+    return this.shift(false, editor, rewind);
   },
   getTransform:function(editor) {
     if(!isEmpty(this.get('opsToApply')))
