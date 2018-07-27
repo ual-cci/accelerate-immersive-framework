@@ -178,7 +178,9 @@ export default Controller.extend({
     }
   },
   initDoc: function() {
+
     this.get('opsPlayer').reset();
+
     if(this.get('wsAvailable'))
     {
       const socket = this.get('socketRef');
@@ -235,13 +237,14 @@ export default Controller.extend({
     else
     {
       this.get('store').findRecord('document',this.get('model').id).then((doc) => {
-        //console.log(doc.data);
+        console.log(doc.data);
         this.set('doc',doc);
         this.didReceiveDoc();
       });
     }
   },
   didReceiveDoc: function() {
+    console.log('did didReceiveDoc')
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -609,8 +612,8 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         this.get('doc').destroy();
-        this.set('doc', null);
       }
+      this.set('doc', null);
       this.removeWindowListener();
     },
     refresh() {
@@ -620,8 +623,15 @@ export default Controller.extend({
       {
         this.get('opsPlayer').reset();
         this.set('renderedSource',"");
-        doc.destroy();
-        this.initDoc();
+        if(this.get('wsAvailable'))
+        {
+          doc.destroy();
+        }
+        this.set('doc', null);
+        if(!isEmpty(this.get('editor')))
+        {
+          this.initDoc();
+        }
       }
     },
     mouseDown(e) {
