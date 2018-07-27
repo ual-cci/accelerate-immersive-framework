@@ -279,13 +279,19 @@ export default Controller.extend({
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        this.updateIFrame();
+        if(!this.get('model.dontPlay'))
+        {
+          this.updateIFrame();
+        }
       });
     }
     else
     {
-      console.log("no assets to preload");
-      this.updateIFrame();
+      console.log("no assets to preload", this.get('model.dontPlay'));
+      if(!this.get('model.dontPlay'))
+      {
+        this.updateIFrame();
+      }
     }
   },
   updateSavedVals: function()
@@ -323,6 +329,7 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
+    console.log("updating iframe");
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
     const doc = this.get('doc');
@@ -392,7 +399,7 @@ export default Controller.extend({
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
-  	eventer(messageEvent, function(e) {
+  	eventer(messageEvent, (e) => {
       this.handleWindowEvent(e)
     });
   },
@@ -400,7 +407,7 @@ export default Controller.extend({
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
     var messageEvent = eventMethod === "detachEvent"? "onmessage":"message";
-    eventer(messageEvent, function(e) {
+    eventer(messageEvent, (e) => {
       this.handleWindowEvent(e)
     });
   },
@@ -426,7 +433,7 @@ export default Controller.extend({
     if(currentUser != doc.data.owner)
     {
       this.set('isOwner', false);
-      if(doc.data.readOnly)
+      if(this.get('model.readOnly'))
       {
         this.set('canEditDoc', false);
         return;
@@ -440,17 +447,11 @@ export default Controller.extend({
   },
   deleteCurrentDocument: function() {
     const doc = this.get('doc');
-    let fn = (asset)=>
-    {
-      return this.get('assetService').deleteAsset(asset.fileId)
-    }
-    var actions = doc.data.assets.map(fn);
-    Promise.all(actions).then(()=> {
-      doc.del([],(err)=>{
-        console.log("deleted doc",err);
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('application');
-      });
+    this.get('documentService').deleteDoc(doc.id)
+    .then(() => {
+      this.transitionToRoute('application');
+    }).catch((err) => {
+      console.log("error deleting doc");
     });
   },
   skipOp:function(prev, rewind = false) {

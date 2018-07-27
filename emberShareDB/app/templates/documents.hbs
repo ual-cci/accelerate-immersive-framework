@@ -26,7 +26,12 @@
 <div class = "container-fluid">
   <div class = "row">
     {{#each model as |document index|}}
-        {{document-list-item document=document index=index onOpen=(action 'openDocument' document.documentId)}}
+        {{document-list-item
+          document=document
+          index=index
+          onOpen=(action 'openDocument' document.documentId)
+          onDelete=(action 'deleteDocument' document.documentId)
+        }}
     {{/each}}
   </div>
   {{#if canGoBack}}

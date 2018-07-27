@@ -112,6 +112,7 @@ export default Service.extend({
           }
           if(toApply.length > 0)
           {
+            console.log(toApply);
             this.set('opsToApply', toApply);
           }
         }

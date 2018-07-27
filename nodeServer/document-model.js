@@ -139,7 +139,7 @@ function startDocAPI(app)
       const docId = req.body.documentId;
       const doc = shareDBConnection.get(contentCollectionName, docId);
       doc.fetch((err)=>{
-        console.log('submitting op', op);
+        console.log('submitting op', op, doc.id);
         try {
           doc.submitOp(op);
         } catch(err)
@@ -246,6 +246,22 @@ function startDocAPI(app)
     });
   });
 
+  app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
+    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    doc.fetch(function(err) {
+      if (err || !doc.data) {
+        res.status(404).send("database error making document");
+        return;
+      }
+      else
+      {
+        doc.del([],(err)=>{
+          res.status(200).send("document deleted");
+        });
+      }
+    });
+  });
+
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
@@ -341,7 +357,8 @@ function createDoc(attr) {
             savedVals:{},
             newEval:"",
             stats:{views:0,forks:0},
-            flags:0
+            flags:0,
+            dontPlay:false
           },()=> {
             console.log("callback");
             let op = {};

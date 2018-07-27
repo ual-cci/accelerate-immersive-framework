@@ -1,10 +1,12 @@
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
 import { computed } from '@ember/object';
+import { isEmpty } from '@ember/utils';
 
 export default Controller.extend({
   store:inject(),
   session:inject('session'),
+  documentService: inject('documents'),
   message:"",
   docName:"",
   isPrivate:true,
@@ -20,7 +22,7 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
-  _makeNewDoc(docName, isPrivate, source, forkedFrom) {
+  makeNewDoc(docName, isPrivate, source, forkedFrom) {
     const currentUser = this.get('sessionAccount').currentUserName;
     let doc = this.get('store').createRecord('document', {
       source:source,
@@ -48,7 +50,7 @@ export default Controller.extend({
   updateResults()
   {
     let searchTerm = this.get('searchTerm');
-    if(!searchTerm)
+    if(isEmpty(searchTerm))
     {
       searchTerm = " ";
     }
@@ -63,6 +65,17 @@ export default Controller.extend({
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
     },
+    deleteDocument(documentId) {
+      this.get('documentService').deleteDoc(documentId)
+      .then(() => {
+        console.log("deleted, updating results");
+        this.set('message',"deleted");
+        this.set('searchTerm', "deleted");
+        this.updateResults();
+      }).catch((err) => {
+
+      });
+    },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
     },
@@ -72,11 +85,11 @@ export default Controller.extend({
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
-        this._makeNewDoc(docName, isPrivate, this.getDefaultSource(), null);
+        this.makeNewDoc(docName, isPrivate, this.getDefaultSource(), null);
       }
     },
     search() {
-      this.set('page',0);
+      this.set('page', 0);
       this.updateResults();
     },
     nextPage() {
