@@ -279,13 +279,19 @@ export default Controller.extend({
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        this.updateIFrame();
+        if(!this.get('model.dontPlay'))
+        {
+          this.updateIFrame();
+        }
       });
     }
     else
     {
-      console.log("no assets to preload");
-      this.updateIFrame();
+      console.log("no assets to preload", this.get('model.dontPlay'));
+      if(!this.get('model.dontPlay'))
+      {
+        this.updateIFrame();
+      }
     }
   },
   updateSavedVals: function()
@@ -323,6 +329,7 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
+    console.log("updating iframe");
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
     const doc = this.get('doc');
@@ -426,7 +433,7 @@ export default Controller.extend({
     if(currentUser != doc.data.owner)
     {
       this.set('isOwner', false);
-      if(doc.data.readOnly)
+      if(this.get('model.readOnly'))
       {
         this.set('canEditDoc', false);
         return;

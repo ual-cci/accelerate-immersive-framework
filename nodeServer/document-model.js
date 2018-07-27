@@ -139,7 +139,7 @@ function startDocAPI(app)
       const docId = req.body.documentId;
       const doc = shareDBConnection.get(contentCollectionName, docId);
       doc.fetch((err)=>{
-        console.log('submitting op', op);
+        console.log('submitting op', op, doc.id);
         try {
           doc.submitOp(op);
         } catch(err)
