@@ -67,3 +67,5 @@ typings/
 .serverless
 
 emberShareDB/config/environment.js
+config.js
+
