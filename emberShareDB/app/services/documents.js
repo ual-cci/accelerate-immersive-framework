@@ -7,6 +7,29 @@ export default Service.extend({
   assetService: inject('assets'),
   store: inject('store'),
   sessionAccount:inject('session-account'),
+  makeNewDoc(docName, isPrivate, source, forkedFrom) {
+    return new RSVP.Promise((resolve, reject) => {
+      const currentUser = this.get('sessionAccount').currentUserName;
+      console.log("current user", currentUser);
+      let doc = this.get('store').createRecord('document', {
+        source:source,
+        owner:currentUser,
+        isPrivate:isPrivate,
+        name:docName,
+        documentId:null,
+        forkedFrom:forkedFrom
+      });
+      doc.save().then((response)=>{
+        console.log("saved new doc");
+        resolve();
+      }).catch((err)=>{
+        console.log("error creating record");
+        doc.deleteRecord();
+        this.get('sessionAccount').updateOwnedDocuments();
+        reject("error creating document, are you signed in?");
+      });
+    });
+  },
   submitOp(op, doc) {
     if(isEmpty(doc))
     {

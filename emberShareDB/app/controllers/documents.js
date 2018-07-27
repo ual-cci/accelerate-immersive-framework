@@ -11,7 +11,7 @@ export default Controller.extend({
   docName:"",
   isPrivate:true,
   page:0,
-  feedbackMessage: null,
+  feedbackMessage: "",
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
     return this.get('page') > 0;
@@ -22,31 +22,6 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
-  makeNewDoc(docName, isPrivate, source, forkedFrom) {
-    const currentUser = this.get('sessionAccount').currentUserName;
-    let doc = this.get('store').createRecord('document', {
-      source:source,
-      owner:currentUser,
-      isPrivate:isPrivate,
-      name:docName,
-      documentId:null,
-      forkedFrom:forkedFrom
-    });
-    doc.save().then((response)=>{
-      this.get('store').query('document', {
-        filter: {search: currentUser, page: 0, currentUser:currentUser}
-      }).then((documents) => {
-        console.log("new doc created", documents, response);
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('code-editor',documents.firstObject.documentId);
-      });
-      this.set('feedbackMessage',"Document created successfully");
-    }).catch((err)=>{
-      doc.deleteRecord();
-      this.get('sessionAccount').updateOwnedDocuments();
-      this.set('feedbackMessage',err.errors[0]);
-    });
-  },
   updateResults()
   {
     let searchTerm = this.get('searchTerm');
@@ -73,7 +48,7 @@ export default Controller.extend({
         this.set('searchTerm', "deleted");
         this.updateResults();
       }).catch((err) => {
-
+        this.set('feedbackMessage',err.errors[0]);
       });
     },
     checkboxClicked() {
@@ -85,7 +60,28 @@ export default Controller.extend({
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
-        this.makeNewDoc(docName, isPrivate, this.getDefaultSource(), null);
+        this.get('documentService').makeNewDoc(docName,
+          isPrivate,
+          this.getDefaultSource(),
+          null)
+          .then(() => {
+            console.log("new doc created");
+            const currentUser = this.get('sessionAccount').currentUserName;
+            this.get('store').query('document', {
+              filter: {search: currentUser, page: 0, currentUser:currentUser}
+            }).then((documents) => {
+              console.log("new doc found, transitioning", documents);
+              this.get('sessionAccount').updateOwnedDocuments();
+              this.transitionToRoute('code-editor',documents.firstObject.documentId);
+            });
+          }).catch((err) => {
+            console.log("error making doc", err);
+            this.set('feedbackMessage', err);
+          });
+      }
+      else
+      {
+        this.set('feedbackMessage', 'Please enter a name');
       }
     },
     search() {
