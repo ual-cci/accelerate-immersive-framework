@@ -7,7 +7,13 @@
   {{#if document.isPrivate}}
   <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
   {{/if}}
-  <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-  {{input type="checkbox" checked=document.dontPlay click=(action 'toggleDontPlay')}}
-  {{#bs-button class = "main-delete-button" icon="glyphicon glyphicon-trash" onClick=(action 'delete')}}{{/bs-button}}
+  {{#if canEdit}}
+    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+    {{input type="checkbox" checked=document.dontPlay click=(action 'toggleDontPlay')}}
+    {{#bs-button class = "main-delete-button"
+    icon="glyphicon glyphicon-trash"
+    onClick=(action 'delete')}}
+    {{/bs-button}}
+  {{/if}}
+
 </div>
