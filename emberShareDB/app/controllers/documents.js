@@ -76,9 +76,6 @@ export default Controller.extend({
 
       });
     },
-    toggleDontPlay(documentId) {
-
-    },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
     },

@@ -1,7 +1,9 @@
 import Component from '@ember/component';
+import { inject }  from '@ember/service';
 
 export default Component.extend({
   document:null,
+  documentService:inject('documents'),
   index:0,
   actions: {
     open() {
@@ -12,7 +14,7 @@ export default Component.extend({
       this.get('onDelete')(this.get('document').documentId);
     },
     toggleDontPlay() {
-      this.get('toggleDontPlay')(this.get('document').documentId);
+      this.get('documentService').toggleDontPlay((this.get('document').documentId));
     }
   }
 });

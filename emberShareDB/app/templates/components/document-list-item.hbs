@@ -1,4 +1,4 @@
-<div class = "col-md-3 document-list-item" {{action 'open'}}>
+<div class = "col-md-3 document-list-item">
   {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}} {{/link-to}}
   by {{document.owner}}
   {{#if document.readOnly}}
@@ -7,6 +7,7 @@
   {{#if document.isPrivate}}
   <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
   {{/if}}
-  {{#bs-button icon="glyphicon glyphicon-remove" onClick=(action 'toggleDontPlay')}}{{/bs-button}}
-  {{#bs-button icon="glyphicon glyphicon-trash" onClick=(action 'delete')}}{{/bs-button}}
+  <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+  {{input type="checkbox" checked=document.dontPlay click=(action 'toggleDontPlay')}}
+  {{#bs-button class = "main-delete-button" icon="glyphicon glyphicon-trash" onClick=(action 'delete')}}{{/bs-button}}
 </div>

@@ -392,7 +392,7 @@ export default Controller.extend({
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
-  	eventer(messageEvent, function(e) {
+  	eventer(messageEvent, (e) => {
       this.handleWindowEvent(e)
     });
   },
@@ -400,7 +400,7 @@ export default Controller.extend({
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
     var messageEvent = eventMethod === "detachEvent"? "onmessage":"message";
-    eventer(messageEvent, function(e) {
+    eventer(messageEvent, (e) => {
       this.handleWindowEvent(e)
     });
   },
