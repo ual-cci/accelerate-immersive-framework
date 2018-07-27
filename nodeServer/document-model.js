@@ -138,15 +138,23 @@ function startDocAPI(app)
       }
       const docId = req.body.documentId;
       const doc = shareDBConnection.get(contentCollectionName, docId);
+      if(!op.si && !op.sd && !op.oi)
+      {
+        res.status(400);
+        res.json({errors:["no objects in op"]});
+        return;
+      }
       doc.fetch((err)=>{
         console.log('submitting op', op, doc.id);
         try {
           doc.submitOp(op);
-        } catch(err)
+        }
+        catch(err)
         {
           console.log(err);
           res.status(400);
           res.json({errors:[err]});
+          return;
         }
       });
     }
@@ -155,6 +163,7 @@ function startDocAPI(app)
       console.log(err);
       res.status(400);
       res.json({errors:[err]});
+      return;
     }
     res.sendStatus(200);
   });
