@@ -213,6 +213,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
     let params = {};
+    console.log(req.query);
     const term = req.query.filter.search;
     const page = req.query.filter.page;
     const sortBy = req.query.filter.sortBy;
@@ -222,6 +223,7 @@ function startDocAPI(app)
       const rg = {$regex : ".*"+term+".*", $options:"i"};
       params = { $or: [{name: rg},{tags: rg},{owner: rg}]};
     }
+
     let query = shareDBConnection.createFetchQuery(contentCollectionName,params,[],(err, results) => {
       if(!err)
       {
@@ -273,13 +275,13 @@ function startDocAPI(app)
         else if (sortBy == "size")
         {
           docs.sort ((a, b) => {
-            return b.data.source.length - a.data.source.length;
+            return b.attributes.source.length - a.attributes.source.length;
           });
         }
         else if (sortBy == "edits")
         {
           docs.sort ((a, b) => {
-            return b.data.source.length - a.data.source.length;
+            return b.attributes.source.length - a.attributes.source.length;
           });
         }
         else if (sortBy == "date")
@@ -295,6 +297,40 @@ function startDocAPI(app)
         res.status(400).send(err);
       }
     });
+/*
+    if(sortBy == "views") {
+      sortBy = 'stats.views';
+    } else if (sortBy == "forks") {
+      sortBy = 'stats.forks';
+    } else if (sortBy == "size") {
+      sortBy = 'data.source.length';
+    } else if (sortBy == "date") {
+      sortBy = 'created';
+    }
+
+    const rg = {$regex : ".*"+term+".*", $options:"i"};
+    const query = {
+      $or: [{name: rg}, {tags: rg}, {owner: rg}],
+      $limit: PAGE_SIZE,
+      $skip: page * PAGE_SIZE
+    }
+    console.log(query);
+    shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
+      console.log(contentCollectionName, err, results, extra);
+      if(err)
+      {
+        res.status(400).send({error:err});
+      }
+      else
+      {
+        var fn = (snapShot) => {
+          return {attributes:data,id:data.documentId,type:"document"}
+        }
+        res.status(200).send({data:results});
+      }
+    });
+    */
+
   });
 
   app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
