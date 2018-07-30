@@ -49,12 +49,24 @@ export default Service.extend({
         });
     });
   },
+  getPopularTags(limit) {
+    return new RSVP.Promise((resolve, reject) => {
+      $.ajax({
+          type: "GET",
+          url: config.serverHost + "/tags?limit=" + limit,
+        }).then((res) => {
+          console.log("tags", res);
+          resolve(res);
+        }).catch((err) => {
+          reject(err);
+        });
+    });
+  },
   toggleDontPlay(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        // doc.toggleProperty('dontPlay');
-        // doc.save();
+        doc.toggleProperty('dontPlay');
         const op = {p:["dontPlay"], oi:doc.data.dontPlay ? "true":"false"}
         this.submitOp(op, docId);
         console.log(doc.data.dontPlay);

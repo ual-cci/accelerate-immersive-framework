@@ -182,6 +182,34 @@ function startDocAPI(app)
     }
   });
 
+  app.get('/tags', (req, res) => {
+    console.log(req.query);
+    let limit = parseInt(req.query.limit);
+    if(!limit)
+    {
+      limit = 5;
+    }
+    const query = {$aggregate : [
+      { $unwind : "$tags" },
+      { $group : { _id : "$tags" , count : { $sum : 1 } } },
+      { $sort : { count : -1 } },
+      { $limit : limit } ]
+    }
+    shareDBMongo.allowAggregateQueries = true;
+    shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
+      console.log(contentCollectionName, err, results, extra);
+      if(err)
+      {
+        res.status(400).send({error:err});
+      }
+      else
+      {
+        res.status(200).send({data:results});
+      }
+    });
+
+  });
+
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
     let params = {};
@@ -254,7 +282,7 @@ function startDocAPI(app)
             return b.data.source.length - a.data.source.length;
           });
         }
-        else
+        else if (sortBy == "date")
         {
           docs.sort ((a, b) => {
             return new Date(b.attributes.created) - new Date(a.attributes.created);

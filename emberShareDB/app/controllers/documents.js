@@ -10,7 +10,6 @@ export default Controller.extend({
   message:"",
   docName:"",
   isPrivate:true,
-  page:0,
   feedbackMessage: "",
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
@@ -22,6 +21,14 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
+  tags:computed('model', function() {
+    this.get('documentService').getPopularTags(5)
+    .then((results) => {
+      console.log("got tags", results.data.length);
+      this.set('tags', results.data);
+    });
+    return [];
+  }),
   updateResults()
   {
     let searchTerm = this.get('searchTerm');
@@ -29,7 +36,7 @@ export default Controller.extend({
     {
       searchTerm = " ";
     }
-    this.transitionToRoute('documents', searchTerm, this.get('page'));
+    this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
     this.set('message',"Results");
   },
   getDefaultSource:function()
@@ -96,5 +103,35 @@ export default Controller.extend({
       this.decrementProperty('page');
       this.updateResults();
     },
+    recent() {
+      this.set('searchTerm', "");
+      this.set('page', 0);
+      this.set('sort', "date");
+      this.updateResults();
+    },
+    popular() {
+      this.set('searchTerm', "");
+      this.set('page', 0);
+      this.set('sort', "views");
+      this.updateResults();
+    },
+    forked() {
+      this.set('searchTerm', "");
+      this.set('page', 0);
+      this.set('sort', "forks");
+      this.updateResults();
+    },
+    editted() {
+      this.set('searchTerm', "");
+      this.set('page', 0);
+      this.set('sort', "edits");
+      this.updateResults();
+    },
+    tag(tag) {
+      this.set('searchTerm', tag);
+      this.set('page', 0);
+      this.set('sort', "edits");
+      this.updateResults();
+    }
   }
 });
