@@ -53,10 +53,14 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        doc.set('data.dontPlay', !doc.data.dontPlay);
-        const op = {p:["dontPlay"],oi:doc.data.dontPlay}
-        this.submitOp(op, docId)
-        resolve(doc.data.dontPlay);
+        // doc.toggleProperty('dontPlay');
+        // doc.save();
+        const op = {p:["dontPlay"], oi:doc.data.dontPlay ? "true":"false"}
+        this.submitOp(op, docId);
+        console.log(doc.data.dontPlay);
+        resolve();
+      }).catch((err) => {
+        reject(err);
       });
     });
   },

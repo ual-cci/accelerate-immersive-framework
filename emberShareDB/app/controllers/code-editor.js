@@ -119,79 +119,81 @@ export default Controller.extend({
     session.setMode("ace/mode/html");
   },
   initWebSockets: function() {
-    let socket;
-    try {
-      socket = new WebSocket(config.wsHost);
-      this.set('socketRef', socket);
-      socket.onopen = () => {
-        console.log("web socket open");
-        this.set('wsAvailable', true);
-        if(!this.get('doc'))
-        {
-          this.initDoc();
+    let socket = this.get('socket');
+    if(!isEmpty(socket))
+    {
+      socket.onclose = ()=> {
+        console.log("websocket closed");
+        this.set('socket', null);
+        this.initWebSockets();
+      }
+      socket.close();
+    }
+    else
+    {
+      try {
+        socket = new WebSocket(config.wsHost);
+        this.set('socket', socket);
+        socket.onopen = () => {
+          console.log("web socket open");
+          this.set('wsAvailable', true);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onerror = () => {
+          console.log("web socket error");
+          this.set('wsAvailable', false);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onclose = () =>  {
+          console.log("web socket close");
+          this.set('wsAvailable', false);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onmessage = (event) =>  {
+          console.log("web socket message", event);
         }
       }
-
-      socket.onerror = () => {
-        console.log("web socket error");
+      catch (err)
+      {
+        console.log("web sockets not available");
         this.set('wsAvailable', false);
         if(!this.get('doc'))
         {
           this.initDoc();
         }
-      }
-
-      socket.onclose = () =>  {
-        console.log("web socket close");
-        this.set('wsAvailable', false);
-        if(!this.get('doc'))
-        {
-          this.initDoc();
-        }
-      }
-
-      socket.onmessage = (event) =>  {
-        console.log("web socket message", event);
-      }
-
-      console.log("socket",socket);
-
-    }
-    catch (err)
-    {
-      console.log("web sockets not available");
-      this.set('wsAvailable', false);
-      if(!this.get('doc'))
-      {
-        this.initDoc();
-      }
-    }
-
-    if(isEmpty(socket))
-    {
-      console.log("web sockets not available");
-      this.set('wsAvailable', false);
-      if(!this.get('doc'))
-      {
-        this.initDoc();
       }
     }
   },
   initDoc: function() {
 
+    console.log("init doc");
     this.get('opsPlayer').reset();
 
     if(this.get('wsAvailable'))
     {
-      const socket = this.get('socketRef');
-      let con = this.get('connection')
-      if(!con)
+      const socket = this.get('socket');
+      let con = this.get('connection');
+      console.log("wsAvailable true", socket, con);
+      if(isEmpty(con))
       {
+        console.log('connecting to ShareDB');
         con = new ShareDB.Connection(socket);
       }
       if(isEmpty(con) || con.state == "disconnected")
       {
-        console.log("web sockets not available");
+        console.log("failed to connect to ShareDB");
         this.set('wsAvailable', false);
       }
       this.set('connection', con);
@@ -199,9 +201,8 @@ export default Controller.extend({
       const editor = this.get('editor');
       const session = editor.getSession();
       doc.subscribe((err) => {
-        console.log("error = ", err);
         if (err) throw err;
-        //console.log("no error", doc);
+        console.log("subscribed to doc", doc.data.dontPlay);
         if(!isEmpty(doc.data))
         {
           this.set('doc', doc);
@@ -282,7 +283,7 @@ export default Controller.extend({
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        if(!this.get('model.dontPlay'))
+        if(doc.data.dontPlay == "false")
         {
           this.updateIFrame();
         }
@@ -290,8 +291,8 @@ export default Controller.extend({
     }
     else
     {
-      console.log("no assets to preload", this.get('model.dontPlay'));
-      if(!this.get('model.dontPlay'))
+      console.log("no assets to preload", doc.data.dontPlay);
+      if(doc.data.dontPlay == "false")
       {
         this.updateIFrame();
       }
@@ -310,7 +311,7 @@ export default Controller.extend({
     try {
       if(hasVals)
       {
-        this.submitOp( {p:['savedVals'],oi:savedVals},{source:true});
+        this.submitOp({p:['savedVals'],oi:savedVals});
       }
     } catch (err)
     {
@@ -355,7 +356,7 @@ export default Controller.extend({
     {
       clearTimeout(this.get('codeTimer'));
     }
-    this.set('codeTimer', setTimeout(function() {
+    this.set('codeTimer', setTimeout(() => {
       this.updateIFrame();
       this.set('codeTimer',null);
     },1500));
@@ -399,6 +400,7 @@ export default Controller.extend({
     }
   },
   addWindowListener: function() {
+    this.removeWindowListener();
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
@@ -611,6 +613,12 @@ export default Controller.extend({
       this.set('renderedSource',"");
       if(this.get('wsAvailable'))
       {
+        this.get('socket').onclose = ()=> {
+          this.set('socket', null);
+          this.set('connection', null)
+          console.log("websocket closed");
+        };
+        this.get('socket').close();
         this.get('doc').destroy();
       }
       this.set('doc', null);

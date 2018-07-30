@@ -10,6 +10,9 @@ export default Component.extend({
     console.log(this.get('sessionAccount').currentUserName, this.get('document').owner)
     return this.get('sessionAccount').currentUserName == this.get('document').owner;
   }),
+  doPlay:computed('document', function() {
+    return !this.get('document').dontPlay;
+  }),
   index:0,
   actions: {
     open() {

@@ -10,6 +10,11 @@ const app = express();
 
 startServer();
 
+process.on('uncaughtException', function (err) {
+  console.error(err);
+  console.log("Node NOT Exiting...");
+});
+
 function startServer()
 {
   app.use(express.static('static'));

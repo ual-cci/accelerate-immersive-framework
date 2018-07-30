@@ -119,7 +119,13 @@ function startWebSockets(server)
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
-    shareDB.listen(stream);
+    try {
+      shareDB.listen(stream);
+    }
+    catch (err)
+    {
+      console.log("web socket error", err);
+    }
   });
 }
 
@@ -146,16 +152,25 @@ function startDocAPI(app)
       }
       doc.fetch((err)=>{
         console.log('submitting op', op, doc.id);
-        try {
-          doc.submitOp(op);
-        }
-        catch(err)
-        {
+        if(err) {
           console.log(err);
           res.status(400);
           res.json({errors:[err]});
           return;
         }
+        doc.submitOp(op, (err)=> {
+          if(err)
+          {
+            console.log("error submitting op",err);
+            res.status(400);
+            res.json({errors:[err]});
+          }
+          else
+          {
+            console.log("success submitting op");
+            res.sendStatus(200);
+          }
+        });
       });
     }
     catch (err)
@@ -165,7 +180,6 @@ function startDocAPI(app)
       res.json({errors:[err]});
       return;
     }
-    res.sendStatus(200);
   });
 
   const PAGE_SIZE = 20;
@@ -272,6 +286,22 @@ function startDocAPI(app)
   });
 
   app.get('/documents/:id', (req,res) => {
+    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    doc.fetch(function(err) {
+      if (err || !doc.data) {
+        res.status(404).send("database error making document");
+        return;
+      }
+      else
+      {
+        let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
+        res.status(200).send({data:reply});
+      }
+    });
+  });
+
+  app.patch('/documents/:id', (req,res) => {
+    console.log(req.body.data.attributes);
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
