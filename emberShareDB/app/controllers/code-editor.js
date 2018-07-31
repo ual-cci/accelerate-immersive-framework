@@ -55,6 +55,7 @@ export default Controller.extend({
   wsAvailable:true,
   editCtr:0,
   fontSize:14,
+  fetchingDoc:false,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -166,7 +167,7 @@ export default Controller.extend({
         socket.onopen = () => {
           console.log("web socket open");
           this.set('wsAvailable', true);
-          if(!this.get('doc'))
+          if(!this.get('fetchingDoc'))
           {
             this.initDoc();
           }
@@ -175,7 +176,7 @@ export default Controller.extend({
         socket.onerror = () => {
           console.log("web socket error");
           this.set('wsAvailable', false);
-          if(!this.get('doc'))
+          if(!this.get('fetchingDoc'))
           {
             this.initDoc();
           }
@@ -184,7 +185,7 @@ export default Controller.extend({
         socket.onclose = () =>  {
           console.log("web socket close");
           this.set('wsAvailable', false);
-          if(!this.get('doc'))
+          if(!this.get('fetchingDoc'))
           {
             this.initDoc();
           }
@@ -198,7 +199,7 @@ export default Controller.extend({
       {
         console.log("web sockets not available");
         this.set('wsAvailable', false);
-        if(!this.get('doc'))
+        if(!this.get('fetchingDoc'))
         {
           this.initDoc();
         }
@@ -207,6 +208,7 @@ export default Controller.extend({
   },
   initDoc: function() {
     console.log("init doc");
+    this.set('fetchingDoc', true);
     this.get('opsPlayer').reset();
     if(this.get('wsAvailable'))
     {
@@ -287,6 +289,7 @@ export default Controller.extend({
     this.set('surpress', true);
     session.setValue(doc.data.source);
     this.set('surpress', false);
+    this.set('fetchingDoc', false);
   },
   submitOp: function(op)
   {
@@ -309,6 +312,7 @@ export default Controller.extend({
       {
         this.get('documentService').submitOp(op)
         .then(() => {
+          console.log("did sumbit op",op);
           resolve();
         }).catch((err) => {
           console.log("ERROR Not submitted");
