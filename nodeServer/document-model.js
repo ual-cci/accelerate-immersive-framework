@@ -22,12 +22,13 @@ var initDocAPI = function(server, app, config)
   mongoPort = config.mongoPort;
   contentDBName = config.contentDBName;
   contentCollectionName = config.contentCollectionName;
+
+  startAssetAPI(app);
+
   shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName);
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();
-
   startDocAPI(app);
-  startAssetAPI(app);
   startWebSockets(server);
 }
 
@@ -40,59 +41,61 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  const url = 'mongodb://'+mongoIP+':'+mongoPort;
+  const url = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
   mongo.MongoClient.connect(url, function(err, client) {
     if(err)
     {
-      console.log("error!",err);
-      return;
+      console.log("error connecting to database", err);
     }
-    console.log("Connected successfully to server");
-    const db = client.db(contentDBName);
+    else
+    {
+      console.log("Connected successfully to server");
+      const db = client.db(contentDBName);
 
-    gridFS = Gridfs(db, mongo);
-    app.post('/asset', multiparty, function(req,res) {
-      var writestream = gridFS.createWriteStream({
-        filename: req.files.file.name,
-        mode: 'w',
-        content_type: req.files.file.mimetype,
-        metadata: req.body
-      });
-
-      fs.createReadStream(req.files.file.path).pipe(writestream);
-      writestream.on('close', function(file) {
-        res.json(200);
-        const content_type = req.files.file.headers["content-type"];
-        let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-        var newAssets = doc.data.assets;
-        newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
-        doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-        fs.unlink(req.files.file.path, function(err) {
-           console.log('success!')
-         });
-      });
-    });
-
-    app.get('/asset/:id', function(req, res) {
-     var readstream = gridFS.createReadStream({
-        _id: req.params.id
-     });
-     readstream.pipe(res);
-    });
-
-    app.delete('/asset/:id', function(req, res) {
-      gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
-        if (err) return handleError(err);
-        console.log('success deleting asset');
-        let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-        var newAssets = doc.data.assets;
-        newAssets = newAssets.filter(function( asset ) {
-            return asset.fileId !== req.params.id;
+      gridFS = Gridfs(db, mongo);
+      app.post('/asset', multiparty, function(req,res) {
+        var writestream = gridFS.createWriteStream({
+          filename: req.files.file.name,
+          mode: 'w',
+          content_type: req.files.file.mimetype,
+          metadata: req.body
         });
-        doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-        res.json(200);
+
+        fs.createReadStream(req.files.file.path).pipe(writestream);
+        writestream.on('close', function(file) {
+          res.json(200);
+          const content_type = req.files.file.headers["content-type"];
+          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
+          var newAssets = doc.data.assets;
+          newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
+          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+          fs.unlink(req.files.file.path, function(err) {
+             console.log('success!')
+           });
+        });
       });
-    });
+
+      app.get('/asset/:id', function(req, res) {
+       var readstream = gridFS.createReadStream({
+          _id: req.params.id
+       });
+       readstream.pipe(res);
+      });
+
+      app.delete('/asset/:id', function(req, res) {
+        gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
+          if (err) return handleError(err);
+          console.log('success deleting asset');
+          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
+          var newAssets = doc.data.assets;
+          newAssets = newAssets.filter(function( asset ) {
+              return asset.fileId !== req.params.id;
+          });
+          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+          res.json(200);
+        });
+      });
+    }
   });
 }
 
