@@ -27,8 +27,8 @@ var initDocAPI = function(server, app, config)
   shareDBConnection = shareDB.connect();
 
   startDocAPI(app);
-  startWebSockets(server);
   startAssetAPI(app);
+  startWebSockets(server);
 }
 
 // ENDPOINTS
