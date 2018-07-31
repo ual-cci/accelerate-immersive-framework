@@ -183,6 +183,7 @@
   position: relative;
   display: inline-block;
   opacity: 1 !important;
+  z-index: 0;
 }
 
 .tooltiptext {
@@ -195,7 +196,6 @@
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
-  z-index: 1;
   bottom: 125%;
   left: 50%;
   margin-left: -60px;
@@ -215,4 +215,10 @@
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+#asset-progress {
+  display: none;
+  background-color: yellow;
+  height:15px;
 }

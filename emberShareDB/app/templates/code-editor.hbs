@@ -139,8 +139,13 @@
               </div>
             {{/if}}
             {{#if canEditDoc}}
+            <div id = "asset-progress"></div>
             <div class = "file-upload">
-              {{file-upload}}
+              {{file-upload
+                onProgress = (action 'assetProgress')
+                onCompletion = (action 'assetUploaded')
+                onError = (action 'assetError')
+              }}
             </div>
             {{/if}}
           </div>
