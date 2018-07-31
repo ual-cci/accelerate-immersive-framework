@@ -479,22 +479,27 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('doc');
       const savedVals = this.get('savedVals');
-      if(!savedVals)
+      if(isEmpty(savedVals))
       {
         resolve();
-        return;
       }
-      const vals = Object.keys(savedVals).map(key => savedVals[key]);
-      const hasVals = vals.length > 0;
-      try {
+      else
+      {
+        const vals = Object.keys(savedVals).map(key => savedVals[key]);
+        const hasVals = vals.length > 0;
         if(hasVals)
         {
           this.submitOp({p:['savedVals'],oi:savedVals})
-          .then(() => {resolve()}).catch((err) => {reject(err)});
+          .then(() => {
+            resolve();
+          }).catch((err) => {
+            reject(err)
+          });
         }
-      } catch (err)
-      {
-        reject(err);
+        else
+        {
+          resolve();
+        }
       }
     });
   },
@@ -578,7 +583,6 @@ export default Controller.extend({
     previewAsset(asset)
     {
       var url = config.serverHost + "/asset/"+asset.fileId;
-      console.log(asset.fileType);
       const isImage = asset.fileType.includes("image");
       const isAudio = asset.fileType.includes("audio");
       const isVideo = asset.fileType.includes("video");
@@ -642,6 +646,7 @@ export default Controller.extend({
       }
     },
     cleanUp() {
+      console.log('cleaning up');
       const fn = () => {
         this.set('renderedSource',"");
         if(this.get('wsAvailable'))
@@ -651,18 +656,18 @@ export default Controller.extend({
             this.set('connection', null)
             console.log("websocket closed");
           };
-          this.get('socket').close();
           this.get('doc').destroy();
+          this.get('socket').close();
         }
         this.set('doc', null);
         this.removeWindowListener();
       }
-      const actions = [this.updateEditStats(),this.updateSavedVals()];
+      const actions = [this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
       const doc = this.get('doc');
-      console.log('refreshing',doc);
+      console.log('refreshing');
       if(!isEmpty(doc))
       {
         const fn = () => {
@@ -678,7 +683,7 @@ export default Controller.extend({
             this.initDoc();
           }
         };
-        const actions = [this.updateEditStats(),this.updateSavedVals()];
+        const actions = [this.updateEditStats(), this.updateSavedVals()];
         Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
       }
     },
