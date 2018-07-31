@@ -1,12 +1,12 @@
-var ShareDB = require('sharedb');
-var WebSocket = require('ws');
-var WebSocketJSONStream = require('websocket-json-stream');
-var mongo = require('mongodb');
-var multiparty = require('connect-multiparty')();
-var fs = require('fs');
-var Gridfs = require('gridfs-stream');
-var guid = require('./uuid.js');
-var userAPI = require('./user-model.js');
+const ShareDB = require('sharedb');
+const WebSocket = require('ws');
+const WebSocketJSONStream = require('websocket-json-stream');
+const mongo = require('mongodb');
+const multiparty = require('connect-multiparty')();
+const fs = require('fs');
+const Gridfs = require('gridfs-stream');
+const guid = require('./uuid.js');
+const userAPI = require('./user-model.js');
 var mongoIP = "";
 var mongoPort = "";
 var contentDBName = "";
@@ -40,9 +40,15 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  var db = new mongo.Db(contentDBName, new mongo.Server(mongoIP, mongoPort));
-  db.open(function (err) {
-    if (err) return handleError(err);
+  const url = 'mongodb://'+mongoIP+':'+mongoPort;
+  mongo.MongoClient.connect(url, function(err, client) {
+    if(err)
+    {
+      console.log("error!",err);
+    }
+    console.log("Connected successfully to server");
+    const db = client.db(contentDBName);
+
     gridFS = Gridfs(db, mongo);
     app.post('/asset', multiparty, function(req,res) {
       var writestream = gridFS.createWriteStream({

@@ -23,7 +23,7 @@ export default EmberUploader.FileField.extend({
         console.log('didUpload',e);
       });
       uploader.on('didError', (jqXHR, textStatus, errorThrown) => {
-        console.log('didError',errorThrown);
+        console.log('didError',jqXHR, textStatus, errorThrown);
       });
       uploader.upload(files[0], data);
     }
