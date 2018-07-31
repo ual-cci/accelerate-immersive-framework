@@ -45,6 +45,7 @@ function startAssetAPI(app)
     if(err)
     {
       console.log("error!",err);
+      return;
     }
     console.log("Connected successfully to server");
     const db = client.db(contentDBName);
