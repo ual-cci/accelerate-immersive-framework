@@ -510,6 +510,7 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('doc');
       const savedVals = this.get('savedVals');
+      console.log('updatingSavedVals, doc',doc,'savedVals', savedVals)
       if(isEmpty(savedVals))
       {
         resolve();
@@ -518,6 +519,7 @@ export default Controller.extend({
       {
         const vals = Object.keys(savedVals).map(key => savedVals[key]);
         const hasVals = vals.length > 0;
+        console.log('vals', vals);
         if(hasVals)
         {
           this.submitOp({p:['savedVals'],oi:savedVals})
