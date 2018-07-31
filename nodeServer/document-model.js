@@ -154,7 +154,7 @@ function startDocAPI(app)
       if(err) {
         console.log(err);
         res.status(400);
-        res.json({errors:[err]});
+        res.json({errors:["errorFetching",err]});
         return;
       }
       doc.submitOp(op, (err)=> {
@@ -162,7 +162,7 @@ function startDocAPI(app)
         {
           console.log("error submitting op",err);
           res.status(400);
-          res.json({errors:[err]});
+          res.json({errors:["errorSubmitting",err]});
         }
         else
         {
