@@ -78,6 +78,7 @@ export default Controller.extend({
 
   //Functions
   initShareDB: function() {
+    console.log('initShareDB')
     this.initWebSockets();
     this.initAceEditor();
     this.addWindowListener();
@@ -147,7 +148,8 @@ export default Controller.extend({
   },
   initWebSockets: function() {
     let socket = this.get('socket');
-    if(!isEmpty(socket))
+    console.log("init websockets", socket);
+    if(!isEmpty(socket) && socket.state == 1)
     {
       socket.onclose = ()=> {
         console.log("websocket closed");
@@ -239,8 +241,8 @@ export default Controller.extend({
     else
     {
       this.get('store').findRecord('document',this.get('model').id).then((doc) => {
-        console.log(doc.data);
-        this.set('doc',doc);
+        console.log("found record", doc.data);
+        this.set('doc', doc);
         this.didReceiveDoc();
       });
     }
@@ -320,7 +322,7 @@ export default Controller.extend({
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        if(doc.data.dontPlay == "false")
+        if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
         {
           this.updateIFrame();
         }
@@ -329,7 +331,7 @@ export default Controller.extend({
     else
     {
       console.log("no assets to preload", doc.data.dontPlay);
-      if(doc.data.dontPlay == "false")
+      if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
       {
         this.updateIFrame();
       }
@@ -548,6 +550,7 @@ export default Controller.extend({
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
+      console.log('editor ready')
       this.initShareDB();
     },
     tagsChanged(tags) {
@@ -680,6 +683,10 @@ export default Controller.extend({
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
+            this.get('socket').onclose = null;
+            this.get('socket').onopen = null;
+            this.get('socket').onmessage = null;
+            this.get('socket').onerror = null;
             this.set('socket', null);
             this.set('connection', null)
             console.log("websocket closed");
@@ -687,6 +694,7 @@ export default Controller.extend({
           this.get('doc').destroy();
           this.get('socket').close();
         }
+        console.log('cleaned up');
         this.set('doc', null);
         this.removeWindowListener();
       }
@@ -695,9 +703,10 @@ export default Controller.extend({
     },
     refresh() {
       const doc = this.get('doc');
-      console.log('refreshing');
+      console.log('refreshing', doc);
       if(!isEmpty(doc))
       {
+        console.log('refreshing doc not empty', doc);
         const fn = () => {
           this.get('opsPlayer').reset();
           this.set('renderedSource',"");
