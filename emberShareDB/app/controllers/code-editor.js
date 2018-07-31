@@ -42,6 +42,7 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showTokens:false,
+  showOpPlayer:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -89,6 +90,7 @@ export default Controller.extend({
     this.set('collapsed', false);
     this.set('showShare', false);
     this.set('showTokens', false);
+    this.set('showOpPlayer', false);
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -629,6 +631,9 @@ export default Controller.extend({
     },
     toggleShowTokens() {
       this.toggleProperty('showTokens');
+    },
+    toggleShowOpPlayer() {
+      this.toggleProperty('showOpPlayer');
     },
     toggleShowAssets() {
       this.toggleProperty('showAssets');
