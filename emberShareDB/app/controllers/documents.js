@@ -11,6 +11,7 @@ export default Controller.extend({
   docName:"",
   isPrivate:true,
   feedbackMessage: "",
+  sort:"views",
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
     return this.get('page') > 0;
@@ -24,7 +25,6 @@ export default Controller.extend({
   tags:computed('model', function() {
     this.get('documentService').getPopularTags(5)
     .then((results) => {
-      console.log("got tags", results.data.length);
       this.set('tags', results.data);
     });
     return [];
@@ -75,11 +75,14 @@ export default Controller.extend({
             console.log("new doc created");
             const currentUser = this.get('sessionAccount').currentUserName;
             this.get('store').query('document', {
-              filter: {search: currentUser, page: 0, currentUser:currentUser}
+              filter: {search: docName,
+                page: 0,
+                currentUser: currentUser,
+                sortBy: 'date'}
             }).then((documents) => {
               console.log("new doc found, transitioning", documents);
               this.get('sessionAccount').updateOwnedDocuments();
-              this.transitionToRoute('code-editor',documents.firstObject.documentId);
+              this.transitionToRoute('code-editor', documents.firstObject.documentId);
             });
           }).catch((err) => {
             console.log("error making doc", err);
@@ -104,33 +107,39 @@ export default Controller.extend({
       this.updateResults();
     },
     recent() {
-      this.set('searchTerm', "");
+      this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "date");
       this.updateResults();
     },
     popular() {
-      this.set('searchTerm', "");
+      this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "views");
       this.updateResults();
     },
     forked() {
-      this.set('searchTerm', "");
+      this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "forks");
       this.updateResults();
     },
     editted() {
-      this.set('searchTerm', "");
+      this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "edits");
+      this.updateResults();
+    },
+    updated() {
+      this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "updated");
       this.updateResults();
     },
     tag(tag) {
       this.set('searchTerm', tag);
       this.set('page', 0);
-      this.set('sort', "edits");
+      this.set('sort', "views");
       this.updateResults();
     }
   }

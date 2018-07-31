@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
+import RSVP from 'rsvp';
 
 export default Controller.extend({
   //Query Params
@@ -51,6 +52,7 @@ export default Controller.extend({
   embed:'false',
   showName:true,
   wsAvailable:true,
+  editCtr:0,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -177,15 +179,12 @@ export default Controller.extend({
     }
   },
   initDoc: function() {
-
     console.log("init doc");
     this.get('opsPlayer').reset();
-
     if(this.get('wsAvailable'))
     {
       const socket = this.get('socket');
       let con = this.get('connection');
-      console.log("wsAvailable true", socket, con);
       if(isEmpty(con))
       {
         console.log('connecting to ShareDB');
@@ -200,6 +199,7 @@ export default Controller.extend({
       const doc = con.get(config.contentCollectionName,this.get('model').id);
       const editor = this.get('editor');
       const session = editor.getSession();
+
       doc.subscribe((err) => {
         if (err) throw err;
         console.log("subscribed to doc", doc.data.dontPlay);
@@ -209,31 +209,7 @@ export default Controller.extend({
           this.didReceiveDoc();
         }
       });
-      doc.on('op',(ops,source) => {
-        const embed = this.get('embed') == "true";
-        if(!embed && ops.length > 0)
-        {
-          if(!source && ops[0].p[0] == "source")
-          {
-            this.set('surpress', true);
-            const deltas = this.get('codeParser').opTransform(ops, editor);
-            session.getDocument().applyDeltas(deltas);
-            this.set('surpress', false);
-          }
-          else if (ops[0].p[0] == "assets")
-          {
-            this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-              toChange.set('assets',ops[0].oi);
-            });
-            this.preloadAssets();
-          }
-          else if (!source && ops[0].p[0] == "newEval")
-          {
-            console.log(ops[0]);
-            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
-          }
-        }
-      });
+      doc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
     }
     else
     {
@@ -244,14 +220,37 @@ export default Controller.extend({
       });
     }
   },
+  didReceiveOp: function (ops,source) {
+    const embed = this.get('embed') == "true";
+    if(!embed && ops.length > 0)
+    {
+      if(!source && ops[0].p[0] == "source")
+      {
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').opTransform(ops, editor);
+        session.getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+      }
+      else if (ops[0].p[0] == "assets")
+      {
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+        this.preloadAssets();
+      }
+      else if (!source && ops[0].p[0] == "newEval")
+      {
+        document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
+      }
+    }
+  },
   didReceiveDoc: function() {
-    console.log('did didReceiveDoc')
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
     this.set('savedVals', doc.data.savedVals);
     this.setCanEditDoc();
-    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
     this.submitOp({p:['stats'],oi:stats},{source:true});
     editor.setReadOnly(!this.get('canEditDoc'));
@@ -263,20 +262,33 @@ export default Controller.extend({
   },
   submitOp: function(op)
   {
-    const doc = this.get('doc');
-    if(this.get('wsAvailable'))
-    {
-      doc.submitOp(op);
-    }
-    else
-    {
-      this.get('documentService').submitOp(op)
-      .then(()=> {
-        //console.log("submitted");
-      }).catch(()=> {
-        console.log("ERROR Not submitted");
-      });
-    }
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      if(this.get('wsAvailable'))
+      {
+        doc.submitOp(op, (err)=> {
+          if(err)
+          {
+            reject(err);
+          }
+          else
+          {
+            resolve();
+          }
+        });
+      }
+      else
+      {
+        this.get('documentService').submitOp(op)
+        .then(() => {
+          //console.log("submitted");
+          resolve();
+        }).catch((err) => {
+          console.log("ERROR Not submitted");
+          reject(err);
+        });
+      }
+    });
   },
   preloadAssets: function() {
     const doc = this.get('doc');
@@ -297,27 +309,6 @@ export default Controller.extend({
         this.updateIFrame();
       }
     }
-  },
-  updateSavedVals: function()
-  {
-    const doc = this.get('doc');
-    const savedVals = this.get('savedVals');
-    if(!savedVals)
-    {
-      return;
-    }
-    const vals = Object.keys(savedVals).map(key => savedVals[key]);
-    const hasVals = vals.length > 0;
-    try {
-      if(hasVals)
-      {
-        this.submitOp({p:['savedVals'],oi:savedVals});
-      }
-    } catch (err)
-    {
-      console.log(err);
-    }
-
   },
   getSelectedText: function()
   {
@@ -369,6 +360,8 @@ export default Controller.extend({
       const editor = this.editor;
       const session = editor.getSession();
 
+      this.incrementProperty('editCtr');
+
       if(!this.get('opsPlayer').atHead())
       {
         console.log("not at head");
@@ -376,7 +369,6 @@ export default Controller.extend({
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
       this.get('opsPlayer').reset();
-      this.submitOp( {p:['lastEdited'],oi:new Date()},{source:true});
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -478,9 +470,50 @@ export default Controller.extend({
       .then((deltas)=>{fn(deltas)});
     }
   },
-  getDefaultSource:function()
+  getDefaultSource: function()
   {
     return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
+  },
+  updateSavedVals: function()
+  {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      const savedVals = this.get('savedVals');
+      if(!savedVals)
+      {
+        resolve();
+        return;
+      }
+      const vals = Object.keys(savedVals).map(key => savedVals[key]);
+      const hasVals = vals.length > 0;
+      try {
+        if(hasVals)
+        {
+          this.submitOp({p:['savedVals'],oi:savedVals})
+          .then(() => {resolve()}).catch((err) => {reject(err)});
+        }
+      } catch (err)
+      {
+        reject(err);
+      }
+    });
+  },
+  updateEditStats: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      stats.edits = parseInt(stats.edits) + this.get('editCtr');
+      const actions = [
+        this.submitOp({p:['stats'], oi:stats}, {source:true}),
+        this.submitOp({p:['lastEdited'], oi:new Date()}, {source:true})
+      ];
+      Promise.all(actions).then(()=> {
+        this.set('editCtr', 0);
+        resolve();
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   },
   actions: {
     editorReady(editor) {
@@ -609,37 +642,44 @@ export default Controller.extend({
       }
     },
     cleanUp() {
-      this.updateSavedVals();
-      this.set('renderedSource',"");
-      if(this.get('wsAvailable'))
-      {
-        this.get('socket').onclose = ()=> {
-          this.set('socket', null);
-          this.set('connection', null)
-          console.log("websocket closed");
-        };
-        this.get('socket').close();
-        this.get('doc').destroy();
+      const fn = () => {
+        this.set('renderedSource',"");
+        if(this.get('wsAvailable'))
+        {
+          this.get('socket').onclose = ()=> {
+            this.set('socket', null);
+            this.set('connection', null)
+            console.log("websocket closed");
+          };
+          this.get('socket').close();
+          this.get('doc').destroy();
+        }
+        this.set('doc', null);
+        this.removeWindowListener();
       }
-      this.set('doc', null);
-      this.removeWindowListener();
+      const actions = [this.updateEditStats(),this.updateSavedVals()];
+      Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
       const doc = this.get('doc');
       console.log('refreshing',doc);
       if(!isEmpty(doc))
       {
-        this.get('opsPlayer').reset();
-        this.set('renderedSource',"");
-        if(this.get('wsAvailable'))
-        {
-          doc.destroy();
-        }
-        this.set('doc', null);
-        if(!isEmpty(this.get('editor')))
-        {
-          this.initDoc();
-        }
+        const fn = () => {
+          this.get('opsPlayer').reset();
+          this.set('renderedSource',"");
+          if(this.get('wsAvailable'))
+          {
+            doc.destroy();
+          }
+          this.set('doc', null);
+          if(!isEmpty(this.get('editor')))
+          {
+            this.initDoc();
+          }
+        };
+        const actions = [this.updateEditStats(),this.updateSavedVals()];
+        Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
       }
     },
     mouseDown(e) {
@@ -727,7 +767,7 @@ export default Controller.extend({
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
       const doc = this.get('doc');
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
       stats.forks = parseInt(stats.forks) + 1;
       this.submitOp( {p:['stats'],oi:stats},{source:true});
       let newDoc = this.get('store').createRecord('document', {

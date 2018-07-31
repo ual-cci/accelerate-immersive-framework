@@ -8,7 +8,6 @@ export default Component.extend({
   store:inject('store'),
   sessionAccount:inject('session-account'),
   canEdit:computed('document', function() {
-    console.log(this.get('sessionAccount').currentUserName, this.get('document').owner)
     return this.get('sessionAccount').currentUserName == this.get('document').owner;
   }),
   doPlay:computed('document', function() {
@@ -18,7 +17,6 @@ export default Component.extend({
   index:0,
   actions: {
     open() {
-      console.log(this.get('document').documentId);
       this.get('onOpen')(this.get('document').documentId);
     },
     delete() {

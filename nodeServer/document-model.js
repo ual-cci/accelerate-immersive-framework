@@ -212,125 +212,63 @@ function startDocAPI(app)
 
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
-    let params = {};
-    console.log(req.query);
+
     const term = req.query.filter.search;
     const page = req.query.filter.page;
-    const sortBy = req.query.filter.sortBy;
+    let sortBy = req.query.filter.sortBy;
     const currentUser = req.query.filter.currentUser;
+
+    let searchTermOr = {};
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
-      params = { $or: [{name: rg},{tags: rg},{owner: rg}]};
+      searchTermOr = { $or: [{name: rg},{tags: rg},{owner: rg}]};
     }
 
-    let query = shareDBConnection.createFetchQuery(contentCollectionName,params,[],(err, results) => {
-      if(!err)
-      {
-        let docs = [];
-        let startIndex = page * PAGE_SIZE < results.length ? page * PAGE_SIZE : results.length - PAGE_SIZE;
-        startIndex = Math.max(0,startIndex);
-        let i = 0;
-        while(docs.length < PAGE_SIZE && startIndex + i < results.length)
-        {
-          const data = results[i].data;
-          if(!data.isPrivate || data.owner == currentUser)
-          {
-            docs.push({attributes:data,id:data.documentId,type:"document"});
-          }
-          i++;
-        }
-        if(sortBy == "views")
-        {
-          docs.sort ((a, b) => {
-            let b_views = 0;
-            let a_views = 0;
-            if(b.attributes.stats)
-            {
-              b_views = b.attributes.stats.views;
-            }
-            if(a.attributes.stats)
-            {
-              a_views = a.attributes.stats.views;
-            }
-            return b_views - a_views;
-          });
-        }
-        else if (sortBy == "forks")
-        {
-          docs.sort ((a, b) => {
-            let b_forks = 0;
-            let a_forks = 0;
-            if(b.attributes.stats)
-            {
-              b_forks = b.attributes.stats.forks;
-            }
-            if(a.attributes.stats)
-            {
-              a_forks = a.attributes.stats.forks;
-            }
-            return b_forks - a_forks;
-          });
-        }
-        else if (sortBy == "size")
-        {
-          docs.sort ((a, b) => {
-            return b.attributes.source.length - a.attributes.source.length;
-          });
-        }
-        else if (sortBy == "edits")
-        {
-          docs.sort ((a, b) => {
-            return b.attributes.source.length - a.attributes.source.length;
-          });
-        }
-        else if (sortBy == "date")
-        {
-          docs.sort ((a, b) => {
-            return new Date(b.attributes.created) - new Date(a.attributes.created);
-          });
-        }
-        res.status(200).send({data:docs});
-      }
-      else
-      {
-        res.status(400).send(err);
-      }
-    });
-/*
+    let s = {};
     if(sortBy == "views") {
       sortBy = 'stats.views';
+      s[sortBy] = -1;
     } else if (sortBy == "forks") {
       sortBy = 'stats.forks';
+      s[sortBy] = 1;
     } else if (sortBy == "size") {
-      sortBy = 'data.source.length';
+      sortBy = 'source.length';
+      s[sortBy] = 1;
     } else if (sortBy == "date") {
       sortBy = 'created';
+      s[sortBy] = -1;
+    } else if (sortBy == "updated") {
+      sortBy = 'lastEdited';
+      s[sortBy] = -1;
+    } else if (sortBy == "edits") {
+      sortBy = 'stats.edits';
+      s[sortBy] = -1;
     }
 
-    const rg = {$regex : ".*"+term+".*", $options:"i"};
     const query = {
-      $or: [{name: rg}, {tags: rg}, {owner: rg}],
+      $and: [searchTermOr,
+             {$or: [{owner: currentUser}, {isPrivate: false}]}],
+      $sort: s,
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
     }
     console.log(query);
-    shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
-      console.log(contentCollectionName, err, results, extra);
+    shareDBMongo.query(contentCollectionName, query, null, null, function (err, results, extra) {
       if(err)
       {
         res.status(400).send({error:err});
       }
       else
       {
-        var fn = (snapShot) => {
-          return {attributes:data,id:data.documentId,type:"document"}
+        var fn = (doc) => {
+          console.log(doc.data.name, doc.data.lastEdited);
+          return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
-        res.status(200).send({data:results});
+        const data = results.map(fn);
+        res.status(200).send({data:data});
       }
     });
-    */
-
   });
 
   app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
@@ -351,6 +289,7 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log('fetching doc');
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -459,7 +398,7 @@ function createDoc(attr) {
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
-            stats:{views:0,forks:0},
+            stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false
           },()=> {

@@ -10,7 +10,6 @@ export default Service.extend({
   makeNewDoc(docName, isPrivate, source, forkedFrom) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
-      console.log("current user", currentUser);
       let doc = this.get('store').createRecord('document', {
         source:source,
         owner:currentUser,
