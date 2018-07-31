@@ -10,8 +10,9 @@ export default Controller.extend({
   message:"",
   docName:"",
   isPrivate:true,
+  feedbackMessage: "",
+  sort:"views",
   page:0,
-  feedbackMessage: null,
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
     return this.get('page') > 0;
@@ -22,31 +23,13 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
-  makeNewDoc(docName, isPrivate, source, forkedFrom) {
-    const currentUser = this.get('sessionAccount').currentUserName;
-    let doc = this.get('store').createRecord('document', {
-      source:source,
-      owner:currentUser,
-      isPrivate:isPrivate,
-      name:docName,
-      documentId:null,
-      forkedFrom:forkedFrom
+  tags:computed('model', function() {
+    this.get('documentService').getPopularTags(7)
+    .then((results) => {
+      this.set('tags', results.data);
     });
-    doc.save().then((response)=>{
-      this.get('store').query('document', {
-        filter: {search: currentUser, page: 0, currentUser:currentUser}
-      }).then((documents) => {
-        console.log("new doc created", documents, response);
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('code-editor',documents.firstObject.documentId);
-      });
-      this.set('feedbackMessage',"Document created successfully");
-    }).catch((err)=>{
-      doc.deleteRecord();
-      this.get('sessionAccount').updateOwnedDocuments();
-      this.set('feedbackMessage',err.errors[0]);
-    });
-  },
+    return [];
+  }),
   updateResults()
   {
     let searchTerm = this.get('searchTerm');
@@ -54,7 +37,8 @@ export default Controller.extend({
     {
       searchTerm = " ";
     }
-    this.transitionToRoute('documents', searchTerm, this.get('page'));
+    console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+    this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
     this.set('message',"Results");
   },
   getDefaultSource:function()
@@ -66,15 +50,17 @@ export default Controller.extend({
       this.transitionToRoute("code-editor", documentId);
     },
     deleteDocument(documentId) {
-      this.get('documentService').deleteDoc(documentId)
-      .then(() => {
-        console.log("deleted, updating results");
-        this.set('message',"deleted");
-        this.set('searchTerm', "deleted");
-        this.updateResults();
-      }).catch((err) => {
-
-      });
+      if (confirm('Are you sure you want to delete?')) {
+        this.get('documentService').deleteDoc(documentId)
+        .then(() => {
+          console.log("deleted, updating results");
+          this.set('searchTerm', this.get('sessionAccount').currentUserName);
+          this.updateResults();
+        }).catch((err) => {
+          console.log("error deleting", err);
+          this.set('feedbackMessage',err.errors[0]);
+        });
+      } 
     },
     checkboxClicked() {
       this.toggleProperty('isPrivate');
@@ -85,7 +71,31 @@ export default Controller.extend({
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
-        this.makeNewDoc(docName, isPrivate, this.getDefaultSource(), null);
+        this.get('documentService').makeNewDoc(docName,
+          isPrivate,
+          this.getDefaultSource(),
+          null)
+          .then(() => {
+            console.log("new doc created");
+            const currentUser = this.get('sessionAccount').currentUserName;
+            this.get('store').query('document', {
+              filter: {search: docName,
+                page: 0,
+                currentUser: currentUser,
+                sortBy: 'date'}
+            }).then((documents) => {
+              console.log("new doc found, transitioning", documents);
+              this.get('sessionAccount').updateOwnedDocuments();
+              this.transitionToRoute('code-editor', documents.firstObject.documentId);
+            });
+          }).catch((err) => {
+            console.log("error making doc", err);
+            this.set('feedbackMessage', err);
+          });
+      }
+      else
+      {
+        this.set('feedbackMessage', 'Please enter a name');
       }
     },
     search() {
@@ -100,5 +110,41 @@ export default Controller.extend({
       this.decrementProperty('page');
       this.updateResults();
     },
+    recent() {
+      //this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "date");
+      this.updateResults();
+    },
+    popular() {
+      //this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "views");
+      this.updateResults();
+    },
+    forked() {
+      //this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "forks");
+      this.updateResults();
+    },
+    editted() {
+      //this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "edits");
+      this.updateResults();
+    },
+    updated() {
+      //this.set('searchTerm', " ");
+      this.set('page', 0);
+      this.set('sort', "updated");
+      this.updateResults();
+    },
+    tag(tag) {
+      this.set('searchTerm', tag);
+      this.set('page', 0);
+      this.set('sort', "views");
+      this.updateResults();
+    }
   }
 });

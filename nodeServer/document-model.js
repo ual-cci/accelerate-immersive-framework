@@ -119,138 +119,143 @@ function startWebSockets(server)
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
-    shareDB.listen(stream);
+    try {
+      shareDB.listen(stream);
+    }
+    catch (err)
+    {
+      console.log("web socket error", err);
+    }
   });
 }
 
 function startDocAPI(app)
 {
   app.post('/submitOp', app.oauth.authorise(), (req,res) => {
-    try {
-      const op = req.body.op;
-      if(op.p)
-      {
-        const asInt = parseInt(op.p[1]);
-        if(!isNaN(asInt))
-        {
-          op.p[1] = asInt;
-        }
-      }
-      const docId = req.body.documentId;
-      const doc = shareDBConnection.get(contentCollectionName, docId);
-      if(!op.si && !op.sd && !op.oi)
-      {
-        res.status(400);
-        res.json({errors:["no objects in op"]});
-        return;
-      }
-      doc.fetch((err)=>{
-        console.log('submitting op', op, doc.id);
-        try {
-          doc.submitOp(op);
-        }
-        catch(err)
-        {
-          console.log(err);
-          res.status(400);
-          res.json({errors:[err]});
-          return;
-        }
-      });
-    }
-    catch (err)
+    const op = req.body.op;
+    if(op.p)
     {
-      console.log(err);
+      const asInt = parseInt(op.p[1]);
+      if(!isNaN(asInt))
+      {
+        op.p[1] = asInt;
+      }
+    }
+    if(!op.si && !op.sd && !op.oi)
+    {
       res.status(400);
-      res.json({errors:[err]});
+      res.json({errors:["no objects in op"]});
       return;
     }
-    res.sendStatus(200);
+
+    const docId = req.body.documentId;
+    const doc = shareDBConnection.get(contentCollectionName, docId);
+    doc.fetch((err)=>{
+      if(err) {
+        console.log(err);
+        res.status(400);
+        res.json({errors:[err]});
+        return;
+      }
+      doc.submitOp(op, (err)=> {
+        if(err)
+        {
+          console.log("error submitting op",err);
+          res.status(400);
+          res.json({errors:[err]});
+        }
+        else
+        {
+          console.log("success submitting op");
+          res.sendStatus(200);
+        }
+      });
+    });
+  });
+
+  app.get('/tags', (req, res) => {
+    let limit = parseInt(req.query.limit);
+    if(!limit)
+    {
+      limit = 5;
+    }
+    const query = {$aggregate : [
+      { $unwind : "$tags" },
+      { $group : { _id : "$tags" , count : { $sum : 1 } } },
+      { $sort : { count : -1 } },
+      { $limit : limit } ]
+    }
+    shareDBMongo.allowAggregateQueries = true;
+    shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
+      if(err)
+      {
+        res.status(400).send({error:err});
+      }
+      else
+      {
+        res.status(200).send({data:results});
+      }
+    });
+
   });
 
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
-    let params = {};
+
+    console.log("fetching docs");
+
     const term = req.query.filter.search;
     const page = req.query.filter.page;
-    const sortBy = req.query.filter.sortBy;
+    let sortBy = req.query.filter.sortBy;
     const currentUser = req.query.filter.currentUser;
+
+    let searchTermOr = {};
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
-      params = { $or: [{name: rg},{tags: rg},{owner: rg}]};
+      searchTermOr = { $or: [{name: rg},{tags: rg},{owner: rg}]};
     }
-    let query = shareDBConnection.createFetchQuery(contentCollectionName,params,[],(err, results) => {
-      if(!err)
+
+    let s = {};
+    if(sortBy == "views") {
+      sortBy = 'stats.views';
+      s[sortBy] = -1;
+    } else if (sortBy == "forks") {
+      sortBy = 'stats.forks';
+      s[sortBy] = 1;
+    } else if (sortBy == "size") {
+      sortBy = 'source.length';
+      s[sortBy] = 1;
+    } else if (sortBy == "date") {
+      sortBy = 'created';
+      s[sortBy] = -1;
+    } else if (sortBy == "updated") {
+      sortBy = 'lastEdited';
+      s[sortBy] = -1;
+    } else if (sortBy == "edits") {
+      sortBy = 'stats.edits';
+      s[sortBy] = -1;
+    }
+
+    const query = {
+      $and: [searchTermOr,
+             {$or: [{owner: currentUser}, {isPrivate: false}]}],
+      $sort: s,
+      $limit: PAGE_SIZE,
+      $skip: page * PAGE_SIZE
+    }
+    shareDBMongo.query(contentCollectionName, query, null, null, function (err, results, extra) {
+      if(err)
       {
-        let docs = [];
-        let startIndex = page * PAGE_SIZE < results.length ? page * PAGE_SIZE : results.length - PAGE_SIZE;
-        startIndex = Math.max(0,startIndex);
-        let i = 0;
-        while(docs.length < PAGE_SIZE && startIndex + i < results.length)
-        {
-          const data = results[i].data;
-          if(!data.isPrivate || data.owner == currentUser)
-          {
-            docs.push({attributes:data,id:data.documentId,type:"document"});
-          }
-          i++;
-        }
-        if(sortBy == "views")
-        {
-          docs.sort ((a, b) => {
-            let b_views = 0;
-            let a_views = 0;
-            if(b.attributes.stats)
-            {
-              b_views = b.attributes.stats.views;
-            }
-            if(a.attributes.stats)
-            {
-              a_views = a.attributes.stats.views;
-            }
-            return b_views - a_views;
-          });
-        }
-        else if (sortBy == "forks")
-        {
-          docs.sort ((a, b) => {
-            let b_forks = 0;
-            let a_forks = 0;
-            if(b.attributes.stats)
-            {
-              b_forks = b.attributes.stats.forks;
-            }
-            if(a.attributes.stats)
-            {
-              a_forks = a.attributes.stats.forks;
-            }
-            return b_forks - a_forks;
-          });
-        }
-        else if (sortBy == "size")
-        {
-          docs.sort ((a, b) => {
-            return b.data.source.length - a.data.source.length;
-          });
-        }
-        else if (sortBy == "edits")
-        {
-          docs.sort ((a, b) => {
-            return b.data.source.length - a.data.source.length;
-          });
-        }
-        else
-        {
-          docs.sort ((a, b) => {
-            return new Date(b.attributes.created) - new Date(a.attributes.created);
-          });
-        }
-        res.status(200).send({data:docs});
+        res.status(400).send({error:err});
       }
       else
       {
-        res.status(400).send(err);
+        var fn = (doc) => {
+          return {attributes:doc.data,id:doc.data.documentId,type:"document"}
+        }
+        const data = results.map(fn);
+        res.status(200).send({data:data});
       }
     });
   });
@@ -272,6 +277,22 @@ function startDocAPI(app)
   });
 
   app.get('/documents/:id', (req,res) => {
+    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log('fetching doc');
+    doc.fetch(function(err) {
+      if (err || !doc.data) {
+        res.status(404).send("database error making document");
+        return;
+      }
+      else
+      {
+        let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
+        res.status(200).send({data:reply});
+      }
+    });
+  });
+
+  app.patch('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
@@ -365,15 +386,13 @@ function createDoc(attr) {
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
-            stats:{views:0,forks:0},
+            stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false
           },()=> {
-            console.log("callback");
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
-            console.log("submitting FIRST op", op);
             doc.submitOp(op);
             resolve(doc);
           });

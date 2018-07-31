@@ -1,15 +1,24 @@
 <div class = "col-md-3 document-list-item">
   {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}} {{/link-to}}
-  by {{document.owner}}
+  by {{#link-to "documents" document.owner 0 'views' class='document-link'}}{{document.owner}} {{/link-to}}
   {{#if document.readOnly}}
-  <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+  <div class="tooltip">
+    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+    <span class="tooltiptext">Read Only</span>
+  </div>
   {{/if}}
   {{#if document.isPrivate}}
-  <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+  <div class="tooltip">
+    <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+    <span class="tooltiptext">Private</span>
+  </div>
   {{/if}}
   {{#if canEdit}}
-    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-    {{input type="checkbox" checked=document.dontPlay click=(action 'toggleDontPlay')}}
+    <div class="tooltip">
+      <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+      {{input type="checkbox" checked=doPlay click=(action 'toggleDontPlay')}}
+      <span class="tooltiptext">Play on Open</span>
+    </div>
     {{#bs-button class = "main-delete-button"
     icon="glyphicon glyphicon-trash"
     onClick=(action 'delete')}}

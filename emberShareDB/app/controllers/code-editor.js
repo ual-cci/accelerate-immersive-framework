@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
+import RSVP from 'rsvp';
 
 export default Controller.extend({
   //Query Params
@@ -41,6 +42,7 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showTokens:false,
+  showOpPlayer:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -51,6 +53,8 @@ export default Controller.extend({
   embed:'false',
   showName:true,
   wsAvailable:true,
+  editCtr:0,
+  fontSize:14,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -87,6 +91,7 @@ export default Controller.extend({
     this.set('collapsed', false);
     this.set('showShare', false);
     this.set('showTokens', false);
+    this.set('showOpPlayer', false);
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -111,7 +116,29 @@ export default Controller.extend({
         console.log("pause")
         this.set('renderedSource', "");
       },
-      bindKey: {mac: "cmd-.", win: "."}
+      bindKey: {mac: "cmd-.", win: "ctrl-."}
+    });
+    editor.commands.addCommand({
+      name: "zoom-in",
+      exec: ()=>{
+        this.incrementProperty('fontSize');
+        console.log("zoom in", this.get('fontSize'));
+        editor.setFontSize(this.get('fontSize'));
+      },
+      bindKey: {mac: "cmd-=", win: "ctrl-="}
+    });
+    editor.commands.addCommand({
+      name: "zoom-out",
+      exec: ()=>{
+        this.decrementProperty('fontSize');
+        if(this.get('fontSize') < 1)
+        {
+          this.set('fontSize', 1);
+        }
+        console.log("zoom out", this.get('fontSize'));
+        editor.setFontSize(this.get('fontSize'));
+      },
+      bindKey: {mac: "cmd--", win: "ctrl--"}
     });
     session.on('change',(delta)=>{
       this.onSessionChange( delta);
@@ -119,120 +146,95 @@ export default Controller.extend({
     session.setMode("ace/mode/html");
   },
   initWebSockets: function() {
-    let socket;
-    try {
-      socket = new WebSocket(config.wsHost);
-      this.set('socketRef', socket);
-      socket.onopen = () => {
-        console.log("web socket open");
-        this.set('wsAvailable', true);
-        if(!this.get('doc'))
-        {
-          this.initDoc();
+    let socket = this.get('socket');
+    if(!isEmpty(socket))
+    {
+      socket.onclose = ()=> {
+        console.log("websocket closed");
+        this.set('socket', null);
+        this.initWebSockets();
+      }
+      socket.close();
+    }
+    else
+    {
+      try {
+        socket = new WebSocket(config.wsHost);
+        this.set('socket', socket);
+        socket.onopen = () => {
+          console.log("web socket open");
+          this.set('wsAvailable', true);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onerror = () => {
+          console.log("web socket error");
+          this.set('wsAvailable', false);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onclose = () =>  {
+          console.log("web socket close");
+          this.set('wsAvailable', false);
+          if(!this.get('doc'))
+          {
+            this.initDoc();
+          }
+        }
+
+        socket.onmessage = (event) =>  {
+          console.log("web socket message", event);
         }
       }
-
-      socket.onerror = () => {
-        console.log("web socket error");
+      catch (err)
+      {
+        console.log("web sockets not available");
         this.set('wsAvailable', false);
         if(!this.get('doc'))
         {
           this.initDoc();
         }
-      }
-
-      socket.onclose = () =>  {
-        console.log("web socket close");
-        this.set('wsAvailable', false);
-        if(!this.get('doc'))
-        {
-          this.initDoc();
-        }
-      }
-
-      socket.onmessage = (event) =>  {
-        console.log("web socket message", event);
-      }
-
-      console.log("socket",socket);
-
-    }
-    catch (err)
-    {
-      console.log("web sockets not available");
-      this.set('wsAvailable', false);
-      if(!this.get('doc'))
-      {
-        this.initDoc();
-      }
-    }
-
-    if(isEmpty(socket))
-    {
-      console.log("web sockets not available");
-      this.set('wsAvailable', false);
-      if(!this.get('doc'))
-      {
-        this.initDoc();
       }
     }
   },
   initDoc: function() {
-
+    console.log("init doc");
     this.get('opsPlayer').reset();
-
     if(this.get('wsAvailable'))
     {
-      const socket = this.get('socketRef');
-      let con = this.get('connection')
-      if(!con)
+      const socket = this.get('socket');
+      let con = this.get('connection');
+      if(isEmpty(con))
       {
+        console.log('connecting to ShareDB');
         con = new ShareDB.Connection(socket);
       }
       if(isEmpty(con) || con.state == "disconnected")
       {
-        console.log("web sockets not available");
+        console.log("failed to connect to ShareDB");
         this.set('wsAvailable', false);
       }
       this.set('connection', con);
       const doc = con.get(config.contentCollectionName,this.get('model').id);
       const editor = this.get('editor');
       const session = editor.getSession();
+
       doc.subscribe((err) => {
-        console.log("error = ", err);
         if (err) throw err;
-        //console.log("no error", doc);
+        console.log("subscribed to doc", doc.data.dontPlay);
         if(!isEmpty(doc.data))
         {
           this.set('doc', doc);
           this.didReceiveDoc();
         }
       });
-      doc.on('op',(ops,source) => {
-        const embed = this.get('embed') == "true";
-        if(!embed && ops.length > 0)
-        {
-          if(!source && ops[0].p[0] == "source")
-          {
-            this.set('surpress', true);
-            const deltas = this.get('codeParser').opTransform(ops, editor);
-            session.getDocument().applyDeltas(deltas);
-            this.set('surpress', false);
-          }
-          else if (ops[0].p[0] == "assets")
-          {
-            this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-              toChange.set('assets',ops[0].oi);
-            });
-            this.preloadAssets();
-          }
-          else if (!source && ops[0].p[0] == "newEval")
-          {
-            console.log(ops[0]);
-            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
-          }
-        }
-      });
+      doc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
     }
     else
     {
@@ -243,14 +245,38 @@ export default Controller.extend({
       });
     }
   },
+  didReceiveOp: function (ops,source) {
+    const embed = this.get('embed') == "true";
+    if(!embed && ops.length > 0)
+    {
+      if(!source && ops[0].p[0] == "source")
+      {
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').opTransform(ops, editor);
+        session.getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+      }
+      else if (ops[0].p[0] == "assets")
+      {
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+        this.preloadAssets();
+      }
+      else if (!source && ops[0].p[0] == "newEval")
+      {
+        document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
+      }
+    }
+  },
   didReceiveDoc: function() {
-    console.log('did didReceiveDoc')
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
     this.set('savedVals', doc.data.savedVals);
+    console.log("did receive doc, dontPlay", doc.data.dontPlay);
     this.setCanEditDoc();
-    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
     this.submitOp({p:['stats'],oi:stats},{source:true});
     editor.setReadOnly(!this.get('canEditDoc'));
@@ -262,27 +288,39 @@ export default Controller.extend({
   },
   submitOp: function(op)
   {
-    const doc = this.get('doc');
-    if(this.get('wsAvailable'))
-    {
-      doc.submitOp(op);
-    }
-    else
-    {
-      this.get('documentService').submitOp(op)
-      .then(()=> {
-        //console.log("submitted");
-      }).catch(()=> {
-        console.log("ERROR Not submitted");
-      });
-    }
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      if(this.get('wsAvailable'))
+      {
+        doc.submitOp(op, (err)=> {
+          if(err)
+          {
+            reject(err);
+          }
+          else
+          {
+            resolve();
+          }
+        });
+      }
+      else
+      {
+        this.get('documentService').submitOp(op)
+        .then(() => {
+          resolve();
+        }).catch((err) => {
+          console.log("ERROR Not submitted");
+          reject(err);
+        });
+      }
+    });
   },
   preloadAssets: function() {
     const doc = this.get('doc');
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        if(!this.get('model.dontPlay'))
+        if(doc.data.dontPlay == "false")
         {
           this.updateIFrame();
         }
@@ -290,33 +328,12 @@ export default Controller.extend({
     }
     else
     {
-      console.log("no assets to preload", this.get('model.dontPlay'));
-      if(!this.get('model.dontPlay'))
+      console.log("no assets to preload", doc.data.dontPlay);
+      if(doc.data.dontPlay == "false")
       {
         this.updateIFrame();
       }
     }
-  },
-  updateSavedVals: function()
-  {
-    const doc = this.get('doc');
-    const savedVals = this.get('savedVals');
-    if(!savedVals)
-    {
-      return;
-    }
-    const vals = Object.keys(savedVals).map(key => savedVals[key]);
-    const hasVals = vals.length > 0;
-    try {
-      if(hasVals)
-      {
-        this.submitOp( {p:['savedVals'],oi:savedVals},{source:true});
-      }
-    } catch (err)
-    {
-      console.log(err);
-    }
-
   },
   getSelectedText: function()
   {
@@ -355,7 +372,7 @@ export default Controller.extend({
     {
       clearTimeout(this.get('codeTimer'));
     }
-    this.set('codeTimer', setTimeout(function() {
+    this.set('codeTimer', setTimeout(() => {
       this.updateIFrame();
       this.set('codeTimer',null);
     },1500));
@@ -368,6 +385,8 @@ export default Controller.extend({
       const editor = this.editor;
       const session = editor.getSession();
 
+      this.incrementProperty('editCtr');
+
       if(!this.get('opsPlayer').atHead())
       {
         console.log("not at head");
@@ -375,7 +394,6 @@ export default Controller.extend({
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
       this.get('opsPlayer').reset();
-      this.submitOp( {p:['lastEdited'],oi:new Date()},{source:true});
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -399,6 +417,7 @@ export default Controller.extend({
     }
   },
   addWindowListener: function() {
+    this.removeWindowListener();
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
@@ -476,9 +495,55 @@ export default Controller.extend({
       .then((deltas)=>{fn(deltas)});
     }
   },
-  getDefaultSource:function()
+  getDefaultSource: function()
   {
     return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
+  },
+  updateSavedVals: function()
+  {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      const savedVals = this.get('savedVals');
+      if(isEmpty(savedVals))
+      {
+        resolve();
+      }
+      else
+      {
+        const vals = Object.keys(savedVals).map(key => savedVals[key]);
+        const hasVals = vals.length > 0;
+        if(hasVals)
+        {
+          this.submitOp({p:['savedVals'],oi:savedVals})
+          .then(() => {
+            resolve();
+          }).catch((err) => {
+            reject(err)
+          });
+        }
+        else
+        {
+          resolve();
+        }
+      }
+    });
+  },
+  updateEditStats: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('doc');
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      stats.edits = parseInt(stats.edits) + this.get('editCtr');
+      const actions = [
+        this.submitOp({p:['stats'], oi:stats}, {source:true}),
+        this.submitOp({p:['lastEdited'], oi:new Date()}, {source:true})
+      ];
+      Promise.all(actions).then(()=> {
+        this.set('editCtr', 0);
+        resolve();
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   },
   actions: {
     editorReady(editor) {
@@ -543,7 +608,6 @@ export default Controller.extend({
     previewAsset(asset)
     {
       var url = config.serverHost + "/asset/"+asset.fileId;
-      console.log(asset.fileType);
       const isImage = asset.fileType.includes("image");
       const isAudio = asset.fileType.includes("audio");
       const isVideo = asset.fileType.includes("video");
@@ -591,6 +655,9 @@ export default Controller.extend({
     toggleShowTokens() {
       this.toggleProperty('showTokens');
     },
+    toggleShowOpPlayer() {
+      this.toggleProperty('showOpPlayer');
+    },
     toggleShowAssets() {
       this.toggleProperty('showAssets');
     },
@@ -607,31 +674,45 @@ export default Controller.extend({
       }
     },
     cleanUp() {
-      this.updateSavedVals();
-      this.set('renderedSource',"");
-      if(this.get('wsAvailable'))
-      {
-        this.get('doc').destroy();
-      }
-      this.set('doc', null);
-      this.removeWindowListener();
-    },
-    refresh() {
-      const doc = this.get('doc');
-      console.log('refreshing',doc);
-      if(!isEmpty(doc))
-      {
-        this.get('opsPlayer').reset();
+      console.log('cleaning up');
+      const fn = () => {
         this.set('renderedSource',"");
         if(this.get('wsAvailable'))
         {
-          doc.destroy();
+          this.get('socket').onclose = ()=> {
+            this.set('socket', null);
+            this.set('connection', null)
+            console.log("websocket closed");
+          };
+          this.get('doc').destroy();
+          this.get('socket').close();
         }
         this.set('doc', null);
-        if(!isEmpty(this.get('editor')))
-        {
-          this.initDoc();
-        }
+        this.removeWindowListener();
+      }
+      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
+    },
+    refresh() {
+      const doc = this.get('doc');
+      console.log('refreshing');
+      if(!isEmpty(doc))
+      {
+        const fn = () => {
+          this.get('opsPlayer').reset();
+          this.set('renderedSource',"");
+          if(this.get('wsAvailable'))
+          {
+            doc.destroy();
+          }
+          this.set('doc', null);
+          if(!isEmpty(this.get('editor')))
+          {
+            this.initDoc();
+          }
+        };
+        const actions = [this.updateEditStats(), this.updateSavedVals()];
+        Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
       }
     },
     mouseDown(e) {
@@ -719,7 +800,7 @@ export default Controller.extend({
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
       const doc = this.get('doc');
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0};
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
       stats.forks = parseInt(stats.forks) + 1;
       this.submitOp( {p:['stats'],oi:stats},{source:true});
       let newDoc = this.get('store').createRecord('document', {

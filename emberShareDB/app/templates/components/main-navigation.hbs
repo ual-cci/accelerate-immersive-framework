@@ -6,7 +6,7 @@
  {{#if session.isAuthenticated}}
     <a {{action 'logout'}} class="btn btn-danger navbar-btn navbar-right">Logout</a>
    {{#if sessionAccount.currentUserName}}
-     <p class="navbar-text pull-right">Signed in as {{sessionAccount.currentUserName}}</p>
+     <p class="navbar-text pull-right">Signed in as {{#nav.link-to "login"}}{{sessionAccount.currentUserName}}{{/nav.link-to}}</p>
    {{/if}}
    {{#nav.dropdown as |dd|}}
      {{#dd.toggle}}My Documents <span class="caret"></span>{{/dd.toggle}}

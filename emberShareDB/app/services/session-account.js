@@ -10,26 +10,30 @@ export default Service.extend({
   currentDoc:"",
   ownedDocuments:null,
   updateOwnedDocuments() {
-    let currentUser = this.get('currentUserName');
-    if(!currentUser)
-    {
-      currentUser = "";
-    }
-    const filter = {
-      filter:{search:currentUser,page:0,currentUser:currentUser}
-    }
-    this.get('store').query('document', filter).then((results) => {
-      var myDocs = results.map(function(doc){
-           return {id:doc.get('id'), name:doc.get('name')};
-       });
-      this.set('ownedDocuments',myDocs);
+    return new RSVP.Promise((resolve, reject) => {
+      let currentUser = this.get('currentUserName');
+      if(!currentUser)
+      {
+        currentUser = "";
+      }
+      const filter = {
+        filter:{search:currentUser,page:0,currentUser:currentUser}
+      }
+      this.get('store').query('document', filter).then((results) => {
+        var myDocs = results.map(function(doc){
+             return {id:doc.get('id'), name:doc.get('name')};
+         });
+        this.set('ownedDocuments',myDocs);
+        resolve();
+      }).catch((err)=> {
+        reject(err);
+      });
     });
   },
   loadCurrentUser() {
     return new RSVP.Promise((resolve, reject) => {
       const currentUserName = this.get('session.data.authenticated.user_id');
       this.set('bearerToken', this.get('session.data.authenticated.access_token'));
-      console.log('currentUserName',currentUserName);
       if (!isEmpty(currentUserName)) {
         this.set('currentUserName', currentUserName);
         resolve();

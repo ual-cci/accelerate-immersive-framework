@@ -8,30 +8,58 @@
   {{/if}}
   {{#if displayEditor}}
   <div class="settings">
-    {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
-    {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
-    {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
-    {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
+    <div class="tooltip">
+      {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
+      <span class="tooltiptext">Settings</span>
+    </div>
+    <div class="tooltip">
+      {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+      <span class="tooltiptext">Render Code</span>
+    </div>
+    <div class="tooltip">
+      {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
+      <span class="tooltiptext">Pause Code</span>
+    </div>
+    <div class="tooltip">
+      {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
+      <span class="tooltiptext">Enter Fullscreen</span>
+    </div>
     {{#if canEditDoc}}
+    <div class="tooltip">
       <label for="autoRenderCheckbox">Auto Render?</label>
       {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+      <span class="tooltiptext">Render Code Whilst Typing</span>
+    </div>
     {{/if}}
     {{#if session.isAuthenticated}}
-      {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+    <div class="tooltip">
       {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
+      <span class="tooltiptext">Make Your Own Copy</span>
+    </div>
+    <div class="tooltip">
       {{download-button doc = doc}}
+      <span class="tooltiptext">Download Project as Zip</span>
+    </div>
     {{/if}}
     {{#bs-collapse collapsed=collapsed}}
       <div class="well">
         {{#if isOwner}}
-          {{ops-player onSkip = (action 'skipOp') onPlay = (action 'playOps') onRewind = (action 'rewindOps')}}
+        <div class="tooltip">
           <label for="privacyCheckbox">Private?</label>
           {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
+          <span class="tooltiptext">Other users can discover</span>
+        </div>
+        <div class="tooltip">
           <label for="readOnlyCheckbox">Read Only?</label>
           {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'readOnlyToggled')}}
-          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowAssets")}}
-            Files
-          {{/bs-button}}
+          <span class="tooltiptext">WARNING! Other users can edit your code</span>
+        </div>
+          <div class="tooltip">
+            {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowAssets")}}
+              Files
+            {{/bs-button}}
+            <span class="tooltiptext">Add Files to Use</span>
+          </div>
         {{/if}}
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
           Share
@@ -39,12 +67,25 @@
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowTokens")}}
           Tags
         {{/bs-button}}
+        <div class="tooltip">
+          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowOpPlayer")}}
+            Playback
+          {{/bs-button}}
+          <span class="tooltiptext">Step Through or Watch The Doc's History</span>
+        </div>
+
         {{#if isOwner}}
           {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
             Delete
           {{/bs-button}}
         {{/if}}
         <div>
+        {{#if showOpPlayer}}
+        <div>
+          <h5>Playback your coding</h5>
+          {{ops-player onSkip = (action 'skipOp') onPlay = (action 'playOps') onRewind = (action 'rewindOps')}}
+        </div>
+        {{/if}}
         {{#if showShare}}
           <label for="edit-link">Editable Link</label>
           {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}

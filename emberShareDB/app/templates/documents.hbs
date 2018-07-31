@@ -23,6 +23,16 @@
   {{/if}}
 </form>
 </div>
+<div>
+  {{#bs-button onClick=(action 'recent')}} Newest {{/bs-button}}
+  {{#bs-button onClick=(action 'popular')}} Popular {{/bs-button}}
+  {{#bs-button onClick=(action 'updated')}} Updated {{/bs-button}}
+  {{#bs-button onClick=(action 'forked')}} Most Remixed {{/bs-button}}
+  {{#bs-button onClick=(action 'editted')}} Most Worked-on {{/bs-button}}
+  {{#each tags as |tag|}}
+    {{#bs-button onClick=(action 'tag' tag._id)}} {{tag._id}} {{/bs-button}}
+  {{/each}}
+</div>
 <div class = "container-fluid">
   <div class = "row">
     {{#each model as |document index|}}

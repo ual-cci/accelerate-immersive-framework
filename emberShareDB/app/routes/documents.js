@@ -9,12 +9,13 @@ export default Route.extend({
     {
       currentUser = "";
     }
+    const sort = params.sort ? params.sort : "views";
     const filter = {
       filter:{
         search:params.search,
         page:params.page,
         currentUser:currentUser,
-        sortBy:"views"
+        sortBy:params.sort
       }
     }
     console.log('reloading document model');

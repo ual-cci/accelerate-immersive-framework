@@ -7,6 +7,28 @@ export default Service.extend({
   assetService: inject('assets'),
   store: inject('store'),
   sessionAccount:inject('session-account'),
+  makeNewDoc(docName, isPrivate, source, forkedFrom) {
+    return new RSVP.Promise((resolve, reject) => {
+      const currentUser = this.get('sessionAccount').currentUserName;
+      let doc = this.get('store').createRecord('document', {
+        source:source,
+        owner:currentUser,
+        isPrivate:isPrivate,
+        name:docName,
+        documentId:null,
+        forkedFrom:forkedFrom
+      });
+      doc.save().then((response)=>{
+        console.log("saved new doc");
+        resolve();
+      }).catch((err)=>{
+        console.log("error creating record");
+        doc.deleteRecord();
+        this.get('sessionAccount').updateOwnedDocuments();
+        reject("error creating document, are you signed in?");
+      });
+    });
+  },
   submitOp(op, doc) {
     if(isEmpty(doc))
     {
@@ -26,15 +48,17 @@ export default Service.extend({
         });
     });
   },
-  toggleDontPlay(docId) {
+  getPopularTags(limit) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('store').findRecord('document', docId)
-      .then((doc) => {
-        doc.set('data.dontPlay', !doc.data.dontPlay);
-        const op = {p:["dontPlay"],oi:doc.data.dontPlay}
-        this.submitOp(op, docId)
-        resolve(doc.data.dontPlay);
-      });
+      $.ajax({
+          type: "GET",
+          url: config.serverHost + "/tags?limit=" + limit,
+        }).then((res) => {
+          console.log("tags", res);
+          resolve(res);
+        }).catch((err) => {
+          reject(err);
+        });
     });
   },
   deleteDoc(docId) {
@@ -55,9 +79,11 @@ export default Service.extend({
               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
             }).then((res) => {
               console.log('deleted', docId);
-              doc.deleteRecord();
-              this.get('sessionAccount').updateOwnedDocuments();
-              resolve();
+              const actions = [
+                doc.deleteRecord(),
+                this.get('sessionAccount').updateOwnedDocuments()
+              ];
+              Promise.all(actions).then(resolve).catch(reject);
             }).catch((err) => {
               console.log('error deleting', docId);
               reject(err);
