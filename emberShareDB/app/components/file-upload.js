@@ -17,13 +17,16 @@ export default EmberUploader.FileField.extend({
       let data = {username:user,documentId:doc};
       console.log(data);
       uploader.on('progress', e => {
-        console.log('progress',e);
+        console.log('progress', e);
+        this.get('onProgress')(e);
       });
       uploader.on('didUpload', e => {
         console.log('didUpload',e);
+        this.get('onCompletion')(e);
       });
       uploader.on('didError', (jqXHR, textStatus, errorThrown) => {
         console.log('didError',jqXHR, textStatus, errorThrown);
+        this.get('onError')(errorThrown);
       });
       uploader.upload(files[0], data);
     }

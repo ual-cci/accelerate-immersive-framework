@@ -553,6 +553,29 @@ export default Controller.extend({
       });
     });
   },
+  refreshDoc: function() {
+    const doc = this.get('doc');
+    console.log('refreshing', doc);
+    if(!isEmpty(doc))
+    {
+      console.log('refreshing doc not empty', doc);
+      const fn = () => {
+        this.get('opsPlayer').reset();
+        this.set('renderedSource',"");
+        if(this.get('wsAvailable'))
+        {
+          doc.destroy();
+        }
+        this.set('doc', null);
+        if(!isEmpty(this.get('editor')))
+        {
+          this.initDoc();
+        }
+      };
+      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
+    }
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -600,15 +623,43 @@ export default Controller.extend({
         this.deleteCurrentDocument();
       }
     },
+    assetError(err) {
+      $("#asset-progress").css("display", "none");
+      alert("Error"+err);
+    },
+    assetProgress(e) {
+      console.log("assetProgress", e);
+      if(parseInt(e.percent) < 100)
+      {
+        $("#asset-progress").css("display", "block");
+        $("#asset-progress").css("width", (parseInt(e.percent)/2)+"vw");
+      }
+      else
+      {
+        $("#asset-progress").css("display", "none");
+      }
+    },
+    assetUploaded(e) {
+      console.log("assetComplete", e);
+      $("#asset-progress").css("display", "none");
+      if(!this.get('wsAvailable'))
+      {
+        this.refreshDoc();
+      }
+    },
     deleteAsset()
     {
       if(this.get('canEditDoc'))
       {
         this.get('assetService').deleteAsset(this.get('assetToDelete'))
         .then(()=> {
-          console.log('deleting asset', this.get('assetToDelete'));
+          console.log('deleted asset', this.get('assetToDelete'));
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
+          if(!this.get('wsAvailable'))
+          {
+            this.refreshDoc();
+          }
         }).catch((err)=>{
           console.log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
@@ -708,27 +759,7 @@ export default Controller.extend({
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
-      const doc = this.get('doc');
-      console.log('refreshing', doc);
-      if(!isEmpty(doc))
-      {
-        console.log('refreshing doc not empty', doc);
-        const fn = () => {
-          this.get('opsPlayer').reset();
-          this.set('renderedSource',"");
-          if(this.get('wsAvailable'))
-          {
-            doc.destroy();
-          }
-          this.set('doc', null);
-          if(!isEmpty(this.get('editor')))
-          {
-            this.initDoc();
-          }
-        };
-        const actions = [this.updateEditStats(), this.updateSavedVals()];
-        Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
-      }
+      this.refreshDoc();
     },
     mouseDown(e) {
       //console.log('mouseDown',e.target);
