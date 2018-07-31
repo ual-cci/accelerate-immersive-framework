@@ -151,7 +151,6 @@ function startDocAPI(app)
         return;
       }
       doc.fetch((err)=>{
-        console.log('submitting op', op, doc.id);
         if(err) {
           console.log(err);
           res.status(400);
@@ -183,7 +182,6 @@ function startDocAPI(app)
   });
 
   app.get('/tags', (req, res) => {
-    console.log(req.query);
     let limit = parseInt(req.query.limit);
     if(!limit)
     {
@@ -197,7 +195,6 @@ function startDocAPI(app)
     }
     shareDBMongo.allowAggregateQueries = true;
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
-      console.log(contentCollectionName, err, results, extra);
       if(err)
       {
         res.status(400).send({error:err});
@@ -253,7 +250,6 @@ function startDocAPI(app)
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
     }
-    console.log(query);
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, results, extra) {
       if(err)
       {
@@ -262,7 +258,6 @@ function startDocAPI(app)
       else
       {
         var fn = (doc) => {
-          console.log(doc.data.name, doc.data.lastEdited);
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
         const data = results.map(fn);
@@ -304,7 +299,6 @@ function startDocAPI(app)
   });
 
   app.patch('/documents/:id', (req,res) => {
-    console.log(req.body.data.attributes);
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
@@ -402,11 +396,9 @@ function createDoc(attr) {
             flags:0,
             dontPlay:false
           },()=> {
-            console.log("callback");
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
-            console.log("submitting FIRST op", op);
             doc.submitOp(op);
             resolve(doc);
           });

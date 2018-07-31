@@ -15,11 +15,9 @@ const saltRounds = 10;
 //AUTH
 
 var getAccessToken = function(bearerToken, callback) {
-	console.log('getting token');
 	tokenModel.findOne({
 		accessToken: bearerToken
 	}, function(err, token) {
-		console.log('done getting token',err,token);
 		callback(err, token);
 	});
 };
@@ -55,7 +53,6 @@ var getUser = function(username, password, callback) {
 			return;
 		}
 		var hash = user.password;
-		console.log("getting user", password, hash);
 		bcrypt.compare(password, hash).then((res) => {
 			if(res)
 			{
@@ -91,7 +88,6 @@ var initErrorHandling = function(app)
 {
 	app.use(function (err, req, res, next) {
 		if (err instanceof OAuthError)
-			//console.log('info', err);
 		next(err);
 	});
 
@@ -122,14 +118,11 @@ function startAuthAPI(app)
   app.all('/oauth/token', app.oauth.grant());
 
   app.post('/accounts', function (req, res) {
-    //console.log('request for new user', req.body);
     let attr = req.body.data.attributes;
-    console.log(attr);
     newUser(attr.username,attr.password,attr.email)
     .then( (user) => {
       res.type('application/vnd.api+json');
       res.status(200);
-      console.log('resolved with user',user);
       var json = {data:{id:user.accountId,type:'account',attr:user}};
       res.json(json);
     })
@@ -137,11 +130,10 @@ function startAuthAPI(app)
   });
 
   app.post('/resetPassword', function(req,res) {
-    console.log(req.body);
     requestPasswordReset(req.body.username)
-    .then( () => {
+    .then( (user) => {
       console.log('success reset');
-      res.sendStatus(200)
+      res.status(200).send({link:"/password-reset?username="+user.username+"&token="+user.passwordResetToken})
     })
     .catch( (err) =>  {
       console.log('failed reset');
@@ -149,27 +141,21 @@ function startAuthAPI(app)
   });
 
   app.post('/checkPasswordToken', function(req,res) {
-    console.log(req.body);
     checkPasswordToken(req.body.username, req.body.token)
     .then( () => {
-      console.log('token good');
       res.sendStatus(200);
     })
     .catch( (err) =>  {
-      console.log('token bad');
       res.status(400).send(err);
     });
   });
 
   app.post('/updatePassword', (req,res)=> {
-    console.log(req.body);
     updatePassword(req.body.username, req.body.token, req.body.password)
     .then( () => {
-      console.log('successfuly updated');
       res.sendStatus(200);
     })
     .catch( (err) =>  {
-      console.log('failed');
       res.status(400).send(err);
     });
   });
@@ -211,17 +197,11 @@ function startAuthAPI(app)
 }
 
 var setup = function() {
-	console.log("checking client");
 	clientModel.find({clientId:"application"}, (err, client) => {
 		if(client.length < 1)
 		{
-			console.log("client doesnt exist, creating");
 			var client = new clientModel({clientId:"application", clientSecret:"secret"});
 			client.save((err, client) => console.log("saved client"));
-		}
-		else
-		{
-			console.log("client exists");
 		}
 	});
 }
@@ -239,7 +219,6 @@ var newUser = function(username, password, email) {
 			userModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
 					getNewUserId((accountId) => {
-						console.log("making user");
 						var user = new userModel({
 							accountId: accountId,
 							username: username,
@@ -265,7 +244,6 @@ var newUser = function(username, password, email) {
 var getNewUserId = function(callback)
 {
 	var uuid = guid.guid();
-	console.log("uuid",uuid);
 	userModel.find({accountId:uuid}, function(err,user) {
 		if(user.length > 0 || err) {
 			console.log("collision, generating again");
@@ -273,20 +251,17 @@ var getNewUserId = function(callback)
 		}
 		else
 		{
-			console.log("returning uuid");
 			callback(uuid);
 		}
 	});
 }
 
-var updatePassword = async function(username, token, password)
+var updatePassword = function(username, token, password)
 {
-	let user = await checkPasswordToken(username, token);
-	console.log('checked token',user);
 	return new Promise((resolve, reject) => {
-		console.log('updating record');
-		if(user)
-		{
+		checkPasswordToken(username, token)
+		.then((user) => {
+			console.log(username, password, saltRounds);
 			bcrypt.hash(password, saltRounds).then((hash) => {
 				user.set('password', hash);
 				user.set('passwordResetToken', null);
@@ -294,7 +269,7 @@ var updatePassword = async function(username, token, password)
 				user.save((err, user) => {
 					if(err)
 					{
-						reject(err);
+						reject("error saving user");
 						return;
 					}
 					else {
@@ -302,12 +277,13 @@ var updatePassword = async function(username, token, password)
 						return;
 					}
 				});
+			}).catch((err) => {
+				console.log(err);
+				reject("error salting");
 			});
-		}
-		else
-		{
+		}).catch((err) => {
 			reject("token bad");
-		}
+		});
 	});
 }
 
@@ -321,23 +297,19 @@ var checkPasswordToken = function(username, token)
 				if(token != user.passwordResetToken)
 				{
 					reject();
-					return;
 				}
 				else if (new Date() > user.passwordResetExpiry)
 				{
 					reject();
-					return;
 				}
 				resolve(user);
-				return;
 			}
 			else
 			{
 				reject();
-				return;
 			}
 		});
-	})
+	});
 }
 
 var requestPasswordReset = function(username) {

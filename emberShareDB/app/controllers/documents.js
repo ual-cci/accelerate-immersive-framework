@@ -23,7 +23,7 @@ export default Controller.extend({
     return this.get('model').length == 0;
   }),
   tags:computed('model', function() {
-    this.get('documentService').getPopularTags(5)
+    this.get('documentService').getPopularTags(7)
     .then((results) => {
       this.set('tags', results.data);
     });

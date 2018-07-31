@@ -34,7 +34,7 @@ export default Controller.extend({
   },
   actions: {
     resetPassword() {
-      let password = this.getProperties('password', 'passwordAgain');
+      let password = this.get('password');
       this.validatePasswords().then(() => {
         let username = this.get('username');
         let token = this.get('token');
@@ -42,10 +42,10 @@ export default Controller.extend({
         .then(()=> {
           this.set('resetMessage','Password updated successfuly');
         }).catch((err) => {
-          this.set('resetMessage', 'Error:' + err);
+          this.set('resetMessage', 'Error:' + err.responseText);
         });
       }).catch((err) => {
-        this.set('resetMessage', 'Error:' + err);
+        this.set('resetMessage', 'Error:' + err.responseText);
       });
     }
   }
