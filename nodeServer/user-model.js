@@ -1,5 +1,6 @@
 var oauthserver = require('oauth2-server');
 var mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
 let clientModel = require('./mongo/model/client');
@@ -101,7 +102,7 @@ function startAuthAPI(app)
   app.use(bodyParser.json());
 
   var mongoUri = 'mongodb://' + mongoIP +'/' + oauthDBName;
-  mongoose.connect(mongoUri, function(err, res) {
+  mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
       return console.error('Error connecting to "%s":', mongoUri, err);
     }
