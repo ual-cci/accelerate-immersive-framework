@@ -132,53 +132,45 @@ function startWebSockets(server)
 function startDocAPI(app)
 {
   app.post('/submitOp', app.oauth.authorise(), (req,res) => {
-    try {
-      const op = req.body.op;
-      if(op.p)
-      {
-        const asInt = parseInt(op.p[1]);
-        if(!isNaN(asInt))
-        {
-          op.p[1] = asInt;
-        }
-      }
-      const docId = req.body.documentId;
-      const doc = shareDBConnection.get(contentCollectionName, docId);
-      if(!op.si && !op.sd && !op.oi)
-      {
-        res.status(400);
-        res.json({errors:["no objects in op"]});
-        return;
-      }
-      doc.fetch((err)=>{
-        if(err) {
-          console.log(err);
-          res.status(400);
-          res.json({errors:[err]});
-          return;
-        }
-        doc.submitOp(op, (err)=> {
-          if(err)
-          {
-            console.log("error submitting op",err);
-            res.status(400);
-            res.json({errors:[err]});
-          }
-          else
-          {
-            console.log("success submitting op");
-            res.sendStatus(200);
-          }
-        });
-      });
-    }
-    catch (err)
+    const op = req.body.op;
+    if(op.p)
     {
-      console.log(err);
+      const asInt = parseInt(op.p[1]);
+      if(!isNaN(asInt))
+      {
+        op.p[1] = asInt;
+      }
+    }
+    if(!op.si && !op.sd && !op.oi)
+    {
       res.status(400);
-      res.json({errors:[err]});
+      res.json({errors:["no objects in op"]});
       return;
     }
+
+    const docId = req.body.documentId;
+    const doc = shareDBConnection.get(contentCollectionName, docId);
+    doc.fetch((err)=>{
+      if(err) {
+        console.log(err);
+        res.status(400);
+        res.json({errors:[err]});
+        return;
+      }
+      doc.submitOp(op, (err)=> {
+        if(err)
+        {
+          console.log("error submitting op",err);
+          res.status(400);
+          res.json({errors:[err]});
+        }
+        else
+        {
+          console.log("success submitting op");
+          res.sendStatus(200);
+        }
+      });
+    });
   });
 
   app.get('/tags', (req, res) => {
@@ -209,6 +201,8 @@ function startDocAPI(app)
 
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
+
+    console.log("fetching docs");
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;

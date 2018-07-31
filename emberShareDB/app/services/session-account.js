@@ -10,19 +10,24 @@ export default Service.extend({
   currentDoc:"",
   ownedDocuments:null,
   updateOwnedDocuments() {
-    let currentUser = this.get('currentUserName');
-    if(!currentUser)
-    {
-      currentUser = "";
-    }
-    const filter = {
-      filter:{search:currentUser,page:0,currentUser:currentUser}
-    }
-    this.get('store').query('document', filter).then((results) => {
-      var myDocs = results.map(function(doc){
-           return {id:doc.get('id'), name:doc.get('name')};
-       });
-      this.set('ownedDocuments',myDocs);
+    return new RSVP.Promise((resolve, reject) => {
+      let currentUser = this.get('currentUserName');
+      if(!currentUser)
+      {
+        currentUser = "";
+      }
+      const filter = {
+        filter:{search:currentUser,page:0,currentUser:currentUser}
+      }
+      this.get('store').query('document', filter).then((results) => {
+        var myDocs = results.map(function(doc){
+             return {id:doc.get('id'), name:doc.get('name')};
+         });
+        this.set('ownedDocuments',myDocs);
+        resolve();
+      }).catch((err)=> {
+        reject(err);
+      });
     });
   },
   loadCurrentUser() {

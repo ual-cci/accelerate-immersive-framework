@@ -14,7 +14,6 @@ export default Route.extend({
   },
   setupController: function(controller, model){
     this._super(controller, model);
-    console.log("setupController",model);
     if(model)
     {
       controller.send('refresh');

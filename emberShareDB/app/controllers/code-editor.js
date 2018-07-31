@@ -249,6 +249,7 @@ export default Controller.extend({
     const editor = this.get('editor');
     const session = editor.getSession();
     this.set('savedVals', doc.data.savedVals);
+    console.log("did receive doc, dontPlay", doc.data.dontPlay);
     this.setCanEditDoc();
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
@@ -281,7 +282,6 @@ export default Controller.extend({
       {
         this.get('documentService').submitOp(op)
         .then(() => {
-          //console.log("submitted");
           resolve();
         }).catch((err) => {
           console.log("ERROR Not submitted");

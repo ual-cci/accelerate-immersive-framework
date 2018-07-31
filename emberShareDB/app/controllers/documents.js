@@ -12,6 +12,7 @@ export default Controller.extend({
   isPrivate:true,
   feedbackMessage: "",
   sort:"views",
+  page:0,
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
     return this.get('page') > 0;
@@ -36,6 +37,7 @@ export default Controller.extend({
     {
       searchTerm = " ";
     }
+    console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
     this.set('message',"Results");
   },
@@ -51,10 +53,10 @@ export default Controller.extend({
       this.get('documentService').deleteDoc(documentId)
       .then(() => {
         console.log("deleted, updating results");
-        this.set('message',"deleted");
-        this.set('searchTerm', "deleted");
+        this.set('searchTerm', this.get('sessionAccount').currentUserName);
         this.updateResults();
       }).catch((err) => {
+        console.log("error deleting", err);
         this.set('feedbackMessage',err.errors[0]);
       });
     },
@@ -107,31 +109,31 @@ export default Controller.extend({
       this.updateResults();
     },
     recent() {
-      this.set('searchTerm', " ");
+      //this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "date");
       this.updateResults();
     },
     popular() {
-      this.set('searchTerm', " ");
+      //this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "views");
       this.updateResults();
     },
     forked() {
-      this.set('searchTerm', " ");
+      //this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "forks");
       this.updateResults();
     },
     editted() {
-      this.set('searchTerm', " ");
+      //this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "edits");
       this.updateResults();
     },
     updated() {
-      this.set('searchTerm', " ");
+      //this.set('searchTerm', " ");
       this.set('page', 0);
       this.set('sort', "updated");
       this.updateResults();

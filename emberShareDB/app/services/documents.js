@@ -61,20 +61,6 @@ export default Service.extend({
         });
     });
   },
-  toggleDontPlay(docId) {
-    return new RSVP.Promise((resolve, reject) => {
-      this.get('store').findRecord('document', docId)
-      .then((doc) => {
-        doc.toggleProperty('dontPlay');
-        const op = {p:["dontPlay"], oi:doc.data.dontPlay ? "true":"false"}
-        this.submitOp(op, docId);
-        console.log(doc.data.dontPlay);
-        resolve();
-      }).catch((err) => {
-        reject(err);
-      });
-    });
-  },
   deleteDoc(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
@@ -93,9 +79,11 @@ export default Service.extend({
               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
             }).then((res) => {
               console.log('deleted', docId);
-              doc.deleteRecord();
-              this.get('sessionAccount').updateOwnedDocuments();
-              resolve();
+              const actions = [
+                doc.deleteRecord(),
+                this.get('sessionAccount').updateOwnedDocuments()
+              ];
+              Promise.all(actions).then(resolve).catch(reject);
             }).catch((err) => {
               console.log('error deleting', docId);
               reject(err);
