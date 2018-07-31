@@ -50,15 +50,17 @@ export default Controller.extend({
       this.transitionToRoute("code-editor", documentId);
     },
     deleteDocument(documentId) {
-      this.get('documentService').deleteDoc(documentId)
-      .then(() => {
-        console.log("deleted, updating results");
-        this.set('searchTerm', this.get('sessionAccount').currentUserName);
-        this.updateResults();
-      }).catch((err) => {
-        console.log("error deleting", err);
-        this.set('feedbackMessage',err.errors[0]);
-      });
+      if (confirm('Are you sure you want to delete?')) {
+        this.get('documentService').deleteDoc(documentId)
+        .then(() => {
+          console.log("deleted, updating results");
+          this.set('searchTerm', this.get('sessionAccount').currentUserName);
+          this.updateResults();
+        }).catch((err) => {
+          console.log("error deleting", err);
+          this.set('feedbackMessage',err.errors[0]);
+        });
+      } 
     },
     checkboxClicked() {
       this.toggleProperty('isPrivate');

@@ -125,7 +125,7 @@ export default Controller.extend({
         console.log("zoom in", this.get('fontSize'));
         editor.setFontSize(this.get('fontSize'));
       },
-      bindKey: {mac: "cmd-=", win: "ctrl-+"}
+      bindKey: {mac: "cmd-=", win: "ctrl-="}
     });
     editor.commands.addCommand({
       name: "zoom-out",
@@ -137,7 +137,6 @@ export default Controller.extend({
         }
         console.log("zoom out", this.get('fontSize'));
         editor.setFontSize(this.get('fontSize'));
-        //session.setF
       },
       bindKey: {mac: "cmd--", win: "ctrl--"}
     });

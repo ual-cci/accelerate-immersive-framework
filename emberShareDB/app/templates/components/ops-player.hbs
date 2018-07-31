@@ -1,4 +1,16 @@
-{{#bs-button onClick=(action 'prev')}}Prev{{/bs-button}}
-{{#bs-button onClick=(action 'next')}}Next{{/bs-button}}
-{{#bs-button icon="glyphicon glyphicon-play" onClick=(action 'play')}}{{/bs-button}}
-{{#bs-button icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
+<div class="tooltip">
+  {{#bs-button onClick=(action 'prev')}}Prev{{/bs-button}}
+  <span class="tooltiptext">Step Back</span>
+</div>
+<div class="tooltip">
+  {{#bs-button onClick=(action 'next')}}Next{{/bs-button}}
+  <span class="tooltiptext">Step Forwards</span>
+</div>
+<div class="tooltip">
+  {{#bs-button icon="glyphicon glyphicon-play" onClick=(action 'play')}}{{/bs-button}}
+  <span class="tooltiptext">Play to End</span>
+</div>
+<div class="tooltip">
+  {{#bs-button icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
+  <span class="tooltiptext">Rewind to Beginning</span>
+</div>
