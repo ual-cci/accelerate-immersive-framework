@@ -359,7 +359,9 @@ export default Controller.extend({
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
     const doc = this.get('doc');
-    let toRender = selection ? this.getSelectedText() : doc.data.source;
+    const editor = this.get('editor');
+    const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
+    let toRender = selection ? this.getSelectedText() : mainText;
     toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     //console.log(toRender);
