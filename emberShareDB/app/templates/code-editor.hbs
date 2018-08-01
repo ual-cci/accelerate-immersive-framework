@@ -33,8 +33,12 @@
     {{/if}}
     {{#if session.isAuthenticated}}
     <div class="tooltip">
-      {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
+      {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
       <span class="tooltiptext">Make Your Own Copy</span>
+    </div>
+    <div class="tooltip">
+      {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
+      <span class="tooltiptext">Report as Inappropriate</span>
     </div>
     <div class="tooltip">
       {{download-button doc = doc}}
