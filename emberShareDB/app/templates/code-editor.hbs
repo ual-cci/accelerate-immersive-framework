@@ -94,7 +94,12 @@
         {{#if showOpPlayer}}
         <div>
           <h5>Playback your coding</h5>
-          {{ops-player onSkip = (action 'skipOp') onPlay = (action 'playOps') onRewind = (action 'rewindOps')}}
+          {{ops-player
+            onSkip = (action 'skipOp')
+            onPlay = (action 'playOps')
+            onRewind = (action 'rewindOps')
+            onPause = (action 'pauseOps')
+          }}
         </div>
         {{/if}}
         {{#if showShare}}
