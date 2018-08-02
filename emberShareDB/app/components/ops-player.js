@@ -13,6 +13,9 @@ export default Component.extend({
     },
     rewind() {
       this.get('onRewind')();
+    },
+    pause() {
+      this.get('onPause')();
     }
   }
 });

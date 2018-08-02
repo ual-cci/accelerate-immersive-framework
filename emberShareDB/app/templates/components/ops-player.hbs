@@ -11,6 +11,10 @@
   <span class="tooltiptext">Play to End</span>
 </div>
 <div class="tooltip">
+  {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action 'pause')}}{{/bs-button}}
+  <span class="tooltiptext">Pause playback</span>
+</div>
+<div class="tooltip">
   {{#bs-button icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
   <span class="tooltiptext">Rewind to Beginning</span>
 </div>

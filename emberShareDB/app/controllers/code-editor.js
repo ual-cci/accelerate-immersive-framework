@@ -30,7 +30,6 @@ export default Controller.extend({
   suppress: false,
   codeTimer: new Date(),
   renderedSource:"",
-  collapsed: false,
   isNotEdittingDocName:true,
   canEditDoc:false,
   isOwner:false,
@@ -38,11 +37,13 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
+  collapsed: true,
   showShare:false,
   showAssets:false,
   showPreview:false,
   showTokens:false,
   showOpPlayer:false,
+  showCodeOptions:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -90,10 +91,11 @@ export default Controller.extend({
     this.set('allowAssetDelete', false);
     this.set('showAssets', false);
     this.set('showPreview', false);
-    this.set('collapsed', false);
+    this.set('collapsed', true);
     this.set('showShare', false);
     this.set('showTokens', false);
     this.set('showOpPlayer', false);
+    this.set('showCodeOptions', false);
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -123,22 +125,14 @@ export default Controller.extend({
     editor.commands.addCommand({
       name: "zoom-in",
       exec: ()=>{
-        this.incrementProperty('fontSize');
-        console.log("zoom in", this.get('fontSize'));
-        editor.setFontSize(this.get('fontSize'));
+        this.zoomIn();
       },
       bindKey: {mac: "cmd-=", win: "ctrl-="}
     });
     editor.commands.addCommand({
       name: "zoom-out",
       exec: ()=>{
-        this.decrementProperty('fontSize');
-        if(this.get('fontSize') < 1)
-        {
-          this.set('fontSize', 1);
-        }
-        console.log("zoom out", this.get('fontSize'));
-        editor.setFontSize(this.get('fontSize'));
+        this.zoomOut();
       },
       bindKey: {mac: "cmd--", win: "ctrl--"}
     });
@@ -320,6 +314,20 @@ export default Controller.extend({
         });
       }
     });
+  },
+  zoomIn: function() {
+    const editor = this.get("editor");
+    this.incrementProperty('fontSize');
+    editor.setFontSize(this.get('fontSize'));
+  },
+  zoomOut: function() {
+    const editor = this.get("editor");
+    this.decrementProperty('fontSize');
+    if(this.get('fontSize') < 1)
+    {
+      this.set('fontSize', 1);
+    }
+    editor.setFontSize(this.get('fontSize'));
   },
   doPlay: function() {
     const doc = this.get('doc');
@@ -588,11 +596,17 @@ export default Controller.extend({
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
-  showFeedback:function(msg) {
+  showFeedback: function(msg) {
     this.set('feedbackMessage', msg);
     setTimeout(() => {
       this.set('feedbackMessage', null);
     },5000)
+  },
+  pauseOps: function() {
+    if(this.get('opsInterval'))
+    {
+      clearInterval(this.get('opsInterval'));
+    }
   },
   actions: {
     editorReady(editor) {
@@ -600,6 +614,8 @@ export default Controller.extend({
       console.log('editor ready')
       this.initShareDB();
     },
+
+    //Doc properties
     tagsChanged(tags) {
       const doc = this.get('doc');
       this.submitOp({p:['tags'],oi:tags},{source:true});
@@ -619,30 +635,66 @@ export default Controller.extend({
       const newName = this.get('model').name;
       this.submitOp({p:['name'],oi:newName},{source:true});
     },
-    togglePrivacy() {
-      if(this.get('canEditDoc'))
-      {
-        let doc = this.get('doc');
-        doc.data.isPrivate = !doc.data.isPrivate;
-        this.set('doc', doc);
-        this.submitOp( {p:['isPrivate'],oi:doc.data.isPrivate},{source:true});
-      }
-    },
-    toggleReadOnly() {
-      if(this.get('canEditDoc'))
-      {
-        let doc = this.get('doc');
-        doc.data.readOnly = !doc.data.readOnly;
-        this.set('doc', doc);
-        this.submitOp( {p:['readOnly'],oi:doc.data.readOnly},{source:true});
-      }
-    },
     deleteDoc() {
       if(this.get('canEditDoc'))
       {
         this.deleteCurrentDocument();
       }
     },
+    download() {
+      this.get('assetService').zip();
+    },
+    flagDocument() {
+      this.get('documentService').flagDoc()
+      .then(()=> {
+        const doc = this.get('doc');
+        let flags = parseInt(doc.data.flags);
+        if(flags < 2)
+        {
+          flags = flags + 1;
+          this.submitOp( {p:['flags'],oi:flags},{source:true});
+        }
+        else
+        {
+          this.deleteCurrentDocument();
+        }
+      }).catch((err) => {
+        alert("Already flagged");
+      });
+    },
+    forkDocument() {
+      const currentUser = this.get('sessionAccount').currentUserName;
+      const doc = this.get('doc');
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      stats.forks = parseInt(stats.forks) + 1;
+      this.submitOp( {p:['stats'],oi:stats},{source:true});
+      let newDoc = this.get('store').createRecord('document', {
+        source:doc.data.source,
+        owner:currentUser,
+        isPrivate:doc.data.isPrivate,
+        name:doc.data.name,
+        documentId:null,
+        forkedFrom:doc.id,
+        assets:doc.data.assets,
+        tags:doc.data.tags
+      });
+      newDoc.save().then((response)=>{
+        this.get('store').query('document', {
+          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
+        }).then((documents) => {
+          console.log("new doc created", response, documents);
+          this.get('sessionAccount').updateOwnedDocuments();
+          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+        });
+        this.showFeedback("Here is your very own new copy!");
+      }).catch((err)=>{
+        newDoc.deleteRecord();
+        this.get('sessionAccount').updateOwnedDocuments();
+        this.set('feedbackMessage',err.errors[0]);
+      });
+    },
+
+    //Assets
     assetError(err) {
       $("#asset-progress").css("display", "none");
       alert("Error"+err);
@@ -704,6 +756,26 @@ export default Controller.extend({
         });
       this.toggleProperty('showPreview');
     },
+
+    //SHOW AND HIDE MENUS
+    togglePrivacy() {
+      if(this.get('canEditDoc'))
+      {
+        let doc = this.get('doc');
+        doc.data.isPrivate = !doc.data.isPrivate;
+        this.set('doc', doc);
+        this.submitOp( {p:['isPrivate'],oi:doc.data.isPrivate},{source:true});
+      }
+    },
+    toggleReadOnly() {
+      if(this.get('canEditDoc'))
+      {
+        let doc = this.get('doc');
+        doc.data.readOnly = !doc.data.readOnly;
+        this.set('doc', doc);
+        this.submitOp( {p:['readOnly'],oi:doc.data.readOnly},{source:true});
+      }
+    },
     toggleAllowDocDelete() {
       if(this.get('canEditDoc'))
       {
@@ -720,17 +792,14 @@ export default Controller.extend({
     toggleCollapsed() {
       this.toggleProperty('collapsed');
     },
-    renderCode() {
-      this.updateIFrame();
-    },
-    pauseCode() {
-      this.set('renderedSource', "");
-    },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
     toggleShowShare() {
       this.toggleProperty('showShare');
+    },
+    toggleShowCodeOptions() {
+      this.toggleProperty('showCodeOptions');
     },
     toggleShowTokens() {
       this.toggleProperty('showTokens');
@@ -753,6 +822,8 @@ export default Controller.extend({
         target.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
       }
     },
+
+    //TIDYING UP ON EXIT / REFRESH
     cleanUp() {
       console.log('cleaning up');
       const fn = () => {
@@ -781,6 +852,8 @@ export default Controller.extend({
     refresh() {
       this.refreshDoc();
     },
+
+    //MOUSE LISTENERS
     mouseDown(e) {
       //console.log('mouseDown',e.target);
       this.set('isDragging', true);
@@ -807,6 +880,14 @@ export default Controller.extend({
         //console.log('mouseMove',e.target);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
+    },
+
+    //OPERATIONS ON CODE
+    renderCode() {
+      this.updateIFrame();
+    },
+    pauseCode() {
+      this.set('renderedSource', "");
     },
     hideCode() {
       var hide = ()=> {
@@ -842,58 +923,8 @@ export default Controller.extend({
       }
       show();
     },
-    download() {
-      this.get('assetService').zip();
-    },
-    flagDocument() {
-      this.get('documentService').flagDoc()
-      .then(()=> {
-        const doc = this.get('doc');
-        let flags = parseInt(doc.data.flags);
-        if(flags < 2)
-        {
-          flags = flags + 1;
-          this.submitOp( {p:['flags'],oi:flags},{source:true});
-        }
-        else
-        {
-          this.deleteCurrentDocument();
-        }
-      }).catch((err) => {
-        alert("Already flagged");
-      });
-    },
-    forkDocument() {
-      const currentUser = this.get('sessionAccount').currentUserName;
-      const doc = this.get('doc');
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
-      stats.forks = parseInt(stats.forks) + 1;
-      this.submitOp( {p:['stats'],oi:stats},{source:true});
-      let newDoc = this.get('store').createRecord('document', {
-        source:doc.data.source,
-        owner:currentUser,
-        isPrivate:doc.data.isPrivate,
-        name:doc.data.name,
-        documentId:null,
-        forkedFrom:doc.id,
-        assets:doc.data.assets,
-        tags:doc.data.tags
-      });
-      newDoc.save().then((response)=>{
-        this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
-        }).then((documents) => {
-          console.log("new doc created", response, documents);
-          this.get('sessionAccount').updateOwnedDocuments();
-          this.transitionToRoute('code-editor',documents.firstObject.documentId);
-        });
-        this.showFeedback("Here is your very own new copy!");
-      }).catch((err)=>{
-        newDoc.deleteRecord();
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.set('feedbackMessage',err.errors[0]);
-      });
-    },
+
+    //OP PLAYBACK
     skipOp(prev) {
       this.skipOp(prev);
     },
@@ -905,10 +936,7 @@ export default Controller.extend({
       this.skipOp(false, true);
     },
     playOps() {
-      if(this.get('opsInterval'))
-      {
-        clearInterval(this.get('opsInterval'));
-      }
+      this.pauseOps();
       this.set('opsInterval', setInterval(()=> {
         if(!this.get('opsPlayer').reachedEnd)
         {
@@ -919,6 +947,15 @@ export default Controller.extend({
           clearInterval(this.get('opsInterval'));
         }
       }, 100));
+    },
+    pauseOps() {
+      this.pauseOps();
+    },
+    zoomOut() {
+      this.zoomOut();
+    },
+    zoomIn() {
+      this.zoomIn();
     }
   }
 });
