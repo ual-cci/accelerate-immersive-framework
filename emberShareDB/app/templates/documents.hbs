@@ -15,20 +15,19 @@
 <form {{action 'search' on='submit'}}>
   {{input id='searchTerm' placeholder='Search...' value=searchTerm key-press="search"}}
   <button type="submit">Search</button>
-  {{#if message}}
-    <p style = "text-align:center;">{{message}}</p>
-  {{/if}}
   {{#if hasNoDocuments}}
     <h2 style = "text-align:center;">No Results</h2>
   {{/if}}
 </form>
 </div>
-<div>
+<div class = "center">
   {{#bs-button onClick=(action 'recent')}} Newest {{/bs-button}}
   {{#bs-button onClick=(action 'popular')}} Popular {{/bs-button}}
   {{#bs-button onClick=(action 'updated')}} Updated {{/bs-button}}
   {{#bs-button onClick=(action 'forked')}} Most Remixed {{/bs-button}}
   {{#bs-button onClick=(action 'editted')}} Most Worked-on {{/bs-button}}
+</div>
+<div class = "center">
   {{#each tags as |tag|}}
     {{#bs-button onClick=(action 'tag' tag._id)}} {{tag._id}} {{/bs-button}}
   {{/each}}

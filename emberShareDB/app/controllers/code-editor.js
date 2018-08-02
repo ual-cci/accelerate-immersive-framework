@@ -281,7 +281,7 @@ export default Controller.extend({
     session.setValue(doc.data.source);
     this.set('surpress', false);
     this.set('savedVals', doc.data.savedVals);
-    console.log("did receive doc, dontPlay", doc.data.dontPlay);
+    console.log("did receive doc");
     this.setCanEditDoc();
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
@@ -588,6 +588,12 @@ export default Controller.extend({
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
+  showFeedback:function(msg) {
+    this.set('feedbackMessage', msg);
+    setTimeout(() => {
+      this.set('feedbackMessage', null);
+    },5000)
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -875,13 +881,13 @@ export default Controller.extend({
       });
       newDoc.save().then((response)=>{
         this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser}
+          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
         }).then((documents) => {
           console.log("new doc created", response, documents);
           this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('code-editor',documents.firstObject.documentId);
         });
-        this.set('feedbackMessage',"Document created successfully");
+        this.showFeedback("Here is your very own new copy!");
       }).catch((err)=>{
         newDoc.deleteRecord();
         this.get('sessionAccount').updateOwnedDocuments();

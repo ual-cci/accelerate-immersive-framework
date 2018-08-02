@@ -7,7 +7,8 @@
       {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
   {{/if}}
-  {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
+  by {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
+  <h4><span>{{feedbackMessage}}</span></h4>
   </div>
   {{#if displayEditor}}
   <div class="settings">
