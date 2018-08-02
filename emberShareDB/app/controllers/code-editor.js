@@ -30,7 +30,6 @@ export default Controller.extend({
   suppress: false,
   codeTimer: new Date(),
   renderedSource:"",
-  collapsed: false,
   isNotEdittingDocName:true,
   canEditDoc:false,
   isOwner:false,
@@ -38,11 +37,13 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
+  collapsed: true,
   showShare:false,
   showAssets:false,
   showPreview:false,
   showTokens:false,
   showOpPlayer:false,
+  showCodeOptions:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -90,10 +91,11 @@ export default Controller.extend({
     this.set('allowAssetDelete', false);
     this.set('showAssets', false);
     this.set('showPreview', false);
-    this.set('collapsed', false);
+    this.set('collapsed', true);
     this.set('showShare', false);
     this.set('showTokens', false);
     this.set('showOpPlayer', false);
+    this.set('showCodeOptions', false);
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -123,22 +125,14 @@ export default Controller.extend({
     editor.commands.addCommand({
       name: "zoom-in",
       exec: ()=>{
-        this.incrementProperty('fontSize');
-        console.log("zoom in", this.get('fontSize'));
-        editor.setFontSize(this.get('fontSize'));
+        this.zoomIn();
       },
       bindKey: {mac: "cmd-=", win: "ctrl-="}
     });
     editor.commands.addCommand({
       name: "zoom-out",
       exec: ()=>{
-        this.decrementProperty('fontSize');
-        if(this.get('fontSize') < 1)
-        {
-          this.set('fontSize', 1);
-        }
-        console.log("zoom out", this.get('fontSize'));
-        editor.setFontSize(this.get('fontSize'));
+        this.zoomOut();
       },
       bindKey: {mac: "cmd--", win: "ctrl--"}
     });
@@ -320,6 +314,20 @@ export default Controller.extend({
         });
       }
     });
+  },
+  zoomIn: function() {
+    const editor = this.get("editor");
+    this.incrementProperty('fontSize');
+    editor.setFontSize(this.get('fontSize'));
+  },
+  zoomOut: function() {
+    const editor = this.get("editor");
+    this.decrementProperty('fontSize');
+    if(this.get('fontSize') < 1)
+    {
+      this.set('fontSize', 1);
+    }
+    editor.setFontSize(this.get('fontSize'));
   },
   doPlay: function() {
     const doc = this.get('doc');
@@ -732,6 +740,9 @@ export default Controller.extend({
     toggleShowShare() {
       this.toggleProperty('showShare');
     },
+    toggleShowCodeOptions() {
+      this.toggleProperty('showCodeOptions');
+    },
     toggleShowTokens() {
       this.toggleProperty('showTokens');
     },
@@ -919,6 +930,12 @@ export default Controller.extend({
           clearInterval(this.get('opsInterval'));
         }
       }, 100));
+    },
+    zoomOut() {
+      this.zoomOut();
+    },
+    zoomIn() {
+      this.zoomIn();
     }
   }
 });

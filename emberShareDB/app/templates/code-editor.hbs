@@ -6,9 +6,9 @@
     {{else}}
       {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
+    by {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
+    <h4><span>{{feedbackMessage}}</span></h4>
   {{/if}}
-  by {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
-  <h4><span>{{feedbackMessage}}</span></h4>
   </div>
   {{#if displayEditor}}
   <div class="settings">
@@ -72,6 +72,9 @@
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
           Share
         {{/bs-button}}
+        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowCodeOptions")}}
+          Code
+        {{/bs-button}}
         {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowTokens")}}
           Tags
         {{/bs-button}}
@@ -102,6 +105,16 @@
           <label for="embed-link">Embed Link</label>
           {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
         {{/if}}
+        {{#if showCodeOptions}}
+          {{#bs-button
+          icon="glyphicon glyphicon-zoom-in"
+          onClick=(action "zoomIn")}}
+          {{/bs-button}}
+          {{#bs-button
+          icon="glyphicon glyphicon-zoom-out"
+          onClick=(action "zoomOut")}}
+          {{/bs-button}}
+        {{/if}}
         {{#if showTokens}}
         <div>
           {{tokenfield-input
@@ -130,9 +143,15 @@
             Files:
             {{#each model.assets as |asset|}}
               {{asset.name}}
-              {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowAssetDelete" asset.fileId)}}
+              {{#bs-button class = "btn-confirm"
+              type="danger"
+              icon="glyphicon glyphicon-remove"
+              onClick=(action "toggleAllowAssetDelete" asset.fileId)}}
               {{/bs-button}}
-              {{#bs-button class = "btn-confirm" type="primary" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}
+              {{#bs-button class = "btn-confirm"
+              type="primary"
+              icon="glyphicon glyphicon-eye-open"
+              onClick=(action "previewAsset" asset)}}
               {{/bs-button}}
             {{/each}}
             {{#if allowAssetDelete}}
