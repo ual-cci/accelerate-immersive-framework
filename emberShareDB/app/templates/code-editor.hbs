@@ -1,4 +1,5 @@
 <div>
+  <div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
       <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
@@ -6,6 +7,8 @@
       {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
   {{/if}}
+  {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
+  </div>
   {{#if displayEditor}}
   <div class="settings">
     <div class="tooltip">

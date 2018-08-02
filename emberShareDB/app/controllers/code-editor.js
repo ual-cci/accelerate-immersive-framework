@@ -277,6 +277,9 @@ export default Controller.extend({
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
+    this.set('surpress', true);
+    session.setValue(doc.data.source);
+    this.set('surpress', false);
     this.set('savedVals', doc.data.savedVals);
     console.log("did receive doc, dontPlay", doc.data.dontPlay);
     this.setCanEditDoc();
@@ -286,9 +289,6 @@ export default Controller.extend({
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets();
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
-    this.set('surpress', true);
-    session.setValue(doc.data.source);
-    this.set('surpress', false);
     this.set('fetchingDoc', false);
   },
   submitOp: function(op)
@@ -321,12 +321,22 @@ export default Controller.extend({
       }
     });
   },
+  doPlay: function() {
+    const doc = this.get('doc');
+    const embed = this.get('embed') == "true";
+    const displayEditor = this.get('displayEditor');
+    const dontPlay = doc.data.dontPlay == "true" || doc.data.dontPlay;
+    if(embed || !displayEditor) {
+      return true;
+    }
+    return !dontPlay;
+  },
   preloadAssets: function() {
     const doc = this.get('doc');
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
+        if(this.doPlay())
         {
           this.updateIFrame();
         }
@@ -334,8 +344,8 @@ export default Controller.extend({
     }
     else
     {
-      console.log("no assets to preload", doc.data.dontPlay);
-      if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
+      console.log("no assets to preload", this.doPlay());
+      if(this.doPlay())
       {
         this.updateIFrame();
       }

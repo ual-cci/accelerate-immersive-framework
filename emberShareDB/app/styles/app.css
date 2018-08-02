@@ -3,6 +3,10 @@
   border-color: rgba(0,0,0,0);
 }
 
+#code-name-label {
+  color:black;
+}
+
 .document-link {
   color:white;
 }
