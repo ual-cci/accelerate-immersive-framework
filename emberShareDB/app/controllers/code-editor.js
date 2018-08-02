@@ -473,7 +473,7 @@ export default Controller.extend({
     if(currentUser != doc.data.owner)
     {
       this.set('isOwner', false);
-      if(this.get('model.readOnly'))
+      if(doc.data.readOnly)
       {
         this.set('canEditDoc', false);
         return;
@@ -613,20 +613,22 @@ export default Controller.extend({
       const newName = this.get('model').name;
       this.submitOp({p:['name'],oi:newName},{source:true});
     },
-    privacyToggled() {
+    togglePrivacy() {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('model.isPrivate');
-        const doc = this.get('doc');
-        this.submitOp( {p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
+        let doc = this.get('doc');
+        doc.data.isPrivate = !doc.data.isPrivate;
+        this.set('doc', doc);
+        this.submitOp( {p:['isPrivate'],oi:doc.data.isPrivate},{source:true});
       }
     },
-    readOnlyToggled() {
+    toggleReadOnly() {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('model.readOnly');
-        const doc = this.get('doc');
-        this.submitOp( {p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
+        let doc = this.get('doc');
+        doc.data.readOnly = !doc.data.readOnly;
+        this.set('doc', doc);
+        this.submitOp( {p:['readOnly'],oi:doc.data.readOnly},{source:true});
       }
     },
     deleteDoc() {

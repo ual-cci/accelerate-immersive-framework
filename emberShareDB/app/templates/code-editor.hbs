@@ -53,12 +53,12 @@
         {{#if isOwner}}
         <div class="tooltip">
           <label for="privacyCheckbox">Private?</label>
-          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
+          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
           <span class="tooltiptext">Other users can discover</span>
         </div>
         <div class="tooltip">
           <label for="readOnlyCheckbox">Read Only?</label>
-          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'readOnlyToggled')}}
+          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
           <span class="tooltiptext">WARNING! Other users can edit your code</span>
         </div>
           <div class="tooltip">
