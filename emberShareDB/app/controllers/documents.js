@@ -7,7 +7,6 @@ export default Controller.extend({
   store:inject(),
   session:inject('session'),
   documentService: inject('documents'),
-  message:"",
   docName:"",
   isPrivate:true,
   feedbackMessage: "",
@@ -24,7 +23,7 @@ export default Controller.extend({
     return this.get('model').length == 0;
   }),
   tags:computed('model', function() {
-    this.get('documentService').getPopularTags(7)
+    this.get('documentService').getPopularTags(12)
     .then((results) => {
       this.set('tags', results.data);
     });
@@ -39,7 +38,6 @@ export default Controller.extend({
     }
     console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
-    this.set('message',"Results");
   },
   getDefaultSource:function()
   {
@@ -60,7 +58,7 @@ export default Controller.extend({
           console.log("error deleting", err);
           this.set('feedbackMessage',err.errors[0]);
         });
-      } 
+      }
     },
     checkboxClicked() {
       this.toggleProperty('isPrivate');

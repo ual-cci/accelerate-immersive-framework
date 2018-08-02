@@ -277,8 +277,11 @@ export default Controller.extend({
     const doc = this.get('doc');
     const editor = this.get('editor');
     const session = editor.getSession();
+    this.set('surpress', true);
+    session.setValue(doc.data.source);
+    this.set('surpress', false);
     this.set('savedVals', doc.data.savedVals);
-    console.log("did receive doc, dontPlay", doc.data.dontPlay);
+    console.log("did receive doc");
     this.setCanEditDoc();
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
@@ -286,9 +289,6 @@ export default Controller.extend({
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets();
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
-    this.set('surpress', true);
-    session.setValue(doc.data.source);
-    this.set('surpress', false);
     this.set('fetchingDoc', false);
   },
   submitOp: function(op)
@@ -321,12 +321,22 @@ export default Controller.extend({
       }
     });
   },
+  doPlay: function() {
+    const doc = this.get('doc');
+    const embed = this.get('embed') == "true";
+    const displayEditor = this.get('displayEditor');
+    const dontPlay = doc.data.dontPlay == "true" || doc.data.dontPlay;
+    if(embed || !displayEditor) {
+      return true;
+    }
+    return !dontPlay;
+  },
   preloadAssets: function() {
     const doc = this.get('doc');
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
-        if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
+        if(this.doPlay())
         {
           this.updateIFrame();
         }
@@ -334,8 +344,8 @@ export default Controller.extend({
     }
     else
     {
-      console.log("no assets to preload", doc.data.dontPlay);
-      if(doc.data.dontPlay == "false" || !doc.data.dontPlay)
+      console.log("no assets to preload", this.doPlay());
+      if(this.doPlay())
       {
         this.updateIFrame();
       }
@@ -463,7 +473,7 @@ export default Controller.extend({
     if(currentUser != doc.data.owner)
     {
       this.set('isOwner', false);
-      if(this.get('model.readOnly'))
+      if(doc.data.readOnly)
       {
         this.set('canEditDoc', false);
         return;
@@ -578,6 +588,12 @@ export default Controller.extend({
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
+  showFeedback:function(msg) {
+    this.set('feedbackMessage', msg);
+    setTimeout(() => {
+      this.set('feedbackMessage', null);
+    },5000)
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -603,20 +619,22 @@ export default Controller.extend({
       const newName = this.get('model').name;
       this.submitOp({p:['name'],oi:newName},{source:true});
     },
-    privacyToggled() {
+    togglePrivacy() {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('model.isPrivate');
-        const doc = this.get('doc');
-        this.submitOp( {p:['isPrivate'],oi:this.get('model.isPrivate')},{source:true});
+        let doc = this.get('doc');
+        doc.data.isPrivate = !doc.data.isPrivate;
+        this.set('doc', doc);
+        this.submitOp( {p:['isPrivate'],oi:doc.data.isPrivate},{source:true});
       }
     },
-    readOnlyToggled() {
+    toggleReadOnly() {
       if(this.get('canEditDoc'))
       {
-        this.toggleProperty('model.readOnly');
-        const doc = this.get('doc');
-        this.submitOp( {p:['readOnly'],oi:this.get('model.readOnly')},{source:true});
+        let doc = this.get('doc');
+        doc.data.readOnly = !doc.data.readOnly;
+        this.set('doc', doc);
+        this.submitOp( {p:['readOnly'],oi:doc.data.readOnly},{source:true});
       }
     },
     deleteDoc() {
@@ -863,13 +881,13 @@ export default Controller.extend({
       });
       newDoc.save().then((response)=>{
         this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser}
+          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
         }).then((documents) => {
           console.log("new doc created", response, documents);
           this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('code-editor',documents.firstObject.documentId);
         });
-        this.set('feedbackMessage',"Document created successfully");
+        this.showFeedback("Here is your very own new copy!");
       }).catch((err)=>{
         newDoc.deleteRecord();
         this.get('sessionAccount').updateOwnedDocuments();

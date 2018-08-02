@@ -1,4 +1,5 @@
 <div>
+  <div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
       <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
@@ -6,6 +7,9 @@
       {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
   {{/if}}
+  by {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
+  <h4><span>{{feedbackMessage}}</span></h4>
+  </div>
   {{#if displayEditor}}
   <div class="settings">
     <div class="tooltip">
@@ -50,12 +54,12 @@
         {{#if isOwner}}
         <div class="tooltip">
           <label for="privacyCheckbox">Private?</label>
-          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'privacyToggled')}}
+          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
           <span class="tooltiptext">Other users can discover</span>
         </div>
         <div class="tooltip">
           <label for="readOnlyCheckbox">Read Only?</label>
-          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'readOnlyToggled')}}
+          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
           <span class="tooltiptext">WARNING! Other users can edit your code</span>
         </div>
           <div class="tooltip">
