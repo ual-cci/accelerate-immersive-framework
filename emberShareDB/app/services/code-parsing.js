@@ -192,7 +192,7 @@ export default Service.extend({
     //If not parsed, insert verbatim
     if(!parsed)
     {
-      //console.log("Not parsed");
+      console.log("Not parsed");
       const exp = script.script.substring(node.start, node.end);
       newSrc = newSrc + exp;
     }
@@ -205,10 +205,10 @@ export default Service.extend({
   getName(node) {
     let name = node.name;
     let exp = "";
-    if(!name && node.property)
+    if(!name)
     {
       let object = node;
-      while(!name)
+      while(!name && object.property)
       {
         const prop = object.property;
         const propName = prop.name ? prop.name : prop.value;
@@ -228,6 +228,10 @@ export default Service.extend({
     else
     {
       exp = name;
+    }
+    if(typeof name == 'undefined' || name == 'undefined')
+    {
+      exp = "";
     }
     return exp;
   },
@@ -372,9 +376,16 @@ export default Service.extend({
   parseCallExpression(node, newSrc)
   {
     let callee = node.callee;
-    let exp = this.getName(callee);
+    let exp = "";
+    if(callee.callee) {
+      console.log("extra callee", callee.callee);
+      exp = exp + this.parseNode(callee.callee);
+      exp = exp + this.parseArgs(callee.arguments);
+    }
+    exp = exp + this.getName(callee);
     exp = exp + this.parseArgs(node.arguments);
     newSrc = this.insert(newSrc, exp);
+
     return newSrc;
   },
   parseFunction(node, newSrc)
