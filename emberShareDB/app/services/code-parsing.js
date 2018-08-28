@@ -8,6 +8,7 @@ export default Service.extend({
   savedVals:null,
   hasPVals:false,
   insertStatefullCallbacks(src, savedVals) {
+    // /return src;
     let newSrc = "";
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
@@ -350,6 +351,10 @@ export default Service.extend({
       else
       {
         name = left.name
+        if(!name)
+        {
+          name = script.script.substring(node.start, node.end);
+        }
       }
     }
     //If an object or a property of it is changed, update with a JSON version of the WHOLE object
