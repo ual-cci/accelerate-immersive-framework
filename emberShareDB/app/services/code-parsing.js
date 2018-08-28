@@ -67,7 +67,6 @@ export default Service.extend({
   },
   parseNode(node, fromAlt = false)
   {
-    //console.log(node)
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
@@ -195,7 +194,7 @@ export default Service.extend({
     {
       console.log("Not parsed");
       const exp = script.script.substring(node.start, node.end);
-      newSrc = newSrc + exp;
+      newSrc = this.insert(newSrc, exp);
     }
     return newSrc;
   },
@@ -269,7 +268,7 @@ export default Service.extend({
         if(init)
         {
           newSrc = newSrc + name + " = ";
-          newSrc = newSrc + this.parseNode(init);
+          newSrc = newSrc + this.parseNode(init) + delim;
         }
         else
         {
@@ -338,9 +337,10 @@ export default Service.extend({
   parseAssignment(node, newSrc)
   {
     const script = this.get('script');
-    const exp = script.script.substring(node.start, node.end);
-    newSrc = this.insert(newSrc,exp);
     let left = node.left;
+    const exp = script.script.substring(left.start, left.end) + node.operator;
+    newSrc = this.insert(newSrc, exp);
+    newSrc = newSrc + this.parseNode(node.right);
     let name = left.name;
     while(!name)
     {
