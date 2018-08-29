@@ -285,15 +285,20 @@ export default Controller.extend({
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
     this.set('fetchingDoc', false);
   },
-  submitOp: function(op)
+  submitOp: function(op, retry = 0)
   {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('doc');
+      const MAX_RETRIES = 5;
       if(this.get('wsAvailable'))
       {
-        doc.submitOp(op, (err)=> {
+        doc.submitOp(op, (err) => {
           if(err)
           {
+            if(retry < MAX_RETRIES)
+            {
+              this.submitOp(op, retry + 1);
+            }
             reject(err);
           }
           else
@@ -310,6 +315,10 @@ export default Controller.extend({
           resolve();
         }).catch((err) => {
           console.log("ERROR Not submitted");
+          if(retry < MAX_RETRIES)
+          {
+            this.submitOp(op, retry + 1);
+          }
           reject(err);
         });
       }
@@ -382,7 +391,7 @@ export default Controller.extend({
     let toRender = selection ? this.getSelectedText() : mainText;
     toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    //console.log(toRender);
+    console.log(toRender);
     if(selection)
     {
       this.submitOp( {p:['newEval'],oi:toRender},{source:true});

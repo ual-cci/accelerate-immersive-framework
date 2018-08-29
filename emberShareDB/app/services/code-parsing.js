@@ -8,6 +8,7 @@ export default Service.extend({
   savedVals:null,
   hasPVals:false,
   insertStatefullCallbacks(src, savedVals) {
+    // /return src;
     let newSrc = "";
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
@@ -66,7 +67,6 @@ export default Service.extend({
   },
   parseNode(node, fromAlt = false)
   {
-    //console.log(node)
     const script = this.get('script');
     let newSrc = "";
     let parsed = false;
@@ -192,9 +192,9 @@ export default Service.extend({
     //If not parsed, insert verbatim
     if(!parsed)
     {
-      //console.log("Not parsed");
+      console.log("Not parsed");
       const exp = script.script.substring(node.start, node.end);
-      newSrc = newSrc + exp;
+      newSrc = this.insert(newSrc, exp);
     }
     return newSrc;
   },
@@ -205,10 +205,10 @@ export default Service.extend({
   getName(node) {
     let name = node.name;
     let exp = "";
-    if(!name && node.property)
+    if(!name)
     {
       let object = node;
-      while(!name)
+      while(!name && object.property)
       {
         const prop = object.property;
         const propName = prop.name ? prop.name : prop.value;
@@ -228,6 +228,10 @@ export default Service.extend({
     else
     {
       exp = name;
+    }
+    if(typeof name == 'undefined' || name == 'undefined')
+    {
+      exp = "";
     }
     return exp;
   },
@@ -264,7 +268,7 @@ export default Service.extend({
         if(init)
         {
           newSrc = newSrc + name + " = ";
-          newSrc = newSrc + this.parseNode(init);
+          newSrc = newSrc + this.parseNode(init) + delim;
         }
         else
         {
@@ -333,9 +337,10 @@ export default Service.extend({
   parseAssignment(node, newSrc)
   {
     const script = this.get('script');
-    const exp = script.script.substring(node.start, node.end);
-    newSrc = this.insert(newSrc,exp);
     let left = node.left;
+    const exp = script.script.substring(left.start, left.end) + node.operator;
+    newSrc = this.insert(newSrc, exp);
+    newSrc = newSrc + this.parseNode(node.right);
     let name = left.name;
     while(!name)
     {
@@ -346,6 +351,10 @@ export default Service.extend({
       else
       {
         name = left.name
+        if(!name)
+        {
+          name = script.script.substring(node.start, node.end);
+        }
       }
     }
     //If an object or a property of it is changed, update with a JSON version of the WHOLE object
@@ -372,9 +381,16 @@ export default Service.extend({
   parseCallExpression(node, newSrc)
   {
     let callee = node.callee;
-    let exp = this.getName(callee);
+    let exp = "";
+    if(callee.callee) {
+      console.log("extra callee", callee.callee);
+      exp = exp + this.parseNode(callee.callee);
+      exp = exp + this.parseArgs(callee.arguments);
+    }
+    exp = exp + this.getName(callee);
     exp = exp + this.parseArgs(node.arguments);
     newSrc = this.insert(newSrc, exp);
+
     return newSrc;
   },
   parseFunction(node, newSrc)
