@@ -19,91 +19,116 @@ export default Service.extend({
       this.set('script', script);
       newSrc = newSrc + script.preamble;
       let ops = [];
-      walk.simple(acorn.parse(script.script), {
-        VariableDeclaration: (node)=> {
-          // console.log("Found a VariableDeclaration:")
-          // console.log(node);
-          // console.log(script.script.substring(node.start, node.end));
-          for(let i = 0; i < node.declarations.length; i++)
-          {
-            const dec = node.declarations[i];
-            let name = dec.id.name;
-            if(!name)
+      let parsed = true;
+      try {
+        walk.simple(acorn.parse(script.script), {
+          VariableDeclaration: (node)=> {
+            // console.log("Found a VariableDeclaration:")
+            // console.log(node);
+            // console.log(script.script.substring(node.start, node.end));
+            for(let i = 0; i < node.declarations.length; i++)
             {
-              name = script.script.substring(dec.id.start, dec.id.end);
-            }
-            const init = dec.init;
-            let savedVal = this.get('savedVals')[name];
-            const delim = i >= node.declarations.length - 1 ? ";" : ","
-            let exp = script.script.substring(dec.start, dec.end) + delim;
-            if(name.substring(0,2) == "p_")
-            {
-              if(!init)
+              const dec = node.declarations[i];
+              let name = dec.id.name;
+              if(!name)
               {
-                savedVal = savedVal ? savedVal:0;
-                exp = " = " + savedVal + delim;
-                ops.push({si:exp, p:dec.end})
+                name = script.script.substring(dec.id.start, dec.id.end);
+              }
+              const init = dec.init;
+              let savedVal = this.get('savedVals')[name];
+              const delim = i >= node.declarations.length - 1 ? ";" : ","
+              let exp = script.script.substring(dec.start, dec.end) + delim;
+              if(name.substring(0,2) == "p_")
+              {
+                if(!init)
+                {
+                  savedVal = savedVal ? savedVal:0;
+                  exp = " = " + savedVal + delim;
+                  ops.push({si:exp, p:dec.end})
+                }
+                else
+                {
+                  const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+                  let index = dec.end;
+                  const end = script.script.substring(index, index + 1);
+                  if(end == ";")
+                  {
+                    index++;
+                  }
+                  ops.push({si:msg, p:index})
+                }
+                this.set('hasPVals', true);
+              }
+            }
+          },
+          AssignmentExpression: (node)=> {
+            // console.log("Found a AssignmentExpression:")
+            // console.log(node);
+            // console.log(script.script.substring(node.start, node.end));
+            let left = node.left;
+            let name = left.name;
+            while(!name)
+            {
+              if(left.object)
+              {
+                left = left.object;
               }
               else
               {
-                const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
-                ops.push({si:msg, p:dec.end})
+                name = left.name
+                if(!name)
+                {
+                  name = script.script.substring(node.start, node.end);
+                }
               }
+            }
+            //If an object or a property of it is changed, update with a JSON version of the WHOLE object
+            if(name.substring(0,2)=="p_")
+            {
+              const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+              let index = node.end;
+              const end = script.script.substring(index, index + 1);
+              if(end == ";")
+              {
+                index++;
+              }
+              ops.push({si:msg, p:index})
               this.set('hasPVals', true);
             }
           }
-        },
-        AssignmentExpression: (node)=> {
-          // console.log("Found a AssignmentExpression:")
-          // console.log(node);
-          // console.log(script.script.substring(node.start, node.end));
-          let left = node.left;
-          let name = left.name;
-          while(!name)
-          {
-            if(left.object)
-            {
-              left = left.object;
-            }
-            else
-            {
-              name = left.name
-              if(!name)
-              {
-                name = script.script.substring(node.start, node.end);
-              }
-            }
-          }
-          //If an object or a property of it is changed, update with a JSON version of the WHOLE object
-          if(name.substring(0,2)=="p_")
-          {
-            const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
-            ops.push({si:msg, p:node.end});
-            this.set('hasPVals', true);
-          }
-        }
-      })
-      let offset = 0;
-      let newScript = script.script;
-      for(let i = 0; i < ops.length; i ++)
-      {
-        if(ops[i].si)
-        {
-          const str = ops[i].si;
-          const index = ops[i].p + offset;
-          console.log("inserting " + str + " at " + index);
-          newScript = newScript.slice(0, index) + str + newScript.slice(index);
-          offset += str.length;
-        }
-        else if (ops[i].sd)
-        {
-          const len = ops[i].sd.length;
-          const index = ops[i].p + offset;
-          newScript = newScript.slice(0, index) + newScript.slice(index + len);
-          offset -= len;
-        }
+        });
+      } catch (err) {
+        console.log("didnt parse script, probably src")
+        parsed = false;
       }
-      newSrc = newSrc + newScript;
+      if(parsed)
+      {
+        let offset = 0;
+        let newScript = script.script;
+        for(let i = 0; i < ops.length; i ++)
+        {
+          if(ops[i].si)
+          {
+            const str = ops[i].si;
+            const index = ops[i].p + offset;
+            console.log("inserting " + str + " at " + index);
+            newScript = newScript.slice(0, index) + str + newScript.slice(index);
+            offset += str.length;
+          }
+          else if (ops[i].sd)
+          {
+            const len = ops[i].sd.length;
+            const index = ops[i].p + offset;
+            newScript = newScript.slice(0, index) + newScript.slice(index + len);
+            offset -= len;
+          }
+        }
+        newSrc = newSrc + newScript;
+      }
+      else
+      {
+        newSrc = newSrc + script.script;
+      }
       newSrc = newSrc + script.post;
     }
     return this.get('hasPVals') ? newSrc : src;
