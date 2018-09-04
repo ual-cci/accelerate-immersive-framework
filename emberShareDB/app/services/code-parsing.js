@@ -1,6 +1,7 @@
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import acorn from 'npm:acorn'
+import walk from 'npm:acorn/dist/walk'
 
 export default Service.extend({
   store:inject('store'),
@@ -8,7 +9,6 @@ export default Service.extend({
   savedVals:null,
   hasPVals:false,
   insertStatefullCallbacks(src, savedVals) {
-    // /return src;
     let newSrc = "";
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
@@ -18,22 +18,119 @@ export default Service.extend({
       const script  = scripts[i];
       this.set('script', script);
       newSrc = newSrc + script.preamble;
-      let parsed;
+      let ops = [];
+      let parsed = true;
       try {
-        parsed = acorn.parse(script.script);
+        walk.simple(acorn.parse(script.script), {
+          VariableDeclaration: (node)=> {
+            // console.log("Found a VariableDeclaration:")
+            // console.log(node);
+            // console.log(script.script.substring(node.start, node.end));
+            for(let i = 0; i < node.declarations.length; i++)
+            {
+              const dec = node.declarations[i];
+              let name = dec.id.name;
+              if(!name)
+              {
+                name = script.script.substring(dec.id.start, dec.id.end);
+              }
+              const init = dec.init;
+              let savedVal = this.get('savedVals')[name];
+              const delim = i >= node.declarations.length - 1 ? ";" : ","
+              let exp = script.script.substring(dec.start, dec.end) + delim;
+              if(name.substring(0,2) == "p_")
+              {
+                if(!init)
+                {
+                  savedVal = savedVal ? savedVal:0;
+                  exp = " = " + savedVal + delim;
+                  ops.push({si:exp, p:dec.end})
+                }
+                else
+                {
+                  const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+                  let index = dec.end;
+                  const end = script.script.substring(index, index + 1);
+                  if(end == ";")
+                  {
+                    index++;
+                  }
+                  ops.push({si:msg, p:index})
+                }
+                this.set('hasPVals', true);
+              }
+            }
+          },
+          AssignmentExpression: (node)=> {
+            // console.log("Found a AssignmentExpression:")
+            // console.log(node);
+            // console.log(script.script.substring(node.start, node.end));
+            let left = node.left;
+            let name = left.name;
+            while(!name)
+            {
+              if(left.object)
+              {
+                left = left.object;
+              }
+              else
+              {
+                name = left.name
+                if(!name)
+                {
+                  name = script.script.substring(node.start, node.end);
+                }
+              }
+            }
+            //If an object or a property of it is changed, update with a JSON version of the WHOLE object
+            if(name.substring(0,2)=="p_")
+            {
+              const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+              let index = node.end;
+              const end = script.script.substring(index, index + 1);
+              if(end == ";")
+              {
+                index++;
+              }
+              ops.push({si:msg, p:index})
+              this.set('hasPVals', true);
+            }
+          }
+        });
       } catch (err) {
-        console.log("Error parsing script", script.script);
+        console.log("didnt parse script, probably src")
+        parsed = false;
       }
       if(parsed)
       {
-        for(let j = 0; j < parsed.body.length; j++)
+        let offset = 0;
+        let newScript = script.script;
+        for(let i = 0; i < ops.length; i ++)
         {
-          newSrc = newSrc + this.parseNode(parsed.body[j]);
+          if(ops[i].si)
+          {
+            const str = ops[i].si;
+            const index = ops[i].p + offset;
+            console.log("inserting " + str + " at " + index);
+            newScript = newScript.slice(0, index) + str + newScript.slice(index);
+            offset += str.length;
+          }
+          else if (ops[i].sd)
+          {
+            const len = ops[i].sd.length;
+            const index = ops[i].p + offset;
+            newScript = newScript.slice(0, index) + newScript.slice(index + len);
+            offset -= len;
+          }
         }
+        newSrc = newSrc + newScript;
+      }
+      else
+      {
+        newSrc = newSrc + script.script;
       }
       newSrc = newSrc + script.post;
     }
-    //console.log(newSrc);
     return this.get('hasPVals') ? newSrc : src;
   },
   getScripts(source) {
@@ -64,405 +161,6 @@ export default Service.extend({
       scripts[scripts.length-1].post = scripts[scripts.length-1].post + source.substr(prevEnd);
     }
     return scripts;
-  },
-  parseNode(node, fromAlt = false)
-  {
-    const script = this.get('script');
-    let newSrc = "";
-    let parsed = false;
-    try {
-      if(node.type == "VariableDeclaration"  && node.declarations)
-      {
-        //console.log("VariableDeclaration");
-        newSrc = newSrc + this.parseDeclaration(node, newSrc);
-        parsed = true;
-      }
-      else if(node.params && node.type.includes("Function"))
-      {
-        //console.log("Function");
-        newSrc = newSrc + this.parseFunction(node, newSrc);
-        parsed = true;
-      }
-      else if (node.type.includes("Expression"))
-      {
-        if (node.expression)
-        {
-          newSrc = newSrc + this.parseNode(node.expression, newSrc);
-        }
-        else
-        {
-          newSrc = newSrc + this.parseExpression(node, newSrc);
-        }
-        parsed = true;
-      }
-      else if (node.consequent)
-      {
-        //console.log("Conditional");
-        newSrc = newSrc + this.parseConditional(node, newSrc, fromAlt);
-        parsed = true;
-      }
-      else if(node.type == "ReturnStatement")
-      {
-        //console.log("ReturnStatement");
-        newSrc = newSrc + this.parseReturnStatement(node, newSrc);
-        parsed = true;
-      }
-      else if(node.type == "ForStatement")
-      {
-        //console.log("ForStatement");
-        let exp = "for(" + script.script.substring(node.init.start, node.init.end) + ";";
-        exp = exp + script.script.substring(node.test.start, node.test.end) + ";";
-        exp = exp + script.script.substring(node.update.start, node.update.end);
-        exp = exp + ")\n{\n";
-        newSrc = this.insert(newSrc,exp);
-        newSrc = newSrc + this.parseNode(node.body);
-        newSrc = this.insert(newSrc,"}");
-        parsed = true;
-      }
-      else if(node.type == "ForInStatement")
-      {
-        //console.log("ForInStatement");
-        const right = this.getName(node.right);
-        const left = node.left.kind + " " + node.left.declarations[0].id.name;
-        let exp = "for(" + left + " in " + right + ")\n{"
-        newSrc = this.insert(newSrc,exp);
-        newSrc = newSrc + this.parseNode(node.body);
-        newSrc = this.insert(newSrc,"}");
-        parsed = true;
-      }
-      else if(node.type == "DoWhileStatement")
-      {
-        //console.log("DoWhileStatement");
-        newSrc = this.insert(newSrc,"do {");
-        newSrc = newSrc + this.parseNode(node.body);
-        newSrc = this.insert(newSrc,"}");
-        newSrc = this.insert(newSrc,"while(");
-        newSrc = newSrc + script.script.substring(node.test.start, node.test.end);
-        newSrc = newSrc + ")";
-        parsed = true;
-      }
-      else if(node.type == "WhileStatement")
-      {
-        //console.log("WhileStatement");
-        let exp = "while(" + script.script.substring(node.test.start, node.test.end);
-        exp = exp + ")\n{\n";
-        newSrc = this.insert(newSrc,exp);
-        newSrc = newSrc + this.parseNode(node.body);
-        newSrc = this.insert(newSrc,"}");
-        parsed = true;
-      }
-      else if (node.type == "TryStatement")
-      {
-        //console.log("TryStatement");
-        newSrc = this.insert(newSrc,"try {\n");
-        newSrc = newSrc + this.parseNode(node.block);
-        newSrc = this.insert(newSrc,"\n} catch(");
-        newSrc = newSrc + node.handler.param.name + ") {\n";
-        newSrc = newSrc + this.parseNode(node.handler.body);
-        newSrc = this.insert(newSrc,"}");
-        if(node.finalizer)
-        {
-          newSrc = this.insert(newSrc,"finally {\n");
-          newSrc = newSrc + this.parseNode(node.finalizer);
-          newSrc = this.insert(newSrc,"}");
-        }
-        parsed = true;
-      }
-      else if(node.body && node.type == "BlockStatement")
-      {
-        //console.log("BlockStatement");
-        for(let i = 0; i < node.body.length; i++)
-        {
-          newSrc = newSrc + this.parseNode(node.body[i]);
-        }
-        parsed = true;
-      }
-      else if (node.type == "Literal")
-      {
-        //console.log("Literal");
-        newSrc = newSrc + node.raw;
-        parsed = true;
-      }
-    }
-    catch (err)
-    {
-      console.log(node, err);
-      parsed = false;
-    }
-    //If not parsed, insert verbatim
-    if(!parsed)
-    {
-      console.log("Not parsed");
-      const exp = script.script.substring(node.start, node.end);
-      newSrc = this.insert(newSrc, exp);
-    }
-    return newSrc;
-  },
-  insert(source, item)
-  {
-    return source + "\n" + item;
-  },
-  getName(node) {
-    let name = node.name;
-    let exp = "";
-    if(!name)
-    {
-      let object = node;
-      while(!name && object.property)
-      {
-        const prop = object.property;
-        const propName = prop.name ? prop.name : prop.value;
-        if(object.computed)
-        {
-          exp = "[" + propName + "]" + exp;
-        }
-        else
-        {
-          exp = "." + propName + exp;
-        }
-        object = object.object;
-        name = object.name
-      }
-      exp = object.name + exp;
-    }
-    else
-    {
-      exp = name;
-    }
-    if(typeof name == 'undefined' || name == 'undefined')
-    {
-      exp = "";
-    }
-    return exp;
-  },
-  parseDeclaration(node, newSrc)
-  {
-    const script = this.get('script');
-    newSrc = this.insert(newSrc, node.kind + " ");
-    for(let i = 0; i < node.declarations.length; i++)
-    {
-      const dec = node.declarations[i];
-      const name = dec.id.name;
-      const init = dec.init;
-      let savedVal = this.get('savedVals')[name];
-      const delim = i >= node.declarations.length - 1 ? ";" : ","
-      let exp = script.script.substring(dec.start, dec.end) + delim;
-      if(name.substring(0,2) == "p_")
-      {
-        if(!init)
-        {
-          savedVal = savedVal ? savedVal:0;
-          exp = name + " = " + savedVal + delim;
-          newSrc = newSrc + exp;
-        }
-        else
-        {
-          newSrc = newSrc + exp;
-          const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
-          newSrc = this.insert(newSrc, msg);
-        }
-        this.set('hasPVals', true);
-      }
-      else
-      {
-        if(init)
-        {
-          newSrc = newSrc + name + " = ";
-          newSrc = newSrc + this.parseNode(init) + delim;
-        }
-        else
-        {
-          newSrc = newSrc + exp;
-        }
-      }
-    }
-    return newSrc;
-  },
-  parseExpression(node)
-  {
-    let newSrc = "";
-    if(node.type == "FunctionExpression" ||
-       node.type == "ArrowFunctionExpression")
-    {
-      newSrc = newSrc + this.parseNode(node);
-    }
-    else if(node.type == "ObjectExpression")
-    {
-      newSrc = newSrc + " {";
-      for(let j = 0; j < node.properties.length; j++)
-      {
-        const prop = node.properties[j]
-        newSrc = newSrc + prop.key.name + ":";
-        newSrc = newSrc + this.parseNode(prop.value);
-        const delim = j < node.properties.length - 1 ? "," : "";
-        newSrc = newSrc + delim;
-      }
-      newSrc = newSrc + "}";
-    }
-    else if(node.type == "NewExpression")
-    {
-      const constructorName = this.getName(node.callee);
-      let exp = " new " + constructorName;
-      exp = exp + this.parseArgs(node.arguments);
-      newSrc = newSrc + exp;
-    }
-    else if(node.type == "ArrayExpression")
-    {
-      newSrc = newSrc + " ["
-      for(let j = 0; j < node.elements.length; j++)
-      {
-        const element = node.elements[j];
-        newSrc = newSrc + this.parseNode(element);
-        const delim = j < node.elements.length - 1 ? "," : "";
-        newSrc = newSrc + delim;
-      }
-      newSrc = newSrc + "]"
-    }
-    else if(node.type == "AssignmentExpression")
-    {
-      newSrc = newSrc + this.parseAssignment(node, newSrc);
-    }
-    else if (node.type == "CallExpression")
-    {
-      newSrc = newSrc + this.parseCallExpression(node, newSrc);
-    }
-    else
-    {
-      const script = this.get('script');
-      const exp = script.script.substring(node.start, node.end);
-      newSrc = this.insert(newSrc,exp);
-    }
-    return newSrc;
-  },
-  parseAssignment(node, newSrc)
-  {
-    const script = this.get('script');
-    let left = node.left;
-    const exp = script.script.substring(left.start, left.end) + node.operator;
-    newSrc = this.insert(newSrc, exp);
-    newSrc = newSrc + this.parseNode(node.right);
-    let name = left.name;
-    while(!name)
-    {
-      if(left.object)
-      {
-        left = left.object;
-      }
-      else
-      {
-        name = left.name
-        if(!name)
-        {
-          name = script.script.substring(node.start, node.end);
-        }
-      }
-    }
-    //If an object or a property of it is changed, update with a JSON version of the WHOLE object
-    if(name.substring(0,2)=="p_")
-    {
-      this.set('hasPVals', true);
-      const msg = "parent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
-      newSrc = this.insert(newSrc, msg);
-    }
-    return newSrc;
-  },
-  parseArgs(args)
-  {
-    let exp = "(";
-    for(let i = 0; i < args.length; i++)
-    {
-      exp = exp + this.parseNode(args[i]);
-      const delim = i < args.length - 1 ? "," : "";
-      exp = exp + delim;
-    }
-    exp = exp + ")";
-    return exp;
-  },
-  parseCallExpression(node, newSrc)
-  {
-    let callee = node.callee;
-    let exp = "";
-    if(callee.callee) {
-      console.log("extra callee", callee.callee);
-      exp = exp + this.parseNode(callee.callee);
-      exp = exp + this.parseArgs(callee.arguments);
-    }
-    exp = exp + this.getName(callee);
-    exp = exp + this.parseArgs(node.arguments);
-    newSrc = this.insert(newSrc, exp);
-
-    return newSrc;
-  },
-  parseFunction(node, newSrc)
-  {
-    const arrowFn = node.type == "ArrowFunctionExpression" ||
-                    node.type == "ArrowFunctionDeclaration";
-    let exp = arrowFn ? "":"function ";
-    if(node.id)
-    {
-      exp = exp + node.id.name;
-    }
-    exp = exp + "(";
-    newSrc = this.insert(newSrc, exp);
-    if(node.params.length > 0)
-    {
-      for(let i = 0; i < node.params.length; i++)
-      {
-        newSrc = newSrc + node.params[i].name;
-        if(i < node.params.length - 1)
-        {
-          newSrc = newSrc + ",";
-        }
-      }
-    }
-    newSrc = newSrc + ")";
-    if(arrowFn)
-    {
-      newSrc = newSrc + " => ";
-    }
-    newSrc = newSrc + " {\n";
-    for(let i = 0; i < node.body.body.length; i++)
-    {
-      newSrc = newSrc + this.parseNode(node.body.body[i]);
-    }
-    newSrc = this.insert(newSrc,"}")
-    return newSrc;
-  },
-  parseConditional(node, newSrc, fromAlt)
-  {
-    const script = this.get('script');
-    const alt = node.alternate;
-    let test = "if(" + script.script.substring(node.test.start, node.test.end) + ") {\n";
-    if(fromAlt)
-    {
-      test = "else " + test;
-    }
-    newSrc = this.insert(newSrc, test);
-    newSrc = newSrc + this.parseNode(node.consequent);
-    newSrc = this.insert(newSrc,"}")
-    if (alt)
-    {
-      if(!alt.test)
-      {
-        newSrc = this.insert(newSrc, "else {\n");
-        newSrc = newSrc + this.parseNode(alt, true);
-        newSrc = this.insert(newSrc,"}")
-      }
-      else
-      {
-        newSrc = newSrc + this.parseNode(alt, true);
-      }
-    }
-    return newSrc;
-  },
-  parseReturnStatement(node, newSrc)
-  {
-    newSrc = this.insert(newSrc, "return ");
-    if(node.argument)
-    {
-      newSrc = newSrc + this.parseNode(node.argument);
-    }
-    return newSrc;
   },
   replaceAssets(source, assets) {
     for(let i = 0; i < assets.length; i++)
