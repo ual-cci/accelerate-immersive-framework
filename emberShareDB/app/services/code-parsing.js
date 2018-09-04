@@ -22,10 +22,7 @@ export default Service.extend({
       let parsed = true;
       try {
         walk.simple(acorn.parse(script.script), {
-          VariableDeclaration: (node)=> {
-            // console.log("Found a VariableDeclaration:")
-            // console.log(node);
-            // console.log(script.script.substring(node.start, node.end));
+          VariableDeclaration: (node) => {
             for(let i = 0; i < node.declarations.length; i++)
             {
               const dec = node.declarations[i];
@@ -62,9 +59,6 @@ export default Service.extend({
             }
           },
           AssignmentExpression: (node)=> {
-            // console.log("Found a AssignmentExpression:")
-            // console.log(node);
-            // console.log(script.script.substring(node.start, node.end));
             let left = node.left;
             let name = left.name;
             while(!name)
@@ -131,6 +125,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
+    //return newSrc;
     return this.get('hasPVals') ? newSrc : src;
   },
   getScripts(source) {

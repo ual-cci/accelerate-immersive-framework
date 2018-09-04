@@ -57,6 +57,7 @@ export default Controller.extend({
   editCtr:0,
   fontSize:14,
   fetchingDoc:false,
+  droppedOps:[],
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -215,8 +216,9 @@ export default Controller.extend({
       }
       if(isEmpty(con) || con.state == "disconnected")
       {
-        console.log("failed to connect to ShareDB");
+        console.log("failed to connect to ShareDB", con);
         this.set('wsAvailable', false);
+        this.fetchDoc();
       }
       this.set('connection', con);
       const doc = con.get(config.contentCollectionName,this.get('model').id);
@@ -225,7 +227,7 @@ export default Controller.extend({
 
       doc.subscribe((err) => {
         if (err) throw err;
-        console.log("subscribed to doc", doc.data.dontPlay);
+        console.log("subscribed to doc");
         if(!isEmpty(doc.data))
         {
           this.set('doc', doc);
@@ -236,12 +238,15 @@ export default Controller.extend({
     }
     else
     {
-      this.get('store').findRecord('document',this.get('model').id).then((doc) => {
-        console.log("found record", doc.data);
-        this.set('doc', doc);
-        this.didReceiveDoc();
-      });
+      this.fetchDoc();
     }
+  },
+  fetchDoc() {
+    this.get('store').findRecord('document',this.get('model').id).then((doc) => {
+      console.log("found record", doc.data);
+      this.set('doc', doc);
+      this.didReceiveDoc();
+    });
   },
   didReceiveOp: function (ops,source) {
     const embed = this.get('embed') == "true";
@@ -290,6 +295,10 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('doc');
       const MAX_RETRIES = 5;
+      if(this.get('droppedOps').length > 0) {
+        return reject();
+      }
+
       if(this.get('wsAvailable'))
       {
         doc.submitOp(op, (err) => {
@@ -299,10 +308,15 @@ export default Controller.extend({
             {
               this.submitOp(op, retry + 1);
             }
+            else
+            {
+              this.get('droppedOps').push(op);
+            }
             reject(err);
           }
           else
           {
+            console.log("did sumbit op",op);
             resolve();
           }
         });
@@ -318,6 +332,10 @@ export default Controller.extend({
           if(retry < MAX_RETRIES)
           {
             this.submitOp(op, retry + 1);
+          }
+          else
+          {
+            this.get('droppedOps').push(op);
           }
           reject(err);
         });
@@ -342,11 +360,10 @@ export default Controller.extend({
     const doc = this.get('doc');
     const embed = this.get('embed') == "true";
     const displayEditor = this.get('displayEditor');
-    const dontPlay = doc.data.dontPlay == "true" || doc.data.dontPlay;
     if(embed || !displayEditor) {
       return true;
     }
-    return !dontPlay;
+    return doc.data.dontPlay === "false" || !doc.data.dontPlay;
   },
   preloadAssets: function() {
     const doc = this.get('doc');
@@ -364,6 +381,7 @@ export default Controller.extend({
       console.log("no assets to preload", this.doPlay());
       if(this.doPlay())
       {
+        console.log("DO PLAY");
         this.updateIFrame();
       }
     }
@@ -382,7 +400,7 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
-    console.log("updating iframe");
+    //console.log("updating iframe");
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
     const doc = this.get('doc');
@@ -391,7 +409,7 @@ export default Controller.extend({
     let toRender = selection ? this.getSelectedText() : mainText;
     toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    console.log(toRender);
+    //console.log(toRender);
     if(selection)
     {
       this.submitOp( {p:['newEval'],oi:toRender},{source:true});
@@ -837,6 +855,7 @@ export default Controller.extend({
       console.log('cleaning up');
       const fn = () => {
         this.set('renderedSource',"");
+        this.set('droppedOps', []);
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
