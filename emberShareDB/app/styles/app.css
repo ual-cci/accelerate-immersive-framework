@@ -62,9 +62,13 @@
   pointer-events: auto;
 }
 
+#console {
+  width:100vw;
+}
+
 .main-container {
   width:100vw;
-  height:75vh;
+  height:65vh;
   display:inline-block;
   position:relative;
   overflow:hidden;

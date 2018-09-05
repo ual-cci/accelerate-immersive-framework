@@ -25,6 +25,7 @@ export default Controller.extend({
   opsPlayer: inject('ops-player'),
 
   //Parameters
+  consoleOutput: "",
   con: null,
   doc: null,
   editor: null,
@@ -426,13 +427,11 @@ export default Controller.extend({
       "tagname-lowercase": true,
       "attr-lowercase": true,
       "attr-value-double-quotes": true,
-      "doctype-first": true,
       "tag-pair": true,
       "spec-char-escape": true,
       "id-unique": true,
       "src-not-empty": true,
       "attr-no-duplication": true,
-      "title-require": true,
       "csslint": {
         "display-property-grouping": true,
         "known-properties": true
@@ -451,6 +450,7 @@ export default Controller.extend({
             raw: message.raw
         });
     }
+    console.log(errors);
     editor.getSession().setAnnotations(errors);
   },
   autoExecuteCode: function() {
@@ -523,10 +523,20 @@ export default Controller.extend({
     const embed = this.get('embed') == "true";
     if (e.origin === config.localOrigin && !embed)
     {
-      const doc = this.get('doc');
-      let savedVals = this.get('savedVals');
-      savedVals[e.data[0]] = e.data[1];
-      this.set('savedVals', savedVals);
+      if(e.data[0].substring(0,2)=="p_")
+      {
+        const doc = this.get('doc');
+        let savedVals = this.get('savedVals');
+        savedVals[e.data[0]] = e.data[1];
+        this.set('savedVals', savedVals);
+      }
+      else if(e.data[0] == "console")
+      {
+        for(let i = 1; i < e.data.length; i++)
+        {
+          this.set("consoleOutput", this.get('consoleOutput') + "\n" + e.data[i]);
+        }
+      }
     }
   },
   setCanEditDoc: function() {
@@ -666,8 +676,18 @@ export default Controller.extend({
       clearInterval(this.get('opsInterval'));
     }
   },
+  hijackConsoleOutput: function() {
+    (()=>{
+        var oldLog = console.log;
+        console.log = (msg) => {
+            this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+            //oldLog.apply(console, arguments);
+        };
+    })();
+  },
   actions: {
     editorReady(editor) {
+
       this.set('editor', editor);
       editor.enableDefaultAutocompletion = true;
       console.log('editor ready')
@@ -898,6 +918,7 @@ export default Controller.extend({
       const fn = () => {
         this.set('renderedSource',"");
         this.set('droppedOps', []);
+        this.set("consoleOutput", "");
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
