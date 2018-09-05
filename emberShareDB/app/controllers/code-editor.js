@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
+import HTMLHint from 'npm:htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
@@ -108,6 +109,7 @@ export default Controller.extend({
   initAceEditor: function() {
     const editor = this.get('editor');
     const session = editor.getSession();
+
     editor.commands.addCommand({
       name: "executeLines",
       exec: ()=>{
@@ -141,6 +143,7 @@ export default Controller.extend({
       this.onSessionChange( delta);
     });
     session.setMode("ace/mode/html");
+    session.setUseWorker(false);
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -316,7 +319,7 @@ export default Controller.extend({
           }
           else
           {
-            console.log("did sumbit op",op);
+            //console.log("did sumbit op",op);
             resolve();
           }
         });
@@ -419,6 +422,36 @@ export default Controller.extend({
     {
       this.set('renderedSource', toRender);
     }
+    const ruleSets = {
+      "tagname-lowercase": true,
+      "attr-lowercase": true,
+      "attr-value-double-quotes": true,
+      "doctype-first": true,
+      "tag-pair": true,
+      "spec-char-escape": true,
+      "id-unique": true,
+      "src-not-empty": true,
+      "attr-no-duplication": true,
+      "title-require": true,
+      "csslint": {
+        "display-property-grouping": true,
+        "known-properties": true
+      },
+      "jshint": {"esversion": 6, "asi" : true}
+    }
+    var messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
+    var errors = [], message;
+    for(var i=0, l=messages.length;i<l;i++){
+        message = messages[i];
+        errors.push({
+            row: message.line-1,
+            column: message.col-1,
+            text: message.message,
+            type: message.type,
+            raw: message.raw
+        });
+    }
+    editor.getSession().setAnnotations(errors);
   },
   autoExecuteCode: function() {
     if(this.get('codeTimer'))
@@ -557,7 +590,6 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('doc');
       const savedVals = this.get('savedVals');
-      console.log('updatingSavedVals, doc',doc,'savedVals', savedVals)
       if(isEmpty(savedVals))
       {
         resolve();
@@ -566,7 +598,6 @@ export default Controller.extend({
       {
         const vals = Object.keys(savedVals).map(key => savedVals[key]);
         const hasVals = vals.length > 0;
-        console.log('vals', vals);
         if(hasVals)
         {
           this.submitOp({p:['savedVals'],oi:savedVals})
@@ -638,11 +669,22 @@ export default Controller.extend({
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
+      editor.enableDefaultAutocompletion = true;
       console.log('editor ready')
       this.initShareDB();
     },
+    suggestCompletions(editor, session, position, prefix) {
+      console.log("requesting completions");
+      return [
+        {value:"",
+          score:100000,
+          caption:"Add some MIMIC Code?",
+          meta:"MIMIC",
+          snippet:"custom-mimic-code-snippet"}
+      ]
+    },
 
-    //Doc properties
+    //DOC PROPERTIES
     tagsChanged(tags) {
       const doc = this.get('doc');
       this.submitOp({p:['tags'],oi:tags},{source:true});
@@ -721,7 +763,7 @@ export default Controller.extend({
       });
     },
 
-    //Assets
+    //ASSETS
     assetError(err) {
       $("#asset-progress").css("display", "none");
       alert("Error"+err);

@@ -105,7 +105,7 @@ export default Service.extend({
           {
             const str = ops[i].si;
             const index = ops[i].p + offset;
-            console.log("inserting " + str + " at " + index);
+            //console.log("inserting " + str + " at " + index);
             newScript = newScript.slice(0, index) + str + newScript.slice(index);
             offset += str.length;
           }

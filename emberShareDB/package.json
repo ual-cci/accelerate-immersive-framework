@@ -62,6 +62,7 @@
   },
   "dependencies": {
     "acorn": "^5.7.1",
+    "htmlhint": "^0.10.1",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
     "jszip": "^3.1.5",
