@@ -425,6 +425,9 @@ export default Controller.extend({
     {
       this.set('renderedSource', toRender);
     }
+    this.updateLinting();
+  },
+  updateLinting: function() {
     const ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
@@ -440,6 +443,9 @@ export default Controller.extend({
       },
       "jshint": {"esversion": 6, "asi" : true}
     }
+    const editor = this.get('editor');
+    const doc = this.get('doc');
+    const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
     var messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
     var errors = [], message;
     for(var i=0, l=messages.length;i<l;i++){
@@ -455,13 +461,17 @@ export default Controller.extend({
     this.get('cs').log(errors);
     editor.getSession().setAnnotations(errors);
   },
-  autoExecuteCode: function() {
+  onCodingFinished: function() {
     if(this.get('codeTimer'))
     {
       clearTimeout(this.get('codeTimer'));
     }
     this.set('codeTimer', setTimeout(() => {
-      this.updateIFrame();
+      if(this.get('autoRender'))
+      {
+        this.updateIFrame();
+      }
+      this.updateLinting();
       this.set('codeTimer',null);
     },1500));
   },
@@ -498,10 +508,7 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       this.submitOp(op);
-      if(this.get('autoRender'))
-      {
-        this.autoExecuteCode();
-      }
+      this.onCodingFinished();
     }
   },
   addWindowListener: function() {
@@ -510,17 +517,17 @@ export default Controller.extend({
   	var eventer = window[eventMethod];
     window.self = this;
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
-  	eventer(messageEvent, this.handleWindowEvent, true);
+  	eventer(messageEvent, this.handleWindowEvent, false);
   },
   removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
     window.self = null;
     var messageEvent = eventMethod === "detachEvent" ? "onmessage":"message";
-    eventer(messageEvent, this.handleWindowEvent, true);
+    eventer(messageEvent, this.handleWindowEvent, false);
   },
   handleWindowEvent: (e) => {
-    const self = window.self;
+    const self = e.target.self;
     const embed = self.get('embed') == "true";
     if (e.origin === config.localOrigin && !embed)
     {
