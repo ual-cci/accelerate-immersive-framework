@@ -23,9 +23,9 @@ export default Controller.extend({
   modalsManager: inject('modalsManager'),
   documentService: inject('documents'),
   opsPlayer: inject('ops-player'),
+  cs: inject('console'),
 
   //Parameters
-  consoleOutput: "",
   con: null,
   doc: null,
   editor: null,
@@ -60,6 +60,7 @@ export default Controller.extend({
   fontSize:14,
   fetchingDoc:false,
   droppedOps:[],
+  consoleOutput:"",
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -83,7 +84,7 @@ export default Controller.extend({
 
   //Functions
   initShareDB: function() {
-    console.log('initShareDB')
+    this.get('cs').log('initShareDB')
     this.initWebSockets();
     this.initAceEditor();
     this.addWindowListener();
@@ -106,6 +107,7 @@ export default Controller.extend({
       this.set('displayEditor', !embed);
       this.set('showName', !embed);
     }
+    this.get('cs').observers.push(this);
   },
   initAceEditor: function() {
     const editor = this.get('editor');
@@ -121,7 +123,7 @@ export default Controller.extend({
     editor.commands.addCommand({
       name: "pause",
       exec: ()=>{
-        console.log("pause")
+        this.get('cs').logToScreen("pause")
         this.set('renderedSource', "");
       },
       bindKey: {mac: "cmd-.", win: "ctrl-."}
@@ -148,11 +150,11 @@ export default Controller.extend({
   },
   initWebSockets: function() {
     let socket = this.get('socket');
-    console.log("init websockets", socket);
+    this.get('cs').log("init websockets", socket);
     if(!isEmpty(socket) && socket.state == 1)
     {
       socket.onclose = ()=> {
-        console.log("websocket closed");
+        this.get('cs').log("websocket closed");
         this.set('socket', null);
         this.initWebSockets();
       }
@@ -164,7 +166,7 @@ export default Controller.extend({
         socket = new WebSocket(config.wsHost);
         this.set('socket', socket);
         socket.onopen = () => {
-          console.log("web socket open");
+          this.get('cs').log("web socket open");
           this.set('wsAvailable', true);
           if(!this.get('fetchingDoc'))
           {
@@ -173,7 +175,7 @@ export default Controller.extend({
         }
 
         socket.onerror = () => {
-          console.log("web socket error");
+          this.get('cs').log("web socket error");
           this.set('wsAvailable', false);
           if(!this.get('fetchingDoc'))
           {
@@ -182,7 +184,7 @@ export default Controller.extend({
         }
 
         socket.onclose = () =>  {
-          console.log("web socket close");
+          this.get('cs').log("web socket close");
           this.set('wsAvailable', false);
           if(!this.get('fetchingDoc'))
           {
@@ -191,12 +193,12 @@ export default Controller.extend({
         }
 
         socket.onmessage = (event) =>  {
-          console.log("web socket message", event);
+          this.get('cs').log("web socket message", event);
         }
       }
       catch (err)
       {
-        console.log("web sockets not available");
+        this.get('cs').log("web sockets not available");
         this.set('wsAvailable', false);
         if(!this.get('fetchingDoc'))
         {
@@ -206,7 +208,7 @@ export default Controller.extend({
     }
   },
   initDoc: function() {
-    console.log("init doc");
+    this.get('cs').log("init doc");
     this.set('fetchingDoc', true);
     this.get('opsPlayer').reset();
     if(this.get('wsAvailable'))
@@ -215,12 +217,12 @@ export default Controller.extend({
       let con = this.get('connection');
       if(isEmpty(con))
       {
-        console.log('connecting to ShareDB');
+        this.get('cs').log('connecting to ShareDB');
         con = new ShareDB.Connection(socket);
       }
       if(isEmpty(con) || con.state == "disconnected")
       {
-        console.log("failed to connect to ShareDB", con);
+        this.get('cs').log("failed to connect to ShareDB", con);
         this.set('wsAvailable', false);
         this.fetchDoc();
       }
@@ -231,7 +233,7 @@ export default Controller.extend({
 
       doc.subscribe((err) => {
         if (err) throw err;
-        console.log("subscribed to doc");
+        this.get('cs').log("subscribed to doc");
         if(!isEmpty(doc.data))
         {
           this.set('doc', doc);
@@ -247,7 +249,7 @@ export default Controller.extend({
   },
   fetchDoc() {
     this.get('store').findRecord('document',this.get('model').id).then((doc) => {
-      console.log("found record", doc.data);
+      this.get('cs').log("found record", doc.data);
       this.set('doc', doc);
       this.didReceiveDoc();
     });
@@ -284,7 +286,7 @@ export default Controller.extend({
     session.setValue(doc.data.source);
     this.set('surpress', false);
     this.set('savedVals', doc.data.savedVals);
-    console.log("did receive doc");
+    this.get('cs').log("did receive doc");
     this.setCanEditDoc();
     let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
     stats.views = parseInt(stats.views) + 1;
@@ -320,7 +322,7 @@ export default Controller.extend({
           }
           else
           {
-            //console.log("did sumbit op",op);
+            //this.get('cs').log("did sumbit op",op);
             resolve();
           }
         });
@@ -329,10 +331,10 @@ export default Controller.extend({
       {
         this.get('documentService').submitOp(op)
         .then(() => {
-          console.log("did sumbit op",op);
+          this.get('cs').log("did sumbit op",op);
           resolve();
         }).catch((err) => {
-          console.log("ERROR Not submitted");
+          this.get('cs').log("ERROR Not submitted");
           if(retry < MAX_RETRIES)
           {
             this.submitOp(op, retry + 1);
@@ -382,10 +384,10 @@ export default Controller.extend({
     }
     else
     {
-      console.log("no assets to preload", this.doPlay());
+      this.get('cs').log("no assets to preload", this.doPlay());
       if(this.doPlay())
       {
-        console.log("DO PLAY");
+        this.get('cs').log("DO PLAY");
         this.updateIFrame();
       }
     }
@@ -404,7 +406,7 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
-    //console.log("updating iframe");
+    //this.get('cs').log("updating iframe");
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
     const doc = this.get('doc');
@@ -413,7 +415,7 @@ export default Controller.extend({
     let toRender = selection ? this.getSelectedText() : mainText;
     toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    //console.log(toRender);
+    //this.get('cs').log(toRender);
     if(selection)
     {
       this.submitOp( {p:['newEval'],oi:toRender},{source:true});
@@ -450,7 +452,7 @@ export default Controller.extend({
             raw: message.raw
         });
     }
-    console.log(errors);
+    this.get('cs').log(errors);
     editor.getSession().setAnnotations(errors);
   },
   autoExecuteCode: function() {
@@ -475,7 +477,7 @@ export default Controller.extend({
 
       if(!this.get('opsPlayer').atHead())
       {
-        console.log("not at head");
+        this.get('cs').log("not at head");
         this.submitOp({p: ["source", 0], sd: doc.data.source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
@@ -506,38 +508,40 @@ export default Controller.extend({
     this.removeWindowListener();
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
+    window.self = this;
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
-  	eventer(messageEvent, (e) => {
-      this.handleWindowEvent(e)
-    });
+  	eventer(messageEvent, this.handleWindowEvent, true);
   },
   removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
-    var messageEvent = eventMethod === "detachEvent"? "onmessage":"message";
-    eventer(messageEvent, (e) => {
-      this.handleWindowEvent(e)
-    });
+    window.self = null;
+    var messageEvent = eventMethod === "detachEvent" ? "onmessage":"message";
+    eventer(messageEvent, this.handleWindowEvent, true);
   },
-  handleWindowEvent: function(e) {
-    const embed = this.get('embed') == "true";
+  handleWindowEvent: (e) => {
+    const self = window.self;
+    const embed = self.get('embed') == "true";
     if (e.origin === config.localOrigin && !embed)
     {
       if(e.data[0].substring(0,2)=="p_")
       {
-        const doc = this.get('doc');
-        let savedVals = this.get('savedVals');
+        const doc = self.get('doc');
+        let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
-        this.set('savedVals', savedVals);
+        self.set('savedVals', savedVals);
       }
       else if(e.data[0] == "console")
       {
         for(let i = 1; i < e.data.length; i++)
         {
-          this.set("consoleOutput", this.get('consoleOutput') + "\n" + e.data[i]);
+          self.get('cs').logToScreen(JSON.parse(e.data[i]));
         }
       }
     }
+  },
+  update() {
+    this.set('consoleOutput', this.get('cs').output);
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
@@ -569,7 +573,7 @@ export default Controller.extend({
     .then(() => {
       this.transitionToRoute('application');
     }).catch((err) => {
-      console.log("error deleting doc");
+      this.get('cs').log("error deleting doc");
     });
   },
   skipOp:function(prev, rewind = false) {
@@ -643,10 +647,10 @@ export default Controller.extend({
   },
   refreshDoc: function() {
     const doc = this.get('doc');
-    console.log('refreshing', doc);
+    this.get('cs').log('refreshing', doc);
     if(!isEmpty(doc))
     {
-      console.log('refreshing doc not empty', doc);
+      this.get('cs').log('refreshing doc not empty', doc);
       const fn = () => {
         this.get('opsPlayer').reset();
         this.set('renderedSource',"");
@@ -687,14 +691,12 @@ export default Controller.extend({
   },
   actions: {
     editorReady(editor) {
-
       this.set('editor', editor);
-      editor.enableDefaultAutocompletion = true;
-      console.log('editor ready')
+      this.get('cs').log('editor ready')
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
-      console.log("requesting completions");
+      this.get('cs').log("requesting completions");
       return [
         {value:"",
           score:100000,
@@ -771,7 +773,7 @@ export default Controller.extend({
         this.get('store').query('document', {
           filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
         }).then((documents) => {
-          console.log("new doc created", response, documents);
+          this.get('cs').log("new doc created", response, documents);
           this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('code-editor',documents.firstObject.documentId);
         });
@@ -789,7 +791,7 @@ export default Controller.extend({
       alert("Error"+err);
     },
     assetProgress(e) {
-      console.log("assetProgress", e);
+      this.get('cs').log("assetProgress", e);
       if(parseInt(e.percent) < 100)
       {
         $("#asset-progress").css("display", "block");
@@ -801,7 +803,7 @@ export default Controller.extend({
       }
     },
     assetUploaded(e) {
-      console.log("assetComplete", e);
+      this.get('cs').log("assetComplete", e);
       $("#asset-progress").css("display", "none");
       if(!this.get('wsAvailable'))
       {
@@ -814,7 +816,7 @@ export default Controller.extend({
       {
         this.get('assetService').deleteAsset(this.get('assetToDelete'))
         .then(()=> {
-          console.log('deleted asset', this.get('assetToDelete'));
+          this.get('cs').log('deleted asset', this.get('assetToDelete'));
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
           if(!this.get('wsAvailable'))
@@ -822,7 +824,7 @@ export default Controller.extend({
             this.refreshDoc();
           }
         }).catch((err)=>{
-          console.log('ERROR deleting asset', err, this.get('assetToDelete'));
+          this.get('cs').log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
       }
     },
@@ -914,11 +916,13 @@ export default Controller.extend({
 
     //TIDYING UP ON EXIT / REFRESH
     cleanUp() {
-      console.log('cleaning up');
+      this.get('cs').log('cleaning up');
       const fn = () => {
         this.set('renderedSource',"");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");
+        this.get('cs').clear();
+        this.get('cs').clearObservers();
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
@@ -928,12 +932,12 @@ export default Controller.extend({
             this.get('socket').onerror = null;
             this.set('socket', null);
             this.set('connection', null)
-            console.log("websocket closed");
+            this.get('cs').log("websocket closed");
           };
           this.get('doc').destroy();
           this.get('socket').close();
         }
-        console.log('cleaned up');
+        this.get('cs').log('cleaned up');
         this.set('doc', null);
         this.removeWindowListener();
       }
@@ -946,7 +950,7 @@ export default Controller.extend({
 
     //MOUSE LISTENERS
     mouseDown(e) {
-      //console.log('mouseDown',e.target);
+      //this.get('cs').log('mouseDown',e.target);
       this.set('isDragging', true);
       const startWidth = document.querySelector('.ace-container').clientWidth;
       const startX = e.clientX;
@@ -958,7 +962,7 @@ export default Controller.extend({
       overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
-      //console.log('mouseup',e.target);
+      //this.get('cs').log('mouseup',e.target);
       this.set('isDragging', false);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
@@ -968,7 +972,7 @@ export default Controller.extend({
     mouseMove(e) {
       if(this.get('isDragging'))
       {
-        //console.log('mouseMove',e.target);
+        //this.get('cs').log('mouseMove',e.target);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },

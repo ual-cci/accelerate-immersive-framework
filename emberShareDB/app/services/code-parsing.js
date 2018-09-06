@@ -102,7 +102,7 @@ export default Service.extend({
                   const arg = node.arguments[j];
                   const val = script.script.substring(arg.start, arg.end);
                   let delim = j < node.arguments.length - 1 ? "," : ""
-                  output = output + val + delim;
+                  output = output + "JSON.stringify(" + val + ")" + delim;
                 }
                 const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
                 let index = node.end;
