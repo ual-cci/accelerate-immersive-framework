@@ -6,8 +6,9 @@ import { isEmpty } from '@ember/utils';
 export default Service.extend({
   sessionAccount:inject('session-account'),
   store:inject('store'),
+  cs:inject('console'),
   deleteAsset(fileId) {
-    console.log("deleteAsset for " + fileId);
+    this.get('cs').log("deleteAsset for " + fileId);
     let doc = this.get('sessionAccount').currentDoc;
     let data = {documentId:doc};
     return new RSVP.Promise((resolve, reject) => {
@@ -16,23 +17,23 @@ export default Service.extend({
           url: config.serverHost + "/asset/"+fileId,
           data: data
         }).then((res) => {
-          console.log("success",res);
+          this.get('cs').log("success",res);
           resolve();
         }).catch((err) => {
-          console.log("error",err);
+          this.get('cs').log("error",err);
           reject(err);
         });
     });
   },
   _fetchAsset(asset, ctr, callback) {
-    console.log("fetching asset:"+asset);
+    this.get('cs').log("fetching asset:"+asset);
     const fileId = asset.fileId;
     const fileName = asset.name;
     const fileType = asset.fileType;
     const inStoreAsset = this.get('store').peekRecord('asset',fileId);
     if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
     {
-        console.log("asset already preloaded:"+fileId);
+        this.get('cs').log("asset already preloaded:"+fileId);
         callback(ctr);
         return;
     }
@@ -40,7 +41,7 @@ export default Service.extend({
     var url = config.serverHost + "/asset/"+fileId;
     xhr.onload = () => {
       if (xhr.readyState == 4 && xhr.status == 200) {
-        console.log("fetched asset:"+fileId);
+        this.get('cs').log("fetched asset:"+fileId);
         this.get('store').push({
           data:[{
             id:fileId,
@@ -57,7 +58,7 @@ export default Service.extend({
       }
     };
     xhr.onerror = () => {
-      console.log("error fetching/converting asset:"+fileId);
+      this.get('cs').log("error fetching/converting asset:"+fileId);
       callback(ctr);
     };
     xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -65,7 +66,7 @@ export default Service.extend({
     xhr.send(null);
   },
   preloadAssets(assets) {
-    console.log("preloadAssets:"+assets);
+    this.get('cs').log("preloadAssets:"+assets);
     return new RSVP.Promise((resolve, reject) => {
       var ctr = 0;
       var callback = (newCtr) => {
@@ -83,7 +84,7 @@ export default Service.extend({
     })
   },
   _b64e(str) {
-    console.log("converting to base64");
+    this.get('cs').log("converting to base64");
     // from this SO question
     // http://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
       let CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

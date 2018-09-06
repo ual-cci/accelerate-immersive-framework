@@ -5,6 +5,7 @@ import walk from 'npm:acorn/dist/walk'
 
 export default Service.extend({
   store:inject('store'),
+  cs:inject('console'),
   script:"",
   savedVals:null,
   hasPVals:false,
@@ -117,7 +118,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        console.log("didnt parse script, probably src")
+        this.get('cs').log("didnt parse script, probably src")
         parsed = false;
       }
       if(parsed)
@@ -131,7 +132,7 @@ export default Service.extend({
           {
             const str = ops[j].si;
             const index = ops[j].p + offset;
-            //console.log("inserting " + str + " at " + index);
+            //this.get('cs').log("inserting " + str + " at " + index);
             newScript = newScript.slice(0, index) + str + newScript.slice(index);
             offset += str.length;
           }
@@ -152,7 +153,7 @@ export default Service.extend({
       newSrc = newSrc + script.post;
     }
     //return newSrc;
-    console.log(newSrc);
+    this.get('cs').log(newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {

@@ -3,6 +3,7 @@ import {inject} from '@ember/service';
 
 export default Route.extend({
   sessionAccount:inject("session-account"),
+  cs:inject('console'),
   model(params) {
     let currentUser = this.get('sessionAccount').currentUserName;
     if(!currentUser)
@@ -18,17 +19,17 @@ export default Route.extend({
         sortBy:params.sort
       }
     }
-    console.log('reloading document model');
+    this.get('cs').log('reloading document model');
     return this.get('store').query('document', filter);
   },
   actions: {
     error(error, transition) {
-      console.log("ERROR", error);
+      this.get('cs').log("ERROR", error);
       const err = error.errors ? error.errors :error;
       if(error)
       {
         if (err.status === '404') {
-            console.log("ERROR 404");
+            this.get('cs').log("ERROR 404");
             this.replaceWith('application');
         } else {
           return true;

@@ -11,7 +11,6 @@ export default Component.extend({
     return this.get('sessionAccount').currentUserName == this.get('document').owner;
   }),
   doPlay:computed('document', function() {
-    //console.log("computing dont play", this.get('document').dontPlay);
     return !this.get('document').dontPlay;
   }),
   index:0,

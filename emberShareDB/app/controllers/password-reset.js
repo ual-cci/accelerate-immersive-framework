@@ -1,16 +1,17 @@
 import Controller from '@ember/controller';
-import { inject as service } from '@ember/service';
+import Service, { inject } from '@ember/service';
 import RSVP from 'rsvp';
 
 export default Controller.extend({
   queryParams: ['username','token'],
-  passwordReset: service('password-reset'),
+  passwordReset: inject('password-reset'),
+  cs:inject('console'),
   hasValidToken:false,
   resetMessage:"",
   isTokenValid () {
     let username = this.get('username');
     let token = this.get('token');
-    console.log('checking valid ',username,token);
+    this.get('cs').log('checking valid ',username,token);
     this.get('passwordReset').checkToken(username,token)
     .then(()=>{
       this.set('hasValidToken',true);

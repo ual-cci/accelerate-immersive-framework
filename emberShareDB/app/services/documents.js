@@ -7,6 +7,7 @@ export default Service.extend({
   assetService: inject('assets'),
   store: inject('store'),
   sessionAccount:inject('session-account'),
+  cs:inject('console'),
   makeNewDoc(docName, isPrivate, source, forkedFrom) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
@@ -19,10 +20,10 @@ export default Service.extend({
         forkedFrom:forkedFrom
       });
       doc.save().then((response)=>{
-        console.log("saved new doc");
+        this.get('cs').log("saved new doc");
         resolve();
       }).catch((err)=>{
-        console.log("error creating record");
+        this.get('cs').log("error creating record");
         doc.deleteRecord();
         this.get('sessionAccount').updateOwnedDocuments();
         reject("error creating document, are you signed in?");
@@ -54,7 +55,7 @@ export default Service.extend({
           type: "GET",
           url: config.serverHost + "/tags?limit=" + limit,
         }).then((res) => {
-          console.log("tags", res);
+          this.get('cs').log("tags", res);
           resolve(res);
         }).catch((err) => {
           reject(err);
@@ -72,20 +73,20 @@ export default Service.extend({
         var actions = doc.data.assets.map(fn);
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;
-          console.log('deleting doc', docId);
+          this.get('cs').log('deleting doc', docId);
           $.ajax({
               type: "DELETE",
               url: config.serverHost + "/documents/" + docId,
               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
             }).then((res) => {
-              console.log('deleted', docId);
+              this.get('cs').log('deleted', docId);
               const actions = [
                 doc.deleteRecord(),
                 this.get('sessionAccount').updateOwnedDocuments()
               ];
               Promise.all(actions).then(resolve).catch(reject);
             }).catch((err) => {
-              console.log('error deleting', docId);
+              this.get('cs').log('error deleting', docId);
               reject(err);
             });
         });
@@ -97,7 +98,7 @@ export default Service.extend({
     const user = this.get('sessionAccount').currentUserName;
     const token = "Bearer " + this.get('sessionAccount').bearerToken;
     const params = "?user=" + user + "&documentId=" + doc;
-    console.log('flagging doc', { user: user , documentId: doc})
+    this.get('cs').log('flagging doc', { user: user , documentId: doc})
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "GET",

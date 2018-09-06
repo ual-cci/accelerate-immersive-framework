@@ -6,6 +6,7 @@ import config from  '../config/environment';
 export default Service.extend({
   parser:inject('code-parsing'),
   sessionAccount:inject('session-account'),
+  cs:inject('console'),
   ops: null,
   opsToApply: null,
   ptr: 0,
@@ -112,7 +113,7 @@ export default Service.extend({
           }
           if(toApply.length > 0)
           {
-            console.log(toApply);
+            this.get('cs').log(toApply);
             this.set('opsToApply', toApply);
           }
         }
