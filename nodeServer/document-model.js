@@ -249,7 +249,9 @@ function startDocAPI(app)
 
     const query = {
       $and: [searchTermOr,
-             {$or: [{owner: currentUser}, {isPrivate: false}]}],
+             {parent: null},
+             {$or: [{owner: currentUser}, {isPrivate: false}]}
+           ],
       $sort: s,
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
@@ -264,8 +266,7 @@ function startDocAPI(app)
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
-        const data = results.map(fn);
-        res.status(200).send({data:data});
+        res.status(200).send({data:results.map(fn)});
       }
     });
   });
@@ -327,11 +328,22 @@ function startDocAPI(app)
 
   app.post('/documents', app.oauth.authorise(), (req,res) => {
     let attr = req.body.data.attributes;
+    console.log(attr);
     createDoc(attr)
-    .then(function(doc){
+    .then(function(doc) {
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
+      if(attr.parent) {
+        var parent = shareDBConnection.get(contentCollectionName, attr.parent);
+        parent.fetch(function(err) {
+          if (!err && parent.data) {
+            let children  = parent.data.children;
+            children.push(doc.data.documentId);
+            parent.submitOp({p:['children'],oi:children},{source:'server'});
+          }
+        });
+      }
       if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
@@ -398,7 +410,9 @@ function createDoc(attr) {
             newEval:"",
             stats:{views:0, forks:0, edits:0},
             flags:0,
-            dontPlay:false
+            dontPlay:false,
+            children:[],
+            parent:attr.parent
           },()=> {
             let op = {};
             op.p = ['source',0];

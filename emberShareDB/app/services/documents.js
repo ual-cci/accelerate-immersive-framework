@@ -8,7 +8,10 @@ export default Service.extend({
   store: inject('store'),
   sessionAccount:inject('session-account'),
   cs:inject('console'),
-  makeNewDoc(docName, isPrivate, source, forkedFrom) {
+  getDefaultSource() {
+    return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
+  },
+  makeNewDoc(docName, isPrivate, source, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
@@ -17,11 +20,12 @@ export default Service.extend({
         isPrivate:isPrivate,
         name:docName,
         documentId:null,
-        forkedFrom:forkedFrom
+        forkedFrom:forkedFrom,
+        parent:parent
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
-        resolve();
+        resolve(doc);
       }).catch((err)=>{
         this.get('cs').log("error creating record");
         doc.deleteRecord();

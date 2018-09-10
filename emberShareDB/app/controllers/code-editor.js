@@ -27,7 +27,8 @@ export default Controller.extend({
 
   //Parameters
   con: null,
-  doc: null,
+  rootDoc: null,
+  currentDoc:null,
   editor: null,
   suppress: false,
   codeTimer: new Date(),
@@ -170,26 +171,18 @@ export default Controller.extend({
           this.set('wsAvailable', true);
           if(!this.get('fetchingDoc'))
           {
-            this.initDoc();
+            this.initRootDoc();
           }
         }
 
         socket.onerror = () => {
           this.get('cs').log("web socket error");
-          this.set('wsAvailable', false);
-          if(!this.get('fetchingDoc'))
-          {
-            this.initDoc();
-          }
+          this.websocketError();
         }
 
         socket.onclose = () =>  {
           this.get('cs').log("web socket close");
-          this.set('wsAvailable', false);
-          if(!this.get('fetchingDoc'))
-          {
-            this.initDoc();
-          }
+          this.websocketError();
         }
 
         socket.onmessage = (event) =>  {
@@ -199,15 +192,18 @@ export default Controller.extend({
       catch (err)
       {
         this.get('cs').log("web sockets not available");
-        this.set('wsAvailable', false);
-        if(!this.get('fetchingDoc'))
-        {
-          this.initDoc();
-        }
+        this.websocketError();
       }
     }
   },
-  initDoc: function() {
+  websocketError() {
+    this.set('wsAvailable', false);
+    if(!this.get('fetchingDoc'))
+    {
+      this.initRootDoc();
+    }
+  },
+  initRootDoc: function() {
     this.get('cs').log("init doc");
     this.set('fetchingDoc', true);
     this.get('opsPlayer').reset();
@@ -224,7 +220,7 @@ export default Controller.extend({
       {
         this.get('cs').log("failed to connect to ShareDB", con);
         this.set('wsAvailable', false);
-        this.fetchDoc();
+        this.fetchRootDoc();
       }
       this.set('connection', con);
       const doc = con.get(config.contentCollectionName,this.get('model').id);
@@ -236,7 +232,8 @@ export default Controller.extend({
         this.get('cs').log("subscribed to doc");
         if(!isEmpty(doc.data))
         {
-          this.set('doc', doc);
+          this.set('rootDoc', doc);
+          this.set('currentDoc', doc);
           this.didReceiveDoc();
         }
       });
@@ -244,15 +241,34 @@ export default Controller.extend({
     }
     else
     {
-      this.fetchDoc();
+      this.fetchRootDoc();
     }
   },
-  fetchDoc() {
+  fetchRootDoc() {
     this.get('store').findRecord('document',this.get('model').id).then((doc) => {
       this.get('cs').log("found record", doc.data);
-      this.set('doc', doc);
+      this.set('rootDoc', doc);
+      this.set('currentDoc', doc);
       this.didReceiveDoc();
     });
+  },
+  didReceiveDoc: function() {
+    const doc = this.get('currentDoc');
+    const editor = this.get('editor');
+    const session = editor.getSession();
+    this.set('surpress', true);
+    session.setValue(doc.data.source);
+    this.set('surpress', false);
+    this.set('savedVals', doc.data.savedVals);
+    this.get('cs').log("did receive doc");
+    this.setCanEditDoc();
+    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+    stats.views = parseInt(stats.views) + 1;
+    this.submitOp({p:['stats'],oi:stats},{source:true});
+    editor.setReadOnly(!this.get('canEditDoc'));
+    this.preloadAssets();
+    this.get('sessionAccount').set('currentDoc',this.get('model').id);
+    this.set('fetchingDoc', false);
   },
   didReceiveOp: function (ops,source) {
     const embed = this.get('embed') == "true";
@@ -278,28 +294,9 @@ export default Controller.extend({
       }
     }
   },
-  didReceiveDoc: function() {
-    const doc = this.get('doc');
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    this.set('surpress', true);
-    session.setValue(doc.data.source);
-    this.set('surpress', false);
-    this.set('savedVals', doc.data.savedVals);
-    this.get('cs').log("did receive doc");
-    this.setCanEditDoc();
-    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
-    stats.views = parseInt(stats.views) + 1;
-    this.submitOp({p:['stats'],oi:stats},{source:true});
-    editor.setReadOnly(!this.get('canEditDoc'));
-    this.preloadAssets();
-    this.get('sessionAccount').set('currentDoc',this.get('model').id);
-    this.set('fetchingDoc', false);
-  },
-  submitOp: function(op, retry = 0)
-  {
+  submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('doc');
+      const doc = this.get('currentDoc');
       const MAX_RETRIES = 5;
       if(this.get('droppedOps').length > 0) {
         return reject();
@@ -363,7 +360,7 @@ export default Controller.extend({
     editor.setFontSize(this.get('fontSize'));
   },
   doPlay: function() {
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     const embed = this.get('embed') == "true";
     const displayEditor = this.get('displayEditor');
     if(embed || !displayEditor) {
@@ -372,7 +369,7 @@ export default Controller.extend({
     return doc.data.dontPlay === "false" || !doc.data.dontPlay;
   },
   preloadAssets: function() {
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     if(!isEmpty(doc.data.assets))
     {
       this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
@@ -387,7 +384,6 @@ export default Controller.extend({
       this.get('cs').log("no assets to preload", this.doPlay());
       if(this.doPlay())
       {
-        this.get('cs').log("DO PLAY");
         this.updateIFrame();
       }
     }
@@ -406,16 +402,14 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
-    //this.get('cs').log("updating iframe");
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     const editor = this.get('editor');
     const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
     let toRender = selection ? this.getSelectedText() : mainText;
     toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    //this.get('cs').log(toRender);
     if(selection)
     {
       this.submitOp( {p:['newEval'],oi:toRender},{source:true});
@@ -444,11 +438,12 @@ export default Controller.extend({
       "jshint": {"esversion": 6, "asi" : true}
     }
     const editor = this.get('editor');
-    const doc = this.get('doc');
+    const doc = this.get('currentDoc');
     const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
-    var messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    var errors = [], message;
-    for(var i=0, l=messages.length;i<l;i++){
+    const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
+    let errors = [], message;
+    for(let i = 0; i < messages.length; i++)
+    {
         message = messages[i];
         errors.push({
             row: message.line-1,
@@ -477,7 +472,7 @@ export default Controller.extend({
   },
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
-    const doc = this.get('doc');
+    const doc = this.get('currentDoc');
     if(!surpress)
     {
       const editor = this.editor;
@@ -529,11 +524,11 @@ export default Controller.extend({
   handleWindowEvent: (e) => {
     const self = e.target.self;
     const embed = self.get('embed') == "true";
-    if (e.origin === config.localOrigin && !embed)
+    if (e.origin === config.localOrigin && !embed && !isEmpty(e.data))
     {
       if(e.data[0].substring(0,2)=="p_")
       {
-        const doc = self.get('doc');
+        const doc = self.get('rootDoc');
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
         self.set('savedVals', savedVals);
@@ -552,7 +547,7 @@ export default Controller.extend({
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     if(isEmpty(currentUser) || isEmpty(doc.data))
     {
       this.set('canEditDoc', false);
@@ -575,7 +570,7 @@ export default Controller.extend({
     this.set('canEditDoc', this.get('displayEditor'));
   },
   deleteCurrentDocument: function() {
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     this.get('documentService').deleteDoc(doc.id)
     .then(() => {
       this.transitionToRoute('application');
@@ -585,7 +580,7 @@ export default Controller.extend({
   },
   skipOp:function(prev, rewind = false) {
     const editor = this.get('editor');
-    const doc = this.get('doc').id;
+    const doc = this.get('currentDoc').id;
     const fn = (deltas) => {
       this.set('surpress', true);
       editor.session.getDocument().applyDeltas(deltas);
@@ -602,14 +597,10 @@ export default Controller.extend({
       .then((deltas)=>{fn(deltas)});
     }
   },
-  getDefaultSource: function()
-  {
-    return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
-  },
   updateSavedVals: function()
   {
     return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('doc');
+      const doc = this.get('rootDoc');
       const savedVals = this.get('savedVals');
       if(isEmpty(savedVals))
       {
@@ -637,7 +628,7 @@ export default Controller.extend({
   },
   updateEditStats: function() {
     return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('doc');
+      const doc = this.get('rootDoc');
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
       stats.edits = parseInt(stats.edits) + this.get('editCtr');
       const actions = [
@@ -653,7 +644,7 @@ export default Controller.extend({
     });
   },
   refreshDoc: function() {
-    const doc = this.get('doc');
+    const doc = this.get('rootDoc');
     this.get('cs').log('refreshing', doc);
     if(!isEmpty(doc))
     {
@@ -668,7 +659,7 @@ export default Controller.extend({
         this.set('doc', null);
         if(!isEmpty(this.get('editor')))
         {
-          this.initDoc();
+          this.initRootDoc();
         }
       };
       const actions = [this.updateEditStats(), this.updateSavedVals()];
@@ -715,7 +706,7 @@ export default Controller.extend({
 
     //DOC PROPERTIES
     tagsChanged(tags) {
-      const doc = this.get('doc');
+      const doc = this.get('rootDoc');
       this.submitOp({p:['tags'],oi:tags},{source:true});
     },
     doEditDocName() {
@@ -729,7 +720,7 @@ export default Controller.extend({
     },
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
-      const doc = this.get('doc');
+      const doc = this.get('rootDoc');
       const newName = this.get('model').name;
       this.submitOp({p:['name'],oi:newName},{source:true});
     },
@@ -745,7 +736,7 @@ export default Controller.extend({
     flagDocument() {
       this.get('documentService').flagDoc()
       .then(()=> {
-        const doc = this.get('doc');
+        const doc = this.get('rootDoc');
         let flags = parseInt(doc.data.flags);
         if(flags < 2)
         {
@@ -762,7 +753,7 @@ export default Controller.extend({
     },
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
-      const doc = this.get('doc');
+      const doc = this.get('rootDoc');
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
       stats.forks = parseInt(stats.forks) + 1;
       this.submitOp( {p:['stats'],oi:stats},{source:true});
@@ -859,7 +850,7 @@ export default Controller.extend({
     togglePrivacy() {
       if(this.get('canEditDoc'))
       {
-        let doc = this.get('doc');
+        let doc = this.get('rootDoc');
         doc.data.isPrivate = !doc.data.isPrivate;
         this.set('doc', doc);
         this.submitOp( {p:['isPrivate'],oi:doc.data.isPrivate},{source:true});
@@ -868,7 +859,7 @@ export default Controller.extend({
     toggleReadOnly() {
       if(this.get('canEditDoc'))
       {
-        let doc = this.get('doc');
+        let doc = this.get('rootDoc');
         doc.data.readOnly = !doc.data.readOnly;
         this.set('doc', doc);
         this.submitOp( {p:['readOnly'],oi:doc.data.readOnly},{source:true});
@@ -941,11 +932,11 @@ export default Controller.extend({
             this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
-          this.get('doc').destroy();
+          this.get('currentDoc').destroy();
           this.get('socket').close();
         }
         this.get('cs').log('cleaned up');
-        this.set('doc', null);
+        this.set('currentDoc', null);
         this.removeWindowListener();
       }
       const actions = [this.updateEditStats(), this.updateSavedVals()];
@@ -1058,6 +1049,14 @@ export default Controller.extend({
     },
     zoomIn() {
       this.zoomIn();
+    },
+
+    //TABS
+    newTab(docId) {
+
+    },
+    tabSelected(index) {
+
     }
   }
 });

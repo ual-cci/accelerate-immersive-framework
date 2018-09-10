@@ -40,10 +40,6 @@ export default Controller.extend({
     this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
   },
-  getDefaultSource:function()
-  {
-    return "<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body></html>"
-  },
   actions: {
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
@@ -70,10 +66,8 @@ export default Controller.extend({
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
-        this.get('documentService').makeNewDoc(docName,
-          isPrivate,
-          this.getDefaultSource(),
-          null)
+        const src = this.get('documentService').getDefaultSource();
+        this.get('documentService').makeNewDoc(docName, isPrivate, src)
           .then(() => {
             this.get('cs').log("new doc created");
             const currentUser = this.get('sessionAccount').currentUserName;

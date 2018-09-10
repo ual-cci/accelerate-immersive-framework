@@ -188,6 +188,10 @@
   {{#if showPreview}}
   {{/if}}
   {{/if}}
+  {{project-tabs
+    parent = model.documentId
+    onSelect = (action 'tabSelected')
+    onCreate = (action 'newTab')}}
   <div class = "main-container">
     <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
       <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
