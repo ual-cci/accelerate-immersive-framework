@@ -28,6 +28,7 @@ export default Controller.extend({
   //Parameters
   con: null,
   children: [],
+  parentData: {},
   currentDoc:null,
   editor: null,
   suppress: false,
@@ -196,18 +197,19 @@ export default Controller.extend({
       }
     }
   },
-  websocketError() {
+  websocketError: function() {
     this.set('wsAvailable', false);
     if(!this.get('fetchingDoc'))
     {
       this.selectRootDoc();
     }
   },
-  selectRootDoc() {
+  selectRootDoc: function() {
     this.fetchChildren();
+
     this.newDocSelected(this.get('model').id)
   },
-  connectToDoc(docId) {
+  connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("init doc");
       this.set('fetchingDoc', true);
@@ -246,7 +248,7 @@ export default Controller.extend({
       }
     })
   },
-  fetchDoc(docId) {
+  fetchDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
         this.get('cs').log("found record", doc.data);
@@ -254,11 +256,12 @@ export default Controller.extend({
       });
     })
   },
-  newDocSelected(docId) {
-    const doc = this.get('currentDoc');
+  newDocSelected: function(docId) {
+    let doc = this.get('currentDoc');
     if(!isEmpty(doc))
     {
       doc.destroy();
+      this.set('currentDoc', null)
     }
     this.connectToDoc(docId)
     .then((newDoc)=> {
@@ -281,7 +284,7 @@ export default Controller.extend({
     this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets();
-    this.get('sessionAccount').set('currentDoc',this.get('model').id);
+    this.get('sessionAccount').set('currentDoc', this.get('model').id);
     this.set('fetchingDoc', false);
   },
   fetchChildren: function() {
@@ -289,6 +292,11 @@ export default Controller.extend({
     .then((children)=> {
       this.get('cs').log("found children", children);
       this.set('children', children);
+      let pd = {name:this.get('model').data.name, id:this.get('model').id};
+      console.log("setting parentData", pd);
+      this.set('parentData', pd);
+    }).catch((err)=>{
+      this.get('cs').log(err);
     });
   },
   didReceiveOp: function (ops,source) {
@@ -381,19 +389,19 @@ export default Controller.extend({
     editor.setFontSize(this.get('fontSize'));
   },
   doPlay: function() {
-    const doc = this.get('model');
+    let model = this.get('model');
     const embed = this.get('embed') == "true";
     const displayEditor = this.get('displayEditor');
     if(embed || !displayEditor) {
       return true;
     }
-    return doc.data.dontPlay === "false" || !doc.data.dontPlay;
+    return model.data.dontPlay === "false" || !model.data.dontPlay;
   },
   preloadAssets: function() {
-    const doc = this.get('model');
-    if(!isEmpty(doc.data.assets))
+    let model = this.get('model');
+    if(!isEmpty(model.data.assets))
     {
-      this.get('assetService').preloadAssets(doc.data.assets).then(()=> {
+      this.get('assetService').preloadAssets(model.data.assets).then(()=> {
         if(this.doPlay())
         {
           this.updateIFrame();
@@ -425,15 +433,15 @@ export default Controller.extend({
   updateIFrame: function(selection = false) {
     this.updateSavedVals();
     const savedVals = this.get('savedVals');
-    const doc = this.get('model');
+    let model = this.get('model');
     const editor = this.get('editor');
-    const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
+    const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
     let toRender = selection ? this.getSelectedText() : mainText;
-    toRender = this.get('codeParser').replaceAssets(toRender, this.get('model').assets);
+    toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
     toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
     if(selection)
     {
-      this.get('documentService').updateDoc(this.get('model').id, 'newEval', toRender);
+      this.get('documentService').updateDoc(model.id, 'newEval', toRender);
       document.getElementById("output-iframe").contentWindow.eval(toRender);
     }
     else
@@ -549,7 +557,6 @@ export default Controller.extend({
     {
       if(e.data[0].substring(0,2)=="p_")
       {
-        const doc = self.get('model');
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
         self.set('savedVals', savedVals);
@@ -568,17 +575,17 @@ export default Controller.extend({
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
-    const doc = this.get('model');
-    if(isEmpty(currentUser) || isEmpty(doc.data))
+    let model = this.get('model');
+    if(isEmpty(currentUser) || isEmpty(model.data))
     {
       this.set('canEditDoc', false);
       this.set('isOwner', false);
       return;
     }
-    if(currentUser != doc.data.owner)
+    if(currentUser != model.data.owner)
     {
       this.set('isOwner', false);
-      if(doc.data.readOnly)
+      if(model.data.readOnly)
       {
         this.set('canEditDoc', false);
         return;
@@ -591,8 +598,8 @@ export default Controller.extend({
     this.set('canEditDoc', this.get('displayEditor'));
   },
   deleteCurrentDocument: function() {
-    const doc = this.get('model');
-    this.get('documentService').deleteDoc(doc.id)
+    let model = this.get('model');
+    this.get('documentService').deleteDoc(model.id)
     .then(() => {
       this.transitionToRoute('application');
     }).catch((err) => {
@@ -648,12 +655,12 @@ export default Controller.extend({
   },
   updateEditStats: function() {
     return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('model');
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      let model = this.get('model');
+      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
       stats.edits = parseInt(stats.edits) + this.get('editCtr');
       const actions = [
-        this.get('documentService').updateDoc(this.get('model').id, "stats", stats),
-        this.get('documentService').updateDoc(this.get('model').id, 'lastEdited', new Date())
+        this.get('documentService').updateDoc(model.id, 'stats', stats),
+        this.get('documentService').updateDoc(model.id, 'lastEdited', new Date())
       ];
       Promise.all(actions).then(()=> {
         this.set('editCtr', 0);
@@ -676,7 +683,6 @@ export default Controller.extend({
         {
           doc.destroy();
         }
-        this.set('doc', null);
         if(!isEmpty(this.get('editor')))
         {
           this.selectRootDoc();
@@ -740,7 +746,6 @@ export default Controller.extend({
     },
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
-      const doc = this.get('model');
       const newName = this.get('model').name;
       this.get('documentService').updateDoc(this.get('model').id, 'name', newName)
     },
@@ -756,12 +761,12 @@ export default Controller.extend({
     flagDocument() {
       this.get('documentService').flagDoc()
       .then(()=> {
-        const doc = this.get('model');
-        let flags = parseInt(doc.data.flags);
+        let model = this.get('model');
+        let flags = parseInt(model.data.flags);
         if(flags < 2)
         {
           flags = flags + 1;
-          this.get('documentService').updateDoc(this.get('model').id, 'flags', flags);
+          this.get('documentService').updateDoc(model.id, 'flags', flags);
         }
         else
         {
@@ -773,19 +778,19 @@ export default Controller.extend({
     },
     forkDocument() {
       const currentUser = this.get('sessionAccount').currentUserName;
-      const doc = this.get('model');
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      let model = this.get('model');
+      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
       stats.forks = parseInt(stats.forks) + 1;
-      this.get('documentService').updateDoc(this.get('model').id, "stats", stats)
+      this.get('documentService').updateDoc(model.id, 'stats', stats)
       let newDoc = this.get('store').createRecord('document', {
-        source:doc.data.source,
+        source:model.data.source,
         owner:currentUser,
-        isPrivate:doc.data.isPrivate,
-        name:doc.data.name,
+        isPrivate:model.data.isPrivate,
+        name:model.data.name,
         documentId:null,
-        forkedFrom:doc.id,
-        assets:doc.data.assets,
-        tags:doc.data.tags
+        forkedFrom:model.id,
+        assets:model.data.assets,
+        tags:model.data.tags
       });
       newDoc.save().then((response)=>{
         this.get('store').query('document', {
@@ -870,19 +875,17 @@ export default Controller.extend({
     togglePrivacy() {
       if(this.get('canEditDoc'))
       {
-        let doc = this.get('model');
-        doc.data.isPrivate = !doc.data.isPrivate;
-        this.set('doc', doc);
-        this.get('documentService').updateDoc(this.get('model').id, 'isPrivate', doc.data.isPrivate)
+        let model = this.get('model');
+        model.data.isPrivate = !model.data.isPrivate;
+        this.get('documentService').updateDoc(model.id, 'isPrivate', model.data.isPrivate)
       }
     },
     toggleReadOnly() {
       if(this.get('canEditDoc'))
       {
-        let doc = this.get('model');
-        doc.data.readOnly = !doc.data.readOnly;
-        this.set('doc', doc);
-        this.get('documentService').updateDoc(this.get('model').id, 'readOnly', doc.data.readOnly);
+        let model = this.get('model');
+        model.data.readOnly = !model.data.readOnly;
+        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly);
       }
     },
     toggleAllowDocDelete() {
@@ -953,10 +956,10 @@ export default Controller.extend({
             this.get('cs').log("websocket closed");
           };
           this.get('currentDoc').destroy();
+          this.set('currentDoc', null);
           this.get('socket').close();
         }
         this.get('cs').log('cleaned up');
-        this.set('currentDoc', null);
         this.removeWindowListener();
       }
       const actions = [this.updateEditStats(), this.updateSavedVals()];

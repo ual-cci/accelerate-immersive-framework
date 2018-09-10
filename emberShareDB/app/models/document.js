@@ -18,5 +18,5 @@ export default DS.Model.extend({
   flags:DS.attr('number'),
   dontPlay:DS.attr('boolean'),
   children:DS.attr(),
-  parent:DS.attr('string')
+  parent:DS.attr('string'),
 });

@@ -55,16 +55,21 @@ export default Service.extend({
   },
   updateDoc(docId, field, value) {
     this.get('cs').log(field, value)
-    return new Promise((resolve, reject) => {
+    return new RSVP.Promise((resolve, reject) => {
+      //docId = "a4ba8f3b-ec7e-7678-8fd2-c82f3150d8ea";
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        this.get('cs').log("before", doc.get(field))
         doc.set(field, value);
-        this.get('cs').log("after", doc.get(field))
         doc.save().then(()=> {
           resolve()
+        }).catch((err)=>{
+          this.get('cs').log(err);
+          reject(err)
         });
-      })
+      }).catch((err)=>{
+        this.get('cs').log(err);
+        reject(err)
+      });
     });
   },
   getPopularTags(limit) {

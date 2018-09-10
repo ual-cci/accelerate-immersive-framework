@@ -25,6 +25,7 @@ export default Component.extend({
       const docId = this.get('document').documentId;
       this.get('store').findRecord('document', docId)
       .then((doc) => {
+        console.log("hehre");
         const toggled = !doc.data.dontPlay;
         const op = {p:["dontPlay"], oi:toggled ? "true":"false"}
         this.get('documentService').submitOp(op, docId);

@@ -10,7 +10,7 @@ export default Component.extend({
   actions:{
     createNewDocument() {
       const parent = this.get('parent');
-      this.get('documentService').makeNewDoc("newTab", true, "", "", parent.documentId)
+      this.get('documentService').makeNewDoc("newTab", true, "", "", parent.id)
       .then((doc)=> {
         this.get('onCreate')(doc.documentId)
       }).catch((error) => {

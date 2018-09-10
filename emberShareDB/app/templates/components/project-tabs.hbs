@@ -5,9 +5,9 @@
   {{/bs-button}}
   <div class = "container-fluid">
     <div class = "row">
-      {{tab-item document=parent  onSelect = onSelect}}
+      {{tab-item name=parent.name id=parent.id onSelect = onSelect}}
       {{#each tabs as |tab index|}}
-        {{tab-item document=tab  onSelect = onSelect}}
+        {{tab-item name=tab.data.name id=tab.data.documentId  onSelect = onSelect}}
       {{/each}}
     </div>
   </div>
