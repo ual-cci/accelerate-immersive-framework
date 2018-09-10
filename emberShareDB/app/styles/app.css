@@ -52,19 +52,23 @@
 .drag-button {
   position:absolute;
   top: 40;
-  left: 40;
+  left: 10;
   z-index: 20;
   height:100%;
-  width:40px;
+  width:10px;
   opacity:0.0;
   cursor:col-resize;
   background-color:white;
   pointer-events: auto;
 }
 
+#console {
+  width:100vw;
+}
+
 .main-container {
   width:100vw;
-  height:80vh;
+  height:65vh;
   display:inline-block;
   position:relative;
   overflow:hidden;
@@ -77,6 +81,7 @@
   top: 0;
   left: 0;
   z-index: 1;
+  overflow: auto;
 }
 
 #output-iframe {

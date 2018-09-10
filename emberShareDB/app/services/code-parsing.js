@@ -5,6 +5,7 @@ import walk from 'npm:acorn/dist/walk'
 
 export default Service.extend({
   store:inject('store'),
+  cs:inject('console'),
   script:"",
   savedVals:null,
   hasPVals:false,
@@ -12,6 +13,7 @@ export default Service.extend({
     let newSrc = "";
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
+    let didEdit = false;
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
     {
@@ -89,30 +91,55 @@ export default Service.extend({
               ops.push({si:msg, p:index})
               this.set('hasPVals', true);
             }
+          },
+          CallExpression: (node) => {
+            if(!isEmpty(node.callee.object))
+            {
+              if(node.callee.object.name === "console")
+              {
+                let output = ""
+                for(let j = 0; j < node.arguments.length; j++)
+                {
+                  const arg = node.arguments[j];
+                  const val = script.script.substring(arg.start, arg.end);
+                  let delim = j < node.arguments.length - 1 ? "," : ""
+                  output = output + "JSON.stringify(" + val + ")" + delim;
+                }
+                const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
+                let index = node.end;
+                const end = script.script.substring(index, index + 1);
+                if(end == ";")
+                {
+                  index++;
+                }
+                ops.push({si:msg, p:index})
+              }
+            }
           }
         });
       } catch (err) {
-        console.log("didnt parse script, probably src")
+        this.get('cs').log("didnt parse script, probably src")
         parsed = false;
       }
       if(parsed)
       {
         let offset = 0;
         let newScript = script.script;
-        for(let i = 0; i < ops.length; i ++)
+        for(let j = 0; j < ops.length; j ++)
         {
-          if(ops[i].si)
+          didEdit = true;
+          if(ops[j].si)
           {
-            const str = ops[i].si;
-            const index = ops[i].p + offset;
-            console.log("inserting " + str + " at " + index);
+            const str = ops[j].si;
+            const index = ops[j].p + offset;
+            //this.get('cs').log("inserting " + str + " at " + index);
             newScript = newScript.slice(0, index) + str + newScript.slice(index);
             offset += str.length;
           }
-          else if (ops[i].sd)
+          else if (ops[j].sd)
           {
-            const len = ops[i].sd.length;
-            const index = ops[i].p + offset;
+            const len = ops[j].sd.length;
+            const index = ops[j].p + offset;
             newScript = newScript.slice(0, index) + newScript.slice(index + len);
             offset -= len;
           }
@@ -126,7 +153,8 @@ export default Service.extend({
       newSrc = newSrc + script.post;
     }
     //return newSrc;
-    return this.get('hasPVals') ? newSrc : src;
+    this.get('cs').log(newSrc);
+    return didEdit ? newSrc : src;
   },
   getScripts(source) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0, startIndex = 0;

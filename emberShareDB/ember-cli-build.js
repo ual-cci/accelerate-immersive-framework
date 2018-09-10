@@ -7,8 +7,9 @@ module.exports = function(defaults) {
     // Add options here
     ace: {
       themes: ['monokai'],
-      modes: ['html'],
-      workers: ['html']
+      modes: ['html', 'javascript'],
+      workers: ['html', 'javascript'],
+      exts: ['language_tools']
     },
 
     'ember-bootstrap': {

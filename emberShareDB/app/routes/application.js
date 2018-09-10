@@ -4,12 +4,13 @@ import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mi
 
 export default Route.extend(ApplicationRouteMixin, {
   activate() {
-    console.log('entering application route');
+    this.get('cs').log('entering application route');
   },
+  cs:inject('console'),
   sessionAccount: inject('session-account'),
   session: inject('session'),
   beforeModel() {
-    console.log('beforeModel application route');
+    this.get('cs').log('beforeModel application route');
      this._loadCurrentUser();
   },
   sessionAuthenticated() {
@@ -17,7 +18,7 @@ export default Route.extend(ApplicationRouteMixin, {
     this._loadCurrentUser();
   },
   _loadCurrentUser() {
-    console.log('loading current user');
+    this.get('cs').log('loading current user');
     this.get('sessionAccount').loadCurrentUser()
     .then(() => {
       this.get('sessionAccount').updateOwnedDocuments();

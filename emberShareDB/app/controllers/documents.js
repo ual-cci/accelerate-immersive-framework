@@ -6,6 +6,7 @@ import { isEmpty } from '@ember/utils';
 export default Controller.extend({
   store:inject(),
   session:inject('session'),
+  cs:inject('console'),
   documentService: inject('documents'),
   docName:"",
   isPrivate:true,
@@ -36,7 +37,7 @@ export default Controller.extend({
     {
       searchTerm = " ";
     }
-    console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+    this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
   },
   getDefaultSource:function()
@@ -51,11 +52,11 @@ export default Controller.extend({
       if (confirm('Are you sure you want to delete?')) {
         this.get('documentService').deleteDoc(documentId)
         .then(() => {
-          console.log("deleted, updating results");
+          this.get('cs').log("deleted, updating results");
           this.set('searchTerm', this.get('sessionAccount').currentUserName);
           this.updateResults();
         }).catch((err) => {
-          console.log("error deleting", err);
+          this.get('cs').log("error deleting", err);
           this.set('feedbackMessage',err.errors[0]);
         });
       }
@@ -74,7 +75,7 @@ export default Controller.extend({
           this.getDefaultSource(),
           null)
           .then(() => {
-            console.log("new doc created");
+            this.get('cs').log("new doc created");
             const currentUser = this.get('sessionAccount').currentUserName;
             this.get('store').query('document', {
               filter: {search: docName,
@@ -82,12 +83,12 @@ export default Controller.extend({
                 currentUser: currentUser,
                 sortBy: 'date'}
             }).then((documents) => {
-              console.log("new doc found, transitioning", documents);
+              this.get('cs').log("new doc found, transitioning", documents);
               this.get('sessionAccount').updateOwnedDocuments();
               this.transitionToRoute('code-editor', documents.firstObject.documentId);
             });
           }).catch((err) => {
-            console.log("error making doc", err);
+            this.get('cs').log("error making doc", err);
             this.set('feedbackMessage', err);
           });
       }

@@ -5,6 +5,7 @@ import { isEmpty } from '@ember/utils';
 export default Service.extend({
   session: inject('session'),
   store: inject(),
+  cs:inject('console'),
   currentUserName:"",
   bearerToken:"",
   currentDoc:"",
@@ -38,7 +39,7 @@ export default Service.extend({
         this.set('currentUserName', currentUserName);
         resolve();
       } else {
-        console.log('currentUserName empty, rejecting');
+        this.get('cs').log('currentUserName empty, rejecting');
         reject();
       }
     });
