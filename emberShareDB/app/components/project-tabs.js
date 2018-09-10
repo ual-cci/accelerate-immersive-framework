@@ -3,19 +3,19 @@ import { inject } from '@ember/service';
 
 export default Component.extend({
   documentService:inject('documents'),
+  didReceiveAttrs() {
+    this._super(...arguments);
+    const parent = this.get('parent');
+  },
   actions:{
     createNewDocument() {
       const parent = this.get('parent');
-      console.log("parent", parent);
-      this.get('documentService').makeNewDoc("newTab", true, "", null, parent)
+      this.get('documentService').makeNewDoc("newTab", true, "", null, parent.documentId)
       .then((doc)=> {
         this.get('onCreate')(doc.documentId)
       }).catch((error) => {
         console.log(error);
       });
-    },
-    tabSelected(index) {
-
     }
   }
 });

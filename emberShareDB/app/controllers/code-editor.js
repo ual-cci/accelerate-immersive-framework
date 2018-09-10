@@ -28,6 +28,7 @@ export default Controller.extend({
   //Parameters
   con: null,
   rootDoc: null,
+  children: [],
   currentDoc:null,
   editor: null,
   suppress: false,
@@ -232,9 +233,7 @@ export default Controller.extend({
         this.get('cs').log("subscribed to doc");
         if(!isEmpty(doc.data))
         {
-          this.set('rootDoc', doc);
-          this.set('currentDoc', doc);
-          this.didReceiveDoc();
+          this.didReceiveRootDoc(doc);
         }
       });
       doc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
@@ -247,10 +246,14 @@ export default Controller.extend({
   fetchRootDoc() {
     this.get('store').findRecord('document',this.get('model').id).then((doc) => {
       this.get('cs').log("found record", doc.data);
-      this.set('rootDoc', doc);
-      this.set('currentDoc', doc);
-      this.didReceiveDoc();
+      this.didReceiveRootDoc(doc);
     });
+  },
+  didReceiveRootDoc(doc) {
+    this.set('rootDoc', doc);
+    this.set('currentDoc', doc);
+    this.fetchChildren();
+    this.didReceiveDoc();
   },
   didReceiveDoc: function() {
     const doc = this.get('currentDoc');
@@ -269,6 +272,13 @@ export default Controller.extend({
     this.preloadAssets();
     this.get('sessionAccount').set('currentDoc',this.get('model').id);
     this.set('fetchingDoc', false);
+  },
+  fetchChildren: function() {
+    const rootDoc = this.get('rootDoc');
+    this.get('documentService').getChildren(rootDoc)
+    .then((children)=> {
+      this.set('children', children);
+    });
   },
   didReceiveOp: function (ops,source) {
     const embed = this.get('embed') == "true";
@@ -1055,8 +1065,8 @@ export default Controller.extend({
     newTab(docId) {
 
     },
-    tabSelected(index) {
-
+    tabSelected(docId) {
+      this.get('cs').log("TAB SELECTED", docId)
     }
   }
 });

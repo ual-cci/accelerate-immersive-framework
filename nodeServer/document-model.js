@@ -289,7 +289,7 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
-    console.log('fetching doc');
+    console.log('fetching doc', req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -298,6 +298,7 @@ function startDocAPI(app)
       else
       {
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
+        console.log("returning doc", doc.data.documentId);
         res.status(200).send({data:reply});
       }
     });
@@ -328,7 +329,6 @@ function startDocAPI(app)
 
   app.post('/documents', app.oauth.authorise(), (req,res) => {
     let attr = req.body.data.attributes;
-    console.log(attr);
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');

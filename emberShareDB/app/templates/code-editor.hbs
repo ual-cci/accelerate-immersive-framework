@@ -189,7 +189,8 @@
   {{/if}}
   {{/if}}
   {{project-tabs
-    parent = model.documentId
+    parent = model
+    tabs = children
     onSelect = (action 'tabSelected')
     onCreate = (action 'newTab')}}
   <div class = "main-container">

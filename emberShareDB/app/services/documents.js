@@ -114,5 +114,16 @@ export default Service.extend({
           reject(err);
         });
     });
+  },
+  getChildren(parent) {
+    return new RSVP.Promise((resolve, reject) => {
+      let fn = (docId) => {
+        return new RSVP.Promise((resolve, reject) => {
+          this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));
+        })
+      }
+      let actions = parent.data.children.map(fn);
+      Promise.all(actions).then((values) => resolve(values)).catch((err)=>reject(err));
+    });
   }
 });
