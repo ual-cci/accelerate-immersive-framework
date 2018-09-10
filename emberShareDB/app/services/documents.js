@@ -53,6 +53,20 @@ export default Service.extend({
         });
     });
   },
+  updateDoc(docId, field, value) {
+    this.get('cs').log(field, value)
+    return new Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId)
+      .then((doc) => {
+        this.get('cs').log("before", doc.get(field))
+        doc.set(field, value);
+        this.get('cs').log("after", doc.get(field))
+        doc.save().then(()=> {
+          resolve()
+        });
+      })
+    });
+  },
   getPopularTags(limit) {
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({

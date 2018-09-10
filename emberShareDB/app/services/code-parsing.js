@@ -153,7 +153,7 @@ export default Service.extend({
       newSrc = newSrc + script.post;
     }
     //return newSrc;
-    this.get('cs').log(newSrc);
+    //this.get('cs').log(newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {

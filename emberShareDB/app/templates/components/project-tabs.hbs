@@ -1,9 +1,14 @@
-<div class = "project-tab">
+<div class = "project-tabs">
   {{#bs-button class = "add-file-button"
     icon="glyphicon glyphicon-plus"
     onClick=(action 'createNewDocument')}}
   {{/bs-button}}
-  {{#each tabs as |tab index|}}
-    {{tab-item document=tab  onSelect = onSelect}}
-  {{/each}}
+  <div class = "container-fluid">
+    <div class = "row">
+      {{tab-item document=parent  onSelect = onSelect}}
+      {{#each tabs as |tab index|}}
+        {{tab-item document=tab  onSelect = onSelect}}
+      {{/each}}
+    </div>
+  </div>
 </div>

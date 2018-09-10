@@ -143,44 +143,14 @@ function startDocAPI(app)
 {
   app.post('/submitOp', app.oauth.authorise(), (req,res) => {
     const op = req.body.op;
-    if(op.p)
-    {
-      const asInt = parseInt(op.p[1]);
-      if(!isNaN(asInt))
-      {
-        op.p[1] = asInt;
-      }
-    }
-    if(!op.si && !op.sd && !op.oi)
-    {
-      res.status(400);
-      res.json({errors:["no objects in op"]});
-      return;
-    }
-
     const docId = req.body.documentId;
-    const doc = shareDBConnection.get(contentCollectionName, docId);
-    doc.fetch((err)=>{
-      if(err) {
-        console.log(err);
-        res.status(400);
-        res.json({errors:["errorFetching",err]});
-        return;
-      }
-      doc.submitOp(op, (err)=> {
-        if(err)
-        {
-          console.log("error submitting op",err);
-          res.status(400);
-          res.json({errors:["errorSubmitting",err]});
-        }
-        else
-        {
-          console.log("success submitting op");
-          res.sendStatus(200);
-        }
-      });
-    });
+    submitOp(docId, op)
+    .then(()=>{
+      res.sendStatus(200);
+    }).catch((err)=> {
+      res.status(400);
+      res.json(err);
+    })
   });
 
   app.get('/tags', (req, res) => {
@@ -289,7 +259,6 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
-    console.log('fetching doc', req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -298,14 +267,14 @@ function startDocAPI(app)
       else
       {
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
-        console.log("returning doc", doc.data.documentId);
         res.status(200).send({data:reply});
       }
     });
   });
 
   app.patch('/documents/:id', (req,res) => {
-    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    const docId = req.params.id;
+    var doc = shareDBConnection.get(contentCollectionName, docId);
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -313,8 +282,36 @@ function startDocAPI(app)
       }
       else
       {
-        let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
-        res.status(200).send({data:reply});
+        let patched = req.body.data.attributes;
+        const current = doc.data;
+        let actions = [];
+        for (var key in current) {
+            if (current.hasOwnProperty(key)) {
+                if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
+                {
+                  console.log("PATCHING", key)
+                  const op = {p:[key],oi:patched[key]};
+                  actions.push(submitOp(docId, op));
+                }
+            }
+        }
+        if(actions.length > 0)
+        {
+          Promise.all(actions).then(()=>{
+            let reply = {attributes:patched, id:docId, type:"document"};
+            res.status(200);
+            res.json({data:reply});
+          }).catch((err)=> {
+            res.status(400);
+            res.json(err);
+          })
+        }
+        else
+        {
+          let reply = {attributes:patched,id:doc.data.documentId,type:"document"};
+          res.status(200).send({data:reply});
+        }
+
       }
     });
   });
@@ -366,6 +363,48 @@ function startDocAPI(app)
 }
 
 //FUNCTIONS
+
+function submitOp(docId, op) {
+  console.log("submitting op", docId, op);
+  return new Promise((resolve, reject) => {
+    if(op.p)
+    {
+      const asInt = parseInt(op.p[1]);
+      if(!isNaN(asInt))
+      {
+        op.p[1] = asInt;
+      }
+    }
+    if(!op.si && !op.sd && !op.oi)
+    {
+      console.log("no objects in op", op)
+      reject({errors:["no objects in op"]});
+      return;
+    }
+    const doc = shareDBConnection.get(contentCollectionName, docId);
+    doc.fetch((err)=>{
+      if(err) {
+        console.log(err);
+        reject({errors:["errorFetching",err]});
+        return;
+      }
+      doc.submitOp(op, (err)=> {
+        if(err)
+        {
+          console.log("error submitting op",err);
+          reject({errors:["errorSubmitting",err]});
+          return;
+        }
+        else
+        {
+          console.log("success submitting op");
+          resolve();
+          return;
+        }
+      });
+    });
+  });
+}
 
 function getNewDocumentId(callback)
 {

@@ -66,6 +66,19 @@
   width:100vw;
 }
 
+#add-file-button {
+  display:inline;
+}
+
+.tab-item {
+  padding:4px 4px 4px 4px;
+  border-radius: 5px;
+}
+
+.project-tabs {
+  display: inline !important;
+}
+
 .main-container {
   width:100vw;
   height:65vh;
