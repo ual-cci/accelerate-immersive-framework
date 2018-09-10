@@ -219,7 +219,7 @@ function startDocAPI(app)
 
     const query = {
       $and: [searchTermOr,
-             {parent: null},
+             {parent: ""},
              {$or: [{owner: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
@@ -331,7 +331,7 @@ function startDocAPI(app)
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      if(attr.parent) {
+      if(attr.parent != "") {
         var parent = shareDBConnection.get(contentCollectionName, attr.parent);
         parent.fetch(function(err) {
           if (!err && parent.data) {
@@ -341,7 +341,7 @@ function startDocAPI(app)
           }
         });
       }
-      if(doc.data.forkedFrom)
+      if(doc.data.forkedFrom != "")
       {
         copyAssets(attr.assets).then((newAssets)=>{
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
@@ -375,7 +375,9 @@ function submitOp(docId, op) {
         op.p[1] = asInt;
       }
     }
-    if(!op.si && !op.sd && !op.oi)
+    if(typeof op.oi == 'undefined' &&
+      typeof op.oi == 'undefined'&&
+      typeof op.oi == 'undefined')
     {
       console.log("no objects in op", op)
       reject({errors:["no objects in op"]});

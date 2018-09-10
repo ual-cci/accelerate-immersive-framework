@@ -11,7 +11,7 @@ export default Service.extend({
   getDefaultSource() {
     return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
   },
-  makeNewDoc(docName, isPrivate, source, forkedFrom = null, parent = null) {
+  makeNewDoc(docName, isPrivate, source, forkedFrom = "", parent = "") {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
