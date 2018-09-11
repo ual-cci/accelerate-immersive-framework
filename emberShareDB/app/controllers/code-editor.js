@@ -330,6 +330,14 @@ export default Controller.extend({
       {
         document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
       }
+      else if (!source && ops[0].p[0] == "children")
+      {
+        this.get('cs').log(ops[0].oi)
+        this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
+        .then(()=>{
+          this.fetchChildren();
+        })
+      }
     }
   },
   submitOp: function(op, retry = 0) {
@@ -1087,7 +1095,7 @@ export default Controller.extend({
 
     //TABS
     newTab(docId) {
-      this.fetchChildren();
+      //this.newDocSelected(this.get("currentDoc").data.documentId);
     },
     tabSelected(docId) {
       this.get('cs').log("TAB SELECTED", docId)
