@@ -13,13 +13,14 @@ export default Service.extend({
   insertStyleSheets(source, children) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
     let linkStartIndex = 0, tagStartIndex = 0;
-    let searchStrs = ['<link', ">"];
+    let searchStrs = ["<link", "/>"];
     let preamble = "", tag = "";
     let newSrc = "";
     let found = false;
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         if(ptr == 0)
         {
+          this.get('cs').log("found start of <link");
           searchIndex = index;
           tagStartIndex = searchIndex;
           preamble = source.substring(prevEnd, searchIndex);
@@ -29,10 +30,8 @@ export default Service.extend({
           searchIndex = index + searchStrs[ptr].length;
           linkStartIndex = searchIndex;
           tag = source.substring(tagStartIndex, searchIndex);
-        }
-        else if (ptr == 2)
-        {
           found = true;
+          this.get('cs').log(tag);
           searchIndex = index + searchStrs[ptr].length;
           newSrc = newSrc + preamble;
           let added = false;
@@ -64,8 +63,9 @@ export default Service.extend({
                     newSrc = newSrc + "<style type = \"text/css\" ";
                     if(media)
                     {
-                      newSrc = newSrc + "media = \"" + media + "\" >\n"
+                      newSrc = newSrc + "media = \"" + media+ "\"";
                     }
+                    newSrc = newSrc + ">\n";
                     newSrc = newSrc + children[j].data.source;
                     newSrc = newSrc +"\n</style>";
                     added = true;
