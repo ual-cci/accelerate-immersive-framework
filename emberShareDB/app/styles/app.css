@@ -73,6 +73,15 @@
 .tab-item {
   padding:4px 4px 4px 4px;
   border-radius: 5px;
+  display: inline !important;
+}
+
+.tab-btn {
+  display: inline !important;
+}
+
+.tab-delete-btn {
+  display: inline !important;
 }
 
 .project-tabs {

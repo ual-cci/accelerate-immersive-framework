@@ -54,13 +54,13 @@ export default Service.extend({
     });
   },
   updateDoc(docId, field, value) {
-    this.get('cs').log(field, value)
+    this.get('cs').log("updating doc", field, value)
     return new RSVP.Promise((resolve, reject) => {
-      //docId = "a4ba8f3b-ec7e-7678-8fd2-c82f3150d8ea";
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         doc.set(field, value);
         doc.save().then(()=> {
+          this.get('cs').log("success updating doc")
           resolve()
         }).catch((err)=>{
           this.get('cs').log(err);
@@ -136,6 +136,11 @@ export default Service.extend({
   },
   getChildren(childrenIds) {
     return new RSVP.Promise((resolve, reject) => {
+      if(childrenIds.length == 0)
+      {
+        resolve({children:{}, parent:{}});
+        return;
+      }
       let fetch = (docId) => {
         return new RSVP.Promise((resolve, reject) => {
           this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));

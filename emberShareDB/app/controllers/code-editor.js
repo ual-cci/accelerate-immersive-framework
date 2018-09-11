@@ -63,6 +63,7 @@ export default Controller.extend({
   fetchingDoc:false,
   droppedOps:[],
   consoleOutput:"",
+  tabs:[],
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -255,12 +256,9 @@ export default Controller.extend({
   },
   newDocSelected: function(docId) {
     let doc = this.get('currentDoc');
+    this.get('cs').log("newDocSelected", docId);
     if(!isEmpty(doc))
     {
-      // if(doc.id == this.get('model').id)
-      // {
-      //   this.set("parentSource", doc.data.source);
-      // }
       this.get('cs').log("destroying connection to old doc");
       this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
@@ -296,19 +294,28 @@ export default Controller.extend({
     this.set('fetchingDoc', false);
   },
   fetchChildren: function() {
+    this.get('cs').log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
       let model = this.get('model').data;
+      if(model.children.length == 0)
+      {
+        this.set('tabs', model.children);
+        this.set('children', null);
+        this.set('children', model.children);
+        this.set('parentData', {name:model.name,id:model.documentId,children:model.children});
+        resolve();
+        return;
+      }
       this.get('documentService').getChildren(model.children)
       .then((data)=> {
         this.get('cs').log("got children", data);
         this.set('children', data.children);
         const tabs = data.children.map((child)=> {
-          return {name:child.data.name, id:child.data.documentId};
+          return {name:child.data.name, id:child.id};
         });
         this.set('tabs', tabs);
         const parent = data.parent.data;
-        this.get('cs').log(parent.source);
-        this.set('parentData', {name:parent.name,id:parent.documentId});
+        this.set('parentData', {name:parent.name,id:parent.documentId,children:parent.children});
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -1106,6 +1113,7 @@ export default Controller.extend({
     //TABS
     newTab(docId) {
       //this.newDocSelected(this.get("currentDoc").data.documentId);
+      this.fetchChildren();
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
@@ -1125,6 +1133,24 @@ export default Controller.extend({
       {
          this.newDocSelected(docId);
       }
+    },
+    tabDeleted(docId) {
+      this.get('cs').log('deleting tab', docId);
+      this.get('documentService').deleteDoc(docId)
+      .then(()=> {
+        const children = this.get('model').data.children;
+        var newChildren = children.filter((c) => {return c != docId})
+        this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
+        .then(()=> {
+          this.get('cs').log("Did delete child", this.get('model').data.children);
+          this.fetchChildren();
+        }).catch((err)=> {
+          this.get('cs').log(err);
+        })
+      }).catch((err)=> {
+        this.get('cs').log(err);
+      })
+
     }
   }
 });

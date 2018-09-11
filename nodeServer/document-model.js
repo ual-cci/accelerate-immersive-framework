@@ -266,7 +266,6 @@ function startDocAPI(app)
       }
       else
       {
-        console.log("fetched doc", req.params.id);
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
         res.status(200).send({data:reply});
       }
@@ -290,9 +289,9 @@ function startDocAPI(app)
             if (current.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
-                  if(!key == "source")
+                  if(key !== "source")
                   {
-                    console.log("PATCHING", key)
+                    console.log("PATCHING", key, patched[key])
                     const op = {p:[key], oi:patched[key]};
                     actions.push(submitOp(docId, op));
                   }

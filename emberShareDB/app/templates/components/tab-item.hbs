@@ -1,3 +1,10 @@
 <div class = "col-md-1 tab-item">
-{{#bs-button onClick=(action 'onSelect') }}{{name}}{{/bs-button}}
+{{#bs-button class = "tab-btn" 
+onClick=(action 'onSelect') }}
+{{name}}
+{{/bs-button}}
+{{#bs-button class = "tab-delete-btn"
+onClick=(action 'onDelete')
+icon="glyphicon glyphicon-remove"}}
+{{/bs-button}}
 </div>
