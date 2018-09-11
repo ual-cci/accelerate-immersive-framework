@@ -28,7 +28,7 @@ export default Controller.extend({
   //Parameters
   con: null,
   children: [],
-  parentData: {},
+  parentData: null,
   currentDoc:null,
   editor: null,
   suppress: false,
@@ -205,7 +205,6 @@ export default Controller.extend({
     }
   },
   selectRootDoc: function() {
-    // this.newDocSelected(this.get('model').id)
     this.newDocSelected(this.get('model').id)
   },
   connectToDoc: function(docId) {
@@ -286,16 +285,22 @@ export default Controller.extend({
     this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets();
+
     this.get('sessionAccount').set('currentDoc', this.get('model').id);
     this.set('fetchingDoc', false);
   },
   fetchChildren: function() {
     return new RSVP.Promise((resolve, reject)=> {
-      this.get('documentService').getChildren(this.get('model'))
+      let model = this.get('model').data;
+      this.get('documentService').getChildren(model.children)
       .then((children)=> {
+        this.get('cs').log("got children", children);
         this.set('children', children);
-        let pd = {name:this.get('model').data.name, id:this.get('model').id};
-        this.set('parentData', pd);
+        const tabs = children.map((child)=> {
+          return {name:child.data.name, id:child.data.documentId};
+        });
+        this.set('tabs', tabs);
+        this.set('parentData', {name:model.name,id:model.documentId});
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -455,7 +460,7 @@ export default Controller.extend({
         this.set('renderedSource', toRender);
       }
       this.updateLinting();
-    })
+    });
   },
   updateLinting: function() {
     const ruleSets = {
@@ -1086,7 +1091,22 @@ export default Controller.extend({
     },
     tabSelected(docId) {
       this.get('cs').log("TAB SELECTED", docId)
-      this.newDocSelected(docId);
+      if(isEmpty(docId))
+      {
+        docId = this.get('model').id;
+      }
+      const doc = this.get("currentDoc");
+      if(!isEmpty(doc))
+      {
+        if(docId != doc.data.documentId)
+        {
+          this.newDocSelected(docId);
+        }
+      }
+      else
+      {
+         this.newDocSelected(docId);
+      }
     }
   }
 });

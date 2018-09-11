@@ -7,7 +7,7 @@
     <div class = "row">
       {{tab-item name=parent.name id=parent.id onSelect = onSelect}}
       {{#each tabs as |tab index|}}
-        {{tab-item name=tab.data.name id=tab.data.documentId  onSelect = onSelect}}
+        {{tab-item name=tab.name id=tab.id  onSelect = onSelect}}
       {{/each}}
     </div>
   </div>
