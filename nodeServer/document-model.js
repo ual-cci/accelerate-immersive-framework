@@ -293,7 +293,7 @@ function startDocAPI(app)
                   if(!key == "source")
                   {
                     console.log("PATCHING", key)
-                    const op = {p:[key],oi:patched[key]};
+                    const op = {p:[key], oi:patched[key]};
                     actions.push(submitOp(docId, op));
                   }
                 }

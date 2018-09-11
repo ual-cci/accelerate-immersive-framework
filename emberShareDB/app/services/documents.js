@@ -134,15 +134,19 @@ export default Service.extend({
         });
     });
   },
-  getChildren(children) {
+  getChildren(childrenIds) {
     return new RSVP.Promise((resolve, reject) => {
-      let fn = (docId) => {
+      let fetch = (docId) => {
         return new RSVP.Promise((resolve, reject) => {
           this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));
         })
       }
-      let actions = children.map(fn);
-      Promise.all(actions).then((values) => resolve(values)).catch((err)=>reject(err));
+      let actions = childrenIds.map(fetch);
+      Promise.all(actions).then((children) =>  {
+        fetch(children[0].data.parent).then((parent)=> {
+          resolve({children:children, parent:parent});
+        }).catch((err)=>resolve(children));
+      }).catch((err)=>reject(err));
     });
   }
 });

@@ -257,6 +257,10 @@ export default Controller.extend({
     let doc = this.get('currentDoc');
     if(!isEmpty(doc))
     {
+      // if(doc.id == this.get('model').id)
+      // {
+      //   this.set("parentSource", doc.data.source);
+      // }
       this.get('cs').log("destroying connection to old doc");
       this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
@@ -295,14 +299,16 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject)=> {
       let model = this.get('model').data;
       this.get('documentService').getChildren(model.children)
-      .then((children)=> {
-        this.get('cs').log("got children", children);
-        this.set('children', children);
-        const tabs = children.map((child)=> {
+      .then((data)=> {
+        this.get('cs').log("got children", data);
+        this.set('children', data.children);
+        const tabs = data.children.map((child)=> {
           return {name:child.data.name, id:child.data.documentId};
         });
         this.set('tabs', tabs);
-        this.set('parentData', {name:model.name,id:model.documentId});
+        const parent = data.parent.data;
+        this.get('cs').log(parent.source);
+        this.set('parentData', {name:parent.name,id:parent.documentId});
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -531,13 +537,13 @@ export default Controller.extend({
 
       this.incrementProperty('editCtr');
 
-      // if(!this.get('opsPlayer').atHead())
-      // {
-      //   this.get('cs').log("not at head");
-      //   this.submitOp({p: ["source", 0], sd: doc.data.source});
-      //   this.submitOp({p: ["source", 0], si: session.getValue()});
-      // }
-      // this.get('opsPlayer').reset();
+      if(!this.get('opsPlayer').atHead())
+      {
+        this.get('cs').log("not at head");
+        this.submitOp({p: ["source", 0], sd: doc.data.source});
+        this.submitOp({p: ["source", 0], si: session.getValue()});
+      }
+      this.get('opsPlayer').reset();
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -554,6 +560,7 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       this.submitOp(op);
+      this.get('documentService').updateDoc(doc.id, "source", session.getValue())
       this.onCodingFinished();
     }
   },
@@ -1101,6 +1108,7 @@ export default Controller.extend({
       //this.newDocSelected(this.get("currentDoc").data.documentId);
     },
     tabSelected(docId) {
+      this.get('cs').log('tab selected', docId);
       if(isEmpty(docId))
       {
         docId = this.get('model').id;
