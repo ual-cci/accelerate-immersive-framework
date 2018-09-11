@@ -9,19 +9,103 @@ export default Service.extend({
   script:"",
   savedVals:null,
   hasPVals:false,
+  parser:new DOMParser(),
+  insertStyleSheets(source, children) {
+    let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
+    let linkStartIndex = 0, tagStartIndex = 0;
+    let searchStrs = ['<link', ">"];
+    let preamble = "", tag = "";
+    let newSrc = "";
+    let found = false;
+    while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
+        if(ptr == 0)
+        {
+          searchIndex = index;
+          tagStartIndex = searchIndex;
+          preamble = source.substring(prevEnd, searchIndex);
+        }
+        else if(ptr == 1)
+        {
+          searchIndex = index + searchStrs[ptr].length;
+          linkStartIndex = searchIndex;
+          tag = source.substring(tagStartIndex, searchIndex);
+        }
+        else if (ptr == 2)
+        {
+          found = true;
+          searchIndex = index + searchStrs[ptr].length;
+          newSrc = newSrc + preamble;
+          let added = false;
+          const parsedTag = this.get('parser').parseFromString(tag, "application/xml");
+          const attr = parsedTag.documentElement.attributes;
+          let styleSheet = false;
+          let media;
+          for(let i = 0; i < attr.length; i++)
+          {
+            if(attr[i].nodeName == "rel" && attr[i].nodeValue == "stylesheet")
+            {
+              styleSheet = true;
+            }
+            else if(attr[i].nodeName == "media")
+            {
+              media = attr[i].nodeValue
+            }
+          }
+          if(styleSheet)
+          {
+            for(let i = 0; i < attr.length; i++)
+            {
+              if(attr[i].nodeName == "href")
+              {
+                for(let j = 0; j < children.length; j++)
+                {
+                  if(children[j].data.name == attr[i].nodeValue)
+                  {
+                    newSrc = newSrc + "<style type = \"text/css\" ";
+                    if(media)
+                    {
+                      newSrc = newSrc + "media = \"" + media + "\" >\n"
+                    }
+                    newSrc = newSrc + children[j].data.source;
+                    newSrc = newSrc +"\n</style>";
+                    added = true;
+                    break;
+                  }
+                }
+                break;
+              }
+            }
+          }
+          if(!added)
+          {
+            newSrc = newSrc + tag;
+          }
+          prevEnd = searchIndex;
+        }
+        ptr = (ptr + 1) % searchStrs.length;
+    }
+    if(found)
+    {
+      newSrc = newSrc + source.substr(prevEnd);
+    }
+    else
+    {
+      newSrc = source;
+    }
+    return newSrc;
+  },
   insertChildren(src, children) {
     let newSrc = "";
     const scripts = this.getScripts(src);
-    let parser = new DOMParser();
     for(let i = 0; i < scripts.length; i++)
     {
       const script  = scripts[i];
       this.set('script', script);
-      newSrc = newSrc + script.preamble;
+      newSrc = newSrc + this.insertStyleSheets(script.preamble, children);
       let added = false;
       if(script.src.length == 0)
       {
-        const parsedTag = parser.parseFromString(script.scriptTag+"</script>", "application/xml");
+        const parsedTag = this.get('parser').parseFromString(script.scriptTag+"</script>", "application/xml");
         const attr = parsedTag.documentElement.attributes;
         for(let i = 0; i < attr.length; i++)
         {
@@ -48,7 +132,7 @@ export default Service.extend({
         newSrc = newSrc + script.scriptTag;
         newSrc = newSrc + script.src;
       }
-      newSrc = newSrc + script.post;
+      newSrc = newSrc + this.insertStyleSheets(script.post, children);
     }
     this.get('cs').log(newSrc);
     return newSrc;
