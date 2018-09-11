@@ -57,6 +57,7 @@ export default Controller.extend({
   hideEditor:'false',
   embed:'false',
   showName:true,
+  titleName:"",
   wsAvailable:true,
   editCtr:0,
   fontSize:14,
@@ -289,7 +290,7 @@ export default Controller.extend({
     this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
     editor.setReadOnly(!this.get('canEditDoc'));
     this.preloadAssets();
-
+    this.set('titleName', doc.data.name);
     this.get('sessionAccount').set('currentDoc', this.get('model').id);
     this.set('fetchingDoc', false);
   },
@@ -782,8 +783,9 @@ export default Controller.extend({
     },
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
-      const newName = this.get('model').name;
-      this.get('documentService').updateDoc(this.get('model').id, 'name', newName)
+      const newName = this.get('titleName');
+      this.get('documentService').updateDoc(this.get('currentDoc').id, 'name', newName)
+      .then(()=>this.fetchChildren());
     },
     deleteDoc() {
       if(this.get('canEditDoc'))
