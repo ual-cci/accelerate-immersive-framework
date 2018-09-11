@@ -290,9 +290,12 @@ function startDocAPI(app)
             if (current.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
-                  console.log("PATCHING", key)
-                  const op = {p:[key],oi:patched[key]};
-                  actions.push(submitOp(docId, op));
+                  if(!key == "source")
+                  {
+                    console.log("PATCHING", key)
+                    const op = {p:[key],oi:patched[key]};
+                    actions.push(submitOp(docId, op));
+                  }
                 }
             }
         }

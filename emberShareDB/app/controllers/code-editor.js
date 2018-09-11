@@ -229,11 +229,9 @@ export default Controller.extend({
         }
         this.set('connection', con);
         const doc = con.get(config.contentCollectionName, docId);
-        this.get('cs').log("getting doc", doc);
         doc.subscribe((err) => {
-          this.get('cs').log("subscribing to", err);
           if (err) throw err;
-          this.get('cs').log("subscribed to doc");
+          this.get('cs').log("subscribed to doc", doc.data);
           if(!isEmpty(doc.data))
           {
             resolve(doc);
@@ -260,8 +258,12 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       this.get('cs').log("destroying connection to old doc");
-      doc.destroy();
-      this.set('currentDoc', null)
+      this.get('opsPlayer').reset();
+      if(this.get('wsAvailable'))
+      {
+        doc.destroy();
+      }
+      this.set('currentDoc', null);
     }
     this.connectToDoc(docId)
     .then((newDoc)=> {
@@ -529,18 +531,18 @@ export default Controller.extend({
 
       this.incrementProperty('editCtr');
 
-      if(!this.get('opsPlayer').atHead())
-      {
-        this.get('cs').log("not at head");
-        this.submitOp({p: ["source", 0], sd: doc.data.source});
-        this.submitOp({p: ["source", 0], si: session.getValue()});
-      }
-      this.get('opsPlayer').reset();
+      // if(!this.get('opsPlayer').atHead())
+      // {
+      //   this.get('cs').log("not at head");
+      //   this.submitOp({p: ["source", 0], sd: doc.data.source});
+      //   this.submitOp({p: ["source", 0], si: session.getValue()});
+      // }
+      // this.get('opsPlayer').reset();
 
       const aceDoc = session.getDocument();
       const op = {};
       const start = aceDoc.positionToIndex(delta.start);
-      op.p = ['source',parseInt(start)];
+      op.p = ['source', parseInt(start)];
       let action;
       if (delta.action === 'insert') {
         action = 'si';
@@ -703,6 +705,7 @@ export default Controller.extend({
         {
           doc.destroy();
         }
+        this.set('currentDoc', null);
         if(!isEmpty(this.get('editor')))
         {
           this.selectRootDoc();
@@ -1098,7 +1101,6 @@ export default Controller.extend({
       //this.newDocSelected(this.get("currentDoc").data.documentId);
     },
     tabSelected(docId) {
-      this.get('cs').log("TAB SELECTED", docId)
       if(isEmpty(docId))
       {
         docId = this.get('model').id;
