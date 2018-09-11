@@ -205,13 +205,12 @@ export default Controller.extend({
     }
   },
   selectRootDoc: function() {
-    this.fetchChildren();
-
+    // this.newDocSelected(this.get('model').id)
     this.newDocSelected(this.get('model').id)
   },
   connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("init doc");
+      this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
       this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
@@ -231,8 +230,9 @@ export default Controller.extend({
         }
         this.set('connection', con);
         const doc = con.get(config.contentCollectionName, docId);
-
+        this.get('cs').log("getting doc", doc);
         doc.subscribe((err) => {
+          this.get('cs').log("subscribing to", err);
           if (err) throw err;
           this.get('cs').log("subscribed to doc");
           if(!isEmpty(doc.data))
@@ -260,6 +260,7 @@ export default Controller.extend({
     let doc = this.get('currentDoc');
     if(!isEmpty(doc))
     {
+      this.get('cs').log("destroying connection to old doc");
       doc.destroy();
       this.set('currentDoc', null)
     }
@@ -270,6 +271,7 @@ export default Controller.extend({
     })
   },
   didReceiveDoc: function() {
+    this.get('cs').log("didReceiveDoc");
     const doc = this.get('currentDoc');
     const editor = this.get('editor');
     const session = editor.getSession();
@@ -288,16 +290,18 @@ export default Controller.extend({
     this.set('fetchingDoc', false);
   },
   fetchChildren: function() {
-    this.get('documentService').getChildren(this.get('model'))
-    .then((children)=> {
-      this.get('cs').log("found children", children);
-      this.set('children', children);
-      let pd = {name:this.get('model').data.name, id:this.get('model').id};
-      console.log("setting parentData", pd);
-      this.set('parentData', pd);
-    }).catch((err)=>{
-      this.get('cs').log(err);
-    });
+    return new RSVP.Promise((resolve, reject)=> {
+      this.get('documentService').getChildren(this.get('model'))
+      .then((children)=> {
+        this.set('children', children);
+        let pd = {name:this.get('model').data.name, id:this.get('model').id};
+        this.set('parentData', pd);
+        resolve();
+      }).catch((err)=>{
+        this.get('cs').log(err);
+        reject(err);
+      });
+    })
   },
   didReceiveOp: function (ops,source) {
     const embed = this.get('embed') == "true";
@@ -431,24 +435,27 @@ export default Controller.extend({
     return content;
   },
   updateIFrame: function(selection = false) {
-    this.updateSavedVals();
-    const savedVals = this.get('savedVals');
-    let model = this.get('model');
-    const editor = this.get('editor');
-    const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
-    let toRender = selection ? this.getSelectedText() : mainText;
-    toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-    toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-    if(selection)
-    {
-      this.get('documentService').updateDoc(model.id, 'newEval', toRender);
-      document.getElementById("output-iframe").contentWindow.eval(toRender);
-    }
-    else
-    {
-      this.set('renderedSource', toRender);
-    }
-    this.updateLinting();
+    this.fetchChildren().then(()=> {
+      this.updateSavedVals();
+      const savedVals = this.get('savedVals');
+      let model = this.get('model');
+      const editor = this.get('editor');
+      const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
+      let toRender = selection ? this.getSelectedText() : mainText;
+      toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
+      toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
+      toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+      if(selection)
+      {
+        this.get('documentService').updateDoc(model.id, 'newEval', toRender);
+        document.getElementById("output-iframe").contentWindow.eval(toRender);
+      }
+      else
+      {
+        this.set('renderedSource', toRender);
+      }
+      this.updateLinting();
+    })
   },
   updateLinting: function() {
     const ruleSets = {
@@ -721,7 +728,6 @@ export default Controller.extend({
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
-      this.get('cs').log("requesting completions");
       return [
         {value:"",
           score:100000,

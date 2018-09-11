@@ -9,6 +9,50 @@ export default Service.extend({
   script:"",
   savedVals:null,
   hasPVals:false,
+  insertChildren(src, children) {
+    let newSrc = "";
+    const scripts = this.getScripts(src);
+    let parser = new DOMParser();
+    for(let i = 0; i < scripts.length; i++)
+    {
+      const script  = scripts[i];
+      this.set('script', script);
+      newSrc = newSrc + script.preamble;
+      let added = false;
+      if(script.src.length == 0)
+      {
+        const parsedTag = parser.parseFromString(script.scriptTag+"</script>", "application/xml");
+        const attr = parsedTag.documentElement.attributes;
+        for(let i = 0; i < attr.length; i++)
+        {
+          this.get('cs').log(attr[i].nodeName)
+          if(attr[i].nodeName == "src")
+          {
+            for(let j = 0; j < children.length; j++)
+            {
+              this.get('cs').log(children[j].data.name, attr[i].nodeValue)
+              if(children[j].data.name == attr[i].nodeValue)
+              {
+                newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
+                newSrc = newSrc + children[j].data.source;
+                added = true;
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+      if(!added)
+      {
+        newSrc = newSrc + script.scriptTag;
+        newSrc = newSrc + script.src;
+      }
+      newSrc = newSrc + script.post;
+    }
+    this.get('cs').log(newSrc);
+    return newSrc;
+  },
   insertStatefullCallbacks(src, savedVals) {
     let newSrc = "";
     this.set('savedVals', savedVals);
@@ -21,9 +65,9 @@ export default Service.extend({
       this.set('script', script);
       newSrc = newSrc + script.preamble;
       let ops = [];
-      let parsed = true;
+      let added = false;
       try {
-        walk.simple(acorn.parse(script.script), {
+        walk.simple(acorn.parse(script.src), {
           VariableDeclaration: (node) => {
             for(let i = 0; i < node.declarations.length; i++)
             {
@@ -31,12 +75,12 @@ export default Service.extend({
               let name = dec.id.name;
               if(!name)
               {
-                name = script.script.substring(dec.id.start, dec.id.end);
+                name = script.src.substring(dec.id.start, dec.id.end);
               }
               const init = dec.init;
               let savedVal = this.get('savedVals')[name];
               const delim = i >= node.declarations.length - 1 ? ";" : ","
-              let exp = script.script.substring(dec.start, dec.end) + delim;
+              let exp = script.src.substring(dec.start, dec.end) + delim;
               if(name.substring(0,2) == "p_")
               {
                 if(!init)
@@ -49,7 +93,7 @@ export default Service.extend({
                 {
                   const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
                   let index = dec.end;
-                  const end = script.script.substring(index, index + 1);
+                  const end = script.src.substring(index, index + 1);
                   if(end == ";")
                   {
                     index++;
@@ -74,7 +118,7 @@ export default Service.extend({
                 name = left.name
                 if(!name)
                 {
-                  name = script.script.substring(node.start, node.end);
+                  name = script.src.substring(node.start, node.end);
                 }
               }
             }
@@ -83,7 +127,7 @@ export default Service.extend({
             {
               const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
               let index = node.end;
-              const end = script.script.substring(index, index + 1);
+              const end = script.src.substring(index, index + 1);
               if(end == ";")
               {
                 index++;
@@ -101,13 +145,13 @@ export default Service.extend({
                 for(let j = 0; j < node.arguments.length; j++)
                 {
                   const arg = node.arguments[j];
-                  const val = script.script.substring(arg.start, arg.end);
+                  const val = script.src.substring(arg.start, arg.end);
                   let delim = j < node.arguments.length - 1 ? "," : ""
                   output = output + "JSON.stringify(" + val + ")" + delim;
                 }
                 const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
                 let index = node.end;
-                const end = script.script.substring(index, index + 1);
+                const end = script.src.substring(index, index + 1);
                 if(end == ";")
                 {
                   index++;
@@ -118,13 +162,12 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        this.get('cs').log("didnt parse script, probably src")
-        parsed = false;
+        this.get('cs').log("acorn couldnt parse script, probably src")
       }
-      if(parsed)
+      if(ops.length > 0)
       {
         let offset = 0;
-        let newScript = script.script;
+        let newScript = script.src;
         for(let j = 0; j < ops.length; j ++)
         {
           didEdit = true;
@@ -132,7 +175,6 @@ export default Service.extend({
           {
             const str = ops[j].si;
             const index = ops[j].p + offset;
-            //this.get('cs').log("inserting " + str + " at " + index);
             newScript = newScript.slice(0, index) + str + newScript.slice(index);
             offset += str.length;
           }
@@ -144,35 +186,46 @@ export default Service.extend({
             offset -= len;
           }
         }
+        added = true;
+        newSrc = newSrc + script.scriptTag;
         newSrc = newSrc + newScript;
       }
-      else
+      if(!added)
       {
-        newSrc = newSrc + script.script;
+        newSrc = newSrc + script.scriptTag;
+        newSrc = newSrc + script.src;
       }
       newSrc = newSrc + script.post;
     }
-    //return newSrc;
-    //this.get('cs').log(newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {
-    let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0, startIndex = 0;
-    let searchStrs = ['<script',">","</script>"];
+    let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
+    let scriptStartIndex = 0, tagStartIndex = 0;
+    let searchStrs = ['<script', ">" , "</script>"];
     let scripts = [];
-    let preamble = "";
+    let preamble = "", scriptTag = "";
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
-        searchIndex = index + searchStrs[ptr].length;
-        if(ptr == 1)
+        if(ptr == 0)
         {
-          startIndex = searchIndex;
-          preamble = source.substring(prevEnd,searchIndex);
+          searchIndex = index;
+          tagStartIndex = searchIndex;
+          preamble = source.substring(prevEnd, searchIndex);
+        }
+        else if(ptr == 1)
+        {
+          searchIndex = index + searchStrs[ptr].length;
+          scriptStartIndex = searchIndex;
+          scriptTag = source.substring(tagStartIndex, searchIndex);
         }
         else if (ptr == 2)
         {
+          searchIndex = index + searchStrs[ptr].length;
+          const src = scriptStartIndex <= (index - 1) ? source.substring(scriptStartIndex, index - 1) : "";
           scripts.push({
             preamble:preamble,
-              script:source.substring(startIndex,index-1),
+            scriptTag:scriptTag,
+              src:src,
                 post:"\n</script>"
              });
           prevEnd = searchIndex;

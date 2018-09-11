@@ -266,6 +266,7 @@ function startDocAPI(app)
       }
       else
       {
+        console.log("fetched doc", req.params.id);
         let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
         res.status(200).send({data:reply});
       }
