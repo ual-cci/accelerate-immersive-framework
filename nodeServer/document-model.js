@@ -462,7 +462,7 @@ function createDoc(attr) {
             dontPlay:false,
             children:[],
             parent:attr.parent,
-            type:attr.parent ? "html" : "js"
+            type:attr.parent ? "js" : "html"
           },()=> {
             let op = {};
             op.p = ['source',0];
