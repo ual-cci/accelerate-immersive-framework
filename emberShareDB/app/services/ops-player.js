@@ -11,6 +11,7 @@ export default Service.extend({
   opsToApply: null,
   ptr: 0,
   prevDir: null,
+  doc:null,
   atHead: function() {
     const ptr = this.get('ptr');
     if(isEmpty(this.get('ops')))
@@ -22,12 +23,14 @@ export default Service.extend({
       return ptr >= this.get('ops').length - 1;
     }
   },
-  reset: function() {
+  reset: function(doc) {
+    this.set('doc', doc);
     this.set('ptr', 0);
     this.set('ops', null);
   },
   loadOps:function() {
-    const doc = this.get('sessionAccount').currentDoc;
+    const doc = this.get('doc');
+    console.log("loading ops", doc);
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "GET",

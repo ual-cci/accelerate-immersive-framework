@@ -216,7 +216,6 @@ export default Controller.extend({
       if(!isEmpty(doc))
       {
         this.get('cs').log("destroying connection to old doc");
-        this.get('opsPlayer').reset();
         if(this.get('wsAvailable'))
         {
           doc.destroy();
@@ -224,6 +223,7 @@ export default Controller.extend({
         this.set('currentDoc', null);
       }
       this.connectToDoc(docId).then((newDoc)=> {
+        this.get('opsPlayer').reset(newDoc.id);
         this.set('currentDoc', newDoc);
         this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
@@ -248,7 +248,6 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
       {
         const socket = this.get('socket');
@@ -293,6 +292,7 @@ export default Controller.extend({
   didReceiveDoc: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
+      this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       const session = editor.getSession();
       this.get('cs').log("didReceiveDoc", doc.data.type);
@@ -585,7 +585,7 @@ export default Controller.extend({
         this.submitOp({p: ["source", 0], sd: doc.data.source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
-      this.get('opsPlayer').reset();
+      this.get('opsPlayer').reset(doc.id);
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -648,6 +648,7 @@ export default Controller.extend({
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
     let model = this.get('model');
+    console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
     {
       this.set('canEditDoc', false);
@@ -744,7 +745,7 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       const fn = () => {
-        this.get('opsPlayer').reset();
+        this.get('opsPlayer').reset(doc.id);
         this.set('renderedSource',"");
         if(this.get('wsAvailable'))
         {
