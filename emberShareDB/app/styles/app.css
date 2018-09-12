@@ -110,11 +110,15 @@
   overflow-y: hidden;
 }
 
+.editor-cotainer {
+
+}
+
 .main-container {
   width:100vw;
-  bottom:200px:
+  height:60vh;
   display:inline-block;
-  position:absolute;
+  position:relative;
   overflow:hidden;
 }
 
