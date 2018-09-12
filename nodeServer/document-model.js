@@ -350,6 +350,10 @@ function startDocAPI(app)
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
           json.data.attr.assets = newAssets;
           res.json(json);
+        }).catch((err)=>{
+          res.type('application/vnd.api+json');
+          res.status(400);
+          res.json({errors:[err]});
         });
       }
       else
@@ -359,7 +363,7 @@ function startDocAPI(app)
     },
      function(err) {
        res.type('application/vnd.api+json');
-       res.status(code);
+       res.status(400);
        res.json({errors:[err]});
      });
   });

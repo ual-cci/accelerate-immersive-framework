@@ -11,17 +11,19 @@ export default Service.extend({
   getDefaultSource() {
     return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
   },
-  makeNewDoc(docName, isPrivate, source, forkedFrom = null, parent = null) {
+  makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
-        source:source,
+        source:data.source,
         owner:currentUser,
-        isPrivate:isPrivate,
-        name:docName,
+        isPrivate:data.isPrivate,
+        name:data.name,
         documentId:null,
         forkedFrom:forkedFrom,
-        parent:parent
+        parent:parent,
+        tags:data.tags,
+        assets:data.assets
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
@@ -32,6 +34,23 @@ export default Service.extend({
         this.get('sessionAccount').updateOwnedDocuments();
         reject("error creating document, are you signed in?");
       });
+    });
+  },
+  forkDoc(docId, children) {
+    this.get('cs').log("forking", docId, children);
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId).then((doc) => {
+        this.get('cs').log("found record", doc.data);
+        this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
+          let actions = children.map((c)=>{
+            return this.makeNewDoc(c.data, docId, newDoc.id);
+          });
+          Promise.all(actions).then(()=>{
+            this.get('cs').log("completed forking root + children");
+            resolve(newDoc);
+          }).catch((err)=>reject(err));
+        }).catch((err)=>reject(err));
+      }).catch((err)=>reject(err));
     });
   },
   submitOp(op, doc) {

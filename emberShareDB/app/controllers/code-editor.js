@@ -834,29 +834,18 @@ export default Controller.extend({
       let model = this.get('model');
       let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
       stats.forks = parseInt(stats.forks) + 1;
-      this.get('documentService').updateDoc(model.id, 'stats', stats)
-      let newDoc = this.get('store').createRecord('document', {
-        source:model.data.source,
-        owner:currentUser,
-        isPrivate:model.data.isPrivate,
-        name:model.data.name,
-        documentId:null,
-        forkedFrom:model.id,
-        assets:model.data.assets,
-        tags:model.data.tags
-      });
-      newDoc.save().then((response)=>{
+      let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
+                    this.get('documentService').forkDoc(model.id, this.get('children'))];
+      Promise.all(actions).then(()=>{
         this.get('store').query('document', {
           filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
         }).then((documents) => {
-          this.get('cs').log("new doc created", response, documents);
+          this.get('cs').log("new doc created", documents);
           this.get('sessionAccount').updateOwnedDocuments();
           this.transitionToRoute('code-editor',documents.firstObject.documentId);
         });
         this.showFeedback("Here is your very own new copy!");
       }).catch((err)=>{
-        newDoc.deleteRecord();
-        this.get('sessionAccount').updateOwnedDocuments();
         this.set('feedbackMessage',err.errors[0]);
       });
     },
@@ -1166,7 +1155,7 @@ export default Controller.extend({
         var newChildren = children.filter((c) => {return c != docId})
         this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
         .then(()=> {
-          this.get('cs').log("Did delete child", this.get('model').data.children);
+          this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
           this.fetchChildren();
         }).catch((err)=> {
           this.get('cs').log(err);

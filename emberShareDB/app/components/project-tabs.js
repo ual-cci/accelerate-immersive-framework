@@ -8,7 +8,8 @@ export default Component.extend({
     createNewDocument() {
       const parent = this.get('parent');
       const name = "newTab" + this.get('tabs').length;
-      this.get('documentService').makeNewDoc(name, true, "", null, parent.id)
+      const data = {name:name, isPrivate:true, source:""}
+      this.get('documentService').makeNewDoc(data, null, parent.id)
       .then((doc)=> {
         this.get('onCreate')(doc.documentId)
       }).catch((error) => {

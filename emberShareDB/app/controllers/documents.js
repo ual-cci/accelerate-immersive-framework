@@ -67,7 +67,8 @@ export default Controller.extend({
       if(docName.length > 1)
       {
         const src = this.get('documentService').getDefaultSource();
-        this.get('documentService').makeNewDoc(docName, isPrivate, src)
+        const data = {name:docName, isPrivate:isPrivate, source:src}
+        this.get('documentService').makeNewDoc(data)
           .then(() => {
             this.get('cs').log("new doc created");
             const currentUser = this.get('sessionAccount').currentUserName;
