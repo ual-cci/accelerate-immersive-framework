@@ -95,15 +95,8 @@ export default Controller.extend({
     this.initUI();
   },
   initUI: function() {
-    this.set('allowDocDelete', false);
-    this.set('allowAssetDelete', false);
-    this.set('showAssets', false);
-    this.set('showPreview', false);
     this.set('collapsed', true);
-    this.set('showShare', false);
-    this.set('showTokens', false);
-    this.set('showOpPlayer', false);
-    this.set('showCodeOptions', false);
+    this.collapseAllSubMenus();
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -112,6 +105,16 @@ export default Controller.extend({
       this.set('showName', !embed);
     }
     this.get('cs').observers.push(this);
+  },
+  collapseAllSubMenus: function() {
+    this.set('allowDocDelete', false);
+    this.set('allowAssetDelete', false);
+    this.set('showAssets', false);
+    this.set('showPreview', false);
+    this.set('showShare', false);
+    this.set('showTokens', false);
+    this.set('showOpPlayer', false);
+    this.set('showCodeOptions', false);
   },
   initAceEditor: function() {
     const editor = this.get('editor');
@@ -279,6 +282,14 @@ export default Controller.extend({
     const doc = this.get('currentDoc');
     const editor = this.get('editor');
     const session = editor.getSession();
+    if(doc.data.type = "js")
+    {
+      session.setMode("ace/mode/javascript");
+    }
+    else
+    {
+      session.setMode("ace/mode/html");
+    }
     this.set('surpress', true);
     session.setValue(doc.data.source);
     this.set('surpress', false);
@@ -289,6 +300,7 @@ export default Controller.extend({
     this.get('cs').log("did recieve doc", stats)
     this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
     editor.setReadOnly(!this.get('canEditDoc'));
+    this.get('cs').log("didReceiveDoc", "preloadAssets")
     this.preloadAssets();
     this.set('titleName', doc.data.name);
     this.get('sessionAccount').set('currentDoc', this.get('model').id);
@@ -335,13 +347,14 @@ export default Controller.extend({
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
-      else if (ops[0].p[0] == "assets")
-      {
-        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-          toChange.set('assets',ops[0].oi);
-        });
-        this.preloadAssets();
-      }
+      // else if (ops[0].p[0] == "assets")
+      // {
+      //   this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+      //     toChange.set('assets',ops[0].oi);
+      //   });
+      //   this.get('cs').log("didReceiveOp", "preloadAssets")
+      //   this.preloadAssets();
+      // }
       else if (!source && ops[0].p[0] == "newEval")
       {
         document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
@@ -636,11 +649,13 @@ export default Controller.extend({
   },
   deleteCurrentDocument: function() {
     let model = this.get('model');
+    this.get('cs').log("deleting root doc");
     this.get('documentService').deleteDoc(model.id)
     .then(() => {
+      this.get('cs').log("completed deleting root doc and all children + assets");
       this.transitionToRoute('application');
     }).catch((err) => {
-      this.get('cs').log("error deleting doc");
+      this.get('cs').log("error deleting doc", err);
     });
   },
   skipOp:function(prev, rewind = false) {
@@ -927,12 +942,14 @@ export default Controller.extend({
       }
     },
     toggleAllowDocDelete() {
+      this.collapseAllSubMenus();
       if(this.get('canEditDoc'))
       {
         this.toggleProperty('allowDocDelete');
       }
     },
     toggleAllowAssetDelete(asset) {
+      this.collapseAllSubMenus();
       if(this.get('canEditDoc'))
       {
         this.set('assetToDelete',asset);
@@ -946,18 +963,23 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleShowShare() {
+      this.collapseAllSubMenus();
       this.toggleProperty('showShare');
     },
     toggleShowCodeOptions() {
+      this.collapseAllSubMenus();
       this.toggleProperty('showCodeOptions');
     },
     toggleShowTokens() {
+      this.collapseAllSubMenus();
       this.toggleProperty('showTokens');
     },
     toggleShowOpPlayer() {
+      this.collapseAllSubMenus();
       this.toggleProperty('showOpPlayer');
     },
     toggleShowAssets() {
+      this.collapseAllSubMenus();
       this.toggleProperty('showAssets');
     },
     enterFullscreen() {

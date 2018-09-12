@@ -17,7 +17,7 @@ export default Service.extend({
           url: config.serverHost + "/asset/"+fileId,
           data: data
         }).then((res) => {
-          this.get('cs').log("success",res);
+          this.get('cs').log("success deleting asset");
           resolve();
         }).catch((err) => {
           this.get('cs').log("error",err);

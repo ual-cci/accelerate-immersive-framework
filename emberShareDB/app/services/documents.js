@@ -11,7 +11,7 @@ export default Service.extend({
   getDefaultSource() {
     return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
   },
-  makeNewDoc(docName, isPrivate, source, forkedFrom = "", parent = "") {
+  makeNewDoc(docName, isPrivate, source, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
@@ -89,14 +89,12 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        let fn = (asset)=>
-        {
-          return this.get('assetService').deleteAsset(asset.fileId)
-        }
-        var actions = doc.data.assets.map(fn);
+        this.get('cs').log('deleting doc : ' + doc.data.parent ? "parent" : "child");
+        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.fileId)});
+        actions.concat(doc.data.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;
-          this.get('cs').log('deleting doc', docId);
+          this.get('cs').log("resolved promise (children, assets), deleting from server");
           $.ajax({
               type: "DELETE",
               url: config.serverHost + "/documents/" + docId,

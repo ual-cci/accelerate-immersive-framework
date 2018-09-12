@@ -219,7 +219,7 @@ function startDocAPI(app)
 
     const query = {
       $and: [searchTermOr,
-             {parent: ""},
+             {parent: null},
              {$or: [{owner: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
@@ -344,7 +344,7 @@ function startDocAPI(app)
           }
         });
       }
-      if(doc.data.forkedFrom != "")
+      if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
@@ -456,7 +456,8 @@ function createDoc(attr) {
             flags:0,
             dontPlay:false,
             children:[],
-            parent:attr.parent
+            parent:attr.parent,
+            type:attr.parent ? "html" : "js"
           },()=> {
             let op = {};
             op.p = ['source',0];

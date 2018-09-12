@@ -19,4 +19,5 @@ export default DS.Model.extend({
   dontPlay:DS.attr('boolean'),
   children:DS.attr(),
   parent:DS.attr('string'),
+  type:DS.attr('string')
 });
