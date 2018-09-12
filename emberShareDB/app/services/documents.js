@@ -77,8 +77,8 @@ export default Service.extend({
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         doc.set(field, value);
-        doc.save().then(()=> {
-          resolve()
+        doc.save().then((newDoc)=> {
+          resolve(newDoc);
         }).catch((err)=>{
           this.get('cs').log(err);
           reject(err)
@@ -157,8 +157,8 @@ export default Service.extend({
         return;
       }
       let fetch = (docId) => {
-        return new RSVP.Promise((resolve, reject) => {
-          this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));
+        return new RSVP.Promise((res, rej) => {
+          this.get('store').findRecord('document', docId).then((doc)=>res(doc)).catch((err)=>rej(err));
         })
       }
       let actions = childrenIds.map(fetch);
