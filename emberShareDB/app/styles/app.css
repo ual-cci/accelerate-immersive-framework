@@ -67,7 +67,15 @@
 }
 
 #add-file-button {
-  max-height: 50px;
+  width: 50px;
+  padding:1px 1px 1px 1px;
+  border-radius: 5px;
+  border-color: lightgray;
+  border-width: thin;
+  border-style: solid;
+  height: 35px;
+  display: inline-block;
+  position:relative;
 }
 
 .tab-item {
@@ -77,10 +85,13 @@
   border-width: thin;
   border-style: solid;
   height: 35px;
+  display: inline-block;
+  position:relative;
 }
 
 .tab-btn {
   border-style: none;
+  position:relative;
   float:left;
   height:30px ! important;
   text-align: center;
@@ -89,7 +100,7 @@
 
 .tab-delete-btn {
   border-style: none;
-  width:20px;
+  width:30px;
   height:30px;
   position:relative;
   float:right;

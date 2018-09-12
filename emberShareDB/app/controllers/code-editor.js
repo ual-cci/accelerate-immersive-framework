@@ -804,7 +804,8 @@ export default Controller.extend({
       this.set('isNotEdittingDocName', true);
       const newName = this.get('titleName');
       this.get('documentService').updateDoc(this.get('currentDoc').id, 'name', newName)
-      .then(()=>this.fetchChildren());
+      .then(()=>this.fetchChildren()
+      .then(()=>this.get('sessionAccount').updateOwnedDocuments()));
     },
     deleteDoc() {
       if(this.get('canEditDoc'))
@@ -1125,8 +1126,12 @@ export default Controller.extend({
 
     //TABS
     newTab(docId) {
-      //this.newDocSelected(this.get("currentDoc").data.documentId);
-      this.fetchChildren();
+      this.get('cs').log('new tab', docId);
+      this.fetchChildren().then(()=>{
+        const children = this.get('model').children;
+        const newChild = children[children.length-1]
+        //this.newDocSelected(newChild);
+      });
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
@@ -1149,19 +1154,21 @@ export default Controller.extend({
     },
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
-      this.get('documentService').deleteDoc(docId).then(()=> {
-        const children = this.get('model').data.children;
-        var newChildren = children.filter((c) => {return c != docId})
-        this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
-        .then(()=> {
-          this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
-          this.fetchChildren();
+      if (confirm('Are you sure you want to delete?')) {
+        this.get('documentService').deleteDoc(docId).then(()=> {
+          const children = this.get('model').data.children;
+          var newChildren = children.filter((c) => {return c != docId})
+          this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
+          .then(()=> {
+            this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
+            this.fetchChildren();
+          }).catch((err)=> {
+            this.get('cs').log(err);
+          })
         }).catch((err)=> {
           this.get('cs').log(err);
         })
-      }).catch((err)=> {
-        this.get('cs').log(err);
-      })
+      }
     }
   }
 });

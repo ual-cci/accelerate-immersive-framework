@@ -11,7 +11,7 @@ export default Component.extend({
       const data = {name:name, isPrivate:true, source:""}
       this.get('documentService').makeNewDoc(data, null, parent.id)
       .then((doc)=> {
-        this.get('onCreate')(doc.documentId)
+        this.get('onCreate')(doc.data.documentId)
       }).catch((error) => {
         console.log(error);
       });

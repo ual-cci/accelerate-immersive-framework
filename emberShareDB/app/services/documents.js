@@ -27,7 +27,7 @@ export default Service.extend({
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
-        resolve(doc);
+        resolve(response);
       }).catch((err)=>{
         this.get('cs').log("error creating record");
         doc.deleteRecord();
