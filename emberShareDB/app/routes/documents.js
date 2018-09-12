@@ -24,7 +24,7 @@ export default Route.extend({
   },
   actions: {
     error(error, transition) {
-      this.get('cs').log("ERROR", error);
+      this.get('cs').log("ERROR transitioning document route", error);
       const err = error.errors ? error.errors :error;
       if(error)
       {

@@ -8,26 +8,49 @@ export default Service.extend({
   store: inject('store'),
   sessionAccount:inject('session-account'),
   cs:inject('console'),
-  makeNewDoc(docName, isPrivate, source, forkedFrom) {
+  getDefaultSource() {
+    return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
+  },
+  makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
-        source:source,
+        source:data.source,
         owner:currentUser,
-        isPrivate:isPrivate,
-        name:docName,
+        isPrivate:data.isPrivate,
+        name:data.name,
         documentId:null,
-        forkedFrom:forkedFrom
+        forkedFrom:forkedFrom,
+        parent:parent,
+        tags:data.tags,
+        assets:data.assets
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
-        resolve();
+        resolve(response);
       }).catch((err)=>{
         this.get('cs').log("error creating record");
         doc.deleteRecord();
         this.get('sessionAccount').updateOwnedDocuments();
         reject("error creating document, are you signed in?");
       });
+    });
+  },
+  forkDoc(docId, children) {
+    this.get('cs').log("forking", docId, children);
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId).then((doc) => {
+        this.get('cs').log("found record", doc.data);
+        this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
+          let actions = children.map((c)=>{
+            return this.makeNewDoc(c.data, docId, newDoc.id);
+          });
+          Promise.all(actions).then(()=>{
+            this.get('cs').log("completed forking root + children");
+            resolve(newDoc);
+          }).catch((err)=>reject(err));
+        }).catch((err)=>reject(err));
+      }).catch((err)=>reject(err));
     });
   },
   submitOp(op, doc) {
@@ -49,6 +72,23 @@ export default Service.extend({
         });
     });
   },
+  updateDoc(docId, field, value) {
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId)
+      .then((doc) => {
+        doc.set(field, value);
+        doc.save().then(()=> {
+          resolve()
+        }).catch((err)=>{
+          this.get('cs').log(err);
+          reject(err)
+        });
+      }).catch((err)=>{
+        this.get('cs').log(err);
+        reject(err)
+      });
+    });
+  },
   getPopularTags(limit) {
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
@@ -66,14 +106,12 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        let fn = (asset)=>
-        {
-          return this.get('assetService').deleteAsset(asset.fileId)
-        }
-        var actions = doc.data.assets.map(fn);
+        this.get('cs').log('deleting doc : ' + doc.data.parent ? "parent" : "child");
+        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.fileId)});
+        actions.concat(doc.data.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;
-          this.get('cs').log('deleting doc', docId);
+          this.get('cs').log("resolved promise (children, assets), deleting from server");
           $.ajax({
               type: "DELETE",
               url: config.serverHost + "/documents/" + docId,
@@ -109,6 +147,26 @@ export default Service.extend({
         }).catch((err) => {
           reject(err);
         });
+    });
+  },
+  getChildren(childrenIds) {
+    return new RSVP.Promise((resolve, reject) => {
+      if(childrenIds.length == 0)
+      {
+        resolve({children:{}, parent:{}});
+        return;
+      }
+      let fetch = (docId) => {
+        return new RSVP.Promise((resolve, reject) => {
+          this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));
+        })
+      }
+      let actions = childrenIds.map(fetch);
+      Promise.all(actions).then((children) =>  {
+        fetch(children[0].data.parent).then((parent)=> {
+          resolve({children:children, parent:parent});
+        }).catch((err)=>resolve(children));
+      }).catch((err)=>reject(err));
     });
   }
 });

@@ -16,5 +16,8 @@ export default DS.Model.extend({
   newEval:DS.attr('string'),
   stats:DS.attr(),
   flags:DS.attr('number'),
-  dontPlay:DS.attr('boolean')
+  dontPlay:DS.attr('boolean'),
+  children:DS.attr(),
+  parent:DS.attr('string'),
+  type:DS.attr('string')
 });

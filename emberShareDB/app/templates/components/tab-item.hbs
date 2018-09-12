@@ -1,0 +1,12 @@
+<div class = "tab-item">
+  {{#bs-button class = "tab-btn"
+  onClick=(action 'onSelect') }}
+  {{name}}
+  {{/bs-button}}
+  {{#if canDelete}}
+    {{#bs-button class = "tab-delete-btn"
+    onClick=(action 'onDelete')
+    icon="glyphicon glyphicon-remove"}}
+    {{/bs-button}}
+  {{/if}}
+</div>

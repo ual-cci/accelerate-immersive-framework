@@ -66,6 +66,54 @@
   width:100vw;
 }
 
+#add-file-button {
+  width: 50px;
+  padding:1px 1px 1px 1px;
+  border-radius: 5px;
+  border-color: lightgray;
+  border-width: thin;
+  border-style: solid;
+  height: 35px;
+  display: inline-block;
+  position:relative;
+}
+
+.tab-item {
+  padding:1px 1px 1px 1px;
+  border-radius: 5px;
+  border-color: lightgray;
+  border-width: thin;
+  border-style: solid;
+  height: 35px;
+  display: inline-block;
+  position:relative;
+}
+
+.tab-btn {
+  border-style: none;
+  position:relative;
+  float:left;
+  height:30px ! important;
+  text-align: center;
+  background-color: rgba(0,0,0,0);
+}
+
+.tab-delete-btn {
+  border-style: none;
+  width:30px;
+  height:30px;
+  position:relative;
+  float:right;
+  text-align: center;
+  background-color: rgba(0,0,0,0);
+}
+
+.project-tabs {
+  max-height: 55px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .main-container {
   width:100vw;
   height:65vh;

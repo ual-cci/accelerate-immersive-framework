@@ -143,44 +143,14 @@ function startDocAPI(app)
 {
   app.post('/submitOp', app.oauth.authorise(), (req,res) => {
     const op = req.body.op;
-    if(op.p)
-    {
-      const asInt = parseInt(op.p[1]);
-      if(!isNaN(asInt))
-      {
-        op.p[1] = asInt;
-      }
-    }
-    if(!op.si && !op.sd && !op.oi)
-    {
-      res.status(400);
-      res.json({errors:["no objects in op"]});
-      return;
-    }
-
     const docId = req.body.documentId;
-    const doc = shareDBConnection.get(contentCollectionName, docId);
-    doc.fetch((err)=>{
-      if(err) {
-        console.log(err);
-        res.status(400);
-        res.json({errors:["errorFetching",err]});
-        return;
-      }
-      doc.submitOp(op, (err)=> {
-        if(err)
-        {
-          console.log("error submitting op",err);
-          res.status(400);
-          res.json({errors:["errorSubmitting",err]});
-        }
-        else
-        {
-          console.log("success submitting op");
-          res.sendStatus(200);
-        }
-      });
-    });
+    submitOp(docId, op)
+    .then(()=>{
+      res.sendStatus(200);
+    }).catch((err)=> {
+      res.status(400);
+      res.json(err);
+    })
   });
 
   app.get('/tags', (req, res) => {
@@ -249,7 +219,9 @@ function startDocAPI(app)
 
     const query = {
       $and: [searchTermOr,
-             {$or: [{owner: currentUser}, {isPrivate: false}]}],
+             {parent: null},
+             {$or: [{owner: currentUser}, {isPrivate: false}]}
+           ],
       $sort: s,
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
@@ -264,8 +236,7 @@ function startDocAPI(app)
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
-        const data = results.map(fn);
-        res.status(200).send({data:data});
+        res.status(200).send({data:results.map(fn)});
       }
     });
   });
@@ -288,7 +259,6 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
-    console.log('fetching doc');
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -303,7 +273,8 @@ function startDocAPI(app)
   });
 
   app.patch('/documents/:id', (req,res) => {
-    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    const docId = req.params.id;
+    var doc = shareDBConnection.get(contentCollectionName, docId);
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -311,8 +282,39 @@ function startDocAPI(app)
       }
       else
       {
-        let reply = {attributes:doc.data,id:doc.data.documentId,type:"document"};
-        res.status(200).send({data:reply});
+        let patched = req.body.data.attributes;
+        const current = doc.data;
+        let actions = [];
+        for (var key in current) {
+            if (current.hasOwnProperty(key)) {
+                if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
+                {
+                  if(key !== "source")
+                  {
+                    console.log("PATCHING", key, patched[key])
+                    const op = {p:[key], oi:patched[key]};
+                    actions.push(submitOp(docId, op));
+                  }
+                }
+            }
+        }
+        if(actions.length > 0)
+        {
+          Promise.all(actions).then(()=>{
+            let reply = {attributes:patched, id:docId, type:"document"};
+            res.status(200);
+            res.json({data:reply});
+          }).catch((err)=> {
+            res.status(400);
+            res.json(err);
+          })
+        }
+        else
+        {
+          let reply = {attributes:patched,id:doc.data.documentId,type:"document"};
+          res.status(200).send({data:reply});
+        }
+
       }
     });
   });
@@ -328,16 +330,30 @@ function startDocAPI(app)
   app.post('/documents', app.oauth.authorise(), (req,res) => {
     let attr = req.body.data.attributes;
     createDoc(attr)
-    .then(function(doc){
+    .then(function(doc) {
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
+      if(attr.parent != "") {
+        var parent = shareDBConnection.get(contentCollectionName, attr.parent);
+        parent.fetch(function(err) {
+          if (!err && parent.data) {
+            let children  = parent.data.children;
+            children.push(doc.data.documentId);
+            parent.submitOp({p:['children'],oi:children},{source:'server'});
+          }
+        });
+      }
       if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
           doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
           json.data.attr.assets = newAssets;
           res.json(json);
+        }).catch((err)=>{
+          res.type('application/vnd.api+json');
+          res.status(400);
+          res.json({errors:[err]});
         });
       }
       else
@@ -347,13 +363,57 @@ function startDocAPI(app)
     },
      function(err) {
        res.type('application/vnd.api+json');
-       res.status(code);
+       res.status(400);
        res.json({errors:[err]});
      });
   });
 }
 
 //FUNCTIONS
+
+function submitOp(docId, op) {
+  console.log("submitting op", docId, op);
+  return new Promise((resolve, reject) => {
+    if(op.p)
+    {
+      const asInt = parseInt(op.p[1]);
+      if(!isNaN(asInt))
+      {
+        op.p[1] = asInt;
+      }
+    }
+    if(typeof op.oi == 'undefined' &&
+      typeof op.oi == 'undefined'&&
+      typeof op.oi == 'undefined')
+    {
+      console.log("no objects in op", op)
+      reject({errors:["no objects in op"]});
+      return;
+    }
+    const doc = shareDBConnection.get(contentCollectionName, docId);
+    doc.fetch((err)=>{
+      if(err) {
+        console.log(err);
+        reject({errors:["errorFetching",err]});
+        return;
+      }
+      doc.submitOp(op, (err)=> {
+        if(err)
+        {
+          console.log("error submitting op",err);
+          reject({errors:["errorSubmitting",err]});
+          return;
+        }
+        else
+        {
+          console.log("success submitting op");
+          resolve();
+          return;
+        }
+      });
+    });
+  });
+}
 
 function getNewDocumentId(callback)
 {
@@ -398,7 +458,10 @@ function createDoc(attr) {
             newEval:"",
             stats:{views:0, forks:0, edits:0},
             flags:0,
-            dontPlay:false
+            dontPlay:false,
+            children:[],
+            parent:attr.parent,
+            type:attr.parent ? "html" : "js"
           },()=> {
             let op = {};
             op.p = ['source',0];

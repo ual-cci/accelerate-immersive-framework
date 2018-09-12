@@ -2,9 +2,9 @@
   <div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
-      <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{model.name}}</span></h2>
+      <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span></h2>
     {{else}}
-      {{input value=model.name type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
+      {{input value=titleName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
     by {{#link-to "documents" model.owner 0 'views' id = "code-name-label"}}{{model.owner}} {{/link-to}}
     <h4><span>{{feedbackMessage}}</span></h4>
@@ -188,6 +188,12 @@
   {{#if showPreview}}
   {{/if}}
   {{/if}}
+  {{project-tabs
+    parent = parentData
+    tabs = tabs
+    onSelect = (action 'tabSelected')
+    onDelete = (action 'tabDeleted')
+    onCreate = (action 'newTab')}}
   <div class = "main-container">
     <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
       <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
@@ -205,6 +211,7 @@
           theme='ace/theme/monokai'
           enableDefaultAutocompletion=true
           enableLiveAutocompletion=true
+          enableBasicAutocompletion=true
           suggestCompletions = (action 'suggestCompletions')
         }}
       </div>
