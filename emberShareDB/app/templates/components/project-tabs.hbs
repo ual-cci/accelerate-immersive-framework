@@ -1,24 +1,31 @@
 <div class = "project-tabs">
-  {{#bs-button class = "add-file-button"
-    icon="glyphicon glyphicon-plus"
-    onClick=(action 'createNewDocument')}}
-  {{/bs-button}}
   <div class = "container-fluid">
-    <div class = "row">
-      {{tab-item name=parent.name
-        id=parent.id
-        onSelect = onSelect
-        onDelete = onDelete
-        canDelete = false
-      }}
+    <table>
+     <tr>
+      <th>
+        {{#bs-button class = "add-file-button"
+          icon="glyphicon glyphicon-plus"
+          onClick=(action 'createNewDocument')}}
+        {{/bs-button}}
+      </th>
+      <th>
+        {{tab-item name=parent.name
+          id=parent.id
+          onSelect = onSelect
+          onDelete = onDelete
+          canDelete = false}}
+      </th>
       {{#each tabs as |tab index|}}
+      <th>
         {{tab-item name=tab.name
           id=tab.id
           onSelect = onSelect
           onDelete = onDelete
           canDelete = true
         }}
+      </th>
       {{/each}}
-    </div>
+     </tr>
+   </table>
   </div>
 </div>
