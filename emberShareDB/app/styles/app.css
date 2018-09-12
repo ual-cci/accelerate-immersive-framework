@@ -62,10 +62,6 @@
   pointer-events: auto;
 }
 
-#console {
-  width:100vw;
-}
-
 #add-file-button {
   width: 50px;
   padding:1px 1px 1px 1px;
@@ -116,9 +112,9 @@
 
 .main-container {
   width:100vw;
-  height:65vh;
+  bottom:200px:
   display:inline-block;
-  position:relative;
+  position:absolute;
   overflow:hidden;
 }
 
@@ -150,6 +146,18 @@
   height: 100%;
   overflow-x: visible;
   overflow-y: scroll;
+}
+
+.doc-title {
+  padding:4px 4px 4px 4px  !important;
+  margin: 1px 1px 1px 1px;
+}
+
+#console {
+  width:100vw;
+  position:absolute;
+  display:inline-block;
+  bottom: 0px;
 }
 
 .asset-token {

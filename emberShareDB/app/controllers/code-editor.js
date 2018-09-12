@@ -292,11 +292,11 @@ export default Controller.extend({
   },
   didReceiveDoc: function() {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("didReceiveDoc");
       const doc = this.get('currentDoc');
       const editor = this.get('editor');
       const session = editor.getSession();
-      if(doc.data.type = "js")
+      this.get('cs').log("didReceiveDoc", doc.data.type);
+      if(doc.data.type == "js")
       {
         session.setMode("ace/mode/javascript");
       }
@@ -633,6 +633,8 @@ export default Controller.extend({
   },
   update() {
     this.set('consoleOutput', this.get('cs').output);
+    var textarea = document.getElementById('console');
+    textarea.scrollTop = textarea.scrollHeight;
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;

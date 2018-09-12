@@ -1,8 +1,8 @@
-<div>
+<div class = "container-fluid">
   <div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
-      <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span></h2>
+      <h2 class = "doc-title"><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span></h2>
     {{else}}
       {{input value=titleName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
@@ -216,5 +216,5 @@
         }}
       </div>
     </div>
-    <textarea id="console" rows="3" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+    <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
 </div>
