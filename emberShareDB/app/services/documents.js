@@ -73,13 +73,11 @@ export default Service.extend({
     });
   },
   updateDoc(docId, field, value) {
-    this.get('cs').log("updating doc", field, value)
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         doc.set(field, value);
         doc.save().then(()=> {
-          this.get('cs').log("success updating doc")
           resolve()
         }).catch((err)=>{
           this.get('cs').log(err);

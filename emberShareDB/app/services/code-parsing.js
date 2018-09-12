@@ -100,7 +100,6 @@ export default Service.extend({
     for(let i = 0; i < scripts.length; i++)
     {
       const script  = scripts[i];
-      this.set('script', script);
       newSrc = newSrc + this.insertStyleSheets(script.preamble, children);
       let added = false;
       if(script.src.length == 0)
@@ -134,7 +133,10 @@ export default Service.extend({
       }
       newSrc = newSrc + this.insertStyleSheets(script.post, children);
     }
-    this.get('cs').log(newSrc);
+    if(scripts.length == 0)
+    {
+      newSrc = this.insertStyleSheets(src, children);
+    }
     return newSrc;
   },
   insertStatefullCallbacks(src, savedVals) {
@@ -146,7 +148,6 @@ export default Service.extend({
     for(let i = 0; i < scripts.length; i++)
     {
       const script  = scripts[i];
-      this.set('script', script);
       newSrc = newSrc + script.preamble;
       let ops = [];
       let added = false;
@@ -281,6 +282,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
+    this.get('cs').log(newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {

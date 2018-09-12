@@ -123,7 +123,7 @@ export default Controller.extend({
     editor.commands.addCommand({
       name: "executeLines",
       exec: ()=>{
-        this.updateIFrame( true)
+        this.updateIFrame(true)
       },
       bindKey: {mac: "shift-enter", win: "shift-enter"}
     });
@@ -209,8 +209,40 @@ export default Controller.extend({
       this.selectRootDoc();
     }
   },
+  newDocSelected: function(docId) {
+    return new RSVP.Promise((resolve, reject)=> {
+      let doc = this.get('currentDoc');
+      this.get('cs').log("newDocSelected", docId);
+      if(!isEmpty(doc))
+      {
+        this.get('cs').log("destroying connection to old doc");
+        this.get('opsPlayer').reset();
+        if(this.get('wsAvailable'))
+        {
+          doc.destroy();
+        }
+        this.set('currentDoc', null);
+      }
+      this.connectToDoc(docId).then((newDoc)=> {
+        this.set('currentDoc', newDoc);
+        this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
+      }).catch((err)=>reject(err));
+    })
+  },
   selectRootDoc: function() {
-    this.newDocSelected(this.get('model').id)
+    this.newDocSelected(this.get('model').id).then(()=> {
+      this.get('cs').log("loaded root doc, preloading assets");
+      this.preloadAssets().then(()=> {
+        if(this.doPlay())
+        {
+          this.updateIFrame();
+        }
+        else
+        {
+          this.fetchChildren();
+        }
+      });
+    });
   },
   connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
@@ -236,7 +268,7 @@ export default Controller.extend({
         const doc = con.get(config.contentCollectionName, docId);
         doc.subscribe((err) => {
           if (err) throw err;
-          this.get('cs').log("subscribed to doc", doc.data);
+          this.get('cs').log("subscribed to doc");
           if(!isEmpty(doc.data))
           {
             resolve(doc);
@@ -258,53 +290,34 @@ export default Controller.extend({
       });
     })
   },
-  newDocSelected: function(docId) {
-    let doc = this.get('currentDoc');
-    this.get('cs').log("newDocSelected", docId);
-    if(!isEmpty(doc))
-    {
-      this.get('cs').log("destroying connection to old doc");
-      this.get('opsPlayer').reset();
-      if(this.get('wsAvailable'))
-      {
-        doc.destroy();
-      }
-      this.set('currentDoc', null);
-    }
-    this.connectToDoc(docId)
-    .then((newDoc)=> {
-      this.set('currentDoc', newDoc);
-      this.didReceiveDoc();
-    })
-  },
   didReceiveDoc: function() {
-    this.get('cs').log("didReceiveDoc");
-    const doc = this.get('currentDoc');
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    if(doc.data.type = "js")
-    {
-      session.setMode("ace/mode/javascript");
-    }
-    else
-    {
-      session.setMode("ace/mode/html");
-    }
-    this.set('surpress', true);
-    session.setValue(doc.data.source);
-    this.set('surpress', false);
-    this.set('savedVals', doc.data.savedVals);
-    this.setCanEditDoc();
-    let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
-    stats.views = parseInt(stats.views) + 1;
-    this.get('cs').log("did recieve doc", stats)
-    this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
-    editor.setReadOnly(!this.get('canEditDoc'));
-    this.get('cs').log("didReceiveDoc", "preloadAssets")
-    this.preloadAssets();
-    this.set('titleName', doc.data.name);
-    this.get('sessionAccount').set('currentDoc', this.get('model').id);
-    this.set('fetchingDoc', false);
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('cs').log("didReceiveDoc");
+      const doc = this.get('currentDoc');
+      const editor = this.get('editor');
+      const session = editor.getSession();
+      if(doc.data.type = "js")
+      {
+        session.setMode("ace/mode/javascript");
+      }
+      else
+      {
+        session.setMode("ace/mode/html");
+      }
+      this.set('surpress', true);
+      session.setValue(doc.data.source);
+      this.set('surpress', false);
+      this.set('savedVals', doc.data.savedVals);
+      this.setCanEditDoc();
+      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      stats.views = parseInt(stats.views) + 1;
+      this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
+      editor.setReadOnly(!this.get('canEditDoc'));
+      this.set('titleName', doc.data.name);
+      this.get('sessionAccount').set('currentDoc', this.get('model').id);
+      this.set('fetchingDoc', false);
+      resolve();
+    })
   },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
@@ -319,9 +332,8 @@ export default Controller.extend({
         resolve();
         return;
       }
-      this.get('documentService').getChildren(model.children)
-      .then((data)=> {
-        this.get('cs').log("got children", data);
+      this.get('documentService').getChildren(model.children).then((data)=> {
+        this.get('cs').log("got children");
         this.set('children', data.children);
         const tabs = data.children.map((child)=> {
           return {name:child.data.name, id:child.id};
@@ -401,8 +413,7 @@ export default Controller.extend({
       }
       else
       {
-        this.get('documentService').submitOp(op)
-        .then(() => {
+        this.get('documentService').submitOp(op).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
         }).catch((err) => {
@@ -444,24 +455,19 @@ export default Controller.extend({
     return model.data.dontPlay === "false" || !model.data.dontPlay;
   },
   preloadAssets: function() {
-    let model = this.get('model');
-    if(!isEmpty(model.data.assets))
-    {
-      this.get('assetService').preloadAssets(model.data.assets).then(()=> {
-        if(this.doPlay())
-        {
-          this.updateIFrame();
-        }
-      });
-    }
-    else
-    {
-      this.get('cs').log("no assets to preload", this.doPlay());
-      if(this.doPlay())
+    this.get('cs').log('preloadAssets')
+    return new RSVP.Promise((resolve, reject)=> {
+      let model = this.get('model');
+      if(!isEmpty(model.data.assets))
       {
-        this.updateIFrame();
+        this.get('assetService').preloadAssets(model.data.assets)
+        .then(()=>resolve()).catch((err)=>reject(err));
       }
-    }
+      else
+      {
+        resolve();
+      }
+    });
   },
   getSelectedText: function()
   {
@@ -479,6 +485,7 @@ export default Controller.extend({
   updateIFrame: function(selection = false) {
     this.fetchChildren().then(()=> {
       this.updateSavedVals();
+      this.get('cs').log("updateIFrame", selection);
       const savedVals = this.get('savedVals');
       let model = this.get('model');
       const editor = this.get('editor');
@@ -487,6 +494,7 @@ export default Controller.extend({
       toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
       toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
       toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+      this.get('cs').clear();
       if(selection)
       {
         this.get('documentService').updateDoc(model.id, 'newEval', toRender);
@@ -535,18 +543,21 @@ export default Controller.extend({
     editor.getSession().setAnnotations(errors);
   },
   onCodingFinished: function() {
+    if(this.get('autoRender'))
+    {
+      this.updateIFrame();
+    }
+    this.updateLinting();
+    this.set('codeTimer',null);
+  },
+  restartCodeTimer: function() {
     if(this.get('codeTimer'))
     {
       clearTimeout(this.get('codeTimer'));
     }
     this.set('codeTimer', setTimeout(() => {
-      if(this.get('autoRender'))
-      {
-        this.updateIFrame();
-      }
-      this.updateLinting();
-      this.set('codeTimer',null);
-    },1500));
+      this.onCodingFinished();
+    }, 500));
   },
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
@@ -582,7 +593,7 @@ export default Controller.extend({
       op[action] = str;
       this.submitOp(op);
       this.get('documentService').updateDoc(doc.id, "source", session.getValue())
-      this.onCodingFinished();
+      this.restartCodeTimer();
     }
   },
   addWindowListener: function() {
@@ -650,8 +661,7 @@ export default Controller.extend({
   deleteCurrentDocument: function() {
     let model = this.get('model');
     this.get('cs').log("deleting root doc");
-    this.get('documentService').deleteDoc(model.id)
-    .then(() => {
+    this.get('documentService').deleteDoc(model.id).then(() => {
       this.get('cs').log("completed deleting root doc and all children + assets");
       this.transitionToRoute('application');
     }).catch((err) => {
@@ -692,11 +702,7 @@ export default Controller.extend({
         if(hasVals)
         {
           this.get('documentService').updateDoc(this.get('model').id, 'savedVals', savedVals)
-          .then(() => {
-            resolve();
-          }).catch((err) => {
-            reject(err)
-          });
+          .then(() => resolve()).catch((err) => reject(err));
         }
         else
         {
@@ -724,10 +730,8 @@ export default Controller.extend({
   },
   refreshDoc: function() {
     const doc = this.get('currentDoc');
-    this.get('cs').log('refreshing', doc);
     if(!isEmpty(doc))
     {
-      this.get('cs').log('refreshing doc not empty', doc);
       const fn = () => {
         this.get('opsPlayer').reset();
         this.set('renderedSource',"");
@@ -879,8 +883,7 @@ export default Controller.extend({
     {
       if(this.get('canEditDoc'))
       {
-        this.get('assetService').deleteAsset(this.get('assetToDelete'))
-        .then(()=> {
+        this.get('assetService').deleteAsset(this.get('assetToDelete')).then(()=> {
           this.get('cs').log('deleted asset', this.get('assetToDelete'));
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
@@ -907,9 +910,6 @@ export default Controller.extend({
                 isImage:isImage,
                 isAudio:isAudio,
                 isVideo:isVideo})
-        .then(() => {
-
-        });
       this.toggleProperty('showPreview');
     },
 
@@ -1149,8 +1149,7 @@ export default Controller.extend({
     },
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
-      this.get('documentService').deleteDoc(docId)
-      .then(()=> {
+      this.get('documentService').deleteDoc(docId).then(()=> {
         const children = this.get('model').data.children;
         var newChildren = children.filter((c) => {return c != docId})
         this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
@@ -1163,7 +1162,6 @@ export default Controller.extend({
       }).catch((err)=> {
         this.get('cs').log(err);
       })
-
     }
   }
 });
