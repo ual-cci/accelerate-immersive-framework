@@ -482,30 +482,40 @@ export default Controller.extend({
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
-  updateIFrame: function(selection = false) {
-    this.fetchChildren().then(()=> {
-      this.updateSavedVals();
-      this.get('cs').log("updateIFrame", selection);
-      const savedVals = this.get('savedVals');
-      let model = this.get('model');
-      const editor = this.get('editor');
-      const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
-      let toRender = selection ? this.getSelectedText() : mainText;
-      toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
-      toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-      toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-      this.get('cs').clear();
-      if(selection)
-      {
-        this.get('documentService').updateDoc(model.id, 'newEval', toRender);
-        document.getElementById("output-iframe").contentWindow.eval(toRender);
-      }
-      else
-      {
-        this.set('renderedSource', toRender);
-      }
-      this.updateLinting();
+  updateSourceFromSession: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('currentDoc');
+      const session = this.get('editor').getSession();
+      this.get('documentService').updateDoc(doc.id, "source", session.getValue())
+      .then(()=>resolve());
     });
+  },
+  updateIFrame: function(selection = false) {
+    this.updateSourceFromSession().then(()=> {
+      this.fetchChildren().then(()=> {
+        this.updateSavedVals();
+        this.get('cs').log("updateIFrame", selection);
+        const savedVals = this.get('savedVals');
+        let model = this.get('model');
+        const editor = this.get('editor');
+        const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
+        let toRender = selection ? this.getSelectedText() : mainText;
+        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
+        toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
+        toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+        this.get('cs').clear();
+        if(selection)
+        {
+          this.get('documentService').updateDoc(model.id, 'newEval', toRender);
+          document.getElementById("output-iframe").contentWindow.eval(toRender);
+        }
+        else
+        {
+          this.set('renderedSource', toRender);
+        }
+        this.updateLinting();
+      });
+    })
   },
   updateLinting: function() {
     const ruleSets = {
@@ -548,7 +558,7 @@ export default Controller.extend({
       this.updateIFrame();
     }
     this.updateLinting();
-    this.set('codeTimer',null);
+    this.set('codeTimer', null);
   },
   restartCodeTimer: function() {
     if(this.get('codeTimer'))
@@ -592,7 +602,6 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       this.submitOp(op);
-      this.get('documentService').updateDoc(doc.id, "source", session.getValue())
       this.restartCodeTimer();
     }
   },
@@ -1137,22 +1146,25 @@ export default Controller.extend({
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
-      if(isEmpty(docId))
-      {
-        docId = this.get('model').id;
-      }
-      const doc = this.get("currentDoc");
-      if(!isEmpty(doc))
-      {
-        if(docId != doc.data.documentId)
+      this.updateSourceFromSession().then(()=> {
+        if(isEmpty(docId))
         {
-          this.newDocSelected(docId);
+          docId = this.get('model').id;
         }
-      }
-      else
-      {
-         this.newDocSelected(docId);
-      }
+        const doc = this.get("currentDoc");
+        if(!isEmpty(doc))
+        {
+          if(docId != doc.data.documentId)
+          {
+            this.newDocSelected(docId);
+          }
+        }
+        else
+        {
+           this.newDocSelected(docId);
+        }
+      });
+
     },
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
