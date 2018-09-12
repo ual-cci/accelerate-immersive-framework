@@ -110,7 +110,7 @@
   overflow-y: hidden;
 }
 
-.editor-cotainer {
+.editor-container {
 
 }
 
@@ -159,9 +159,6 @@
 
 #console {
   width:100vw;
-  position:absolute;
-  display:inline-block;
-  bottom: 0px;
 }
 
 .asset-token {
