@@ -220,6 +220,7 @@ function startDocAPI(app)
     const query = {
       $and: [searchTermOr,
              {parent: null},
+             { children : { $exists : true } },
              {$or: [{owner: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
