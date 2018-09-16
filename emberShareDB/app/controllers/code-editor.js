@@ -319,6 +319,14 @@ export default Controller.extend({
       resolve();
     })
   },
+  setParentData: function(data) {
+    this.set('parentData', {name:data.name,
+      id:data.documentId,
+      children:data.children,
+      source:data.source,
+      assets:data.assets
+    });
+  },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
@@ -328,7 +336,7 @@ export default Controller.extend({
         this.set('tabs', model.children);
         this.set('children', null);
         this.set('children', model.children);
-        this.set('parentData', {name:model.name,id:model.documentId,children:model.children});
+        this.setParentData(model);
         resolve();
         return;
       }
@@ -340,7 +348,7 @@ export default Controller.extend({
         });
         this.set('tabs', tabs);
         const parent = data.parent.data;
-        this.set('parentData', {name:parent.name,id:parent.documentId,children:parent.children});
+        this.setParentData(parent);
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -1019,6 +1027,7 @@ export default Controller.extend({
           };
           this.get('currentDoc').destroy();
           this.set('currentDoc', null);
+          this.get('connection').close();
           this.get('socket').close();
         }
         this.get('cs').log('cleaned up');

@@ -11,10 +11,10 @@ export default Component.extend(FileSaverMixin, {
   store: inject('store'),
   actions: {
     download() {
-      const doc = this.get('doc').data;
+      const data = this.get('doc');
       let zip = new JSZip();
-      zip.file("index.html", doc.source, { type: 'string' });
-      for(let asset of doc.assets)
+      zip.file("index.html", data.source, { type: 'string' });
+      for(let asset of data.assets)
       {
         const storeAsset = this.get('store').peekRecord('asset',asset.fileId);
         if(storeAsset)
@@ -24,7 +24,7 @@ export default Component.extend(FileSaverMixin, {
       }
       zip.generateAsync({type : "blob"})
       .then((blob) => {
-        this.saveFileAs(doc.name + "-MIMIC.zip", blob, 'application/zip');
+        this.saveFileAs(data.name + "-MIMIC.zip", blob, 'application/zip');
       });
     }
   }

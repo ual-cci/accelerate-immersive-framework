@@ -36,6 +36,10 @@
         <span class="tooltiptext">Render Code Whilst Typing</span>
       </div>
       {{/if}}
+      <div class="tooltip">
+        {{download-button doc = parentData}}
+        <span class="tooltiptext">Download Project as Zip</span>
+      </div>
       {{#if session.isAuthenticated}}
       <div class="tooltip">
         {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
@@ -44,10 +48,6 @@
       <div class="tooltip">
         {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
         <span class="tooltiptext">Report as Inappropriate</span>
-      </div>
-      <div class="tooltip">
-        {{download-button doc = doc}}
-        <span class="tooltiptext">Download Project as Zip</span>
       </div>
       {{/if}}
       {{#bs-collapse collapsed=collapsed}}
@@ -189,12 +189,14 @@
     {{#if showPreview}}
     {{/if}}
     {{/if}}
-    {{project-tabs
-      parent = parentData
-      tabs = tabs
-      onSelect = (action 'tabSelected')
-      onDelete = (action 'tabDeleted')
-      onCreate = (action 'newTab')}}
+    {{#if displayEditor}}
+      {{project-tabs
+        parent = parentData
+        tabs = tabs
+        onSelect = (action 'tabSelected')
+        onDelete = (action 'tabDeleted')
+        onCreate = (action 'newTab')}}
+    {{/if}}
     <div class = "main-container">
       <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
@@ -217,6 +219,8 @@
           }}
         </div>
       </div>
+      {{#if displayEditor}}
       <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+      {{/if}}
     </div>
 </div>

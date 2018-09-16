@@ -124,11 +124,26 @@ function copyAssets(assets)
 function startWebSockets(server)
 {
   var wss = new WebSocket.Server({server: server});
+
   wss.on('connection', (ws, req) => {
+    ws.isAlive = true;
+    function noop() {}
+    function heartbeat() {
+      ws.isAlive = true;
+    }
+    ws.on('pong', heartbeat);
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
+    const interval = setInterval(function ping() {
+      wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+          ws.isAlive = false;
+          ws.ping(noop);
+      });
+    }, 1000);
+
     try {
       shareDB.listen(stream);
     }
