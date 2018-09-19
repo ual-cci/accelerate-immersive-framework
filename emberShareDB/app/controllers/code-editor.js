@@ -341,7 +341,7 @@ export default Controller.extend({
         return;
       }
       this.get('documentService').getChildren(model.children).then((data)=> {
-        this.get('cs').log("got children");
+        this.get('cs').log("got children", data.children);
         this.set('children', data.children);
         const tabs = data.children.map((child)=> {
           return {name:child.data.name, id:child.id};
@@ -421,7 +421,7 @@ export default Controller.extend({
       }
       else
       {
-        this.get('documentService').submitOp(op).then(() => {
+        this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
         }).catch((err) => {
@@ -895,23 +895,37 @@ export default Controller.extend({
     assetUploaded(e) {
       this.get('cs').log("assetComplete", e);
       $("#asset-progress").css("display", "none");
-      if(!this.get('wsAvailable'))
-      {
-        this.refreshDoc();
-      }
+      const doc = this.get('model');
+      let newAssets = doc.data.assets;
+      newAssets.push(e);
+      this.get('documentService').updateDoc(doc.id, "assets", newAssets)
+      .then(()=>{
+        if(!this.get('wsAvailable'))
+        {
+          this.refreshDoc();
+        }
+      }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
     },
     deleteAsset()
     {
       if(this.get('canEditDoc'))
       {
         this.get('assetService').deleteAsset(this.get('assetToDelete')).then(()=> {
-          this.get('cs').log('deleted asset', this.get('assetToDelete'));
+          const doc = this.get('model');
+          let newAssets = doc.data.assets;
+          newAssets = newAssets.filter((asset) => {
+              return asset.fileId !== this.get('assetToDelete')
+          });
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
-          if(!this.get('wsAvailable'))
-          {
-            this.refreshDoc();
-          }
+          this.get('documentService').updateDoc(doc.id, "assets", newAssets)
+          .then(()=>{
+            if(!this.get('wsAvailable'))
+            {
+              this.refreshDoc();
+            }
+          }).catch((err)=>{this.get('cs').log(err)});
+
         }).catch((err)=>{
           this.get('cs').log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
@@ -959,7 +973,6 @@ export default Controller.extend({
       }
     },
     toggleAllowAssetDelete(asset) {
-      this.collapseAllSubMenus();
       if(this.get('canEditDoc'))
       {
         this.set('assetToDelete',asset);

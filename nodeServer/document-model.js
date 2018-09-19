@@ -63,12 +63,11 @@ function startAssetAPI(app)
 
         fs.createReadStream(req.files.file.path).pipe(writestream);
         writestream.on('close', function(file) {
-          res.json(200);
           const content_type = req.files.file.headers["content-type"];
-          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-          var newAssets = doc.data.assets;
-          newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+          const newAsset = {'name':req.files.file.name,"fileId":file._id,fileType:content_type};
+          console.log('success uploading asset');
+          res.status(200);
+          res.json(newAsset);
           fs.unlink(req.files.file.path, function(err) {
              console.log('success!')
            });
@@ -86,13 +85,8 @@ function startAssetAPI(app)
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
-          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-          var newAssets = doc.data.assets;
-          newAssets = newAssets.filter(function( asset ) {
-              return asset.fileId !== req.params.id;
-          });
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-          res.json(200);
+          res.status(200);
+          res.json(req.params.id);
         });
       });
     }
@@ -351,16 +345,6 @@ function startDocAPI(app)
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      if(attr.parent != "") {
-        var parent = shareDBConnection.get(contentCollectionName, attr.parent);
-        parent.fetch(function(err) {
-          if (!err && parent.data) {
-            let children  = parent.data.children;
-            children.push(doc.data.documentId);
-            parent.submitOp({p:['children'],oi:children},{source:'server'});
-          }
-        });
-      }
       if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
@@ -400,8 +384,8 @@ function submitOp(docId, op) {
       }
     }
     if(typeof op.oi == 'undefined' &&
-      typeof op.oi == 'undefined'&&
-      typeof op.oi == 'undefined')
+      typeof op.sd == 'undefined'&&
+      typeof op.si == 'undefined')
     {
       console.log("no objects in op", op)
       reject({errors:["no objects in op"]});
