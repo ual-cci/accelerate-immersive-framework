@@ -216,7 +216,6 @@ export default Controller.extend({
       if(!isEmpty(doc))
       {
         this.get('cs').log("destroying connection to old doc");
-        this.get('opsPlayer').reset();
         if(this.get('wsAvailable'))
         {
           doc.destroy();
@@ -224,6 +223,7 @@ export default Controller.extend({
         this.set('currentDoc', null);
       }
       this.connectToDoc(docId).then((newDoc)=> {
+        this.get('opsPlayer').reset(newDoc.id);
         this.set('currentDoc', newDoc);
         this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
@@ -248,7 +248,6 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
       {
         const socket = this.get('socket');
@@ -293,6 +292,7 @@ export default Controller.extend({
   didReceiveDoc: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
+      this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       const session = editor.getSession();
       this.get('cs').log("didReceiveDoc", doc.data.type);
@@ -319,6 +319,14 @@ export default Controller.extend({
       resolve();
     })
   },
+  setParentData: function(data) {
+    this.set('parentData', {name:data.name,
+      id:data.documentId,
+      children:data.children,
+      source:data.source,
+      assets:data.assets
+    });
+  },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
@@ -328,7 +336,7 @@ export default Controller.extend({
         this.set('tabs', model.children);
         this.set('children', null);
         this.set('children', model.children);
-        this.set('parentData', {name:model.name,id:model.documentId,children:model.children});
+        this.setParentData(model);
         resolve();
         return;
       }
@@ -340,7 +348,7 @@ export default Controller.extend({
         });
         this.set('tabs', tabs);
         const parent = data.parent.data;
-        this.set('parentData', {name:parent.name,id:parent.documentId,children:parent.children});
+        this.setParentData(parent);
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -585,7 +593,7 @@ export default Controller.extend({
         this.submitOp({p: ["source", 0], sd: doc.data.source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
-      this.get('opsPlayer').reset();
+      this.get('opsPlayer').reset(doc.id);
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -648,6 +656,7 @@ export default Controller.extend({
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
     let model = this.get('model');
+    console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
     {
       this.set('canEditDoc', false);
@@ -744,7 +753,7 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       const fn = () => {
-        this.get('opsPlayer').reset();
+        this.get('opsPlayer').reset(doc.id);
         this.set('renderedSource',"");
         if(this.get('wsAvailable'))
         {
@@ -1018,6 +1027,7 @@ export default Controller.extend({
           };
           this.get('currentDoc').destroy();
           this.set('currentDoc', null);
+          this.get('connection').close();
           this.get('socket').close();
         }
         this.get('cs').log('cleaned up');
