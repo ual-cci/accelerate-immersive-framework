@@ -27,7 +27,19 @@ export default Service.extend({
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
-        resolve(response);
+        if(!isEmpty(parent))
+        {
+          this.get('store').findRecord('document', parent).then((parentDoc) => {
+            let children = parentDoc.data.children;
+            children.push(doc.id);
+            this.updateDoc(parent, "children", children)
+            .then(resolve(response)).catch((err)=>{this.get('cs').log(err)});
+          }).catch((err)=>{this.get('cs').log(err)});
+        }
+        else
+        {
+          resolve(response);
+        }
       }).catch((err)=>{
         this.get('cs').log("error creating record");
         doc.deleteRecord();
