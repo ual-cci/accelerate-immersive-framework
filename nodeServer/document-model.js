@@ -400,8 +400,8 @@ function submitOp(docId, op) {
       }
     }
     if(typeof op.oi == 'undefined' &&
-      typeof op.oi == 'undefined'&&
-      typeof op.oi == 'undefined')
+      typeof op.sd == 'undefined'&&
+      typeof op.si == 'undefined')
     {
       console.log("no objects in op", op)
       reject({errors:["no objects in op"]});

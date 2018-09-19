@@ -421,7 +421,7 @@ export default Controller.extend({
       }
       else
       {
-        this.get('documentService').submitOp(op).then(() => {
+        this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
         }).catch((err) => {
