@@ -512,7 +512,7 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
         let toRender = selection ? this.getSelectedText() : mainText;
-        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.data.assets);
+        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
         toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
         toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
         this.get('cs').clear();
