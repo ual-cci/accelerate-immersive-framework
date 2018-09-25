@@ -2,6 +2,7 @@ import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import acorn from 'npm:acorn'
 import walk from 'npm:acorn/dist/walk'
+import config from  '../config/environment';
 
 export default Service.extend({
   store:inject('store'),
@@ -94,7 +95,7 @@ export default Service.extend({
     }
     return newSrc;
   },
-  insertChildren(src, children) {
+  insertChildren(src, children, assets) {
     let newSrc = "";
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
@@ -118,6 +119,18 @@ export default Service.extend({
               {
                 newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
                 newSrc = newSrc + children[j].data.source;
+                added = true;
+                break;
+              }
+            }
+            for(let j = 0; j < assets.length; j++)
+            {
+              this.get('cs').log(assets[j].name, attr[i].nodeValue)
+              if(assets[j].name == attr[i].nodeValue)
+              {
+                newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\"";
+                newSrc = newSrc + " src=\""+ config.serverHost + "/asset/" + assets[j].fileId +"\"";
+                newSrc = newSrc +">\n";
                 added = true;
                 break;
               }

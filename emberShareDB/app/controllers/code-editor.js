@@ -327,6 +327,12 @@ export default Controller.extend({
       assets:data.assets
     });
   },
+  setTabs: function(data) {
+    const tabs = data.map((child)=> {
+      return {name:child.data.name, id:child.id};
+    });
+    this.set('tabs', tabs);
+  },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
@@ -343,12 +349,8 @@ export default Controller.extend({
       this.get('documentService').getChildren(model.children).then((data)=> {
         this.get('cs').log("got children", data.children);
         this.set('children', data.children);
-        const tabs = data.children.map((child)=> {
-          return {name:child.data.name, id:child.id};
-        });
-        this.set('tabs', tabs);
-        const parent = data.parent.data;
-        this.setParentData(parent);
+        this.setTabs(data.children);
+        this.setParentData(data.parent.data);
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -393,7 +395,9 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       const MAX_RETRIES = 5;
-      if(this.get('droppedOps').length > 0) {
+      let droppedOps = this.get('droppedOps');
+      if(droppedOps.length > 0) {
+        this.set('droppedOps', droppedOps.push(op));
         return reject();
       }
 
@@ -432,7 +436,7 @@ export default Controller.extend({
           }
           else
           {
-            this.get('droppedOps').push(op);
+            droppedOps.push(op);
           }
           reject(err);
         });
@@ -508,7 +512,7 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
         let toRender = selection ? this.getSelectedText() : mainText;
-        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
+        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.data.assets);
         toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
         toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
         this.get('cs').clear();
@@ -925,7 +929,6 @@ export default Controller.extend({
               this.refreshDoc();
             }
           }).catch((err)=>{this.get('cs').log(err)});
-
         }).catch((err)=>{
           this.get('cs').log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
