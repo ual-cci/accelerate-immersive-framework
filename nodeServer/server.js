@@ -18,6 +18,8 @@ process.on('uncaughtException', function (err) {
 function startServer()
 {
   app.use(express.static('static'));
+  app.use(express.json({limit: '50mb'}));
+  app.use(express.urlencoded({limit: '50mb'}));
   app.use(function(req, res, next) {
   	res.header('Access-Control-Allow-Origin', req.get('Origin') || '*');
   	res.header('Access-Control-Allow-Credentials', 'true');
