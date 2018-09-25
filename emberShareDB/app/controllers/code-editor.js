@@ -530,7 +530,8 @@ export default Controller.extend({
     })
   },
   updateLinting: function() {
-    const ruleSets = {
+    const doc = this.get('currentDoc');
+    let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
       "attr-value-double-quotes": true,
@@ -545,8 +546,26 @@ export default Controller.extend({
       },
       "jshint": {"esversion": 6, "asi" : true}
     }
+    if(doc.data.type == "js")
+    {
+      ruleSets = {
+        "tagname-lowercase": false,
+        "attr-lowercase": false,
+        "attr-value-double-quotes": false,
+        "tag-pair": false,
+        "spec-char-escape": false,
+        "id-unique": false,
+        "src-not-empty": false,
+        "attr-no-duplication": false,
+        "csslint": {
+          "display-property-grouping": false,
+          "known-properties": false
+        },
+        "jshint": {"esversion": 6, "asi" : true}
+      }
+    }
+
     const editor = this.get('editor');
-    const doc = this.get('currentDoc');
     const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
     const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
     let errors = [], message;
