@@ -310,7 +310,10 @@ export default Controller.extend({
       this.setCanEditDoc();
       let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
       stats.views = parseInt(stats.views) + 1;
-      this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
+      this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
+      .catch((err)=>{
+        this.get('cs').log('error updating doc', err);
+      });
       editor.setReadOnly(!this.get('canEditDoc'));
       this.set('titleName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
@@ -386,7 +389,9 @@ export default Controller.extend({
         this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
         .then(()=>{
           this.fetchChildren();
-        })
+        }).catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     }
   },
@@ -411,7 +416,7 @@ export default Controller.extend({
             }
             else
             {
-              this.get('droppedOps').push(op);
+              droppedOps.push(op);
             }
             reject(err);
           }
@@ -525,7 +530,10 @@ export default Controller.extend({
         const session = this.get('editor').getSession();
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         this.get('documentService').updateDoc(doc.id, "source", session.getValue())
-        .then(()=>resolve());
+        .then(()=>resolve())
+        .catch((err)=>{
+          this.get('cs').log("error updateSourceFromSession - updateDoc", err);
+        });
       }
       else
       {
@@ -549,7 +557,10 @@ export default Controller.extend({
         this.get('cs').clear();
         if(selection)
         {
-          this.get('documentService').updateDoc(model.id, 'newEval', toRender);
+          this.get('documentService').updateDoc(model.id, 'newEval', toRender)
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+          });
           document.getElementById("output-iframe").contentWindow.eval(toRender);
         }
         else
@@ -723,6 +734,7 @@ export default Controller.extend({
       if(isEmpty(savedVals))
       {
         resolve();
+        return;
       }
       else
       {
@@ -731,7 +743,12 @@ export default Controller.extend({
         if(hasVals)
         {
           this.get('documentService').updateDoc(this.get('model').id, 'savedVals', savedVals)
-          .then(() => resolve()).catch((err) => reject(err));
+          .then(() => resolve()).catch((err) => reject(err))
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+            reject(err);
+            return;
+          });
         }
         else
         {
@@ -774,7 +791,7 @@ export default Controller.extend({
           this.selectRootDoc();
         }
       };
-      const actions = [this.updateEditStats(), this.updateSavedVals(), this.updateSourceFromSession()];
+      const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
@@ -828,7 +845,10 @@ export default Controller.extend({
 
     //DOC PROPERTIES
     tagsChanged(tags) {
-      this.get('documentService').updateDoc(this.get('model').id, 'tags', tags);
+      this.get('documentService').updateDoc(this.get('model').id, 'tags', tags)
+      .catch((err)=>{
+        this.get('cs').log('error updating doc', err);
+      });
     },
     doEditDocName() {
       if(this.get('canEditDoc'))
@@ -862,7 +882,10 @@ export default Controller.extend({
         if(flags < 2)
         {
           flags = flags + 1;
-          this.get('documentService').updateDoc(model.id, 'flags', flags);
+          this.get('documentService').updateDoc(model.id, 'flags', flags)
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+          });
         }
         else
         {
@@ -972,6 +995,9 @@ export default Controller.extend({
         let model = this.get('model');
         model.data.isPrivate = !model.data.isPrivate;
         this.get('documentService').updateDoc(model.id, 'isPrivate', model.data.isPrivate)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     },
     toggleReadOnly() {
@@ -979,7 +1005,10 @@ export default Controller.extend({
       {
         let model = this.get('model');
         model.data.readOnly = !model.data.readOnly;
-        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly);
+        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     },
     toggleAllowDocDelete() {
@@ -1063,7 +1092,7 @@ export default Controller.extend({
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
       }
-      const actions = [this.updateEditStats(), this.updateSavedVals(), this.updateSourceFromSession()];
+      const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
@@ -1199,8 +1228,9 @@ export default Controller.extend({
         {
            this.newDocSelected(docId);
         }
+      }).catch((err)=>{
+        this.get('cs').log('ERROR updateSourceFromSession', err)
       });
-
     },
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
