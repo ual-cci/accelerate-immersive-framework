@@ -22,6 +22,7 @@ export default Controller.extend({
   codeParser:inject('code-parsing'),
   modalsManager: inject('modalsManager'),
   documentService: inject('documents'),
+  autocomplete: inject('autocomplete'),
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
 
@@ -232,15 +233,13 @@ export default Controller.extend({
   selectRootDoc: function() {
     this.newDocSelected(this.get('model').id).then(()=> {
       this.get('cs').log("loaded root doc, preloading assets");
-      this.preloadAssets().then(()=> {
-        if(this.doPlay())
-        {
-          this.updateIFrame();
-        }
-        else
-        {
-          this.fetchChildren();
-        }
+      this.fetchChildren().then(()=> {
+        this.preloadAssets().then(()=> {
+          if(this.doPlay())
+          {
+            this.updateIFrame();
+          }
+        });
       });
     });
   },
@@ -497,9 +496,16 @@ export default Controller.extend({
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-      const session = this.get('editor').getSession();
-      this.get('documentService').updateDoc(doc.id, "source", session.getValue())
-      .then(()=>resolve());
+      if(!isEmpty(doc))
+      {
+        const session = this.get('editor').getSession();
+        this.get('documentService').updateDoc(doc.id, "source", session.getValue())
+        .then(()=>resolve());
+      }
+      else
+      {
+          resolve();
+      }
     });
   },
   updateIFrame: function(selection = false) {
@@ -821,13 +827,18 @@ export default Controller.extend({
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
-      return [
-        {value:"",
-          score:100000,
-          caption:"Add some MIMIC Code?",
-          meta:"MIMIC",
-          snippet:"custom-mimic-code-snippet"}
-      ]
+      let suggestions = [];
+      const assets = this.get('model').data.assets;
+      if(!isEmpty(assets))
+      {
+        suggestions = suggestions.concat(this.get('autocomplete').assets(assets));
+      }
+      const children = this.get('children');
+      if(!isEmpty(children))
+      {
+        suggestions = suggestions.concat(this.get('autocomplete').tabs(children));
+      }
+      return suggestions;
     },
 
     //DOC PROPERTIES
@@ -860,8 +871,7 @@ export default Controller.extend({
       this.get('assetService').zip();
     },
     flagDocument() {
-      this.get('documentService').flagDoc()
-      .then(()=> {
+      this.get('documentService').flagDoc().then(()=> {
         let model = this.get('model');
         let flags = parseInt(model.data.flags);
         if(flags < 2)
@@ -1192,10 +1202,6 @@ export default Controller.extend({
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
       this.updateSourceFromSession().then(()=> {
-        if(isEmpty(docId))
-        {
-          docId = this.get('model').id;
-        }
         const doc = this.get("currentDoc");
         if(!isEmpty(doc))
         {
