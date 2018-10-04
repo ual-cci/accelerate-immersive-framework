@@ -66,6 +66,7 @@ export default Controller.extend({
   droppedOps:[],
   consoleOutput:"",
   tabs:[],
+  feedbackTimer:null,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -216,15 +217,14 @@ export default Controller.extend({
       this.get('cs').log("newDocSelected", docId);
       if(!isEmpty(doc))
       {
-        this.get('cs').log("destroying connection to old doc");
         if(this.get('wsAvailable'))
         {
+          this.get('cs').log("destroying connection to old doc");
           doc.destroy();
         }
         this.set('currentDoc', null);
       }
       this.connectToDoc(docId).then((newDoc)=> {
-        this.get('opsPlayer').reset(newDoc.id);
         this.set('currentDoc', newDoc);
         this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
@@ -260,7 +260,7 @@ export default Controller.extend({
         {
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
-          this.fetchDoc(docId);
+          this.fetchDoc(docId).then((doc)=>resolve(doc));
         }
         this.set('connection', con);
         const doc = con.get(config.contentCollectionName, docId);
@@ -471,8 +471,32 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.data.assets))
       {
+        let text = "preloading assets.";
+        let interval = setInterval(()=>{
+          if(text=="preloading assets.")
+          {
+            text = "preloading assets.."
+          }
+          else if (text=="preloading assets..")
+          {
+            text = "preloading assets"
+          }
+          else if (text=="preloading assets")
+          {
+            text = "preloading assets."
+          }
+          this.showFeedback(text);
+        }, 500);
         this.get('assetService').preloadAssets(model.data.assets)
-        .then(()=>resolve()).catch((err)=>reject(err));
+        .then(()=>{
+          this.showFeedback("");
+          clearInterval(interval);
+          resolve();
+        }).catch((err)=>{
+          this.showFeedback("");
+          clearInterval(interval);
+          reject(err)
+        });
       }
       else
       {
@@ -516,7 +540,8 @@ export default Controller.extend({
         const savedVals = this.get('savedVals');
         let model = this.get('model');
         const editor = this.get('editor');
-        const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
+        //const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
+        const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
         toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
         toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
@@ -537,56 +562,11 @@ export default Controller.extend({
   },
   updateLinting: function() {
     const doc = this.get('currentDoc');
-    let ruleSets = {
-      "tagname-lowercase": true,
-      "attr-lowercase": true,
-      "attr-value-double-quotes": true,
-      "tag-pair": true,
-      "spec-char-escape": true,
-      "id-unique": true,
-      "src-not-empty": true,
-      "attr-no-duplication": true,
-      "csslint": {
-        "display-property-grouping": true,
-        "known-properties": true
-      },
-      "jshint": {"esversion": 6, "asi" : true}
-    }
-    if(doc.data.type == "js")
-    {
-      ruleSets = {
-        "tagname-lowercase": false,
-        "attr-lowercase": false,
-        "attr-value-double-quotes": false,
-        "tag-pair": false,
-        "spec-char-escape": false,
-        "id-unique": false,
-        "src-not-empty": false,
-        "attr-no-duplication": false,
-        "csslint": {
-          "display-property-grouping": false,
-          "known-properties": false
-        },
-        "jshint": {"esversion": 6, "asi" : true}
-      }
-    }
-
+    const ruleSets = this.get('autocomplete').ruleSets(doc.data.type);
     const editor = this.get('editor');
     const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
     const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    let errors = [], message;
-    for(let i = 0; i < messages.length; i++)
-    {
-        message = messages[i];
-        errors.push({
-            row: message.line-1,
-            column: message.col-1,
-            text: message.message,
-            type: message.type,
-            raw: message.raw
-        });
-    }
-    this.get('cs').log(errors);
+    const errors = this.get('autocomplete').lintingErrors(messages);
     editor.getSession().setAnnotations(errors);
   },
   onCodingFinished: function() {
@@ -800,9 +780,14 @@ export default Controller.extend({
   },
   showFeedback: function(msg) {
     this.set('feedbackMessage', msg);
-    setTimeout(() => {
+    if(!isEmpty(this.get('feedbackTimer')))
+    {
+      clearTimeout(this.get('feedbackTimer'));
+      this.set('feedbackTimer', null);
+    }
+    this.set('feedbackTimer', setTimeout(() => {
       this.set('feedbackMessage', null);
-    },5000)
+    }, 5000));
   },
   pauseOps: function() {
     if(this.get('opsInterval'))
