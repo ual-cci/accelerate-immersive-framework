@@ -33,7 +33,7 @@ export default Controller.extend({
   currentDoc:null,
   editor: null,
   suppress: false,
-  codeTimer: new Date(),
+  codeTimer: null,
   renderedSource:"",
   isNotEdittingDocName:true,
   canEditDoc:false,
@@ -368,14 +368,14 @@ export default Controller.extend({
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
-      // else if (ops[0].p[0] == "assets")
-      // {
-      //   this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-      //     toChange.set('assets',ops[0].oi);
-      //   });
-      //   this.get('cs').log("didReceiveOp", "preloadAssets")
-      //   this.preloadAssets();
-      // }
+      else if (ops[0].p[0] == "assets")
+      {
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+        this.get('cs').log("didReceiveOp", "preloadAssets")
+        this.preloadAssets();
+      }
       else if (!source && ops[0].p[0] == "newEval")
       {
         document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
@@ -523,6 +523,7 @@ export default Controller.extend({
       if(!isEmpty(doc))
       {
         const session = this.get('editor').getSession();
+        //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         this.get('documentService').updateDoc(doc.id, "source", session.getValue())
         .then(()=>resolve());
       }
@@ -540,7 +541,6 @@ export default Controller.extend({
         const savedVals = this.get('savedVals');
         let model = this.get('model');
         const editor = this.get('editor');
-        //const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
         toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
@@ -774,7 +774,7 @@ export default Controller.extend({
           this.selectRootDoc();
         }
       };
-      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      const actions = [this.updateEditStats(), this.updateSavedVals(), this.updateSourceFromSession()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
@@ -1063,7 +1063,7 @@ export default Controller.extend({
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
       }
-      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      const actions = [this.updateEditStats(), this.updateSavedVals(), this.updateSourceFromSession()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
