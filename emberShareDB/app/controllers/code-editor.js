@@ -313,6 +313,8 @@ export default Controller.extend({
       this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
       .catch((err)=>{
         this.get('cs').log('error updating doc', err);
+        reject(err);
+        return;
       });
       editor.setReadOnly(!this.get('canEditDoc'));
       this.set('titleName', doc.data.name);
@@ -533,6 +535,7 @@ export default Controller.extend({
         .then(()=>resolve())
         .catch((err)=>{
           this.get('cs').log("error updateSourceFromSession - updateDoc", err);
+          reject(err);
         });
       }
       else
