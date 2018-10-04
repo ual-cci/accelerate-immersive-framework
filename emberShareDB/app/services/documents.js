@@ -88,13 +88,20 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        doc.set(field, value);
-        doc.save().then((newDoc)=> {
-          resolve(newDoc);
-        }).catch((err)=>{
-          this.get('cs').log(err);
-          reject(err)
-        });
+        if(!isEmpty(doc))
+        {
+          doc.set(field, value);
+          doc.save().then((newDoc)=> {
+            resolve(newDoc);
+          }).catch((err)=>{
+            this.get('cs').log(err);
+            reject(err)
+          });
+        }
+        else
+        {
+          reject();
+        }
       }).catch((err)=>{
         this.get('cs').log(err);
         reject(err)
