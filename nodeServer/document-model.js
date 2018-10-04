@@ -138,7 +138,6 @@ function startWebSockets(server)
       console.log('server weboscket message',data);
     });
 
-
     try {
       shareDB.listen(stream);
     }
