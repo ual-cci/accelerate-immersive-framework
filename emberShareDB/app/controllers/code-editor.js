@@ -311,7 +311,7 @@ export default Controller.extend({
       this.set('surpress', false);
       this.set('savedVals', doc.data.savedVals);
       this.setCanEditDoc();
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      let stats = doc.data.stats;
       stats.views = parseInt(stats.views) + 1;
       this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
       .catch((err)=>{
@@ -412,7 +412,8 @@ export default Controller.extend({
 
       if(this.get('wsAvailable'))
       {
-        doc.submitOp(op, (err) => {
+        const sharedDBDoc = this.get('sharedDBDoc');
+        sharedDBDoc.submitOp(op, (err) => {
           if(err)
           {
             if(retry < MAX_RETRIES)
@@ -427,7 +428,6 @@ export default Controller.extend({
           }
           else
           {
-            //this.get('cs').log("did sumbit op",op);
             resolve();
           }
         });
@@ -581,7 +581,7 @@ export default Controller.extend({
     const doc = this.get('currentDoc');
     const ruleSets = this.get('autocomplete').ruleSets(doc.data.type);
     const editor = this.get('editor');
-    const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
+    const mainText = doc.data.source;
     const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
     const errors = this.get('autocomplete').lintingErrors(messages);
     editor.getSession().setAnnotations(errors);
