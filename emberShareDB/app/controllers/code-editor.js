@@ -217,10 +217,12 @@ export default Controller.extend({
       this.get('cs').log("newDocSelected", docId);
       if(!isEmpty(doc))
       {
-        if(this.get('wsAvailable'))
+        const sharedDBDoc = this.get('sharedDBDoc');
+        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
           this.get('cs').log("destroying connection to old doc");
-          doc.destroy();
+          sharedDBDoc.destroy();
+          this.set('sharedDBDoc', null);
         }
         this.set('currentDoc', null);
       }
@@ -263,16 +265,17 @@ export default Controller.extend({
           this.fetchDoc(docId).then((doc)=>resolve(doc));
         }
         this.set('connection', con);
-        const doc = con.get(config.contentCollectionName, docId);
-        doc.subscribe((err) => {
+        const sharedDBDoc = con.get(config.contentCollectionName, docId);
+        sharedDBDoc.subscribe((err) => {
           if (err) throw err;
           this.get('cs').log("subscribed to doc");
-          if(!isEmpty(doc.data))
+          if(!isEmpty(sharedDBDoc.data))
           {
-            resolve(doc);
+            this.set('sharedDBDoc', sharedDBDoc);
+            this.fetchDoc(docId).then((doc)=>resolve(doc));
           }
         });
-        doc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
+        sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
       }
       else
       {
@@ -784,9 +787,11 @@ export default Controller.extend({
       const fn = () => {
         this.get('opsPlayer').reset(doc.id);
         this.set('renderedSource',"");
-        if(this.get('wsAvailable'))
+        const sharedDBDoc = this.get('sharedDBDoc');
+        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
-          doc.destroy();
+          sharedDBDoc.destroy();
+          this.set('sharedDBDoc', null);
         }
         this.set('currentDoc', null);
         if(!isEmpty(this.get('editor')))
@@ -1087,7 +1092,8 @@ export default Controller.extend({
             this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
-          this.get('currentDoc').destroy();
+          this.get('sharedDBDoc').destroy();
+          this.set('sharedDBDoc', null);
           this.set('currentDoc', null);
           this.get('connection').close();
           this.get('socket').close();
