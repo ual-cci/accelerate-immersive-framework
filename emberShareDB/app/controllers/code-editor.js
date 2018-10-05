@@ -530,7 +530,7 @@ export default Controller.extend({
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-      if(!isEmpty(doc))
+      if(!isEmpty(doc) && this.get('droppedOps').length == 0)
       {
         const session = this.get('editor').getSession();
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
@@ -786,6 +786,7 @@ export default Controller.extend({
     {
       const fn = () => {
         this.get('opsPlayer').reset(doc.id);
+        this.set('droppedOps', []);
         this.set('renderedSource',"");
         const sharedDBDoc = this.get('sharedDBDoc');
         if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
