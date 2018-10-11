@@ -23,13 +23,15 @@ export default Service.extend({
         forkedFrom:forkedFrom,
         parent:parent,
         tags:data.tags,
-        assets:data.assets
+        assets:data.assets,
+        children: data.children
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
         if(!isEmpty(parent))
         {
           this.get('store').findRecord('document', parent).then((parentDoc) => {
+            this.get('cs').log("got parent", parentDoc.data);
             let children = parentDoc.data.children;
             children.push(doc.id);
             this.updateDoc(parent, "children", children)
@@ -52,9 +54,11 @@ export default Service.extend({
     this.get('cs').log("forking", docId, children);
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record", doc.data);
+        this.get('cs').log("found record, making copy of parent", doc.data);
         this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
+          this.get('cs').log("made copy", newDoc.data);
           let actions = children.map((c)=>{
+            this.get('cs').log("making copy of child", doc.data);
             return this.makeNewDoc(c.data, docId, newDoc.id);
           });
           Promise.all(actions).then(()=>{

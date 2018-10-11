@@ -150,7 +150,7 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
-  app.post('/submitOp', app.oauth.authorise(), (req,res) => {
+  app.post('/submitOp', app.oauth.authenticate(), (req,res) => {
     const op = req.body.op;
     const docId = req.body.documentId;
     submitOp(docId, op)
@@ -251,7 +251,7 @@ function startDocAPI(app)
     });
   });
 
-  app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
+  app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
@@ -337,7 +337,8 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
-  app.post('/documents', app.oauth.authorise(), (req,res) => {
+  app.post('/documents', app.oauth.authenticate(), (req,res) => {
+    console.log("POST document")
     let attr = req.body.data.attributes;
     createDoc(attr)
     .then(function(doc) {
@@ -441,7 +442,6 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          const tags = attr.tags ? attr.tags:[];
           doc.create({
             source:"",
             owner:attr.owner,
@@ -452,14 +452,14 @@ function createDoc(attr) {
             created:new Date(),
             lastEdited:new Date(),
             assets:[],
-            tags:tags,
+            tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,
-            children:[],
+            children:attr.children ? attr.children : [],
             parent:attr.parent,
             type:attr.parent ? "js" : "html"
           },()=> {
@@ -468,6 +468,7 @@ function createDoc(attr) {
             op.si = attr.source;
             doc.submitOp(op);
             resolve(doc);
+            return;
           });
           resolve(doc);
           return;
