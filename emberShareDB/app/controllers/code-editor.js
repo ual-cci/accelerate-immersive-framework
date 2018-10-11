@@ -1085,12 +1085,6 @@ export default Controller.extend({
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
-            this.get('socket').onclose = null;
-            this.get('socket').onopen = null;
-            this.get('socket').onmessage = null;
-            this.get('socket').onerror = null;
-            this.set('socket', null);
-            this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
           this.get('sharedDBDoc').destroy();
@@ -1098,6 +1092,12 @@ export default Controller.extend({
           this.set('currentDoc', null);
           this.get('connection').close();
           this.get('socket').close();
+          this.get('socket').onclose = null;
+          this.get('socket').onopen = null;
+          this.get('socket').onmessage = null;
+          this.get('socket').onerror = null;
+          this.set('socket', null);
+          this.set('connection', null)
         }
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
