@@ -18,6 +18,8 @@ process.on('uncaughtException', function (err) {
 function startServer()
 {
   app.use(express.static('static'));
+  app.use(express.json({limit: '50mb'}));
+  app.use(express.urlencoded({limit: '50mb'}));
   app.use(function(req, res, next) {
   	res.header('Access-Control-Allow-Origin', req.get('Origin') || '*');
   	res.header('Access-Control-Allow-Credentials', 'true');
@@ -25,7 +27,7 @@ function startServer()
   	res.header('Access-Control-Expose-Headers', 'Content-Length');
   	res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
   	if (req.method === 'OPTIONS') {
-  	    return res.send(200);
+  	    return res.sendStatus(200);
     } else {
         return next();
     }
@@ -35,6 +37,5 @@ function startServer()
   server.listen(config.serverPort);
   userAPI.initUserAPI(app, config);
   docAPI.initDocAPI(server, app, config);
-  userAPI.initErrorHandling(app);
   console.log('Listening on http://'+ config.serverIP + ':'+ config.serverPort);
 }

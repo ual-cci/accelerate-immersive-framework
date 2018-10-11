@@ -1,10 +1,6 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-  didReceiveAttrs() {
-    this._super(...arguments);
-    console.log("tab item", this.get('id'))
-  },
   actions: {
     onSelect() {
       console.log("tab item selected", this.get('id'))

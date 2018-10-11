@@ -63,12 +63,11 @@ function startAssetAPI(app)
 
         fs.createReadStream(req.files.file.path).pipe(writestream);
         writestream.on('close', function(file) {
-          res.json(200);
           const content_type = req.files.file.headers["content-type"];
-          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-          var newAssets = doc.data.assets;
-          newAssets.push({'name':req.files.file.name,"fileId":file._id,fileType:content_type});
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
+          const newAsset = {'name':req.files.file.name,"fileId":file._id,fileType:content_type};
+          console.log('success uploading asset');
+          res.status(200);
+          res.json(newAsset);
           fs.unlink(req.files.file.path, function(err) {
              console.log('success!')
            });
@@ -86,13 +85,8 @@ function startAssetAPI(app)
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
-          let doc = shareDBConnection.get(contentCollectionName,req.body.documentId)
-          var newAssets = doc.data.assets;
-          newAssets = newAssets.filter(function( asset ) {
-              return asset.fileId !== req.params.id;
-          });
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-          res.json(200);
+          res.status(200);
+          res.json(req.params.id);
         });
       });
     }
@@ -124,11 +118,26 @@ function copyAssets(assets)
 function startWebSockets(server)
 {
   var wss = new WebSocket.Server({server: server});
+
   wss.on('connection', (ws, req) => {
+    // ws.isAlive = true;
+    // function noop() {}
+    // function heartbeat() {
+    //   ws.isAlive = true;
+    // }
+    // ws.on('pong', heartbeat);
+    // const interval = setInterval(function ping() {
+    //   wss.clients.forEach(function each(ws) {
+    //     if (ws.isAlive === false) return ws.terminate();
+    //       ws.isAlive = false;
+    //       ws.ping(noop);
+    //   });
+    // }, 1000);
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
+
     try {
       shareDB.listen(stream);
     }
@@ -141,7 +150,7 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
-  app.post('/submitOp', app.oauth.authorise(), (req,res) => {
+  app.post('/submitOp', app.oauth.authenticate(), (req,res) => {
     const op = req.body.op;
     const docId = req.body.documentId;
     submitOp(docId, op)
@@ -220,6 +229,7 @@ function startDocAPI(app)
     const query = {
       $and: [searchTermOr,
              {parent: null},
+             { children : { $exists : true } },
              {$or: [{owner: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
@@ -241,7 +251,7 @@ function startDocAPI(app)
     });
   });
 
-  app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
+  app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
@@ -327,23 +337,14 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
-  app.post('/documents', app.oauth.authorise(), (req,res) => {
+  app.post('/documents', app.oauth.authenticate(), (req,res) => {
+    console.log("POST document")
     let attr = req.body.data.attributes;
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      if(attr.parent != "") {
-        var parent = shareDBConnection.get(contentCollectionName, attr.parent);
-        parent.fetch(function(err) {
-          if (!err && parent.data) {
-            let children  = parent.data.children;
-            children.push(doc.data.documentId);
-            parent.submitOp({p:['children'],oi:children},{source:'server'});
-          }
-        });
-      }
       if(doc.data.forkedFrom)
       {
         copyAssets(attr.assets).then((newAssets)=>{
@@ -383,8 +384,8 @@ function submitOp(docId, op) {
       }
     }
     if(typeof op.oi == 'undefined' &&
-      typeof op.oi == 'undefined'&&
-      typeof op.oi == 'undefined')
+      typeof op.sd == 'undefined'&&
+      typeof op.si == 'undefined')
     {
       console.log("no objects in op", op)
       reject({errors:["no objects in op"]});
@@ -441,7 +442,6 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          const tags = attr.tags ? attr.tags:[];
           doc.create({
             source:"",
             owner:attr.owner,
@@ -452,22 +452,23 @@ function createDoc(attr) {
             created:new Date(),
             lastEdited:new Date(),
             assets:[],
-            tags:tags,
+            tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,
-            children:[],
+            children:attr.children ? attr.children : [],
             parent:attr.parent,
-            type:attr.parent ? "html" : "js"
+            type:attr.parent ? "js" : "html"
           },()=> {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
             doc.submitOp(op);
             resolve(doc);
+            return;
           });
           resolve(doc);
           return;

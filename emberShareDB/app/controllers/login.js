@@ -29,11 +29,11 @@ export default Controller.extend({
     },
     authenticate() {
       let { identification, password } = this.getProperties('identification', 'password');
-      this.get('cs').log(identification, password);
       this.get('session').authenticate('authenticator:oauth2', identification, password).then((response) => {
         this.get('cs').log("authenticated", response);
         this.set('loginErrorMessage', "authenticated");
       }).catch((err) => {
+        console.log(err);
         this.set('loginErrorMessage', err.error_description);
       });
     },
@@ -53,7 +53,7 @@ export default Controller.extend({
           this.set('registerMessage', 'user created');
         }).catch((err) => {
           this.get('cs').log(err);
-          this.set('registerMessage', 'Error:' + err.errors[0].detail);
+          this.set('registerMessage', 'Error:' + err);
         });
       }).catch((err) => {
         this.set('registerMessage', 'Error:' + err);

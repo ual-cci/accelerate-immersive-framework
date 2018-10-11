@@ -22,6 +22,7 @@ export default Controller.extend({
   codeParser:inject('code-parsing'),
   modalsManager: inject('modalsManager'),
   documentService: inject('documents'),
+  autocomplete: inject('autocomplete'),
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
 
@@ -32,7 +33,7 @@ export default Controller.extend({
   currentDoc:null,
   editor: null,
   suppress: false,
-  codeTimer: new Date(),
+  codeTimer: null,
   renderedSource:"",
   isNotEdittingDocName:true,
   canEditDoc:false,
@@ -65,6 +66,7 @@ export default Controller.extend({
   droppedOps:[],
   consoleOutput:"",
   tabs:[],
+  feedbackTimer:null,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -215,11 +217,12 @@ export default Controller.extend({
       this.get('cs').log("newDocSelected", docId);
       if(!isEmpty(doc))
       {
-        this.get('cs').log("destroying connection to old doc");
-        this.get('opsPlayer').reset();
-        if(this.get('wsAvailable'))
+        const sharedDBDoc = this.get('sharedDBDoc');
+        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
-          doc.destroy();
+          this.get('cs').log("destroying connection to old doc");
+          sharedDBDoc.destroy();
+          this.set('sharedDBDoc', null);
         }
         this.set('currentDoc', null);
       }
@@ -232,15 +235,13 @@ export default Controller.extend({
   selectRootDoc: function() {
     this.newDocSelected(this.get('model').id).then(()=> {
       this.get('cs').log("loaded root doc, preloading assets");
-      this.preloadAssets().then(()=> {
-        if(this.doPlay())
-        {
-          this.updateIFrame();
-        }
-        else
-        {
-          this.fetchChildren();
-        }
+      this.fetchChildren().then(()=> {
+        this.preloadAssets().then(()=> {
+          if(this.doPlay())
+          {
+            this.updateIFrame();
+          }
+        });
       });
     });
   },
@@ -248,7 +249,6 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      this.get('opsPlayer').reset();
       if(this.get('wsAvailable'))
       {
         const socket = this.get('socket');
@@ -262,19 +262,20 @@ export default Controller.extend({
         {
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
-          this.fetchDoc(docId);
+          this.fetchDoc(docId).then((doc)=>resolve(doc));
         }
         this.set('connection', con);
-        const doc = con.get(config.contentCollectionName, docId);
-        doc.subscribe((err) => {
+        const sharedDBDoc = con.get(config.contentCollectionName, docId);
+        sharedDBDoc.subscribe((err) => {
           if (err) throw err;
           this.get('cs').log("subscribed to doc");
-          if(!isEmpty(doc.data))
+          if(!isEmpty(sharedDBDoc.data))
           {
-            resolve(doc);
+            this.set('sharedDBDoc', sharedDBDoc);
+            this.fetchDoc(docId).then((doc)=>resolve(doc));
           }
         });
-        doc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
+        sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
       }
       else
       {
@@ -292,11 +293,12 @@ export default Controller.extend({
   },
   didReceiveDoc: function() {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("didReceiveDoc");
       const doc = this.get('currentDoc');
+      this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       const session = editor.getSession();
-      if(doc.data.type = "js")
+      this.get('cs').log("didReceiveDoc", doc.data.type);
+      if(doc.data.type == "js")
       {
         session.setMode("ace/mode/javascript");
       }
@@ -309,15 +311,34 @@ export default Controller.extend({
       this.set('surpress', false);
       this.set('savedVals', doc.data.savedVals);
       this.setCanEditDoc();
-      let stats = doc.data.stats ? doc.data.stats : {views:0,forks:0,edits:0};
+      let stats = doc.data.stats;
       stats.views = parseInt(stats.views) + 1;
-      this.get('documentService').updateDoc(this.get('model').id, 'stats', stats);
+      this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
+      .catch((err)=>{
+        this.get('cs').log('error updating doc', err);
+        reject(err);
+        return;
+      });
       editor.setReadOnly(!this.get('canEditDoc'));
       this.set('titleName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
       resolve();
     })
+  },
+  setParentData: function(data) {
+    this.set('parentData', {name:data.name,
+      id:data.documentId,
+      children:data.children,
+      source:data.source,
+      assets:data.assets
+    });
+  },
+  setTabs: function(data) {
+    const tabs = data.map((child)=> {
+      return {name:child.data.name, id:child.id};
+    });
+    this.set('tabs', tabs);
   },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
@@ -328,19 +349,15 @@ export default Controller.extend({
         this.set('tabs', model.children);
         this.set('children', null);
         this.set('children', model.children);
-        this.set('parentData', {name:model.name,id:model.documentId,children:model.children});
+        this.setParentData(model);
         resolve();
         return;
       }
       this.get('documentService').getChildren(model.children).then((data)=> {
-        this.get('cs').log("got children");
+        this.get('cs').log("got children", data.children);
         this.set('children', data.children);
-        const tabs = data.children.map((child)=> {
-          return {name:child.data.name, id:child.id};
-        });
-        this.set('tabs', tabs);
-        const parent = data.parent.data;
-        this.set('parentData', {name:parent.name,id:parent.documentId,children:parent.children});
+        this.setTabs(data.children);
+        this.setParentData(data.parent.data);
         resolve();
       }).catch((err)=>{
         this.get('cs').log(err);
@@ -359,14 +376,14 @@ export default Controller.extend({
         session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
-      // else if (ops[0].p[0] == "assets")
-      // {
-      //   this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-      //     toChange.set('assets',ops[0].oi);
-      //   });
-      //   this.get('cs').log("didReceiveOp", "preloadAssets")
-      //   this.preloadAssets();
-      // }
+      else if (ops[0].p[0] == "assets")
+      {
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+        this.get('cs').log("didReceiveOp", "preloadAssets")
+        this.preloadAssets();
+      }
       else if (!source && ops[0].p[0] == "newEval")
       {
         document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
@@ -377,7 +394,9 @@ export default Controller.extend({
         this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
         .then(()=>{
           this.fetchChildren();
-        })
+        }).catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     }
   },
@@ -385,13 +404,16 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       const MAX_RETRIES = 5;
-      if(this.get('droppedOps').length > 0) {
+      let droppedOps = this.get('droppedOps');
+      if(droppedOps.length > 0) {
+        this.set('droppedOps', droppedOps.push(op));
         return reject();
       }
 
       if(this.get('wsAvailable'))
       {
-        doc.submitOp(op, (err) => {
+        const sharedDBDoc = this.get('sharedDBDoc');
+        sharedDBDoc.submitOp(op, (err) => {
           if(err)
           {
             if(retry < MAX_RETRIES)
@@ -400,20 +422,19 @@ export default Controller.extend({
             }
             else
             {
-              this.get('droppedOps').push(op);
+              droppedOps.push(op);
             }
             reject(err);
           }
           else
           {
-            //this.get('cs').log("did sumbit op",op);
             resolve();
           }
         });
       }
       else
       {
-        this.get('documentService').submitOp(op).then(() => {
+        this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
         }).catch((err) => {
@@ -424,7 +445,7 @@ export default Controller.extend({
           }
           else
           {
-            this.get('droppedOps').push(op);
+            droppedOps.push(op);
           }
           reject(err);
         });
@@ -460,8 +481,32 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.data.assets))
       {
+        let text = "preloading assets.";
+        let interval = setInterval(()=>{
+          if(text=="preloading assets.")
+          {
+            text = "preloading assets.."
+          }
+          else if (text=="preloading assets..")
+          {
+            text = "preloading assets"
+          }
+          else if (text=="preloading assets")
+          {
+            text = "preloading assets."
+          }
+          this.showFeedback(text);
+        }, 500);
         this.get('assetService').preloadAssets(model.data.assets)
-        .then(()=>resolve()).catch((err)=>reject(err));
+        .then(()=>{
+          this.showFeedback("");
+          clearInterval(interval);
+          resolve();
+        }).catch((err)=>{
+          this.showFeedback("");
+          clearInterval(interval);
+          reject(err)
+        });
       }
       else
       {
@@ -482,64 +527,63 @@ export default Controller.extend({
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
-  updateIFrame: function(selection = false) {
-    this.fetchChildren().then(()=> {
-      this.updateSavedVals();
-      this.get('cs').log("updateIFrame", selection);
-      const savedVals = this.get('savedVals');
-      let model = this.get('model');
-      const editor = this.get('editor');
-      const mainText = this.get('wsAvailable') ? model.data.source : editor.session.getValue();
-      let toRender = selection ? this.getSelectedText() : mainText;
-      toRender = this.get('codeParser').insertChildren(toRender, this.get('children'));
-      toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-      toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-      this.get('cs').clear();
-      if(selection)
+  updateSourceFromSession: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('currentDoc');
+      if(!isEmpty(doc) && this.get('droppedOps').length == 0)
       {
-        this.get('documentService').updateDoc(model.id, 'newEval', toRender);
-        document.getElementById("output-iframe").contentWindow.eval(toRender);
+        const session = this.get('editor').getSession();
+        //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
+        this.get('documentService').updateDoc(doc.id, "source", session.getValue())
+        .then(()=>resolve())
+        .catch((err)=>{
+          this.get('cs').log("error updateSourceFromSession - updateDoc", err);
+          reject(err);
+        });
       }
       else
       {
-        this.set('renderedSource', toRender);
+          resolve();
       }
-      this.updateLinting();
     });
   },
+  updateIFrame: function(selection = false) {
+    this.updateSourceFromSession().then(()=> {
+      this.fetchChildren().then(()=> {
+        this.updateSavedVals();
+        this.get('cs').log("updateIFrame", selection);
+        const savedVals = this.get('savedVals');
+        let model = this.get('model');
+        const editor = this.get('editor');
+        const mainText = model.data.source;
+        let toRender = selection ? this.getSelectedText() : mainText;
+        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
+        toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
+        toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
+        this.get('cs').clear();
+        if(selection)
+        {
+          this.get('documentService').updateDoc(model.id, 'newEval', toRender)
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+          });
+          document.getElementById("output-iframe").contentWindow.eval(toRender);
+        }
+        else
+        {
+          this.set('renderedSource', toRender);
+        }
+        this.updateLinting();
+      });
+    })
+  },
   updateLinting: function() {
-    const ruleSets = {
-      "tagname-lowercase": true,
-      "attr-lowercase": true,
-      "attr-value-double-quotes": true,
-      "tag-pair": true,
-      "spec-char-escape": true,
-      "id-unique": true,
-      "src-not-empty": true,
-      "attr-no-duplication": true,
-      "csslint": {
-        "display-property-grouping": true,
-        "known-properties": true
-      },
-      "jshint": {"esversion": 6, "asi" : true}
-    }
-    const editor = this.get('editor');
     const doc = this.get('currentDoc');
-    const mainText = this.get('wsAvailable') ? doc.data.source : editor.session.getValue();
+    const ruleSets = this.get('autocomplete').ruleSets(doc.data.type);
+    const editor = this.get('editor');
+    const mainText = doc.data.source;
     const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    let errors = [], message;
-    for(let i = 0; i < messages.length; i++)
-    {
-        message = messages[i];
-        errors.push({
-            row: message.line-1,
-            column: message.col-1,
-            text: message.message,
-            type: message.type,
-            raw: message.raw
-        });
-    }
-    this.get('cs').log(errors);
+    const errors = this.get('autocomplete').lintingErrors(messages);
     editor.getSession().setAnnotations(errors);
   },
   onCodingFinished: function() {
@@ -548,7 +592,7 @@ export default Controller.extend({
       this.updateIFrame();
     }
     this.updateLinting();
-    this.set('codeTimer',null);
+    this.set('codeTimer', null);
   },
   restartCodeTimer: function() {
     if(this.get('codeTimer'))
@@ -575,7 +619,7 @@ export default Controller.extend({
         this.submitOp({p: ["source", 0], sd: doc.data.source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
-      this.get('opsPlayer').reset();
+      this.get('opsPlayer').reset(doc.id);
 
       const aceDoc = session.getDocument();
       const op = {};
@@ -592,7 +636,6 @@ export default Controller.extend({
       const str = delta.lines.join('\n');
       op[action] = str;
       this.submitOp(op);
-      this.get('documentService').updateDoc(doc.id, "source", session.getValue())
       this.restartCodeTimer();
     }
   },
@@ -633,10 +676,13 @@ export default Controller.extend({
   },
   update() {
     this.set('consoleOutput', this.get('cs').output);
+    var textarea = document.getElementById('console');
+    textarea.scrollTop = textarea.scrollHeight;
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserName;
     let model = this.get('model');
+    console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
     {
       this.set('canEditDoc', false);
@@ -694,6 +740,7 @@ export default Controller.extend({
       if(isEmpty(savedVals))
       {
         resolve();
+        return;
       }
       else
       {
@@ -702,7 +749,12 @@ export default Controller.extend({
         if(hasVals)
         {
           this.get('documentService').updateDoc(this.get('model').id, 'savedVals', savedVals)
-          .then(() => resolve()).catch((err) => reject(err));
+          .then(() => resolve()).catch((err) => reject(err))
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+            reject(err);
+            return;
+          });
         }
         else
         {
@@ -733,11 +785,14 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       const fn = () => {
-        this.get('opsPlayer').reset();
+        this.get('opsPlayer').reset(doc.id);
+        this.set('droppedOps', []);
         this.set('renderedSource',"");
-        if(this.get('wsAvailable'))
+        const sharedDBDoc = this.get('sharedDBDoc');
+        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
-          doc.destroy();
+          sharedDBDoc.destroy();
+          this.set('sharedDBDoc', null);
         }
         this.set('currentDoc', null);
         if(!isEmpty(this.get('editor')))
@@ -745,15 +800,20 @@ export default Controller.extend({
           this.selectRootDoc();
         }
       };
-      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     }
   },
   showFeedback: function(msg) {
     this.set('feedbackMessage', msg);
-    setTimeout(() => {
+    if(!isEmpty(this.get('feedbackTimer')))
+    {
+      clearTimeout(this.get('feedbackTimer'));
+      this.set('feedbackTimer', null);
+    }
+    this.set('feedbackTimer', setTimeout(() => {
       this.set('feedbackMessage', null);
-    },5000)
+    }, 5000));
   },
   pauseOps: function() {
     if(this.get('opsInterval'))
@@ -778,18 +838,26 @@ export default Controller.extend({
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
-      return [
-        {value:"",
-          score:100000,
-          caption:"Add some MIMIC Code?",
-          meta:"MIMIC",
-          snippet:"custom-mimic-code-snippet"}
-      ]
+      let suggestions = [];
+      const assets = this.get('model').data.assets;
+      if(!isEmpty(assets))
+      {
+        suggestions = suggestions.concat(this.get('autocomplete').assets(assets));
+      }
+      const children = this.get('children');
+      if(!isEmpty(children))
+      {
+        suggestions = suggestions.concat(this.get('autocomplete').tabs(children));
+      }
+      return suggestions;
     },
 
     //DOC PROPERTIES
     tagsChanged(tags) {
-      this.get('documentService').updateDoc(this.get('model').id, 'tags', tags);
+      this.get('documentService').updateDoc(this.get('model').id, 'tags', tags)
+      .catch((err)=>{
+        this.get('cs').log('error updating doc', err);
+      });
     },
     doEditDocName() {
       if(this.get('canEditDoc'))
@@ -817,14 +885,16 @@ export default Controller.extend({
       this.get('assetService').zip();
     },
     flagDocument() {
-      this.get('documentService').flagDoc()
-      .then(()=> {
+      this.get('documentService').flagDoc().then(()=> {
         let model = this.get('model');
         let flags = parseInt(model.data.flags);
         if(flags < 2)
         {
           flags = flags + 1;
-          this.get('documentService').updateDoc(model.id, 'flags', flags);
+          this.get('documentService').updateDoc(model.id, 'flags', flags)
+          .catch((err)=>{
+            this.get('cs').log('error updating doc', err);
+          });
         }
         else
         {
@@ -875,23 +945,36 @@ export default Controller.extend({
     assetUploaded(e) {
       this.get('cs').log("assetComplete", e);
       $("#asset-progress").css("display", "none");
-      if(!this.get('wsAvailable'))
-      {
-        this.refreshDoc();
-      }
+      const doc = this.get('model');
+      let newAssets = doc.data.assets;
+      newAssets.push(e);
+      this.get('documentService').updateDoc(doc.id, "assets", newAssets)
+      .then(()=>{
+        if(!this.get('wsAvailable'))
+        {
+          this.refreshDoc();
+        }
+      }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
     },
     deleteAsset()
     {
       if(this.get('canEditDoc'))
       {
         this.get('assetService').deleteAsset(this.get('assetToDelete')).then(()=> {
-          this.get('cs').log('deleted asset', this.get('assetToDelete'));
+          const doc = this.get('model');
+          let newAssets = doc.data.assets;
+          newAssets = newAssets.filter((asset) => {
+              return asset.fileId !== this.get('assetToDelete')
+          });
           this.set('assetToDelete',"");
           this.toggleProperty('allowAssetDelete');
-          if(!this.get('wsAvailable'))
-          {
-            this.refreshDoc();
-          }
+          this.get('documentService').updateDoc(doc.id, "assets", newAssets)
+          .then(()=>{
+            if(!this.get('wsAvailable'))
+            {
+              this.refreshDoc();
+            }
+          }).catch((err)=>{this.get('cs').log(err)});
         }).catch((err)=>{
           this.get('cs').log('ERROR deleting asset', err, this.get('assetToDelete'));
         });
@@ -921,6 +1004,9 @@ export default Controller.extend({
         let model = this.get('model');
         model.data.isPrivate = !model.data.isPrivate;
         this.get('documentService').updateDoc(model.id, 'isPrivate', model.data.isPrivate)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     },
     toggleReadOnly() {
@@ -928,7 +1014,10 @@ export default Controller.extend({
       {
         let model = this.get('model');
         model.data.readOnly = !model.data.readOnly;
-        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly);
+        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
       }
     },
     toggleAllowDocDelete() {
@@ -939,7 +1028,6 @@ export default Controller.extend({
       }
     },
     toggleAllowAssetDelete(asset) {
-      this.collapseAllSubMenus();
       if(this.get('canEditDoc'))
       {
         this.set('assetToDelete',asset);
@@ -1005,14 +1093,16 @@ export default Controller.extend({
             this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
-          this.get('currentDoc').destroy();
+          this.get('sharedDBDoc').destroy();
+          this.set('sharedDBDoc', null);
           this.set('currentDoc', null);
+          this.get('connection').close();
           this.get('socket').close();
         }
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
       }
-      const actions = [this.updateEditStats(), this.updateSavedVals()];
+      const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
     refresh() {
@@ -1135,22 +1225,22 @@ export default Controller.extend({
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
-      if(isEmpty(docId))
-      {
-        docId = this.get('model').id;
-      }
-      const doc = this.get("currentDoc");
-      if(!isEmpty(doc))
-      {
-        if(docId != doc.data.documentId)
+      this.updateSourceFromSession().then(()=> {
+        const doc = this.get("currentDoc");
+        if(!isEmpty(doc))
         {
-          this.newDocSelected(docId);
+          if(docId != doc.data.documentId)
+          {
+            this.newDocSelected(docId);
+          }
         }
-      }
-      else
-      {
-         this.newDocSelected(docId);
-      }
+        else
+        {
+           this.newDocSelected(docId);
+        }
+      }).catch((err)=>{
+        this.get('cs').log('ERROR updateSourceFromSession', err)
+      });
     },
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);

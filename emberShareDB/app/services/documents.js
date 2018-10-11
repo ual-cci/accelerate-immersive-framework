@@ -23,11 +23,25 @@ export default Service.extend({
         forkedFrom:forkedFrom,
         parent:parent,
         tags:data.tags,
-        assets:data.assets
+        assets:data.assets,
+        children: data.children
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
-        resolve(response);
+        if(!isEmpty(parent))
+        {
+          this.get('store').findRecord('document', parent).then((parentDoc) => {
+            this.get('cs').log("got parent", parentDoc.data);
+            let children = parentDoc.data.children;
+            children.push(doc.id);
+            this.updateDoc(parent, "children", children)
+            .then(resolve(response)).catch((err)=>{this.get('cs').log(err)});
+          }).catch((err)=>{this.get('cs').log(err)});
+        }
+        else
+        {
+          resolve(response);
+        }
       }).catch((err)=>{
         this.get('cs').log("error creating record");
         doc.deleteRecord();
@@ -40,9 +54,11 @@ export default Service.extend({
     this.get('cs').log("forking", docId, children);
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record", doc.data);
+        this.get('cs').log("found record, making copy of parent", doc.data);
         this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
+          this.get('cs').log("made copy", newDoc.data);
           let actions = children.map((c)=>{
+            this.get('cs').log("making copy of child", doc.data);
             return this.makeNewDoc(c.data, docId, newDoc.id);
           });
           Promise.all(actions).then(()=>{
@@ -76,15 +92,22 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        doc.set(field, value);
-        doc.save().then(()=> {
-          resolve()
-        }).catch((err)=>{
-          this.get('cs').log(err);
-          reject(err)
-        });
+        if(!isEmpty(doc) &&  !(doc.get('isDestroyed') || doc.get('isDestroying')))
+        {
+          doc.set(field, value);
+          doc.save().then((newDoc)=> {
+            resolve(newDoc);
+          }).catch((err)=>{
+            this.get('cs').log("documentservice, updateDoc1", err);
+            reject(err)
+          });
+        }
+        else
+        {
+          reject();
+        }
       }).catch((err)=>{
-        this.get('cs').log(err);
+        this.get('cs').log("documentservice, updateDoc2", err);
         reject(err)
       });
     });
@@ -157,8 +180,8 @@ export default Service.extend({
         return;
       }
       let fetch = (docId) => {
-        return new RSVP.Promise((resolve, reject) => {
-          this.get('store').findRecord('document', docId).then((doc)=>resolve(doc)).catch((err)=>reject(err));
+        return new RSVP.Promise((res, rej) => {
+          this.get('store').findRecord('document', docId).then((doc)=>res(doc)).catch((err)=>rej(err));
         })
       }
       let actions = childrenIds.map(fetch);

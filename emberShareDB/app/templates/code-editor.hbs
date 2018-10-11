@@ -1,8 +1,8 @@
-<div>
+<div class = "container-fluid">
   <div>
   {{#if showName}}
     {{#if isNotEdittingDocName}}
-      <h2><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span></h2>
+      <h2 class = "doc-title"><span class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span></h2>
     {{else}}
       {{input value=titleName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
@@ -10,211 +10,217 @@
     <h4><span>{{feedbackMessage}}</span></h4>
   {{/if}}
   </div>
-  {{#if displayEditor}}
-  <div class="settings">
-    <div class="tooltip">
-      {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
-      <span class="tooltiptext">Settings</span>
-    </div>
-    <div class="tooltip">
-      {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
-      <span class="tooltiptext">Render Code</span>
-    </div>
-    <div class="tooltip">
-      {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
-      <span class="tooltiptext">Pause Code</span>
-    </div>
-    <div class="tooltip">
-      {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
-      <span class="tooltiptext">Enter Fullscreen</span>
-    </div>
-    {{#if canEditDoc}}
-    <div class="tooltip">
-      <label for="autoRenderCheckbox">Auto Render?</label>
-      {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-      <span class="tooltiptext">Render Code Whilst Typing</span>
-    </div>
-    {{/if}}
-    {{#if session.isAuthenticated}}
-    <div class="tooltip">
-      {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
-      <span class="tooltiptext">Make Your Own Copy</span>
-    </div>
-    <div class="tooltip">
-      {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
-      <span class="tooltiptext">Report as Inappropriate</span>
-    </div>
-    <div class="tooltip">
-      {{download-button doc = doc}}
-      <span class="tooltiptext">Download Project as Zip</span>
-    </div>
-    {{/if}}
-    {{#bs-collapse collapsed=collapsed}}
-      <div class="well">
-        {{#if isOwner}}
-        <div class="tooltip">
-          <label for="privacyCheckbox">Private?</label>
-          {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-          <span class="tooltiptext">Other users can discover</span>
-        </div>
-        <div class="tooltip">
-          <label for="readOnlyCheckbox">Read Only?</label>
-          {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-          <span class="tooltiptext">WARNING! Other users can edit your code</span>
-        </div>
-          <div class="tooltip">
-            {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowAssets")}}
-              Files
-            {{/bs-button}}
-            <span class="tooltiptext">Add Files to Use</span>
-          </div>
-        {{/if}}
-        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
-          Share
-        {{/bs-button}}
-        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowCodeOptions")}}
-          Code
-        {{/bs-button}}
-        {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowTokens")}}
-          Tags
-        {{/bs-button}}
-        <div class="tooltip">
-          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowOpPlayer")}}
-            Playback
-          {{/bs-button}}
-          <span class="tooltiptext">Step Through or Watch The Doc's History</span>
-        </div>
-
-        {{#if isOwner}}
-          {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
-            Delete
-          {{/bs-button}}
-        {{/if}}
-        <div>
-        {{#if showOpPlayer}}
-        <div>
-          <h5>Playback your coding</h5>
-          {{ops-player
-            onSkip = (action 'skipOp')
-            onPlay = (action 'playOps')
-            onRewind = (action 'rewindOps')
-            onPause = (action 'pauseOps')
-          }}
-        </div>
-        {{/if}}
-        {{#if showShare}}
-          <label for="edit-link">Editable Link</label>
-          {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}
-          <label for="display-link">Just Display Link</label>
-          {{input value=displayLink type="form-control" id="display-link" name="display-link"}}
-          <label for="embed-link">Embed Link</label>
-          {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
-        {{/if}}
-        {{#if showCodeOptions}}
-          {{#bs-button
-          icon="glyphicon glyphicon-zoom-in"
-          onClick=(action "zoomIn")}}
-          {{/bs-button}}
-          {{#bs-button
-          icon="glyphicon glyphicon-zoom-out"
-          onClick=(action "zoomOut")}}
-          {{/bs-button}}
-        {{/if}}
-        {{#if showTokens}}
-        <div>
-          {{tokenfield-input
-            tokens=model.tags
-            allowDuplicates=false
-            placeholder="Enter Tags"
-            editable=canEditDoc
-            tokensChanged=(action 'tagsChanged')
-          }}
-          </div>
-        {{/if}}
-        {{#if allowDocDelete}}
-          <div>
-            Are you sure?
-            {{#bs-button class = "btn-confirm" type="success" onClick=(action "deleteDoc")}}
-              Yes
-            {{/bs-button}}
-            {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowDocDelete")}}
-              No
-            {{/bs-button}}
-          </div>
-        {{/if}}
+  <div class = "editor-container">
+    {{#if displayEditor}}
+    <div class="settings">
+      <div class="tooltip">
+        {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
+        <span class="tooltiptext">Settings</span>
       </div>
-        {{#if showAssets}}
-          <div class = "file-upload-container">
-            Files:
-            {{#each model.assets as |asset|}}
-              {{asset.name}}
-              {{#bs-button class = "btn-confirm"
-              type="danger"
-              icon="glyphicon glyphicon-remove"
-              onClick=(action "toggleAllowAssetDelete" asset.fileId)}}
-              {{/bs-button}}
-              {{#bs-button class = "btn-confirm"
-              type="primary"
-              icon="glyphicon glyphicon-eye-open"
-              onClick=(action "previewAsset" asset)}}
-              {{/bs-button}}
-            {{/each}}
-            {{#if allowAssetDelete}}
-              <div>
-                Are you sure you want to delete this file?
-                {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset")}}
-                  Yes
-                {{/bs-button}}
-                {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
-                  No
-                {{/bs-button}}
-              </div>
-            {{/if}}
-            {{#if canEditDoc}}
-            <div id = "asset-progress"></div>
-            <div class = "file-upload">
-              {{file-upload
-                onProgress = (action 'assetProgress')
-                onCompletion = (action 'assetUploaded')
-                onError = (action 'assetError')
-              }}
-            </div>
-            {{/if}}
-          </div>
-        {{/if}}
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+        <span class="tooltiptext">Render Code</span>
       </div>
-    {{/bs-collapse}}
-  </div>
-  {{#if showPreview}}
-  {{/if}}
-  {{/if}}
-  {{project-tabs
-    parent = parentData
-    tabs = tabs
-    onSelect = (action 'tabSelected')
-    onDelete = (action 'tabDeleted')
-    onCreate = (action 'newTab')}}
-  <div class = "main-container">
-    <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-      <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
-    </div>
-    <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-      {{#if isShowingCode}}
-        {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
-      {{else}}
-        {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
+        <span class="tooltiptext">Pause Code</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
+        <span class="tooltiptext">Enter Fullscreen</span>
+      </div>
+      {{#if canEditDoc}}
+      <div class="tooltip">
+        <label for="autoRenderCheckbox">Auto Render?</label>
+        {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+        <span class="tooltiptext">Render Code Whilst Typing</span>
+      </div>
       {{/if}}
-      <div class = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-        {{ember-ace lines=36
-          value=value
-          ready=(action 'editorReady')
-          theme='ace/theme/monokai'
-          enableDefaultAutocompletion=true
-          enableLiveAutocompletion=true
-          enableBasicAutocompletion=true
-          suggestCompletions = (action 'suggestCompletions')
-        }}
+      <div class="tooltip">
+        {{download-button doc = parentData}}
+        <span class="tooltiptext">Download Project as Zip</span>
       </div>
+      {{#if session.isAuthenticated}}
+      <div class="tooltip">
+        {{#bs-button onClick=(action "forkDocument")}}Fork{{/bs-button}}
+        <span class="tooltiptext">Make Your Own Copy</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button onClick=(action "flagDocument")}}Flag{{/bs-button}}
+        <span class="tooltiptext">Report as Inappropriate</span>
+      </div>
+      {{/if}}
+      {{#bs-collapse collapsed=collapsed}}
+        <div class="well">
+          {{#if isOwner}}
+          <div class="tooltip">
+            <label for="privacyCheckbox">Private?</label>
+            {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+            <span class="tooltiptext">Other users can discover</span>
+          </div>
+          <div class="tooltip">
+            <label for="readOnlyCheckbox">Read Only?</label>
+            {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+            <span class="tooltiptext">WARNING! Other users can edit your code</span>
+          </div>
+            <div class="tooltip">
+              {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowAssets")}}
+                Files
+              {{/bs-button}}
+              <span class="tooltiptext">Add Files to Use</span>
+            </div>
+          {{/if}}
+          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowShare")}}
+            Share
+          {{/bs-button}}
+          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowCodeOptions")}}
+            Code
+          {{/bs-button}}
+          {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowTokens")}}
+            Tags
+          {{/bs-button}}
+          <div class="tooltip">
+            {{#bs-button class = "btn-confirm" type="primary" onClick=(action "toggleShowOpPlayer")}}
+              Playback
+            {{/bs-button}}
+            <span class="tooltiptext">Step Through or Watch The Doc's History</span>
+          </div>
+
+          {{#if isOwner}}
+            {{#bs-button class = "btn-confirm" type="danger" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowDocDelete")}}
+              Delete
+            {{/bs-button}}
+          {{/if}}
+          <div>
+          {{#if showOpPlayer}}
+          <div>
+            <h5>Playback your coding</h5>
+            {{ops-player
+              onSkip = (action 'skipOp')
+              onPlay = (action 'playOps')
+              onRewind = (action 'rewindOps')
+              onPause = (action 'pauseOps')
+            }}
+          </div>
+          {{/if}}
+          {{#if showShare}}
+            <label for="edit-link">Editable Link</label>
+            {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}
+            <label for="display-link">Just Display Link</label>
+            {{input value=displayLink type="form-control" id="display-link" name="display-link"}}
+            <label for="embed-link">Embed Link</label>
+            {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
+          {{/if}}
+          {{#if showCodeOptions}}
+            {{#bs-button
+            icon="glyphicon glyphicon-zoom-in"
+            onClick=(action "zoomIn")}}
+            {{/bs-button}}
+            {{#bs-button
+            icon="glyphicon glyphicon-zoom-out"
+            onClick=(action "zoomOut")}}
+            {{/bs-button}}
+          {{/if}}
+          {{#if showTokens}}
+          <div>
+            {{tokenfield-input
+              tokens=model.tags
+              allowDuplicates=false
+              placeholder="Enter Tags"
+              editable=canEditDoc
+              tokensChanged=(action 'tagsChanged')
+            }}
+            </div>
+          {{/if}}
+          {{#if allowDocDelete}}
+            <div>
+              Are you sure?
+              {{#bs-button class = "btn-confirm" type="success" onClick=(action "deleteDoc")}}
+                Yes
+              {{/bs-button}}
+              {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowDocDelete")}}
+                No
+              {{/bs-button}}
+            </div>
+          {{/if}}
+        </div>
+          {{#if showAssets}}
+            <div class = "file-upload-container">
+              Files:
+              {{#each model.assets as |asset|}}
+                {{asset.name}}
+                {{#bs-button class = "btn-confirm"
+                type="danger"
+                icon="glyphicon glyphicon-remove"
+                onClick=(action "toggleAllowAssetDelete" asset.fileId)}}
+                {{/bs-button}}
+                {{#bs-button class = "btn-confirm"
+                type="primary"
+                icon="glyphicon glyphicon-eye-open"
+                onClick=(action "previewAsset" asset)}}
+                {{/bs-button}}
+              {{/each}}
+              {{#if allowAssetDelete}}
+                <div>
+                  Are you sure you want to delete this file?
+                  {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset")}}
+                    Yes
+                  {{/bs-button}}
+                  {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
+                    No
+                  {{/bs-button}}
+                </div>
+              {{/if}}
+              {{#if canEditDoc}}
+              <div id = "asset-progress"></div>
+              <div class = "file-upload">
+                {{file-upload
+                  onProgress = (action 'assetProgress')
+                  onCompletion = (action 'assetUploaded')
+                  onError = (action 'assetError')
+                }}
+              </div>
+              {{/if}}
+            </div>
+          {{/if}}
+        </div>
+      {{/bs-collapse}}
     </div>
-    <textarea id="console" rows="3" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+    {{#if showPreview}}
+    {{/if}}
+    {{/if}}
+    {{#if displayEditor}}
+      {{project-tabs
+        parent = parentData
+        tabs = tabs
+        onSelect = (action 'tabSelected')
+        onDelete = (action 'tabDeleted')
+        onCreate = (action 'newTab')}}
+    {{/if}}
+    <div class = "main-container">
+      <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
+      </div>
+      <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        {{#if isShowingCode}}
+          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+        {{else}}
+          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+        {{/if}}
+        <div class = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+          {{ember-ace lines=36
+            value=value
+            ready=(action 'editorReady')
+            theme='ace/theme/monokai'
+            enableDefaultAutocompletion=true
+            enableLiveAutocompletion=true
+            enableBasicAutocompletion=true
+            suggestCompletions = (action 'suggestCompletions')
+          }}
+        </div>
+      </div>
+      {{#if displayEditor}}
+      <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+      {{/if}}
+    </div>
 </div>
