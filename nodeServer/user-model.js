@@ -12,7 +12,7 @@ const saltRounds = 10;
 
 //AUTH
 
-mongoose.model('OAuthTokens', new Schema({
+mongoose.model('token', new Schema({
   accessToken: { type: String },
   accessTokenExpiresAt: { type: Date },
   client : { type: Object },
@@ -23,14 +23,14 @@ mongoose.model('OAuthTokens', new Schema({
   userId: { type: String },
 }));
 
-mongoose.model('OAuthClients', new Schema({
+mongoose.model('client', new Schema({
   clientId: { type: String },
   clientSecret: { type: String },
   redirectUris: { type: Array },
 	grants: {type: Array}
 }));
 
-mongoose.model('OAuthUsers', new Schema({
+mongoose.model('user', new Schema({
   email: { type: String, default: '' },
   firstname: { type: String },
   lastname: { type: String },
@@ -190,7 +190,7 @@ function startAuthAPI(app)
     .then( (user) => {
       res.type('application/vnd.api+json');
       res.status(200);
-      var json = {data:{id:user.accountId,type:'account',attr:user}};
+      var json = {data:{id:user.id,type:'account',attr:user}};
       res.json(json);
     })
     .catch( (err) =>  res.status(400).send(err));
@@ -286,14 +286,14 @@ var newUser = function(username, password, email) {
 			OAuthUsersModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
 					getNewUserId((accountId) => {
-						var user = new OAuthUsersModel({
+ 						var user = new OAuthUsersModel({
 							accountId: accountId,
 							username: username,
 							password: hash,
 							email: email,
 							created:new Date()
 						});
-						user.save((err, user) => {
+						user.save((err, savedUser) => {
 							if (err) {
 								reject("internal error creating user");
 								return;

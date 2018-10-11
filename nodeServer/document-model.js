@@ -442,7 +442,6 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          const tags = attr.tags ? attr.tags:[];
           doc.create({
             source:"",
             owner:attr.owner,
@@ -453,14 +452,14 @@ function createDoc(attr) {
             created:new Date(),
             lastEdited:new Date(),
             assets:[],
-            tags:tags,
+            tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
             newEval:"",
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,
-            children:[],
+            children:attr.children ? attr.children : [],
             parent:attr.parent,
             type:attr.parent ? "js" : "html"
           },()=> {
@@ -469,6 +468,7 @@ function createDoc(attr) {
             op.si = attr.source;
             doc.submitOp(op);
             resolve(doc);
+            return;
           });
           resolve(doc);
           return;
