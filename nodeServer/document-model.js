@@ -150,7 +150,7 @@ function startWebSockets(server)
 
 function startDocAPI(app)
 {
-  app.post('/submitOp', app.oauth.authorise(), (req,res) => {
+  app.post('/submitOp', app.oauth.authenticate(), (req,res) => {
     const op = req.body.op;
     const docId = req.body.documentId;
     submitOp(docId, op)
@@ -251,7 +251,7 @@ function startDocAPI(app)
     });
   });
 
-  app.delete('/documents/:id', app.oauth.authorise(), (req, res) => {
+  app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
@@ -337,7 +337,8 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
-  app.post('/documents', app.oauth.authorise(), (req,res) => {
+  app.post('/documents', app.oauth.authenticate(), (req,res) => {
+    console.log("POST document")
     let attr = req.body.data.attributes;
     createDoc(attr)
     .then(function(doc) {

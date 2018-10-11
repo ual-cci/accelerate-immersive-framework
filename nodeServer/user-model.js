@@ -1,13 +1,10 @@
-var oauthserver = require('oauth2-server');
+const OAuth2Server = require('express-oauth-server');
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
+var Schema = mongoose.Schema;
 var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
-let clientModel = require('./mongo/model/client');
-let	tokenModel = require('./mongo/model/token');
-let	userModel = require('./mongo/model/user');
 var bcrypt = require('bcrypt');
-var OAuthError = require('oauth2-server/lib/error');
 var mongoIP = "";
 var mongoPort = "";
 var oauthDBName = "";
@@ -15,65 +12,143 @@ const saltRounds = 10;
 
 //AUTH
 
-var getAccessToken = function(bearerToken, callback) {
-	tokenModel.findOne({
-		accessToken: bearerToken
-	}, function(err, token) {
-		callback(err, token);
-	});
-};
+mongoose.model('OAuthTokens', new Schema({
+  accessToken: { type: String },
+  accessTokenExpiresAt: { type: Date },
+  client : { type: Object },
+  clientId: { type: String },
+  refreshToken: { type: String },
+  refreshTokenExpiresAt: { type: Date },
+  user : { type: Object },
+  userId: { type: String },
+}));
 
-var getClient = function(clientId, clientSecret, callback) {
-	clientModel.findOne({
-		clientId: clientId,
-		clientSecret: clientSecret
-	}, callback);
-};
+mongoose.model('OAuthClients', new Schema({
+  clientId: { type: String },
+  clientSecret: { type: String },
+  redirectUris: { type: Array },
+	grants: {type: Array}
+}));
 
-var grantTypeAllowed = function(clientId, grantType, callback) {
-	callback(false, grantType === "password");
-};
+mongoose.model('OAuthUsers', new Schema({
+  email: { type: String, default: '' },
+  firstname: { type: String },
+  lastname: { type: String },
+  password: { type: String },
+  username: { type: String }
+}));
 
-var saveAccessToken = function(accessToken, clientId, expires, user, callback) {
-	var token = new tokenModel({
-		accessToken: accessToken,
-		expires: expires,
-		clientId: clientId,
-		user: user
-	});
-	token.save(callback);
-};
+var OAuthTokensModel = mongoose.model('token');
+var OAuthClientsModel = mongoose.model('client');
+var OAuthUsersModel = mongoose.model('user');
 
-var getUser = function(username, password, callback) {
-	userModel.findOne({
-		username: username
-	}, (err, user) => {
-		if(err || !user)
-		{
-			callback(err);
-			return;
-		}
-		var hash = user.password;
-		bcrypt.compare(password, hash).then((res) => {
-			if(res)
-			{
-				callback(err, user);
+
+let model = {};
+model.getAccessToken = function(bearerToken) {
+	console.log("getAccessToken");
+	return new Promise ((resolve, reject) => {
+	  OAuthTokensModel.findOne({ accessToken: bearerToken },
+		(err, token) => {
+			if(err) {
+				reject(err);
 			}
 			else
 			{
-				callback();
+				console.log("got token", token);
+				resolve(token)
 			}
 		});
 	});
 };
 
-const model = {
-	getAccessToken: getAccessToken,
-	getClient: getClient,
-	grantTypeAllowed: grantTypeAllowed,
-	saveAccessToken: saveAccessToken,
-	getUser: getUser
-}
+model.getClient = function(clientId, clientSecret) {
+	console.log("geting Client");
+  return new Promise ((resolve, reject) => {
+		OAuthClientsModel.findOne({ clientId: clientId, clientSecret: clientSecret },
+		(err, client) => {
+			if(err) {
+				reject(err);
+			}
+			else {
+				const c = {
+	        id: client.id,
+	        grants: ["password"]
+      	};
+				console.log("got client");
+				resolve(client)
+			}
+		});
+	});
+};
+
+model.getRefreshToken = function(refreshToken) {
+	console.log("get refresh token");
+  return OAuthTokensModel.findOne({ refreshToken: refreshToken }).lean();
+};
+
+model.getUser = function(username, password) {
+	console.log('getting user')
+  return new Promise((resolve, reject)=> {
+    OAuthUsersModel.findOne({ username: username},
+      (err, user) => {
+      if(err || !user)
+      {
+				console.log('ERROR getting user')
+        reject(err);
+        return;
+      }
+      var hash = user.password;
+      bcrypt.compare(password, hash).then((res) => {
+        if(res)
+        {
+					console.log('got user', user)
+          resolve(user);
+					return;
+        }
+        else
+        {
+					console.log('ERROR getting user')
+          reject(err);
+					return;
+        }
+      });
+    });
+  })
+};
+
+model.saveToken = function(token, client, user) {
+  var accessToken = new OAuthTokensModel({
+    accessToken: token.accessToken,
+    accessTokenExpiresAt: token.accessTokenExpiresAt,
+    client : client,
+    clientId: client.clientId,
+    refreshToken: token.refreshToken,
+    refreshTokenExpiresAt: token.refreshTokenExpiresAt,
+    user : user,
+    userId: user._id,
+  });
+	console.log("save token", token, accessToken);
+  // Can't just chain `lean()` to `save()` as we did with `findOne()` elsewhere. Instead we use `Promise` to resolve the data.
+  return new Promise( function(resolve,reject){
+    accessToken.save(function(err,data){
+      if( err ) reject( err );
+      else resolve( data );
+    }) ;
+  }).then(function(saveResult){
+    // `saveResult` is mongoose wrapper object, not doc itself. Calling `toJSON()` returns the doc.
+    saveResult = saveResult && typeof saveResult == 'object' ? saveResult.toJSON() : saveResult;
+
+    // Unsure what else points to `saveResult` in oauth2-server, making copy to be safe
+    var data = new Object();
+    for( var prop in saveResult ) data[prop] = saveResult[prop];
+
+    // /oauth-server/lib/models/token-model.js complains if missing `client` and `user`. Creating missing properties.
+    data.client = data.clientId;
+    data.user = data.userId;
+
+    return data;
+  });
+};
 
 //API
 
@@ -83,16 +158,6 @@ var initUserAPI = function(app, config)
   mongoPort = config.mongoPort;
 	oauthDBName = config.oauthDBName;
 	startAuthAPI(app);
-}
-
-var initErrorHandling = function(app)
-{
-	app.use(function (err, req, res, next) {
-		if (err instanceof OAuthError)
-		next(err);
-	});
-
-	app.use(app.oauth.errorHandler());
 }
 
 function startAuthAPI(app)
@@ -110,13 +175,14 @@ function startAuthAPI(app)
     setup();
   });
 
-  app.oauth = oauthserver({
-    model: model,
-    grants: ['password'],
-    debug: false
-  });
+	app.oauth = new OAuth2Server({
+	  debug: true,
+	  model: model,
+		allowBearerTokensInQueryString: true,
+  	accessTokenLifetime: 4 * 60 * 60
+	});
 
-  app.all('/oauth/token', app.oauth.grant());
+  app.all('/oauth/token', app.oauth.token());
 
   app.post('/accounts', function (req, res) {
     let attr = req.body.data.attributes;
@@ -161,10 +227,10 @@ function startAuthAPI(app)
     });
   });
 
-	app.get('/canFlag', app.oauth.authorise(), (req, res) => {
+	app.get('/canFlag', app.oauth.authenticate(), (req, res) => {
 		const username = req.query.user;
 		const doc = req.query.documentId;
-		userModel.findOne({
+		OAuthUsersModel.findOne({
 			username: username
 		}, (err, user) => {
 			if(err)
@@ -198,10 +264,10 @@ function startAuthAPI(app)
 }
 
 var setup = function() {
-	clientModel.find({clientId:"application"}, (err, client) => {
+	OAuthClientsModel.find({clientId:"application"}, (err, client) => {
 		if(client.length < 1)
 		{
-			var client = new clientModel({clientId:"application", clientSecret:"secret"});
+			var client = new OAuthClientsModel({clientId:"application", clientSecret:"secret", grants:["password"]});
 			client.save((err, client) => console.log("saved client"));
 		}
 	});
@@ -211,16 +277,16 @@ var setup = function() {
 
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
-		userModel.find({username:username}, function(err,user) {
+		OAuthUsersModel.find({username:username}, function(err,user) {
 			if(user.length > 0 || err)
 			{
 				reject("user already exists");
 				return;
 			}
-			userModel.count({}, (err, c) => {
+			OAuthUsersModel.count({}, (err, c) => {
 				bcrypt.hash(password, saltRounds).then((hash) => {
 					getNewUserId((accountId) => {
-						var user = new userModel({
+						var user = new OAuthUsersModel({
 							accountId: accountId,
 							username: username,
 							password: hash,
@@ -245,7 +311,7 @@ var newUser = function(username, password, email) {
 var getNewUserId = function(callback)
 {
 	var uuid = guid.guid();
-	userModel.find({accountId:uuid}, function(err,user) {
+	OAuthUsersModel.find({accountId:uuid}, function(err,user) {
 		if(user.length > 0 || err) {
 			console.log("collision, generating again");
 			getNewUserId(callback);
@@ -291,7 +357,7 @@ var updatePassword = function(username, token, password)
 var checkPasswordToken = function(username, token)
 {
 	return new Promise((resolve, reject) => {
-		userModel.find({username:username}, function(err,users) {
+		OAuthUsersModel.find({username:username}, function(err,users) {
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
@@ -315,7 +381,7 @@ var checkPasswordToken = function(username, token)
 
 var requestPasswordReset = function(username) {
 	return new Promise((resolve, reject) => {
-		userModel.find({username:username}, function(err,users) {
+		OAuthUsersModel.find({username:username}, function(err,users) {
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
@@ -347,33 +413,32 @@ var requestPasswordReset = function(username) {
 
 module.exports = {
 	initUserAPI:initUserAPI,
-	initErrorHandling:initErrorHandling
 };
 
 //HELPER
 
 var dropUsers = function() {
-	userModel.remove({},function(err){console.log('cleared all users')});
+	OAuthUsersModel.remove({},function(err){console.log('cleared all users')});
 }
 
 var dropTokens = function() {
-	tokenModel.remove({},function(err){console.log('cleared all tokens')});
+	OAuthTokensModel.remove({},function(err){console.log('cleared all tokens')});
 }
 
 var dump = function() {
-	clientModel.find(function(err, clients) {
+	OAuthClientsModel.find(function(err, clients) {
 		if (err) {
 			return console.error(err);
 		}
 		console.log('clients', clients);
 	});
-	tokenModel.find(function(err, tokens) {
+	OAuthTokensModel.find(function(err, tokens) {
 		if (err) {
 			return console.error(err);
 		}
 		console.log('tokens', tokens);
 	});
-	userModel.find(function(err, users) {
+	OAuthUsersModel.find(function(err, users) {
 
 		if (err) {
 			return console.error(err);
