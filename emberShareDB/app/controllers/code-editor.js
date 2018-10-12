@@ -905,23 +905,25 @@ export default Controller.extend({
       });
     },
     forkDocument() {
-      const currentUser = this.get('sessionAccount').currentUserName;
-      let model = this.get('model');
-      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
-      stats.forks = parseInt(stats.forks) + 1;
-      let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
-                    this.get('documentService').forkDoc(model.id, this.get('children'))];
-      Promise.all(actions).then(()=>{
-        this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
-        }).then((documents) => {
-          this.get('cs').log("new doc created", documents);
-          this.get('sessionAccount').updateOwnedDocuments();
-          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+      this.fetchChildren().then(()=> {
+        const currentUser = this.get('sessionAccount').currentUserName;
+        let model = this.get('model');
+        let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
+        stats.forks = parseInt(stats.forks) + 1;
+        // let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
+        //               this.get('documentService').forkDoc(model.id, this.get('children'))];
+        this.get('documentService').forkDoc(model.id, this.get('children')).then(()=>{
+          this.get('store').query('document', {
+            filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
+          }).then((documents) => {
+            this.get('cs').log("new doc created", documents);
+            this.get('sessionAccount').updateOwnedDocuments();
+            this.transitionToRoute('code-editor',documents.firstObject.documentId);
+          });
+          this.showFeedback("Here is your very own new copy!");
+        }).catch((err)=>{
+          this.set('feedbackMessage',err.errors[0]);
         });
-        this.showFeedback("Here is your very own new copy!");
-      }).catch((err)=>{
-        this.set('feedbackMessage',err.errors[0]);
       });
     },
 

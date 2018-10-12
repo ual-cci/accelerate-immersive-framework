@@ -299,7 +299,7 @@ function startDocAPI(app)
             if (current.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
-                  if(key !== "source")
+                  if(key !== "source" && key !== "documentId")
                   {
                     console.log("PATCHING", key, patched[key])
                     const op = {p:[key], oi:patched[key]};
@@ -459,7 +459,7 @@ function createDoc(attr) {
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,
-            children:attr.children ? attr.children : [],
+            children:[],
             parent:attr.parent,
             type:attr.parent ? "js" : "html"
           },()=> {
@@ -467,6 +467,7 @@ function createDoc(attr) {
             op.p = ['source',0];
             op.si = attr.source;
             doc.submitOp(op);
+            console.log("document created", doc.data);
             resolve(doc);
             return;
           });
