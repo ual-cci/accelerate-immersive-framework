@@ -7,12 +7,14 @@ export default Service.extend({
   assetService: inject('assets'),
   store: inject('store'),
   sessionAccount:inject('session-account'),
+  codeParser:inject('code-parsing'),
   cs:inject('console'),
   getDefaultSource() {
     return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
   },
   makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
+      this.get('cs').log("making doc");
       const currentUser = this.get('sessionAccount').currentUserName;
       let doc = this.get('store').createRecord('document', {
         source:data.source,
@@ -24,16 +26,16 @@ export default Service.extend({
         parent:parent,
         tags:data.tags,
         assets:data.assets,
-        children: data.children
       });
       doc.save().then((response)=>{
         this.get('cs').log("saved new doc");
         if(!isEmpty(parent))
         {
-          this.get('store').findRecord('document', parent).then((parentDoc) => {
-            this.get('cs').log("got parent", parentDoc.data);
+          this.get('cs').log("NOT A PARENT, updating parent with myself as a child");
+          this.get('store').findRecord('document', parent, { reload: true }).then((parentDoc) => {
+            this.get('cs').log(parentDoc.data);
             let children = parentDoc.data.children;
-            children.push(doc.id);
+            children.push(response.id);
             this.updateDoc(parent, "children", children)
             .then(resolve(response)).catch((err)=>{this.get('cs').log(err)});
           }).catch((err)=>{this.get('cs').log(err)});
@@ -56,15 +58,20 @@ export default Service.extend({
       this.get('store').findRecord('document', docId).then((doc) => {
         this.get('cs').log("found record, making copy of parent", doc.data);
         this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
-          this.get('cs').log("made copy", newDoc.data);
-          let actions = children.map((c)=>{
-            this.get('cs').log("making copy of child", doc.data);
-            return this.makeNewDoc(c.data, docId, newDoc.id);
-          });
-          Promise.all(actions).then(()=>{
+
+          this.get('cs').log("made copy of root doc, copying children", newDoc.data);
+
+          const makeChildren = async (c) => {
+            for(const child of c) {
+              this.get('cs').log("making copy of child", child.data);
+              await this.makeNewDoc(child.data, docId, newDoc.id);
+            }
             this.get('cs').log("completed forking root + children");
             resolve(newDoc);
-          }).catch((err)=>reject(err));
+          };
+
+          makeChildren(children);
+
         }).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
     });
@@ -189,6 +196,27 @@ export default Service.extend({
         fetch(children[0].data.parent).then((parent)=> {
           resolve({children:children, parent:parent});
         }).catch((err)=>resolve(children));
+      }).catch((err)=>reject(err));
+    });
+  },
+  getCombinedSource(docId, replaceAssets = false, mainText)
+  {
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId)
+      .then((doc) => {
+        this.getChildren(doc.data.children).then((childDocs)=> {
+          if(isEmpty(mainText))
+          {
+            mainText = doc.data.source;
+          }
+          let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
+          if(replaceAssets)
+          {
+            combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);
+          }
+          combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
+          resolve(combined);
+        });
       }).catch((err)=>reject(err));
     });
   }

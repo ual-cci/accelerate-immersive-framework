@@ -45,11 +45,12 @@ var OAuthUsersModel = mongoose.model('user');
 
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	console.log("getAccessToken");
+	console.log("getAccessToken", bearerToken);
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
-			if(err) {
+			if(err || !token) {
+        console.log("error fetching token", token);
 				reject(err);
 			}
 			else
@@ -179,7 +180,7 @@ function startAuthAPI(app)
 	  debug: true,
 	  model: model,
 		allowBearerTokensInQueryString: true,
-  	accessTokenLifetime: 4 * 60 * 60
+  	accessTokenLifetime: 1209600
 	});
 
   app.all('/oauth/token', app.oauth.token());

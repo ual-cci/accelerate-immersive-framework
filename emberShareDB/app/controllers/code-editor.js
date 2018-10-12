@@ -534,6 +534,7 @@ export default Controller.extend({
       {
         const session = this.get('editor').getSession();
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
+        //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
         this.get('documentService').updateDoc(doc.id, "source", session.getValue())
         .then(()=>resolve())
         .catch((err)=>{
@@ -557,23 +558,23 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
-        toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-        toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-        this.get('cs').clear();
-        if(selection)
-        {
-          this.get('documentService').updateDoc(model.id, 'newEval', toRender)
-          .catch((err)=>{
-            this.get('cs').log('error updating doc', err);
-          });
-          document.getElementById("output-iframe").contentWindow.eval(toRender);
-        }
-        else
-        {
-          this.set('renderedSource', toRender);
-        }
-        this.updateLinting();
+        this.get('documentService').getCombinedSource(model.id, true, toRender)
+        .then((combined) => {
+          this.get('cs').clear();
+          if(selection)
+          {
+            this.get('documentService').updateDoc(model.id, 'newEval', combined)
+            .catch((err)=>{
+              this.get('cs').log('error updating doc', err);
+            });
+            document.getElementById("output-iframe").contentWindow.eval(combined);
+          }
+          else
+          {
+            this.set('renderedSource', combined);
+          }
+          this.updateLinting();
+        });
       });
     })
   },
@@ -905,23 +906,27 @@ export default Controller.extend({
       });
     },
     forkDocument() {
-      const currentUser = this.get('sessionAccount').currentUserName;
-      let model = this.get('model');
-      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
-      stats.forks = parseInt(stats.forks) + 1;
-      let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
-                    this.get('documentService').forkDoc(model.id, this.get('children'))];
-      Promise.all(actions).then(()=>{
-        this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
-        }).then((documents) => {
-          this.get('cs').log("new doc created", documents);
-          this.get('sessionAccount').updateOwnedDocuments();
-          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+      this.fetchChildren().then(()=> {
+        const currentUser = this.get('sessionAccount').currentUserName;
+        let model = this.get('model');
+        let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
+        stats.forks = parseInt(stats.forks) + 1;
+        let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
+                      this.get('documentService').forkDoc(model.id, this.get('children'))];
+        Promise.all(actions).then(()=>{
+          this.get('store').query('document', {
+            filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
+          }).then((documents) => {
+            this.get('cs').log("new doc created", documents);
+            this.get('sessionAccount').updateOwnedDocuments();
+            this.transitionToRoute('code-editor',documents.firstObject.documentId);
+          }).catch((err)=>{
+            this.set('feedbackMessage',err.errors[0]);
+          });
+          this.showFeedback("Here is your very own new copy!");
+        }).catch((err)=>{
+          this.set('feedbackMessage',err.errors[0]);
         });
-        this.showFeedback("Here is your very own new copy!");
-      }).catch((err)=>{
-        this.set('feedbackMessage',err.errors[0]);
       });
     },
 
@@ -1085,12 +1090,6 @@ export default Controller.extend({
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
-            this.get('socket').onclose = null;
-            this.get('socket').onopen = null;
-            this.get('socket').onmessage = null;
-            this.get('socket').onerror = null;
-            this.set('socket', null);
-            this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
           this.get('sharedDBDoc').destroy();
@@ -1098,6 +1097,12 @@ export default Controller.extend({
           this.set('currentDoc', null);
           this.get('connection').close();
           this.get('socket').close();
+          this.get('socket').onclose = null;
+          this.get('socket').onopen = null;
+          this.get('socket').onmessage = null;
+          this.get('socket').onerror = null;
+          this.set('socket', null);
+          this.set('connection', null)
         }
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
