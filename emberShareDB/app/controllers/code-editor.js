@@ -557,23 +557,23 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
-        toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-        toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-        this.get('cs').clear();
-        if(selection)
-        {
-          this.get('documentService').updateDoc(model.id, 'newEval', toRender)
-          .catch((err)=>{
-            this.get('cs').log('error updating doc', err);
-          });
-          document.getElementById("output-iframe").contentWindow.eval(toRender);
-        }
-        else
-        {
-          this.set('renderedSource', toRender);
-        }
-        this.updateLinting();
+        this.get('documentService').getCombinedSource(model.id, true, toRender)
+        .then((combined) => {
+          this.get('cs').clear();
+          if(selection)
+          {
+            this.get('documentService').updateDoc(model.id, 'newEval', combined)
+            .catch((err)=>{
+              this.get('cs').log('error updating doc', err);
+            });
+            document.getElementById("output-iframe").contentWindow.eval(combined);
+          }
+          else
+          {
+            this.set('renderedSource', combined);
+          }
+          this.updateLinting();
+        });
       });
     })
   },

@@ -7,6 +7,7 @@ export default Service.extend({
   assetService: inject('assets'),
   store: inject('store'),
   sessionAccount:inject('session-account'),
+  codeParser:inject('code-parsing'),
   cs:inject('console'),
   getDefaultSource() {
     return "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language=\"javascript\" type=\"text/javascript\">\n\n</script>\n</body>\n</html>"
@@ -195,6 +196,27 @@ export default Service.extend({
         fetch(children[0].data.parent).then((parent)=> {
           resolve({children:children, parent:parent});
         }).catch((err)=>resolve(children));
+      }).catch((err)=>reject(err));
+    });
+  },
+  getCombinedSource(docId, replaceAssets = false, mainText)
+  {
+    return new RSVP.Promise((resolve, reject) => {
+      this.get('store').findRecord('document', docId)
+      .then((doc) => {
+        this.getChildren(doc.data.children).then((childDocs)=> {
+          if(isEmpty(mainText))
+          {
+            mainText = doc.data.source;
+          }
+          let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
+          if(replaceAssets)
+          {
+            combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);
+          }
+          combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
+          resolve(combined);
+        });
       }).catch((err)=>reject(err));
     });
   }
