@@ -12,6 +12,7 @@ export default OAuth2PasswordGrant.extend({
   serverTokenRevocationEndpoint: `${config.oauthHost}/revoke`,
   authenticate(identification, password, scope = [], headers = {}) {
     return new RSVP.Promise((resolve, reject) => {
+      console.log("trying to authenticate");
       const data = { 'grant_type': 'password', username: identification, password };
       const serverTokenEndpoint = this.get('serverTokenEndpoint');
       const useResponse = this.get('rejectWithResponse');
@@ -22,6 +23,7 @@ export default OAuth2PasswordGrant.extend({
       this.makeRequest(serverTokenEndpoint, data, headers).then((response) => {
         run(() => {
           if (!this._validate(response)) {
+            console.log('access_token is missing in server response');
             reject('access_token is missing in server response');
           }
 
