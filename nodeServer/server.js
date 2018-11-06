@@ -39,3 +39,5 @@ function startServer()
   docAPI.initDocAPI(server, app, config);
   console.log('Listening on http://'+ config.serverIP + ':'+ config.serverPort);
 }
+
+module.exports = app; // for testing

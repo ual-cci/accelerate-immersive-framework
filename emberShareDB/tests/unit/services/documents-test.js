@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { run } from '@ember/runloop';
+import { authenticateSession } from 'ember-simple-auth/test-support';
 
 module('Unit | Service | documents', function(hooks) {
   setupTest(hooks);
@@ -23,7 +24,6 @@ module('Unit | Service | documents', function(hooks) {
     let service = this.owner.lookup('service:documents');
     let session = this.owner.lookup('service:session');
     run(()=> {
-      var done = assert.async(2);
       session.authenticate('authenticator:oauth2', "louis", "123")
       .then((response) => {
         console.log("SIGNED IN", response);

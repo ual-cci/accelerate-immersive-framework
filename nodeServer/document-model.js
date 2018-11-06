@@ -15,13 +15,15 @@ var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
+let db;
 
 var initDocAPI = function(server, app, config)
 {
+  const isTest = process.env.NODE_ENV == 'test';
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-  contentDBName = config.contentDBName;
-  contentCollectionName = config.contentCollectionName;
+  contentDBName = isTest ? "test_" + config.contentDBName : config.contentDBName;
+  contentCollectionName = isTest ? "test_" + config.contentCollectionName : config.contentCollectionName;
 
   startAssetAPI(app);
 
@@ -50,7 +52,7 @@ function startAssetAPI(app)
     else
     {
       console.log("Connected successfully to server");
-      const db = client.db(contentDBName);
+      db = client.db(contentDBName);
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
@@ -169,10 +171,12 @@ function startDocAPI(app)
       limit = 5;
     }
     const query = {$aggregate : [
+      { $match : { isPrivate : false } },
       { $unwind : "$tags" },
       { $group : { _id : "$tags" , count : { $sum : 1 } } },
       { $sort : { count : -1 } },
-      { $limit : limit } ]
+      { $limit : limit }
+    ]
     }
     shareDBMongo.allowAggregateQueries = true;
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
@@ -191,12 +195,13 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs");
+    console.log("fetching docs", req.query);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
     let sortBy = req.query.filter.sortBy;
     const currentUser = req.query.filter.currentUser;
+    console.log(term, page, sortBy, currentUser);
 
     let searchTermOr = {};
     if(term.length > 1)
@@ -225,7 +230,6 @@ function startDocAPI(app)
       sortBy = 'stats.edits';
       s[sortBy] = -1;
     }
-
     const query = {
       $and: [searchTermOr,
              {parent: null},
@@ -467,6 +471,7 @@ function createDoc(attr) {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
+            console.log("submitting default source as op", op);
             doc.submitOp(op);
             console.log("document created", doc.data);
             resolve(doc);
@@ -482,6 +487,15 @@ function createDoc(attr) {
   });
 }
 
+/////helpers
+
+const dropDocs = (callback) => {
+  console.log(shareDBMongo)
+	db.collection(contentCollectionName).remove({}, callback());
+}
+
 module.exports = {
-  initDocAPI:initDocAPI
+  initDocAPI:initDocAPI,
+  createDoc:createDoc,
+  dropDocs:dropDocs
 }
