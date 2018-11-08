@@ -249,8 +249,8 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      if(this.get('wsAvailable'))
-      {
+      // if(this.get('wsAvailable'))
+      // {
         const socket = this.get('socket');
         let con = this.get('connection');
         if(isEmpty(con))
@@ -263,6 +263,7 @@ export default Controller.extend({
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
           this.fetchDoc(docId).then((doc)=>resolve(doc));
+          return;
         }
         this.set('connection', con);
         const sharedDBDoc = con.get(config.contentCollectionName, docId);
@@ -276,17 +277,17 @@ export default Controller.extend({
           }
         });
         sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
-      }
-      else
-      {
-        this.fetchDoc(docId).then((doc)=>resolve(doc));
-      }
+      // }
+      // else
+      // {
+      //   this.fetchDoc(docId).then((doc)=>resolve(doc));
+      // }
     })
   },
   fetchDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record", doc.data);
+        this.get('cs').log("found record");
         resolve(doc);
       });
     })
@@ -1250,19 +1251,22 @@ export default Controller.extend({
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
       if (confirm('Are you sure you want to delete?')) {
-        this.get('documentService').deleteDoc(docId).then(()=> {
-          const children = this.get('model').data.children;
-          var newChildren = children.filter((c) => {return c != docId})
-          this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
-          .then(()=> {
-            this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
-            this.fetchChildren();
+        //SWITCH TO HOME TAB FIRST
+        this.newDocSelected(this.get('model').id).then(()=>{
+          this.get('documentService').deleteDoc(docId).then(()=> {
+            const children = this.get('model').data.children;
+            var newChildren = children.filter((c) => {return c != docId})
+            this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
+            .then(()=> {
+              this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
+              this.fetchChildren();
+            }).catch((err)=> {
+              this.get('cs').log(err);
+            })
           }).catch((err)=> {
             this.get('cs').log(err);
           })
-        }).catch((err)=> {
-          this.get('cs').log(err);
-        })
+        });
       }
     }
   }
