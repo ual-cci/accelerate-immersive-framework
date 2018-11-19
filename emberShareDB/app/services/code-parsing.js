@@ -28,7 +28,6 @@ export default Service.extend({
         }
         else if(ptr == 1)
         {
-          console.log("HERERERE");
           searchIndex = index + searchStrs[ptr].length;
           linkStartIndex = searchIndex;
           tag = source.substring(tagStartIndex, searchIndex);
@@ -302,7 +301,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    //this.get('cs').log(newSrc);
+    //this.get('cs').log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {
