@@ -11,6 +11,7 @@ var mongoIP = "";
 var mongoPort = "";
 var contentDBName = "";
 var contentCollectionName = "";
+var replicaSet = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -22,10 +23,14 @@ var initDocAPI = function(server, app, config)
   mongoPort = config.mongoPort;
   contentDBName = config.contentDBName;
   contentCollectionName = config.contentCollectionName;
-
+  replicaSet = config.replicaSet;
   startAssetAPI(app);
-
-  shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName);
+  let mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
+  if(replicaSet)
+  {
+    mongoUri = mongoUri + '?replicaSet='+replicaSet;
+  }
+  shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();
   startDocAPI(app);

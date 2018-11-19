@@ -8,6 +8,7 @@ var bcrypt = require('bcrypt');
 var mongoIP = "";
 var mongoPort = "";
 var oauthDBName = "";
+var replicaSet = "";
 const saltRounds = 10;
 
 //AUTH
@@ -158,6 +159,7 @@ var initUserAPI = function(app, config)
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
 	oauthDBName = config.oauthDBName;
+  replicaSet = config.replicaSet;
 	startAuthAPI(app);
 }
 
@@ -168,6 +170,10 @@ function startAuthAPI(app)
   app.use(bodyParser.json());
 
   var mongoUri = 'mongodb://' + mongoIP +'/' + oauthDBName;
+  if(replicaSet.length
+  {
+    mongoUri = mongoUri + '?replicaSet='+replicaSet;
+  }
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
       return console.error('Error connecting to "%s":', mongoUri, err);
@@ -266,6 +272,7 @@ function startAuthAPI(app)
 
 var setup = function() {
 	OAuthClientsModel.find({clientId:"application"}, (err, client) => {
+    console.log(err, client);
 		if(client.length < 1)
 		{
 			var client = new OAuthClientsModel({clientId:"application", clientSecret:"secret", grants:["password"]});

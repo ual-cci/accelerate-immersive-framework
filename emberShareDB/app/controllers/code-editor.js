@@ -553,7 +553,6 @@ export default Controller.extend({
     this.updateSourceFromSession().then(()=> {
       this.fetchChildren().then(()=> {
         this.updateSavedVals();
-        this.get('cs').log("updateIFrame", selection);
         const savedVals = this.get('savedVals');
         let model = this.get('model');
         const editor = this.get('editor');
