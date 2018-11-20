@@ -11,6 +11,7 @@ var mongoIP = "";
 var mongoPort = "";
 var contentDBName = "";
 var contentCollectionName = "";
+let mongoUri = "";
 var replicaSet = "";
 var shareDBMongo;
 var shareDB;
@@ -24,12 +25,12 @@ var initDocAPI = function(server, app, config)
   contentDBName = config.contentDBName;
   contentCollectionName = config.contentCollectionName;
   replicaSet = config.replicaSet;
-  startAssetAPI(app);
-  let mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
+  mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
   if(replicaSet)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
+  startAssetAPI(app);
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo});
   shareDBConnection = shareDB.connect();
@@ -46,8 +47,7 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  const url = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
-  mongo.MongoClient.connect(url, function(err, client) {
+  mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
     {
       console.log("error connecting to database", err);

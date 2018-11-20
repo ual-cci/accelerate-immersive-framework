@@ -169,8 +169,8 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  var mongoUri = 'mongodb://' + mongoIP +'/' + oauthDBName;
-  if(replicaSet.length
+  var mongoUri = 'mongodb://' + mongoIP + ":" + mongoPort +'/' + oauthDBName;
+  if(replicaSet)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
