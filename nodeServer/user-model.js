@@ -170,7 +170,7 @@ function startAuthAPI(app)
   app.use(bodyParser.json());
 
   var mongoUri = 'mongodb://' + mongoIP + ":" + mongoPort +'/' + oauthDBName;
-  if(replicaSet.length
+  if(replicaSet)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
