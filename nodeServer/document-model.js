@@ -31,9 +31,11 @@ var initDocAPI = function(server, app, config)
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
   startAssetAPI(app);
+
   shareDBMongo = require('sharedb-mongo')(mongoUri);
-  shareDB = new ShareDB({db:shareDBMongo});
+  shareDB = new ShareDB({shareDBMongo});
   shareDBConnection = shareDB.connect();
+
   startDocAPI(app);
   startWebSockets(server);
 }
@@ -50,7 +52,7 @@ function startAssetAPI(app)
   mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
     {
-      console.log("error connecting to database", err);
+      console.log("DOCUMENT MODEL - error connecting to database", err);
     }
     else
     {
@@ -125,19 +127,6 @@ function startWebSockets(server)
   var wss = new WebSocket.Server({server: server});
 
   wss.on('connection', (ws, req) => {
-    // ws.isAlive = true;
-    // function noop() {}
-    // function heartbeat() {
-    //   ws.isAlive = true;
-    // }
-    // ws.on('pong', heartbeat);
-    // const interval = setInterval(function ping() {
-    //   wss.clients.forEach(function each(ws) {
-    //     if (ws.isAlive === false) return ws.terminate();
-    //       ws.isAlive = false;
-    //       ws.ping(noop);
-    //   });
-    // }, 1000);
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
@@ -274,9 +263,11 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log("getting doc", doc.data)
     doc.fetch(function(err) {
       if (err || !doc.data) {
-        res.status(404).send("database error making document");
+        console.log(err);
+        res.status(404).send("database error making document" + err);
         return;
       }
       else
@@ -438,8 +429,9 @@ function getNewDocumentId(callback)
 
 function createDoc(attr) {
   return new Promise((resolve, reject) => {
-    console.log("creating doc", attr);
     getNewDocumentId(function(uuid) {
+      console.log("creating doc", contentCollectionName, uuid);
+
       var doc = shareDBConnection.get(contentCollectionName, uuid);
       doc.fetch(function(err) {
         if (err) {
@@ -448,6 +440,7 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
+          console.log("doc.create");
           doc.create({
             source:"",
             owner:attr.owner,
@@ -473,7 +466,7 @@ function createDoc(attr) {
             op.p = ['source',0];
             op.si = attr.source;
             doc.submitOp(op);
-            console.log("document created", doc.data);
+            console.log("document created", doc);
             resolve(doc);
             return;
           });

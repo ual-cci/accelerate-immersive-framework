@@ -176,7 +176,9 @@ function startAuthAPI(app)
   }
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
-      return console.error('Error connecting to "%s":', mongoUri, err);
+
+      
+      return console.error('USER MODEL - Error connecting to "%s":', mongoUri, err);
     }
     console.log('Connected successfully to "%s"', mongoUri);
     setup();

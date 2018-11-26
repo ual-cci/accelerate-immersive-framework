@@ -18,11 +18,9 @@
     "gridfs-stream": "^1.1.1",
     "mongoose": "^4.7.1",
     "oauth2-server": "^2.4.1",
-    "sharedb": "^1.0.0-beta.8",
+    "sharedb": "^1.0.0-beta.15",
+    "sharedb-mongo": "^1.0.0-beta.8",
     "websocket-json-stream": "0.0.3",
     "ws": "^5.1.1"
-  },
-  "devDependencies": {
-    "sharedb-mongo": "^1.0.0-beta.4"
   }
 }

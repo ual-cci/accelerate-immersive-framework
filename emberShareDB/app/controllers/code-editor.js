@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
+import ReconnectingWebSocket from 'npm:reconnecting-websocket';
 import HTMLHint from 'npm:htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
@@ -172,7 +173,7 @@ export default Controller.extend({
     else
     {
       try {
-        socket = new WebSocket(config.wsHost);
+        socket = new ReconnectingWebSocket(config.wsHost);
         this.set('socket', socket);
         socket.onopen = () => {
           this.get('cs').log("web socket open");
