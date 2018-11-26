@@ -67,7 +67,7 @@ export default Controller.extend({
         this.set('resetMessage', 'password reset link generated');
       }).catch((err) => {
         this.get('cs').log(err);
-        this.set('resetMessage', 'Error:' + err.errors[0].detail);
+        this.set('resetMessage', 'Error:' + err);
       });
     }
   }
