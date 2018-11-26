@@ -409,6 +409,12 @@ var requestPasswordReset = function(username) {
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
+        console.log(user)
+        if(user.email == "")
+        {
+          reject("no email linked to account")
+          return;
+        }
 				user.passwordResetToken = guid.guid();
         console.log("password reset token", user.passwordResetToken)
 				var tomorrow = new Date();
