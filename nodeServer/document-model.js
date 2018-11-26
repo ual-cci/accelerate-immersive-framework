@@ -33,7 +33,7 @@ var initDocAPI = function(server, app, config)
   startAssetAPI(app);
 
   shareDBMongo = require('sharedb-mongo')(mongoUri);
-  shareDB = new ShareDB({shareDBMongo});
+  shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
 
   startDocAPI(app);
