@@ -17,6 +17,7 @@
     "express-oauth-server": "^2.0.0",
     "gridfs-stream": "^1.1.1",
     "mongoose": "^4.7.1",
+    "nodemailer": "^4.7.0",
     "oauth2-server": "^2.4.1",
     "sharedb": "^1.0.0-beta.15",
     "sharedb-mongo": "^1.0.0-beta.8",

@@ -5,10 +5,12 @@ var Schema = mongoose.Schema;
 var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
 var bcrypt = require('bcrypt');
+var nodemailer = require('nodemailer')
 var mongoIP = "";
 var mongoPort = "";
 var oauthDBName = "";
 var replicaSet = "";
+var siteURL = "";
 const saltRounds = 10;
 
 //AUTH
@@ -36,7 +38,9 @@ mongoose.model('user', new Schema({
   firstname: { type: String },
   lastname: { type: String },
   password: { type: String },
-  username: { type: String }
+  username: { type: String },
+  passwordResetToken: {type: String},
+  passwordResetExpiry: {type: Date}
 }));
 
 var OAuthTokensModel = mongoose.model('token');
@@ -160,6 +164,7 @@ var initUserAPI = function(app, config)
   mongoPort = config.mongoPort;
 	oauthDBName = config.oauthDBName;
   replicaSet = config.replicaSet;
+  siteURL = config.siteURL;
 	startAuthAPI(app);
 }
 
@@ -177,7 +182,7 @@ function startAuthAPI(app)
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
 
-      
+
       return console.error('USER MODEL - Error connecting to "%s":', mongoUri, err);
     }
     console.log('Connected successfully to "%s"', mongoUri);
@@ -208,7 +213,8 @@ function startAuthAPI(app)
   app.post('/resetPassword', function(req,res) {
     requestPasswordReset(req.body.username)
     .then( (user) => {
-      console.log('success reset');
+      console.log('success reset', siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
+      sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
       res.status(200).send({link:"/password-reset?username="+user.username+"&token="+user.passwordResetToken})
     })
     .catch( (err) =>  {
@@ -217,11 +223,14 @@ function startAuthAPI(app)
   });
 
   app.post('/checkPasswordToken', function(req,res) {
+    console.log("checking password token")
     checkPasswordToken(req.body.username, req.body.token)
     .then( () => {
+      console.log("token GOOD")
       res.sendStatus(200);
     })
     .catch( (err) =>  {
+      console.log("token BAD")
       res.status(400).send(err);
     });
   });
@@ -367,18 +376,23 @@ var updatePassword = function(username, token, password)
 var checkPasswordToken = function(username, token)
 {
 	return new Promise((resolve, reject) => {
+    console.log("cheking for user")
 		OAuthUsersModel.find({username:username}, function(err,users) {
+      console.log(err,users)
 			if(users.length>0 && !err)
 			{
-				var user = users[0];
+        var user = users[0];
 				if(token != user.passwordResetToken)
 				{
+          console.log("tokens dont match")
 					reject();
 				}
 				else if (new Date() > user.passwordResetExpiry)
 				{
+          console.log("token expired")
 					reject();
 				}
+        console.log("token good")
 				resolve(user);
 			}
 			else
@@ -396,6 +410,7 @@ var requestPasswordReset = function(username) {
 			{
 				var user = users[0];
 				user.passwordResetToken = guid.guid();
+        console.log("password reset token", user.passwordResetToken)
 				var tomorrow = new Date();
 				tomorrow.setDate(tomorrow.getDate() + 1);
 				user.passwordResetExpiry = tomorrow;
@@ -418,6 +433,27 @@ var requestPasswordReset = function(username) {
 			}
 		});
 	})
+}
+
+var sendResetEmail = (email, link)=> {
+  let smtpConfig = {
+    host: 'smtp-relay.sendinblue.com',
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+        user: 'l.mccallum@gold.ac.uk',
+        pass: 'D48JXQByAC1ES3ac'
+    }
+  };
+  let transporter = nodemailer.createTransport(smtpConfig)
+  var message = {
+      from: 'l.mccallum@gold.ac.uk',
+      to: email,
+      subject: 'Reset your MIMIC Password',
+      text: 'Click this link ' + link,
+      html: '<p>Click this link <a href=' + link + '>Reset your password</a></p>'
+  };
+  transporter.sendMail(message);
 }
 
 
