@@ -32,6 +32,7 @@ export default Controller.extend({
   }),
   updateResults()
   {
+    this.get('sessionAccount').getUserFromName();
     let searchTerm = this.get('searchTerm');
     if(isEmpty(searchTerm))
     {

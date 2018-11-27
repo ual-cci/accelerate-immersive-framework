@@ -198,6 +198,22 @@ function startAuthAPI(app)
 
   app.all('/oauth/token', app.oauth.token());
 
+  app.get('/accounts', function (req, res) {
+    OAuthUsersModel.find({username:req.query.username}, function(err,users) {
+			if(users.length > 0 && !err)
+			{
+        let user = users[0];
+        user.password = "";
+        user.email = "";
+        user.created = "";
+        user._id = "";
+        console.log(user);
+				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
+				return;
+			}
+    });
+  });
+
   app.post('/accounts', function (req, res) {
     let attr = req.body.data.attributes;
     newUser(attr.username,attr.password,attr.email)

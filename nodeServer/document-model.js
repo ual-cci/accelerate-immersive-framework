@@ -443,7 +443,7 @@ function createDoc(attr) {
           console.log("doc.create");
           doc.create({
             source:"",
-            owner:attr.owner,
+            ownerId:attr.owner,
             isPrivate:attr.isPrivate,
             readOnly:true,
             name:attr.name,

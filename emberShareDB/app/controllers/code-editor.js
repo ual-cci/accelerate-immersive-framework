@@ -601,7 +601,7 @@ export default Controller.extend({
     autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
     setTimeout(()=> {
         autoInput.style["border-style"] = "none"
-    },500);
+    }, 250);
   },
   flashSelectedText: function() {
     let selectionMarkers = document.getElementsByClassName('ace_selection');
