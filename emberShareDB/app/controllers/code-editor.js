@@ -323,6 +323,11 @@ export default Controller.extend({
         return;
       });
       editor.setReadOnly(!this.get('canEditDoc'));
+      if(!isEmpty(this.get('loadingInterval')))
+      {
+        clearInterval(this.get('loadingInterval'))
+        this.set('loadingInterval', null);
+      }
       this.set('titleName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
@@ -838,6 +843,23 @@ export default Controller.extend({
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
       this.get('cs').log('editor ready', editor)
+      let text = "loading code.";
+      this.set('titleName', text);
+      this.set('loadingInterval', setInterval(()=>{
+        if(text=="loading code.")
+        {
+          text = "loading code.."
+        }
+        else if (text=="loading code..")
+        {
+          text = "loading code"
+        }
+        else if (text=="loading code")
+        {
+          text = "loading code."
+        }
+        this.set('titleName', text);
+      }, 500));
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
