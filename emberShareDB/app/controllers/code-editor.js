@@ -522,16 +522,22 @@ export default Controller.extend({
       }
     });
   },
-  getSelectedText: function()
-  {
+  getSelectionRange: function() {
     const editor = this.get('editor');
     let selectionRange = editor.getSelectionRange();
     if(selectionRange.start.row == selectionRange.end.row &&
       selectionRange.start.column == selectionRange.end.column)
       {
+        //editor.selection.selectLine();
         selectionRange.start.column = 0;
         selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
       }
+      return selectionRange;
+  },
+  getSelectedText: function()
+  {
+    const editor = this.get('editor');
+    let selectionRange = this.getSelectionRange();
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
@@ -570,11 +576,13 @@ export default Controller.extend({
           this.get('cs').clear();
           if(selection)
           {
+            this.flashSelectedText();
+            document.getElementById("output-iframe").contentWindow.eval(combined);
             this.get('documentService').updateDoc(model.id, 'newEval', combined)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
-            document.getElementById("output-iframe").contentWindow.eval(combined);
+
           }
           else
           {
@@ -584,6 +592,43 @@ export default Controller.extend({
         });
       });
     })
+  },
+  flashAutoRender:function()
+  {
+    let autoInput = document.getElementsByClassName('ace_content').item(0)
+    autoInput.style["border-style"] = "solid"
+    autoInput.style["border-width"] = "5px"
+    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    setTimeout(()=> {
+        autoInput.style["border-style"] = "none"
+    },500);
+  },
+  flashSelectedText: function() {
+    let selectionMarkers = document.getElementsByClassName('ace_selection');
+    for(let i = 0; i < selectionMarkers.length; i++)
+    {
+      selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
+    }
+    setTimeout(()=> {
+      for(let i = 0; i < selectionMarkers.length; i++)
+      {
+        selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
+      }
+    }, 500);
+    if(selectionMarkers.length < 1)
+    {
+      let activeMarkers = document.getElementsByClassName('ace_active-line');
+      for(let j = 0; j < activeMarkers.length; j++)
+      {
+        activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
+      }
+      setTimeout(()=> {
+        for(let j = 0; j < activeMarkers.length; j++)
+        {
+          activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
+        }
+      }, 500);
+    }
   },
   updateLinting: function() {
     const doc = this.get('currentDoc');
@@ -597,6 +642,7 @@ export default Controller.extend({
   onCodingFinished: function() {
     if(this.get('autoRender'))
     {
+      this.flashAutoRender();
       this.updateIFrame();
     }
     this.updateLinting();
