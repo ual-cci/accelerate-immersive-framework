@@ -43,6 +43,7 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
+  codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
   showAssets:false,
@@ -603,7 +604,7 @@ export default Controller.extend({
     }
     this.set('codeTimer', setTimeout(() => {
       this.onCodingFinished();
-    }, 500));
+    }, this.get('codeTimerRefresh')));
   },
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');

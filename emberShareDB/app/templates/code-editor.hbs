@@ -208,7 +208,9 @@
           {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
         {{/if}}
         <div class = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-          {{ember-ace lines=36
+          {{ember-ace
+            minLines = 40
+            maxLines = 10000
             value=value
             ready=(action 'editorReady')
             theme='ace/theme/monokai'
