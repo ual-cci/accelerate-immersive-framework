@@ -28,7 +28,12 @@ mongo.MongoClient.connect(docURI, function(err, client) {
   {
     console.log("Connected successfully to server");
     docDB = client.db(contentDBName);
-
+    var myquery = {ownerId: {$exist:false}};
+    var newvalues = {$set: {owner: "louis-id", ownerId:"b3d087be-566b-21f6-bf8d-3b2f89a2165a"} };
+    docDB.collection("docs").updateMany(myquery, newvalues, function(err, res) {
+      if (err) throw err;
+        console.log(res.result.nModified + " document(s) updated");
+    });
   }
 });
 

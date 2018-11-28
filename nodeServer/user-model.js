@@ -181,6 +181,7 @@ function startAuthAPI(app)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
+  console.log(mongoUri);
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
 

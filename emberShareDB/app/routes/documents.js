@@ -9,6 +9,7 @@ export default Route.extend({
   model(params) {
     let currentUserId = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
+    console.log("document model", currentUserId, currentUserName);
     const sort = params.sort ? params.sort : "views";
     let filter = {
       filter:{
@@ -18,40 +19,47 @@ export default Route.extend({
         sortBy:params.sort
       }
     }
-    if(isEmpty(currentUserId) && !isEmpty(currentUserName))
+    if(isEmpty(currentUserId))
     {
-      console.log("has name but doesnt have currentUserId",currentUserName)
-      return new RSVP.Promise((resolve, reject)=> {
-        this.get('sessionAccount').getUserFromName().then(()=>{
-          this.get('sessionAccount').updateOwnedDocuments().then(()=>{
-            filter.filter.currentUser = this.get('sessionAccount').currentUserId;
-            this.get('store').query('document', filter).then((res)=> {
-              resolve(res);
+      if(!isEmpty(currentUserName))
+      {
+        console.log("has name but doesnt have currentUserId",currentUserName)
+        return new RSVP.Promise((resolve, reject)=> {
+          this.get('sessionAccount').getUserFromName().then(()=>{
+            this.get('sessionAccount').updateOwnedDocuments().then(()=>{
+              filter.filter.currentUser = this.get('sessionAccount').currentUserId;
+              console.log("document model got id",filter.filter.currentUser);
+              this.get('store').query('document', filter).then((res)=> {
+                resolve(res);
+              })
+            }).catch((err)=> {
+              console.log('updateOwnedDocuments',err);
             })
           }).catch((err)=> {
-            console.log('updateOwnedDocuments',err);
-          })
-        }).catch((err)=> {
-          console.log('getUserFromName',err);
-          filter.filter.currentUser = "";
-          this.get('store').query('document', filter).then((res)=> {
-            resolve(res);
-          }).catch((err)=>{
-            console.log('query',err);
-            reject(err);
+            console.log('error getUserFromName',err);
+            filter.filter.currentUser = "";
+            this.get('store').query('document', filter).then((res)=> {
+              resolve(res);
+            }).catch((err)=>{
+              console.log('error query',err);
+              reject(err);
+            });
           });
         });
-      });
-    }
-    else if (isEmpty(currentUserId) && !isEmpty(currentUserName))
-    {
-      return RVSP.Promise((resolve, reject) => {
-        this.get('sessionAccount').updateOwnedDocuments().then(()=>{
-          this.get('store').query('document', filter).then((res)=> {
-            resolve(res);
+      }
+      else {
+        return RVSP.Promise((resolve, reject) => {
+          this.get('sessionAccount').updateOwnedDocuments().then(()=>{
+            this.get('store').query('document', filter).then((res)=> {
+              resolve(res);
+            }).catch((err)=>reject(err));
           }).catch((err)=>reject(err));
-        }).catch((err)=>reject(err));
-      });
+        });
+      }
+    }
+    else if (!isEmpty(currentUserName))
+    {
+      return this.get('store').query('document', filter);
     }
     else
     {
