@@ -22,7 +22,7 @@ export default OAuth2PasswordGrant.extend({
       }
       this.makeRequest(serverTokenEndpoint, data, headers).then((response) => {
         run(() => {
-          console.log('authenticated!');
+          console.log(response)
           if (!this._validate(response)) {
             console.log('access_token is missing in server response');
             reject('access_token is missing in server response');
@@ -37,22 +37,21 @@ export default OAuth2PasswordGrant.extend({
           resolve(response);
         });
       }, (response) => {
-        console.log('failed?!');
         run(null, reject, useResponse ? response : (response.responseJSON || response.responseText));
       });
     });
   },
   makeRequest: function (url, data) {
-    var client_id = 'application';
-    var client_secret = 'secret';
-    return $.ajax({
-        url: this.serverTokenEndpoint,
-        type: 'POST',
-        data: data,
-        contentType: 'application/x-www-form-urlencoded',
-        headers: {
-            Authorization: "Basic " + btoa(client_id + ":" + client_secret)
-        }
-    });
+      var client_id = 'application';
+      var client_secret = 'secret';
+      return $.ajax({
+          url: this.serverTokenEndpoint,
+          type: 'POST',
+          data: data,
+          contentType: 'application/x-www-form-urlencoded',
+          headers: {
+              Authorization: "Basic " + btoa(client_id + ":" + client_secret)
+          }
+      });
   }
 });

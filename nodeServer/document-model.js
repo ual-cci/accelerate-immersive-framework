@@ -11,25 +11,31 @@ var mongoIP = "";
 var mongoPort = "";
 var contentDBName = "";
 var contentCollectionName = "";
+let mongoUri = "";
+var replicaSet = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
-let db;
 
 var initDocAPI = function(server, app, config)
 {
-  const isTest = process.env.NODE_ENV == 'test';
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-  contentDBName = isTest ? "test_" + config.contentDBName : config.contentDBName;
-  contentCollectionName = isTest ? "test_" + config.contentCollectionName : config.contentCollectionName;
-
+  contentDBName = config.contentDBName;
+  contentCollectionName = config.contentCollectionName;
+  replicaSet = config.replicaSet;
+  mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
+  if(replicaSet)
+  {
+    mongoUri = mongoUri + '?replicaSet='+replicaSet;
+  }
   startAssetAPI(app);
 
-  shareDBMongo = require('sharedb-mongo')('mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName);
-  shareDB = new ShareDB({db:shareDBMongo});
+  shareDBMongo = require('sharedb-mongo')(mongoUri);
+  shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
+
   startDocAPI(app);
   startWebSockets(server);
 }
@@ -43,16 +49,15 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  const url = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
-  mongo.MongoClient.connect(url, function(err, client) {
+  mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
     {
-      console.log("error connecting to database", err);
+      console.log("DOCUMENT MODEL - error connecting to database", err);
     }
     else
     {
       console.log("Connected successfully to server");
-      db = client.db(contentDBName);
+      const db = client.db(contentDBName);
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
@@ -122,19 +127,6 @@ function startWebSockets(server)
   var wss = new WebSocket.Server({server: server});
 
   wss.on('connection', (ws, req) => {
-    // ws.isAlive = true;
-    // function noop() {}
-    // function heartbeat() {
-    //   ws.isAlive = true;
-    // }
-    // ws.on('pong', heartbeat);
-    // const interval = setInterval(function ping() {
-    //   wss.clients.forEach(function each(ws) {
-    //     if (ws.isAlive === false) return ws.terminate();
-    //       ws.isAlive = false;
-    //       ws.ping(noop);
-    //   });
-    // }, 1000);
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
@@ -171,12 +163,10 @@ function startDocAPI(app)
       limit = 5;
     }
     const query = {$aggregate : [
-      { $match : { isPrivate : false } },
       { $unwind : "$tags" },
       { $group : { _id : "$tags" , count : { $sum : 1 } } },
       { $sort : { count : -1 } },
-      { $limit : limit }
-    ]
+      { $limit : limit } ]
     }
     shareDBMongo.allowAggregateQueries = true;
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, extra, results) {
@@ -195,19 +185,18 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs", req.query);
+    console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
     let sortBy = req.query.filter.sortBy;
     const currentUser = req.query.filter.currentUser;
-    console.log(term, page, sortBy, currentUser);
 
     let searchTermOr = {};
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
-      searchTermOr = { $or: [{name: rg},{tags: rg},{owner: rg}]};
+      searchTermOr = { $or: [{name: rg},{tags: rg},{ownerId: rg},{owner: rg}]};
     }
 
     let s = {};
@@ -230,11 +219,32 @@ function startDocAPI(app)
       sortBy = 'stats.edits';
       s[sortBy] = -1;
     }
+
+    console.log("Searching for docs with no ownerID")
+    shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
+      results.forEach((doc)=> {
+        console.log("NO OWNER ID", doc.data)
+        const docId = doc.data.documentId;
+        var doc = shareDBConnection.get(contentCollectionName, docId);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            // const op = {p:["ownerId"], oi:[currentUser]};
+            // submitOp(docId, op);
+          };
+        });
+      });
+    });
+
     const query = {
       $and: [searchTermOr,
              {parent: null},
              { children : { $exists : true } },
-             {$or: [{owner: currentUser}, {isPrivate: false}]}
+             {$or: [{ownerId: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
       $limit: PAGE_SIZE,
@@ -247,6 +257,7 @@ function startDocAPI(app)
       }
       else
       {
+        console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -273,9 +284,11 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log("getting doc", doc.data)
     doc.fetch(function(err) {
       if (err || !doc.data) {
-        res.status(404).send("database error making document");
+        console.log(err);
+        res.status(404).send("database error making document" + err);
         return;
       }
       else
@@ -437,8 +450,8 @@ function getNewDocumentId(callback)
 
 function createDoc(attr) {
   return new Promise((resolve, reject) => {
-    console.log("creating doc", attr);
     getNewDocumentId(function(uuid) {
+      console.log("creating doc", contentCollectionName, uuid);
       var doc = shareDBConnection.get(contentCollectionName, uuid);
       doc.fetch(function(err) {
         if (err) {
@@ -447,8 +460,10 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
+          console.log("doc.create");
           doc.create({
             source:"",
+            ownerId:attr.ownerId,
             owner:attr.owner,
             isPrivate:attr.isPrivate,
             readOnly:true,
@@ -471,9 +486,8 @@ function createDoc(attr) {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
-            console.log("submitting default source as op", op);
             doc.submitOp(op);
-            console.log("document created", doc.data);
+            //console.log("document created", doc);
             resolve(doc);
             return;
           });
@@ -487,15 +501,6 @@ function createDoc(attr) {
   });
 }
 
-/////helpers
-
-const dropDocs = (callback) => {
-  console.log(shareDBMongo)
-	db.collection(contentCollectionName).remove({}, callback());
-}
-
 module.exports = {
-  initDocAPI:initDocAPI,
-  createDoc:createDoc,
-  dropDocs:dropDocs
+  initDocAPI:initDocAPI
 }
