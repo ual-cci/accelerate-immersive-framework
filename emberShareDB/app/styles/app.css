@@ -111,11 +111,10 @@
 }
 
 .editor-container {
-
 }
 
 .main-container {
-  width:100vw;
+  width:97vw;
   height:60vh;
   display:inline-block;
   position:relative;
@@ -136,6 +135,14 @@
   width:100%;
   height:100%;
 }
+
+/* .ace_editor {
+  height: 59vh !important
+} */
+
+/* .ace_content {
+  height: 59vh !important
+} */
 
 .ace-container {
   top: 0;
@@ -158,7 +165,7 @@
 }
 
 #console {
-  width:100vw;
+  width:97vw;
 }
 
 .asset-token {

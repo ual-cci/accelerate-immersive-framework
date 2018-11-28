@@ -16,8 +16,8 @@ export default Service.extend({
           this.get('cs').log("success",res);
           resolve();
         }).catch((err) => {
-          this.get('cs').log("error",err);
-          reject(err);
+          this.get('cs').log("error",err.responseText);
+          reject(err.responseText);
         });
     });
   },

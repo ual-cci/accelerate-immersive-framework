@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'npm:sharedb/lib/client';
+import ReconnectingWebSocket from 'npm:reconnecting-websocket';
 import HTMLHint from 'npm:htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
@@ -42,6 +43,7 @@ export default Controller.extend({
   allowAssetDelete:false,
   assetToDelete:"",
   autoRender:false,
+  codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
   showAssets:false,
@@ -172,7 +174,7 @@ export default Controller.extend({
     else
     {
       try {
-        socket = new WebSocket(config.wsHost);
+        socket = new ReconnectingWebSocket(config.wsHost);
         this.set('socket', socket);
         socket.onopen = () => {
           this.get('cs').log("web socket open");
@@ -249,8 +251,8 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      if(this.get('wsAvailable'))
-      {
+      // if(this.get('wsAvailable'))
+      // {
         const socket = this.get('socket');
         let con = this.get('connection');
         if(isEmpty(con))
@@ -263,6 +265,7 @@ export default Controller.extend({
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
           this.fetchDoc(docId).then((doc)=>resolve(doc));
+          return;
         }
         this.set('connection', con);
         const sharedDBDoc = con.get(config.contentCollectionName, docId);
@@ -276,17 +279,17 @@ export default Controller.extend({
           }
         });
         sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
-      }
-      else
-      {
-        this.fetchDoc(docId).then((doc)=>resolve(doc));
-      }
+      // }
+      // else
+      // {
+      //   this.fetchDoc(docId).then((doc)=>resolve(doc));
+      // }
     })
   },
   fetchDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record", doc.data);
+        this.get('cs').log("found record");
         resolve(doc);
       });
     })
@@ -320,6 +323,11 @@ export default Controller.extend({
         return;
       });
       editor.setReadOnly(!this.get('canEditDoc'));
+      if(!isEmpty(this.get('loadingInterval')))
+      {
+        clearInterval(this.get('loadingInterval'))
+        this.set('loadingInterval', null);
+      }
       this.set('titleName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
@@ -514,16 +522,22 @@ export default Controller.extend({
       }
     });
   },
-  getSelectedText: function()
-  {
+  getSelectionRange: function() {
     const editor = this.get('editor');
     let selectionRange = editor.getSelectionRange();
     if(selectionRange.start.row == selectionRange.end.row &&
       selectionRange.start.column == selectionRange.end.column)
       {
+        //editor.selection.selectLine();
         selectionRange.start.column = 0;
         selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
       }
+      return selectionRange;
+  },
+  getSelectedText: function()
+  {
+    const editor = this.get('editor');
+    let selectionRange = this.getSelectionRange();
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
@@ -534,6 +548,7 @@ export default Controller.extend({
       {
         const session = this.get('editor').getSession();
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
+        //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
         this.get('documentService').updateDoc(doc.id, "source", session.getValue())
         .then(()=>resolve())
         .catch((err)=>{
@@ -551,31 +566,69 @@ export default Controller.extend({
     this.updateSourceFromSession().then(()=> {
       this.fetchChildren().then(()=> {
         this.updateSavedVals();
-        this.get('cs').log("updateIFrame", selection);
         const savedVals = this.get('savedVals');
         let model = this.get('model');
         const editor = this.get('editor');
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        toRender = this.get('codeParser').insertChildren(toRender, this.get('children'), model.assets);
-        toRender = this.get('codeParser').replaceAssets(toRender, model.assets);
-        toRender = this.get('codeParser').insertStatefullCallbacks(toRender, savedVals);
-        this.get('cs').clear();
-        if(selection)
-        {
-          this.get('documentService').updateDoc(model.id, 'newEval', toRender)
-          .catch((err)=>{
-            this.get('cs').log('error updating doc', err);
-          });
-          document.getElementById("output-iframe").contentWindow.eval(toRender);
-        }
-        else
-        {
-          this.set('renderedSource', toRender);
-        }
-        this.updateLinting();
+        this.get('documentService').getCombinedSource(model.id, true, toRender)
+        .then((combined) => {
+          this.get('cs').clear();
+          if(selection)
+          {
+            this.flashSelectedText();
+            document.getElementById("output-iframe").contentWindow.eval(combined);
+            this.get('documentService').updateDoc(model.id, 'newEval', combined)
+            .catch((err)=>{
+              this.get('cs').log('error updating doc', err);
+            });
+
+          }
+          else
+          {
+            this.set('renderedSource', combined);
+          }
+          this.updateLinting();
+        });
       });
     })
+  },
+  flashAutoRender:function()
+  {
+    let autoInput = document.getElementsByClassName('ace_content').item(0)
+    autoInput.style["border-style"] = "solid"
+    autoInput.style["border-width"] = "5px"
+    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    setTimeout(()=> {
+        autoInput.style["border-style"] = "none"
+    }, 250);
+  },
+  flashSelectedText: function() {
+    let selectionMarkers = document.getElementsByClassName('ace_selection');
+    for(let i = 0; i < selectionMarkers.length; i++)
+    {
+      selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
+    }
+    setTimeout(()=> {
+      for(let i = 0; i < selectionMarkers.length; i++)
+      {
+        selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
+      }
+    }, 500);
+    if(selectionMarkers.length < 1)
+    {
+      let activeMarkers = document.getElementsByClassName('ace_active-line');
+      for(let j = 0; j < activeMarkers.length; j++)
+      {
+        activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
+      }
+      setTimeout(()=> {
+        for(let j = 0; j < activeMarkers.length; j++)
+        {
+          activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
+        }
+      }, 500);
+    }
   },
   updateLinting: function() {
     const doc = this.get('currentDoc');
@@ -589,6 +642,7 @@ export default Controller.extend({
   onCodingFinished: function() {
     if(this.get('autoRender'))
     {
+      this.flashAutoRender();
       this.updateIFrame();
     }
     this.updateLinting();
@@ -601,7 +655,7 @@ export default Controller.extend({
     }
     this.set('codeTimer', setTimeout(() => {
       this.onCodingFinished();
-    }, 500));
+    }, this.get('codeTimerRefresh')));
   },
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
@@ -835,6 +889,23 @@ export default Controller.extend({
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
       this.get('cs').log('editor ready', editor)
+      let text = "loading code.";
+      this.set('titleName', text);
+      this.set('loadingInterval', setInterval(()=>{
+        if(text=="loading code.")
+        {
+          text = "loading code.."
+        }
+        else if (text=="loading code..")
+        {
+          text = "loading code"
+        }
+        else if (text=="loading code")
+        {
+          text = "loading code."
+        }
+        this.set('titleName', text);
+      }, 500));
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
@@ -905,23 +976,27 @@ export default Controller.extend({
       });
     },
     forkDocument() {
-      const currentUser = this.get('sessionAccount').currentUserName;
-      let model = this.get('model');
-      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
-      stats.forks = parseInt(stats.forks) + 1;
-      let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
-                    this.get('documentService').forkDoc(model.id, this.get('children'))];
-      Promise.all(actions).then(()=>{
-        this.get('store').query('document', {
-          filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
-        }).then((documents) => {
-          this.get('cs').log("new doc created", documents);
-          this.get('sessionAccount').updateOwnedDocuments();
-          this.transitionToRoute('code-editor',documents.firstObject.documentId);
+      this.fetchChildren().then(()=> {
+        const currentUser = this.get('sessionAccount').currentUserName;
+        let model = this.get('model');
+        let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
+        stats.forks = parseInt(stats.forks) + 1;
+        let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
+                      this.get('documentService').forkDoc(model.id, this.get('children'))];
+        Promise.all(actions).then(()=>{
+          this.get('store').query('document', {
+            filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
+          }).then((documents) => {
+            this.get('cs').log("new doc created", documents);
+            this.get('sessionAccount').updateOwnedDocuments();
+            this.transitionToRoute('code-editor',documents.firstObject.documentId);
+          }).catch((err)=>{
+            this.set('feedbackMessage',err.errors[0]);
+          });
+          this.showFeedback("Here is your very own new copy!");
+        }).catch((err)=>{
+          this.set('feedbackMessage',err.errors[0]);
         });
-        this.showFeedback("Here is your very own new copy!");
-      }).catch((err)=>{
-        this.set('feedbackMessage',err.errors[0]);
       });
     },
 
@@ -1085,12 +1160,6 @@ export default Controller.extend({
         if(this.get('wsAvailable'))
         {
           this.get('socket').onclose = ()=> {
-            this.get('socket').onclose = null;
-            this.get('socket').onopen = null;
-            this.get('socket').onmessage = null;
-            this.get('socket').onerror = null;
-            this.set('socket', null);
-            this.set('connection', null)
             this.get('cs').log("websocket closed");
           };
           this.get('sharedDBDoc').destroy();
@@ -1098,6 +1167,12 @@ export default Controller.extend({
           this.set('currentDoc', null);
           this.get('connection').close();
           this.get('socket').close();
+          this.get('socket').onclose = null;
+          this.get('socket').onopen = null;
+          this.get('socket').onmessage = null;
+          this.get('socket').onerror = null;
+          this.set('socket', null);
+          this.set('connection', null)
         }
         this.get('cs').log('cleaned up');
         this.removeWindowListener();
@@ -1245,19 +1320,22 @@ export default Controller.extend({
     tabDeleted(docId) {
       this.get('cs').log('deleting tab', docId);
       if (confirm('Are you sure you want to delete?')) {
-        this.get('documentService').deleteDoc(docId).then(()=> {
-          const children = this.get('model').data.children;
-          var newChildren = children.filter((c) => {return c != docId})
-          this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
-          .then(()=> {
-            this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
-            this.fetchChildren();
+        //SWITCH TO HOME TAB FIRST
+        this.newDocSelected(this.get('model').id).then(()=>{
+          this.get('documentService').deleteDoc(docId).then(()=> {
+            const children = this.get('model').data.children;
+            var newChildren = children.filter((c) => {return c != docId})
+            this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
+            .then(()=> {
+              this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
+              this.fetchChildren();
+            }).catch((err)=> {
+              this.get('cs').log(err);
+            })
           }).catch((err)=> {
             this.get('cs').log(err);
           })
-        }).catch((err)=> {
-          this.get('cs').log(err);
-        })
+        });
       }
     }
   }

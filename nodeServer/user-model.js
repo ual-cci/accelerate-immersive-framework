@@ -5,9 +5,12 @@ var Schema = mongoose.Schema;
 var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
 var bcrypt = require('bcrypt');
+var nodemailer = require('nodemailer')
 var mongoIP = "";
 var mongoPort = "";
 var oauthDBName = "";
+var replicaSet = "";
+var siteURL = "";
 const saltRounds = 10;
 
 //AUTH
@@ -35,21 +38,23 @@ mongoose.model('user', new Schema({
   firstname: { type: String },
   lastname: { type: String },
   password: { type: String },
-  username: { type: String }
+  username: { type: String },
+  passwordResetToken: {type: String},
+  passwordResetExpiry: {type: Date}
 }));
 
 var OAuthTokensModel = mongoose.model('token');
 var OAuthClientsModel = mongoose.model('client');
 var OAuthUsersModel = mongoose.model('user');
 
-
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	console.log("getAccessToken");
+	console.log("getAccessToken", bearerToken);
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
-			if(err) {
+			if(err || !token) {
+        console.log("error fetching token", token);
 				reject(err);
 			}
 			else
@@ -157,6 +162,8 @@ var initUserAPI = function(app, config)
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
 	oauthDBName = config.oauthDBName;
+  replicaSet = config.replicaSet;
+  siteURL = config.siteURL;
 	startAuthAPI(app);
 }
 
@@ -166,10 +173,16 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  var mongoUri = 'mongodb://' + mongoIP +'/' + oauthDBName;
+  var mongoUri = 'mongodb://' + mongoIP + ":" + mongoPort +'/' + oauthDBName;
+  if(replicaSet)
+  {
+    mongoUri = mongoUri + '?replicaSet='+replicaSet;
+  }
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
-      return console.error('Error connecting to "%s":', mongoUri, err);
+
+
+      return console.error('USER MODEL - Error connecting to "%s":', mongoUri, err);
     }
     console.log('Connected successfully to "%s"', mongoUri);
     setup();
@@ -179,10 +192,26 @@ function startAuthAPI(app)
 	  debug: true,
 	  model: model,
 		allowBearerTokensInQueryString: true,
-  	accessTokenLifetime: 4 * 60 * 60
+  	accessTokenLifetime: 1209600
 	});
 
   app.all('/oauth/token', app.oauth.token());
+
+  app.get('/accounts', function (req, res) {
+    OAuthUsersModel.find({username:req.query.username}, function(err,users) {
+			if(users.length > 0 && !err)
+			{
+        let user = users[0];
+        user.password = "";
+        user.email = "";
+        user.created = "";
+        user._id = "";
+        console.log(user);
+				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
+				return;
+			}
+    });
+  });
 
   app.post('/accounts', function (req, res) {
     let attr = req.body.data.attributes;
@@ -199,7 +228,8 @@ function startAuthAPI(app)
   app.post('/resetPassword', function(req,res) {
     requestPasswordReset(req.body.username)
     .then( (user) => {
-      console.log('success reset');
+      console.log('success reset', siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
+      sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
       res.status(200).send({link:"/password-reset?username="+user.username+"&token="+user.passwordResetToken})
     })
     .catch( (err) =>  {
@@ -208,11 +238,14 @@ function startAuthAPI(app)
   });
 
   app.post('/checkPasswordToken', function(req,res) {
+    console.log("checking password token")
     checkPasswordToken(req.body.username, req.body.token)
     .then( () => {
+      console.log("token GOOD")
       res.sendStatus(200);
     })
     .catch( (err) =>  {
+      console.log("token BAD")
       res.status(400).send(err);
     });
   });
@@ -265,6 +298,7 @@ function startAuthAPI(app)
 
 var setup = function() {
 	OAuthClientsModel.find({clientId:"application"}, (err, client) => {
+    console.log(err, client);
 		if(client.length < 1)
 		{
 			var client = new OAuthClientsModel({clientId:"application", clientSecret:"secret", grants:["password"]});
@@ -357,18 +391,23 @@ var updatePassword = function(username, token, password)
 var checkPasswordToken = function(username, token)
 {
 	return new Promise((resolve, reject) => {
+    console.log("cheking for user")
 		OAuthUsersModel.find({username:username}, function(err,users) {
+      console.log(err,users)
 			if(users.length>0 && !err)
 			{
-				var user = users[0];
+        var user = users[0];
 				if(token != user.passwordResetToken)
 				{
+          console.log("tokens dont match")
 					reject();
 				}
 				else if (new Date() > user.passwordResetExpiry)
 				{
+          console.log("token expired")
 					reject();
 				}
+        console.log("token good")
 				resolve(user);
 			}
 			else
@@ -385,7 +424,14 @@ var requestPasswordReset = function(username) {
 			if(users.length>0 && !err)
 			{
 				var user = users[0];
+        console.log(user)
+        if(user.email == "")
+        {
+          reject("no email linked to account")
+          return;
+        }
 				user.passwordResetToken = guid.guid();
+        console.log("password reset token", user.passwordResetToken)
 				var tomorrow = new Date();
 				tomorrow.setDate(tomorrow.getDate() + 1);
 				user.passwordResetExpiry = tomorrow;
@@ -408,6 +454,27 @@ var requestPasswordReset = function(username) {
 			}
 		});
 	})
+}
+
+var sendResetEmail = (email, link)=> {
+  let smtpConfig = {
+    host: 'smtp-relay.sendinblue.com',
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+        user: 'l.mccallum@gold.ac.uk',
+        pass: 'D48JXQByAC1ES3ac'
+    }
+  };
+  let transporter = nodemailer.createTransport(smtpConfig)
+  var message = {
+      from: 'l.mccallum@gold.ac.uk',
+      to: email,
+      subject: 'Reset your MIMIC Password',
+      text: 'Click this link ' + link,
+      html: '<p>Click this link <a href=' + link + '>Reset your password</a></p>'
+  };
+  transporter.sendMail(message);
 }
 
 

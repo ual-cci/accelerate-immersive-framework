@@ -40,6 +40,7 @@ export default Service.extend({
           const attr = parsedTag.documentElement.attributes;
           let styleSheet = false;
           let media;
+          console.log("stylesheet", attr);
           for(let i = 0; i < attr.length; i++)
           {
             if(attr[i].nodeName == "rel" && attr[i].nodeValue == "stylesheet")
@@ -53,6 +54,7 @@ export default Service.extend({
           }
           if(styleSheet)
           {
+            console.log("stylesheet", children);
             for(let i = 0; i < attr.length; i++)
             {
               if(attr[i].nodeName == "href")
@@ -70,6 +72,7 @@ export default Service.extend({
                     newSrc = newSrc + children[j].data.source;
                     newSrc = newSrc +"\n</style>";
                     added = true;
+                    console.log(newSrc);
                     break;
                   }
                 }
@@ -298,7 +301,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    this.get('cs').log(newSrc);
+    //this.get('cs').log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {
