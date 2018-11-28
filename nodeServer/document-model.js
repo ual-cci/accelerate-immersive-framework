@@ -164,6 +164,7 @@ function startDocAPI(app)
       limit = 5;
     }
     const query = {$aggregate : [
+      { $match : { isPrivate : false } },
       { $unwind : "$tags" },
       { $group : { _id : "$tags" , count : { $sum : 1 } } },
       { $sort : { count : -1 } },
