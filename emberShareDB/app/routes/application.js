@@ -27,12 +27,10 @@ export default Route.extend(ApplicationRouteMixin, {
       .then(()=> {
         this.get('sessionAccount').getUserFromName().then(resolve())
       })
-      // .then(() => {
-      //   this.get('sessionAccount').updateOwnedDocuments().then(resolve());
-      // })
       .catch(() => {
+        this.get('cs').log('no current user');
         this.get('session').invalidate();
-        reject();
+        resolve();
       });
     })
 
