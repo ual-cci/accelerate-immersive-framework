@@ -161,7 +161,7 @@ var initUserAPI = function(app, config)
 {
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-	oauthDBName = config.oauthDBName;
+	oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName : config.oauthDBName;
   replicaSet = config.replicaSet;
   siteURL = config.siteURL;
 	startAuthAPI(app);

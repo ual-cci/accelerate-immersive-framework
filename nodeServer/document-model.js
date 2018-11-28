@@ -22,9 +22,10 @@ var initDocAPI = function(server, app, config)
 {
   mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-  contentDBName = config.contentDBName;
+  contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.contentDBName;
   contentCollectionName = config.contentCollectionName;
   replicaSet = config.replicaSet;
+  console.log("ENVIRONMENT", process.env.NODE_ENV);
   mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
   if(replicaSet)
   {

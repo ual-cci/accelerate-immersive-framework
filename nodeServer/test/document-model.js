@@ -84,7 +84,7 @@ describe('documents', () => {
     })
   })
 
-  describe('/GET documents', () => {
+  describe('/GET documents for user', () => {
       it('it should GET all the public documents, and documents owned by test-user', (done) => {
         chai.request(server)
             .get('/documents')
@@ -109,23 +109,39 @@ describe('documents', () => {
       });
   });
 
-  // describe('/GET tags', () => {
-  //     it('it should GET the five most popular public tags', (done) => {
-  //       chai.request(server)
-  //           .get('/tags')
-  //           .query({limit:5})
-  //           .end((err, res) => {
-  //             console.log(res.body.data);
-  //             assert.equal(res.body.data.length, 5);
-  //             const tags = res.body.data.map((t)=> {return t._id});
-  //             assert.isTrue(tags.includes('tag1'));
-  //             assert.isTrue(tags.includes('tag2'));
-  //             assert.isTrue(tags.includes('tag3'));
-  //             assert.isTrue(tags.includes('tag4'));
-  //             assert.isTrue(tags.includes('tag5'));
-  //             res.should.have.status(200);
-  //             done();
-  //           });
-  //     });
-  // });
+  describe('/GET documents no user', () => {
+      it('it should GET all the public documents, and nothing else', (done) => {
+        chai.request(server)
+            .get('/documents')
+            .query({filter:{search:" ", currentUser:"", sortBy:"views", page: 0}})
+            .end((err, res) => {
+              let names = [];
+              res.body.data.forEach((doc)=> {
+                assert.isFalse(doc.attributes.isPrivate);
+              });
+              res.should.have.status(200);
+              done();
+            });
+      });
+  });
+
+  describe('/GET tags', () => {
+      it('it should GET the five most popular public tags', (done) => {
+        chai.request(server)
+            .get('/tags')
+            .query({limit:5})
+            .end((err, res) => {
+              console.log(res.body.data);
+              assert.equal(res.body.data.length, 5);
+              const tags = res.body.data.map((t)=> {return t._id});
+              assert.isTrue(tags.includes('tag1'));
+              assert.isTrue(tags.includes('tag2'));
+              assert.isTrue(tags.includes('tag3'));
+              assert.isTrue(tags.includes('tag4'));
+              assert.isTrue(tags.includes('tag5'));
+              res.should.have.status(200);
+              done();
+            });
+      });
+  });
 });
