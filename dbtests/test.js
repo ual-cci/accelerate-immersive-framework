@@ -41,6 +41,10 @@ mongo.MongoClient.connect(userURI, function(err, client) {
   else
   {
     console.log("Connected successfully to server");
-    userDB = client.db(contentDBName);
+    userDB = client.db(oauthDBName);
+    userDB.collection("users").find({}).toArray(function(err, result) {
+      if (err) throw err;
+        console.log(result);
+    });
   }
 });
