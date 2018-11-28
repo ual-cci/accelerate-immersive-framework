@@ -336,7 +336,7 @@ var newUser = function(username, password, email) {
 								reject("internal error creating user");
 								return;
 							}
-              console.log(user, savedUser);
+              console.log("CREATED USER",user, savedUser);
 							resolve(savedUser);
 							return;
 						});

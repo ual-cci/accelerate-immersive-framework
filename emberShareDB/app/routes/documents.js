@@ -20,16 +20,27 @@ export default Route.extend({
     }
     if(isEmpty(currentUserId) && !isEmpty(currentUserName))
     {
-      console.log("doesnt have currentUserId")
+      console.log("has name but doesnt have currentUserId",currentUserName)
       return new RSVP.Promise((resolve, reject)=> {
         this.get('sessionAccount').getUserFromName().then(()=>{
           this.get('sessionAccount').updateOwnedDocuments().then(()=>{
             filter.filter.currentUser = this.get('sessionAccount').currentUserId;
             this.get('store').query('document', filter).then((res)=> {
               resolve(res);
-            }).catch((err)=>reject(err));
-          }).catch((err)=>reject(err));
-        }).catch((err)=>reject(err));
+            })
+          }).catch((err)=> {
+            console.log('updateOwnedDocuments',err);
+          })
+        }).catch((err)=> {
+          console.log('getUserFromName',err);
+          filter.filter.currentUser = "";
+          this.get('store').query('document', filter).then((res)=> {
+            resolve(res);
+          }).catch((err)=>{
+            console.log('query',err);
+            reject(err);
+          });
+        });
       });
     }
     else if (isEmpty(currentUserId) && !isEmpty(currentUserName))

@@ -3,6 +3,7 @@ import DS from 'ember-data';
 export default DS.Model.extend({
   source:DS.attr('string'),
   owner:DS.attr('string'),
+  ownerId:DS.attr('string'),
   name:DS.attr('string'),
   created:DS.attr('date'),
   isPrivate:DS.attr('boolean'),
