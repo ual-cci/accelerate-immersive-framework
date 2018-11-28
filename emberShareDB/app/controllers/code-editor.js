@@ -123,10 +123,11 @@ export default Controller.extend({
   initAceEditor: function() {
     const editor = this.get('editor');
     const session = editor.getSession();
-
+    console.log("Adding in commands");
     editor.commands.addCommand({
       name: "executeLines",
       exec: ()=>{
+        console.log("executeLines");
         this.updateIFrame(true)
       },
       bindKey: {mac: "shift-enter", win: "shift-enter"}
@@ -734,7 +735,7 @@ export default Controller.extend({
     textarea.scrollTop = textarea.scrollHeight;
   },
   setCanEditDoc: function() {
-    const currentUser = this.get('sessionAccount').currentUserName;
+    const currentUser = this.get('sessionAccount').currentUserId;
     let model = this.get('model');
     console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
@@ -743,7 +744,7 @@ export default Controller.extend({
       this.set('isOwner', false);
       return;
     }
-    if(currentUser != model.data.owner)
+    if(currentUser != model.data.ownerId)
     {
       this.set('isOwner', false);
       if(model.data.readOnly)
