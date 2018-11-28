@@ -48,7 +48,7 @@ export default Route.extend({
         });
       }
       else {
-        return RVSP.Promise((resolve, reject) => {
+        return RSVP.Promise((resolve, reject) => {
           this.get('sessionAccount').updateOwnedDocuments().then(()=>{
             this.get('store').query('document', filter).then((res)=> {
               resolve(res);
