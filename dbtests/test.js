@@ -1,5 +1,5 @@
 const mongo = require('mongodb');
-var config = require('../nodeServer/config.js');
+var config = require('./config.js');
 const mongoIP = config.mongoIP;
 const mongoPort = config.mongoPort;
 const contentDBName = config.contentDBName;
@@ -7,12 +7,12 @@ const contentCollectionName = config.contentCollectionName;
 const replicaSet = config.replicaSet;
 const oauthDBName = config.oauthDBName;
 
-const docURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
+let docURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
 if(replicaSet)
 {
   docURI = docURI + '?replicaSet='+replicaSet;
 }
-const userURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+oauthDBName;
+let userURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+oauthDBName;
 if(replicaSet)
 {
   userURI = userURI + '?replicaSet='+replicaSet;
