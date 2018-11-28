@@ -6,8 +6,17 @@ const contentDBName = config.contentDBName;
 const contentCollectionName = config.contentCollectionName;
 const replicaSet = config.replicaSet;
 const oauthDBName = config.oauthDBName;
+
 const docURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
+if(replicaSet)
+{
+  docURI = docURI + '?replicaSet='+replicaSet;
+}
 const userURI = 'mongodb://'+mongoIP+':'+mongoPort+'/'+oauthDBName;
+if(replicaSet)
+{
+  userURI = userURI + '?replicaSet='+replicaSet;
+}
 
 let docDB;
 mongo.MongoClient.connect(docURI, function(err, client) {
