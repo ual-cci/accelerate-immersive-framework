@@ -479,13 +479,27 @@ var sendResetEmail = (email, link)=> {
 
 
 module.exports = {
+  dropUsers:dropUsers,
 	initUserAPI:initUserAPI,
 };
 
 //HELPER
 
-var dropUsers = function() {
-	OAuthUsersModel.remove({},function(err){console.log('cleared all users')});
+var dropUsers = ()=> {
+  return new Promise((resolve, reject)=> {
+    OAuthUsersModel.remove({},function(err){
+      if (err)
+      {
+        reject();
+      }
+      else
+      {
+        resolve();
+        console.log('cleared all users')
+      }
+    });
+  })
+
 }
 
 var dropTokens = function() {

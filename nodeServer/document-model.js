@@ -223,7 +223,7 @@ function startDocAPI(app)
     console.log("Searching for docs with no ownerID")
     shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
       results.forEach((doc)=> {
-        console.log("NO OWNER ID", doc.data)
+        //console.log("NO OWNER ID", doc.data)
         const docId = doc.data.documentId;
         var doc = shareDBConnection.get(contentCollectionName, docId);
         doc.fetch(function(err) {
@@ -501,6 +501,42 @@ function createDoc(attr) {
   });
 }
 
+/////helpers
+
+const dropDocs = (callback) => {
+  console.log(shareDBMongo)
+	mongo.collection(contentCollectionName).remove({}, callback());
+}
+
+const removeDocs = (ids) =>
+{
+  console.log("removing docs",ids);
+  return new Promise((resolve, reject) => {
+    mongo.MongoClient.connect(mongoUri, function(err, client) {
+      if(err)
+      {
+        console.log("DOCUMENT MODEL - error connecting to database", err);
+      }
+      else
+      {
+        console.log("Connected successfully to mongo");
+        docDB = client.db(contentDBName);
+        docDB.collection(contentCollectionName).deleteMany({ _id: { $in: ids } }, function(err, obj) {
+          console.log(err, obj.result)
+          if (err) {
+            reject(err)
+          } else  {
+            resolve();
+          }
+          docDB.close();
+        });
+      }
+    });
+  });
+}
+
 module.exports = {
-  initDocAPI:initDocAPI
+  initDocAPI:initDocAPI,
+  createDoc:createDoc,
+  removeDocs:removeDocs
 }
