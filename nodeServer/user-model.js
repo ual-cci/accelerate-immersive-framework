@@ -39,6 +39,8 @@ mongoose.model('user', new Schema({
   lastname: { type: String },
   password: { type: String },
   username: { type: String },
+  accountId: {type: String},
+  created: {type: Date},
   passwordResetToken: {type: String},
   passwordResetExpiry: {type: Date}
 }));
@@ -162,6 +164,7 @@ var initUserAPI = function(app, config)
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
 	oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName : config.oauthDBName;
+  console.log("USER DB", oauthDBName);
   replicaSet = config.replicaSet;
   siteURL = config.siteURL;
 	startAuthAPI(app);
@@ -214,6 +217,7 @@ function startAuthAPI(app)
   });
 
   app.post('/accounts', function (req, res) {
+    console.log("new user", req.body.data.attributes);
     let attr = req.body.data.attributes;
     newUser(attr.username,attr.password,attr.email)
     .then( (user) => {
@@ -332,7 +336,8 @@ var newUser = function(username, password, email) {
 								reject("internal error creating user");
 								return;
 							}
-							resolve(user);
+              console.log(user, savedUser);
+							resolve(savedUser);
 							return;
 						});
 					});
@@ -477,12 +482,6 @@ var sendResetEmail = (email, link)=> {
   transporter.sendMail(message);
 }
 
-
-module.exports = {
-  dropUsers:dropUsers,
-	initUserAPI:initUserAPI,
-};
-
 //HELPER
 
 var dropUsers = ()=> {
@@ -498,8 +497,20 @@ var dropUsers = ()=> {
         console.log('cleared all users')
       }
     });
-  })
+  });
+}
 
+const dropUser = (accountId)=>
+{
+  return new Promise((resolve, request)=> {
+    OAuthUsersModel.remove({accountId:accountId}, function(err) {
+      if(err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  });
 }
 
 var dropTokens = function() {
@@ -527,6 +538,9 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-//dump();
-// dropUsers();
-// dropTokens();
+
+module.exports = {
+  newUser:newUser,
+  dropUser:dropUser,
+	initUserAPI:initUserAPI,
+};
