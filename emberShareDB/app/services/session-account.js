@@ -8,6 +8,7 @@ export default Service.extend({
   store: inject(),
   cs:inject('console'),
   currentUserName:"",
+  currentUserId:null,
   bearerToken:"",
   currentDoc:"",
   ownedDocuments:null,
@@ -18,8 +19,9 @@ export default Service.extend({
       {
         currentUser = "";
       }
+      let userID = this.get('currentUserId');
       const filter = {
-        filter:{search:currentUser,page:0,currentUser:currentUser}
+        filter:{search:currentUser, page:0, currentUser:userID}
       }
       this.get('store').query('document', filter).then((results) => {
         var myDocs = results.map(function(doc){
@@ -33,7 +35,6 @@ export default Service.extend({
     });
   },
   getUserFromName() {
-    console.log("getting user for name", this.get('currentUserName'),this.get('bearerToken'))
     return new RSVP.Promise((resolve, reject) => {
       const username = this.get('currentUserName');
       const token = this.get('bearerToken');
@@ -43,7 +44,7 @@ export default Service.extend({
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data:{username:username}
         }).then((res) => {
-          console.log(res)
+          this.set("currentUserId", res.data.attr.accountId);
           resolve(res);
         }).catch((err) => {
           reject(err);
@@ -52,15 +53,11 @@ export default Service.extend({
   },
   loadCurrentUser() {
     return new RSVP.Promise((resolve, reject) => {
-      console.log(this.get('session.data'))
+      //console.log(this.get('session.data'))
       const currentUserName = this.get('session.data.authenticated.user_id');
       this.set('bearerToken', this.get('session.data.authenticated.access_token'));
       if (!isEmpty(currentUserName)) {
         this.set('currentUserName', currentUserName);
-        // this.getCurrentUserName().then((res)=>{
-        //   console.log(res);
-        //   resolve()
-        // }).catch((err)=>reject(err));
         resolve();
       } else {
         this.get('cs').log('currentUserName empty, rejecting');

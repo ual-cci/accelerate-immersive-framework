@@ -47,7 +47,6 @@ var OAuthTokensModel = mongoose.model('token');
 var OAuthClientsModel = mongoose.model('client');
 var OAuthUsersModel = mongoose.model('user');
 
-
 let model = {};
 model.getAccessToken = function(bearerToken) {
 	console.log("getAccessToken", bearerToken);

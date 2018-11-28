@@ -185,7 +185,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs");
+    console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -196,7 +196,7 @@ function startDocAPI(app)
     if(term.length > 1)
     {
       const rg = {$regex : ".*"+term+".*", $options:"i"};
-      searchTermOr = { $or: [{name: rg},{tags: rg},{owner: rg}]};
+      searchTermOr = { $or: [{name: rg},{tags: rg},{ownerId: rg},{owner: rg}]};
     }
 
     let s = {};
@@ -220,11 +220,31 @@ function startDocAPI(app)
       s[sortBy] = -1;
     }
 
+    console.log("Searching for docs with no ownerID")
+    shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
+      results.forEach((doc)=> {
+        console.log("NO OWNER ID", doc.data)
+        const docId = doc.data.documentId;
+        var doc = shareDBConnection.get(contentCollectionName, docId);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            // const op = {p:["ownerId"], oi:[currentUser]};
+            // submitOp(docId, op);
+          };
+        });
+      });
+    });
+
     const query = {
       $and: [searchTermOr,
              {parent: null},
              { children : { $exists : true } },
-             {$or: [{owner: currentUser}, {isPrivate: false}]}
+             {$or: [{ownerId: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
       $limit: PAGE_SIZE,
@@ -237,6 +257,7 @@ function startDocAPI(app)
       }
       else
       {
+        console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -431,7 +452,6 @@ function createDoc(attr) {
   return new Promise((resolve, reject) => {
     getNewDocumentId(function(uuid) {
       console.log("creating doc", contentCollectionName, uuid);
-
       var doc = shareDBConnection.get(contentCollectionName, uuid);
       doc.fetch(function(err) {
         if (err) {
@@ -443,7 +463,8 @@ function createDoc(attr) {
           console.log("doc.create");
           doc.create({
             source:"",
-            ownerId:attr.owner,
+            ownerId:attr.ownerId,
+            owner:attr.owner,
             isPrivate:attr.isPrivate,
             readOnly:true,
             name:attr.name,
@@ -466,7 +487,7 @@ function createDoc(attr) {
             op.p = ['source',0];
             op.si = attr.source;
             doc.submitOp(op);
-            console.log("document created", doc);
+            //console.log("document created", doc);
             resolve(doc);
             return;
           });

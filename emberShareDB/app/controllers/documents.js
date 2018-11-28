@@ -72,11 +72,11 @@ export default Controller.extend({
         this.get('documentService').makeNewDoc(data)
           .then(() => {
             this.get('cs').log("new doc created");
-            const currentUser = this.get('sessionAccount').currentUserName;
+            const currentUserId = this.get('sessionAccount').currentUserId;
             this.get('store').query('document', {
               filter: {search: docName,
                 page: 0,
-                currentUser: currentUser,
+                currentUser: currentUserId,
                 sortBy: 'date'}
             }).then((documents) => {
               this.get('cs').log("new doc found, transitioning", documents);

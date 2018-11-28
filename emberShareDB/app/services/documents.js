@@ -16,9 +16,11 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("making doc");
       const currentUser = this.get('sessionAccount').currentUserName;
+      const currentUserId = this.get('sessionAccount').currentUserId;
       let doc = this.get('store').createRecord('document', {
         source:data.source,
         owner:currentUser,
+        ownerId:currentUserId,
         isPrivate:data.isPrivate,
         name:data.name,
         documentId:null,
