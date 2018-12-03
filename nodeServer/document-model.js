@@ -315,7 +315,7 @@ function startDocAPI(app)
         const current = doc.data;
         let actions = [];
         for (var key in current) {
-            if (current.hasOwnProperty(key)) {
+            if (current.hasOwnProperty(key) && patched.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
                   //DONT UPDATE THE SOURCE OR THE DOCUMENT ID

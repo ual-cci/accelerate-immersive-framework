@@ -234,6 +234,65 @@ describe('documents searching', () => {
       });
   });
 
+  describe('/PATCH doc', () => {
+    it('it should patch the OWNER property of the doc', (done) => {
+      chai.request(server)
+      .patch("/documents/" + docsAdded[0])
+      .send({data:{attributes:{owner:"new-owner"}}})
+      .then(res=> {
+        res.should.have.status(200);
+        chai.request(server)
+            .get('/documents')
+            .query({filter:{search:"new-owner", currentUser:"456", sortBy:"views", page: 0}})
+            .end((err, res) => {
+              res.should.have.status(200);
+              assert.equal(res.body.data[0].attributes.owner, "new-owner");
+              done();
+            });
+      });
+    });
+  });
+
+  describe('dont /PATCH source', () => {
+    it('it should NOT patch the SOURCE property of the doc', (done) => {
+      chai.request(server)
+      .patch("/documents/" + docsAdded[0])
+      .send({data:{attributes:{source:"<new-code>"}}})
+      .then(res=> {
+        res.should.have.status(200);
+        chai.request(server)
+            .get('/documents')
+            .query({filter:{search:"public-me", currentUser:"456", sortBy:"views", page: 0}})
+            .end((err, res) => {
+              res.should.have.status(200);
+              assert.equal(res.body.data.length, 1);
+              assert.equal(res.body.data[0].attributes.source, "<code>");
+              done();
+            });
+      });
+    });
+  });
+
+  describe('dont /PATCH documentID', () => {
+    it('it should NOT patch the SOURCE property of the doc', (done) => {
+      chai.request(server)
+      .patch("/documents/" + docsAdded[0])
+      .send({data:{attributes:{documentId:"1239209580394810"}}})
+      .then(res=> {
+        res.should.have.status(200);
+        chai.request(server)
+            .get('/documents')
+            .query({filter:{search:"public-me", currentUser:"456", sortBy:"views", page: 0}})
+            .end((err, res) => {
+              res.should.have.status(200);
+              assert.equal(res.body.data.length, 1);
+              assert.equal(res.body.data[0].attributes.documentId, docsAdded[0]);
+              done();
+            });
+      });
+    });
+  });
+
   describe('/POST op', () => {
     before((done)=> {
       getToken().then(done);
