@@ -175,30 +175,30 @@ export default Controller.extend({
     else
     {
       try {
-        socket = new ReconnectingWebSocket(config.wsHost);
+        socket = new ReconnectingWebSocket(config.wsHost)
         this.set('socket', socket);
-        socket.onopen = () => {
+        socket.addEventListener('open', () => {
           this.get('cs').log("web socket open");
           this.set('wsAvailable', true);
           if(!this.get('fetchingDoc'))
           {
             this.selectRootDoc();
           }
-        }
+        });
 
-        socket.onerror = () => {
+        socket.addEventListener('error',  () => {
           this.get('cs').log("web socket error");
           this.websocketError();
-        }
+        })
 
-        socket.onclose = () =>  {
+        socket.addEventListener('close',  () =>  {
           this.get('cs').log("web socket close");
           this.websocketError();
-        }
+        })
 
-        socket.onmessage = (event) =>  {
+        socket.addEventListener('message',  (event) =>  {
           this.get('cs').log("web socket message", event);
-        }
+        })
       }
       catch (err)
       {
@@ -256,12 +256,12 @@ export default Controller.extend({
       // {
         const socket = this.get('socket');
         let con = this.get('connection');
-        if(isEmpty(con))
+        if(isEmpty(con) && !isEmpty(socket))
         {
           this.get('cs').log('connecting to ShareDB');
           con = new ShareDB.Connection(socket);
         }
-        if(isEmpty(con) || con.state == "disconnected")
+        if(isEmpty(con) || con.state == "disconnected" || isEmpty(socket))
         {
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
@@ -342,6 +342,16 @@ export default Controller.extend({
       source:data.source,
       assets:data.assets
     });
+  },
+  clearTabs: function() {
+    // this.setParentData({
+    //     name:"",
+    //     id:"",
+    //     children:[],
+    //     source:"",
+    //     assets:""
+    // })
+    this.set('tabs',[]);
   },
   setTabs: function(data) {
     const tabs = data.map((child)=> {
@@ -892,6 +902,7 @@ export default Controller.extend({
       this.get('cs').log('editor ready', editor)
       let text = "loading code.";
       this.set('titleName', text);
+      this.clearTabs();
       this.set('loadingInterval', setInterval(()=>{
         if(text=="loading code.")
         {
