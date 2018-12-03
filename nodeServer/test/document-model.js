@@ -5,13 +5,16 @@ let assert = chai.assert;
 let chaiHttp = require('chai-http');
 let server = require('../server');
 let documentModel = require('../document-model');
+let userModel = require('../user-model');
 let should = chai.should();
+let expect = chai.expect();
 
 chai.use(chaiHttp);
 
 describe('documents', () => {
   let docsAdded = [];
-  beforeEach((done) => {
+  let accountId = ""
+  before((done) => {
     const public_attr = {
       isPrivate:false,
       name:"public-me",
@@ -71,14 +74,19 @@ describe('documents', () => {
     ];
     Promise.all(actions).then((vals)=> {
       docsAdded = vals.map((doc)=>{return doc.id})
-      done();
+      userModel.newUser("test-user","somethingsecure","something@test.com")
+      .then((res) => {
+        console.log("made user", res);
+        accountId = res.accountId
+        done();
+      });
     });
   });
 
-  afterEach((done)=> {
+  after((done)=> {
     documentModel.removeDocs(docsAdded).then(()=> {
       console.log("did remove ", docsAdded)
-      done();
+      userModel.dropUser(accountId).then(done);
     }).catch((err)=> {
       console.log(err);
     })
@@ -143,5 +151,39 @@ describe('documents', () => {
               done();
             });
       });
+  });
+
+  describe('/POST op', () => {
+    let token = "";
+    before((done)=> {
+      let agent = chai.request.agent(server)
+      agent
+        .post('/oauth/token')
+        .type('form')
+        .send({
+          client_id:"application",
+          client_secret:"secret",
+          grant_type:"password",
+          username:"test-user",
+          password:"somethingsecure"
+        })
+        .end((err, res)=> {
+          console.log("RES",err, res.body)
+          assert.equal(res.body.token_type, "Bearer");
+          assert.exists(res.body.access_token);
+          token = res.body.access_token;
+          res.should.have.status(200);
+          done();
+        });
+    })
+    it('it should POST op if authorised', (done)=> {
+      chai.request(server)
+      .post("/submitOp")
+      .set('Authorization', 'Bearer ' + token)
+      .send({op:{p: ["source", 0], sd: "test"}, docId:docsAdded[0].id})
+      .end((err, res) => {
+        console.log(err, res.status);
+      });
+    });
   });
 });

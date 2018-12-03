@@ -453,7 +453,7 @@ function getNewDocumentId(callback)
 function createDoc(attr) {
   return new Promise((resolve, reject) => {
     getNewDocumentId(function(uuid) {
-      console.log("creating doc", contentCollectionName, uuid);
+      //console.log("creating doc", contentCollectionName, uuid);
       var doc = shareDBConnection.get(contentCollectionName, uuid);
       doc.fetch(function(err) {
         if (err) {
@@ -462,7 +462,6 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          console.log("doc.create");
           doc.create({
             source:"",
             ownerId:attr.ownerId,

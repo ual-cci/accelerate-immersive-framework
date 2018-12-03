@@ -69,7 +69,7 @@ model.getAccessToken = function(bearerToken) {
 };
 
 model.getClient = function(clientId, clientSecret) {
-	console.log("geting Client");
+	console.log("getting Client");
   return new Promise ((resolve, reject) => {
 		OAuthClientsModel.findOne({ clientId: clientId, clientSecret: clientSecret },
 		(err, client) => {
@@ -202,9 +202,12 @@ function startAuthAPI(app)
   app.all('/oauth/token', app.oauth.token());
 
   app.get('/accounts', function (req, res) {
+    console.log("find user");
     OAuthUsersModel.find({username:req.query.username}, function(err,users) {
+      console.log("found user", users.length,err);
 			if(users.length > 0 && !err)
 			{
+        console.log("found user");
         let user = users[0];
         user.password = "";
         user.email = "";
@@ -234,8 +237,11 @@ function startAuthAPI(app)
     requestPasswordReset(req.body.username)
     .then( (user) => {
       console.log('success reset', siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
-      sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
-      res.status(200).send({link:"/password-reset?username="+user.username+"&token="+user.passwordResetToken})
+      if(!req.body.test)
+      {
+        sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
+      }
+      res.status(200).send()
     })
     .catch( (err) =>  {
       console.log('failed reset');
@@ -316,7 +322,8 @@ var setup = function() {
 
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
-		OAuthUsersModel.find({username:username}, function(err,user) {
+		OAuthUsersModel.find({username:username}, function(err, user) {
+      console.log(err, user)
 			if(user.length > 0 || err)
 			{
 				reject("user already exists");
@@ -337,7 +344,7 @@ var newUser = function(username, password, email) {
 								reject("internal error creating user");
 								return;
 							}
-              console.log("CREATED USER",user, savedUser);
+              c//onsole.log("CREATED USER",user, savedUser);
 							resolve(savedUser);
 							return;
 						});
