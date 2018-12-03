@@ -11,7 +11,88 @@ let expect = chai.expect();
 
 chai.use(chaiHttp);
 
-describe('documents', () => {
+let token = "";
+
+let getToken = ()=> {
+  return new Promise((resolve, reject)=> {
+    chai.request(server)
+      .post('/oauth/token')
+      .type('form')
+      .send({
+        client_id:"application",
+        client_secret:"secret",
+        grant_type:"password",
+        username:"test-user",
+        password:"somethingsecure"
+      })
+      .end((err, res)=> {
+        assert.equal(res.body.token_type, "Bearer");
+        assert.exists(res.body.access_token);
+        token = res.body.access_token;
+        res.should.have.status(200);
+        resolve();
+      });
+  })
+}
+
+describe('doc delete', () => {
+  let accountId = ""
+  let docId = "";
+  before((done)=> {
+    userModel.newUser("test-user","somethingsecure","something@test.com")
+    .then((res) => {
+      console.log("made user", res);
+      accountId = res.accountId
+      getToken().then(()=> {
+        const public_attr = {
+          isPrivate:false,
+          name:"public-me",
+          owner:"deleting-user",
+          ownerId:"456",
+          tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
+          forkedFrom:null,
+          parent:null,
+          source:"<code>"
+        };
+        documentModel.createDoc(public_attr).then((res)=>{
+          docId = res.id;
+          console.log("made document", docId, res.id)
+          done();
+        });
+      });
+    });
+  });
+
+  it('it should delete the document and it should no longer return in searches', (done)=> {
+    chai.request(server)
+    .delete("/documents/"+docId)
+    .set('Authorization', 'Bearer ' + token)
+    .then((res) => {
+      res.should.have.status(200);
+      chai.request(server)
+          .get('/documents')
+          .query({filter:{search:"deleting-user", currentUser:"456", sortBy:"views", page: 0}})
+          .end((err, res) => {
+            res.should.have.status(200);
+            console.log(res.body.data)
+            assert.equal(res.body.data.length, 0);
+            done();
+          });
+    });
+  });
+
+  after((done)=> {
+    token = "";
+    documentModel.removeDocs([docId]).then(()=> {
+      userModel.dropTokens()
+      userModel.dropUser(accountId).then(done());
+    });
+  })
+})
+
+
+
+describe('documents searching', () => {
   let docsAdded = [];
   let accountId = ""
   before((done) => {
@@ -154,27 +235,10 @@ describe('documents', () => {
   });
 
   describe('/POST op', () => {
-    let token = "";
     before((done)=> {
-      let agent = chai.request.agent(server)
-      agent
-        .post('/oauth/token')
-        .type('form')
-        .send({
-          client_id:"application",
-          client_secret:"secret",
-          grant_type:"password",
-          username:"test-user",
-          password:"somethingsecure"
-        })
-        .end((err, res)=> {
-          assert.equal(res.body.token_type, "Bearer");
-          assert.exists(res.body.access_token);
-          token = res.body.access_token;
-          res.should.have.status(200);
-          done();
-        });
-    })
+      getToken().then(done);
+    });
+
     it('it should POST op if authorised', (done)=> {
       chai.request(server)
       .post("/submitOp")
@@ -188,6 +252,7 @@ describe('documents', () => {
     });
 
     after((done)=> {
+      token = "";
       userModel.dropTokens()
       done();
     })
