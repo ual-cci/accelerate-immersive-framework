@@ -86,7 +86,7 @@ describe('documents', () => {
   after((done)=> {
     documentModel.removeDocs(docsAdded).then(()=> {
       console.log("did remove ", docsAdded)
-      userModel.dropUser(accountId).then(done);
+      userModel.dropUser(accountId).then(done());
     }).catch((err)=> {
       console.log(err);
     })
@@ -168,7 +168,6 @@ describe('documents', () => {
           password:"somethingsecure"
         })
         .end((err, res)=> {
-          console.log("RES",err, res.body)
           assert.equal(res.body.token_type, "Bearer");
           assert.exists(res.body.access_token);
           token = res.body.access_token;
@@ -180,10 +179,17 @@ describe('documents', () => {
       chai.request(server)
       .post("/submitOp")
       .set('Authorization', 'Bearer ' + token)
-      .send({op:{p: ["source", 0], sd: "test"}, docId:docsAdded[0].id})
+      .send({op:{p: ["source", 0], si: "test"}, documentId:docsAdded[0]})
       .end((err, res) => {
         console.log(err, res.status);
+        res.should.have.status(200);
+        done();
       });
     });
+
+    after((done)=> {
+      userModel.dropTokens()
+      done();
+    })
   });
 });

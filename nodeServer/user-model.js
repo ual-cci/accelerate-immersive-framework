@@ -51,7 +51,7 @@ var OAuthUsersModel = mongoose.model('user');
 
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	console.log("getAccessToken", bearerToken);
+	console.log("getAccessToken");
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
@@ -61,7 +61,7 @@ model.getAccessToken = function(bearerToken) {
 			}
 			else
 			{
-				console.log("got token", token);
+				console.log("got token");
 				resolve(token)
 			}
 		});
@@ -108,7 +108,7 @@ model.getUser = function(username, password) {
       bcrypt.compare(password, hash).then((res) => {
         if(res)
         {
-					console.log('got user', user)
+					console.log('got user')
           resolve(user);
 					return;
         }
@@ -134,7 +134,7 @@ model.saveToken = function(token, client, user) {
     user : user,
     userId: user._id,
   });
-	console.log("save token", token, accessToken);
+	console.log("save token");
   // Can't just chain `lean()` to `save()` as we did with `findOne()` elsewhere. Instead we use `Promise` to resolve the data.
   return new Promise( function(resolve,reject){
     accessToken.save(function(err,data){
@@ -202,9 +202,9 @@ function startAuthAPI(app)
   app.all('/oauth/token', app.oauth.token());
 
   app.get('/accounts', function (req, res) {
-    console.log("find user");
+    console.log("find user", req.query.username);
     OAuthUsersModel.find({username:req.query.username}, function(err,users) {
-      console.log("found user", users.length,err);
+      console.log("returned user", users.length, err);
 			if(users.length > 0 && !err)
 			{
         console.log("found user");
@@ -323,7 +323,6 @@ var setup = function() {
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
 		OAuthUsersModel.find({username:username}, function(err, user) {
-      console.log(err, user)
 			if(user.length > 0 || err)
 			{
 				reject("user already exists");
@@ -344,7 +343,7 @@ var newUser = function(username, password, email) {
 								reject("internal error creating user");
 								return;
 							}
-              c//onsole.log("CREATED USER",user, savedUser);
+              //console.log("CREATED USER",user, savedUser);
 							resolve(savedUser);
 							return;
 						});
@@ -521,8 +520,11 @@ const dropUser = (accountId)=>
   });
 }
 
-var dropTokens = function() {
-	OAuthTokensModel.remove({},function(err){console.log('cleared all tokens')});
+var dropTokens = async function() {
+	OAuthTokensModel.remove({},function(err){
+    console.log('cleared all tokens')
+    return err;
+  });
 }
 
 var dump = function() {
@@ -550,5 +552,6 @@ var dump = function() {
 module.exports = {
   newUser:newUser,
   dropUser:dropUser,
+  dropTokens:dropTokens,
 	initUserAPI:initUserAPI,
 };
