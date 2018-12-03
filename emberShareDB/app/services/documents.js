@@ -172,7 +172,7 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "GET",
-          url: config.serverHost + "/canFlag" + params,
+          url: config.serverHost + "/flagDoc" + params,
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
         }).then((res) => {
           resolve();

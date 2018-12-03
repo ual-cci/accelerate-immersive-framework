@@ -42,7 +42,8 @@ mongoose.model('user', new Schema({
   accountId: {type: String},
   created: {type: Date},
   passwordResetToken: {type: String},
-  passwordResetExpiry: {type: Date}
+  passwordResetExpiry: {type: Date},
+  flaggedDocs: {type:[String]}
 }));
 
 var OAuthTokensModel = mongoose.model('token');
@@ -271,18 +272,21 @@ function startAuthAPI(app)
     });
   });
 
-	app.get('/canFlag', app.oauth.authenticate(), (req, res) => {
+	app.get('/flagDoc', app.oauth.authenticate(), (req, res) => {
 		const username = req.query.user;
 		const doc = req.query.documentId;
+    console.log("flag doc", req.query)
 		OAuthUsersModel.findOne({
 			username: username
 		}, (err, user) => {
-			if(err)
+      console.log(err, user)
+			if(err || !user)
 			{
 				res.status(400).send(err);
 			}
 			else
 			{
+        console.log(user);
 				flagged = user.flaggedDocs;
 				if(flagged.includes(doc))
 				{

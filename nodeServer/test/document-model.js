@@ -157,8 +157,8 @@ describe('documents searching', () => {
       docsAdded = vals.map((doc)=>{return doc.id})
       userModel.newUser("test-user","somethingsecure","something@test.com")
       .then((res) => {
-        console.log("made user", res);
         accountId = res.accountId
+        console.log("made user", accountId);
         done();
       });
     });
@@ -239,7 +239,7 @@ describe('documents searching', () => {
       chai.request(server)
       .patch("/documents/" + docsAdded[0])
       .send({data:{attributes:{owner:"new-owner"}}})
-      .then(res=> {
+      .then((res) => {
         res.should.have.status(200);
         chai.request(server)
             .get('/documents')
@@ -258,7 +258,7 @@ describe('documents searching', () => {
       chai.request(server)
       .patch("/documents/" + docsAdded[0])
       .send({data:{attributes:{source:"<new-code>"}}})
-      .then(res=> {
+      .then((res) => {
         res.should.have.status(200);
         chai.request(server)
             .get('/documents')
@@ -278,7 +278,7 @@ describe('documents searching', () => {
       chai.request(server)
       .patch("/documents/" + docsAdded[0])
       .send({data:{attributes:{documentId:"1239209580394810"}}})
-      .then(res=> {
+      .then((res) => {
         res.should.have.status(200);
         chai.request(server)
             .get('/documents')
@@ -291,6 +291,35 @@ describe('documents searching', () => {
             });
       });
     });
+  });
+
+  describe('users can flag docs only once', () => {
+    before((done)=> {
+      getToken().then(done);
+    });
+
+    it('user should be able to flag a doc once, and ONLY once', (done) => {
+      chai.request(server)
+      .get("/flagDoc/?documentId=" + docsAdded[0] + "&user=test-user")
+      .set('Authorization', 'Bearer ' + token)
+      .then((res) => {
+        res.should.have.status(200);
+        chai.request(server)
+          .get("/flagDoc/?documentId=" + docsAdded[0] + "&user=test-user")
+          .set('Authorization', 'Bearer ' + token)
+          .end((err,res) => {
+            res.should.have.status(400);
+            done();
+          });
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      done();
+    })
+
   });
 
   describe('/POST op', () => {
