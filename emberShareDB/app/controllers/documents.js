@@ -10,6 +10,9 @@ export default Controller.extend({
   documentService: inject('documents'),
   docName:"",
   isPrivate:true,
+  isPrivateText:computed('isPrivate', function() {
+    return this.get('isPrivate') ? "private":"public";
+  }),
   feedbackMessage: "",
   sort:"views",
   page:0,
@@ -58,7 +61,7 @@ export default Controller.extend({
         });
       }
     },
-    checkboxClicked() {
+    isPrivateChanged() {
       this.toggleProperty('isPrivate');
     },
     createNewDocument() {

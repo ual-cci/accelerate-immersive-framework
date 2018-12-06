@@ -9,7 +9,7 @@
       {{#if sessionAccount.currentUserName}}
         <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{#nav.link-to "login" id = "signed-in-link" }}{{sessionAccount.currentUserName}}{{/nav.link-to}}</p>
       {{/if}}
-      <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right">log out</a>
+      <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
     </div>
    {{#nav.dropdown as |dd|}}
      {{#dd.toggle id = "my-docs" }}my docs <span  class="caret"></span>{{/dd.toggle}}

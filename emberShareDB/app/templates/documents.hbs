@@ -1,10 +1,10 @@
-<div class = "container">
+<div class = "container-fluid doc-create-container">
 {{#if session.isAuthenticated}}
   <form {{action 'createNewDocument' on='submit'}}>
-    {{input id='docName' placeholder='Doc Name' value=docName}}
-    <label for="isPrivate">Private?</label>
-    {{input type="checkbox" id='isPrivate' checked=true click=(action 'checkboxClicked')}}
-    <button type="submit">Create New Document</button>
+    {{input id='docName' placeholder='document name' value=docName}}
+    <button type="submit" id = "create-doc-btn">create</button>
+    {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
+
   </form>
 {{/if}}
 {{#if feedbackMessage}}
