@@ -75,6 +75,8 @@ export default Controller.extend({
     const aceW = this.get('aceW');
     const displayEditor = this.get('displayEditor');
     const display = displayEditor ? "inline" : "none"
+    let drag = document.getElementById('drag-button')
+    //drag.style.right = 10;
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   displayEditor: computed('hideEditor', function() {
@@ -918,6 +920,7 @@ export default Controller.extend({
         }
         this.set('titleName', text);
       }, 500));
+      editor.setReadOnly(true);
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
@@ -1221,6 +1224,7 @@ export default Controller.extend({
       if(this.get('isDragging'))
       {
         //this.get('cs').log('mouseMove',e.target);
+
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },

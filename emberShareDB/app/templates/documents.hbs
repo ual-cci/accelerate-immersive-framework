@@ -1,24 +1,23 @@
+<div class = "container">
+<form {{action 'search' on='submit'}}>
+  {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
+</form>
+</div>
 <div class = "container-fluid doc-create-container">
 {{#if session.isAuthenticated}}
   <form {{action 'createNewDocument' on='submit'}}>
     {{input id='docName' placeholder='document name' value=docName}}
     <button type="submit" id = "create-doc-btn">create</button>
     {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
-
   </form>
 {{/if}}
+</div>
 {{#if feedbackMessage}}
   <label>{{feedbackMessage}}</label>
 {{/if}}
-</div>
-<div class = "container">
-<form {{action 'search' on='submit'}}>
-  {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
-  {{#if hasNoDocuments}}
-    <h2 style = "text-align:center;">No Results</h2>
-  {{/if}}
-</form>
-</div>
+{{#if hasNoDocuments}}
+  <h2 style = "text-align:center;">No Results</h2>
+{{/if}}
 <div class = "center">
   {{#bs-button onClick=(action 'recent')}} Newest {{/bs-button}}
   {{#bs-button onClick=(action 'popular')}} Popular {{/bs-button}}
