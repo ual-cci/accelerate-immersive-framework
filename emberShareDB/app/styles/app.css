@@ -15,7 +15,7 @@
 }
 
 .document-link {
-  color:white;
+  color:black;
 }
 
 .btn-confirm {
@@ -96,13 +96,12 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .document-list-col {
-  height: 10vh;
+  height: 60px;
 }
 
 .document-list-item {
   padding:4px 4px 4px 4px;
-  border-radius: 5px;
-  background-color: #416FE8;
+  background-color: lightgray;
   height:90%;
   margin: 10px 10px 10px 10px;
 }
