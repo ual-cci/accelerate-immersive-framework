@@ -22,33 +22,33 @@
 {{/if}}
 <div class = "row">
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" onclick={{action 'recent'}}>
-      Newest
+    <div class = "filter-item" id = "newest" onclick={{action 'recent'}}>
+      <p class = "filter-text">NEWEST</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" onclick={{action 'popular'}}>
-      Popular
+    <div class = "filter-item" id = "popular" onclick={{action 'popular'}}>
+      <p class = "filter-text">POPULAR</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" onclick={{action 'updated'}}>
-      Updated
+    <div class = "filter-item" id = "remixed" onclick={{action 'forked'}}>
+      <p class = "filter-text">MOST REMIXED</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" onclick={{action 'forked'}}>
-      Most Remixed
+    <div class = "filter-item" id = "editted" onclick={{action 'editted'}}>
+      <p class = "filter-text">MOST WORKED ON</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" onclick={{action 'editted'}}>
-      Most Worked On
+    <div class = "filter-item" id = "updated" onclick={{action 'updated'}}>
+      <p class = "filter-text">UPDATED</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" onclick={{action 'recent'}}>
-      Oldest
+    <div class = "filter-item" id = "oldest" onclick={{action 'recent'}}>
+      <p class = "filter-text">OLDEST</p>
     </div>
   </div>
 </div>
@@ -56,7 +56,7 @@
   {{#each tags as |tag|}}
   <div class = "col-sm-6 col-md-4 col-lg-2 filter-col">
     <div class = "filter-item" onclick={{action 'tag' tag._id}}>
-      {{tag._id}}
+      <p class = "filter-text">{{tag._id}}</p>
     </div>
   </div>
   {{/each}}
