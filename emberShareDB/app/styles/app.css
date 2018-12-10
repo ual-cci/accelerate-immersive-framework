@@ -101,6 +101,7 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: lightgray;
   height:90%;
   margin: 10px 10px 10px 10px;
+  overflow:hidden;
 }
 
 .filter-col {
@@ -225,13 +226,14 @@ input[id="docName"]:-ms-input-placeholder {
   width:30px;
   height:30px;
   position:relative;
-  float:right;
   text-align: center;
   background-color: rgba(0,0,0,0);
 }
 
 .project-tabs {
   max-height: 55px;
+  float:right;
+  width:50%;
   overflow-x: auto;
   overflow-y: hidden;
 }

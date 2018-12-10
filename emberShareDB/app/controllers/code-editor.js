@@ -360,9 +360,12 @@ export default Controller.extend({
     this.set('tabs',[]);
   },
   setTabs: function(data) {
+    const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      return {name:child.data.name, id:child.id};
+      console.log("SETTING TAB",child.id,currentDoc.id)
+      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id};
     });
+    console.log(tabs);
     this.set('tabs', tabs);
   },
   fetchChildren: function() {
@@ -1327,12 +1330,16 @@ export default Controller.extend({
         {
           if(docId != doc.data.documentId)
           {
-            this.newDocSelected(docId);
+            this.newDocSelected(docId).then(()=> {
+              this.fetchChildren()
+            });
           }
         }
         else
         {
-           this.newDocSelected(docId);
+           this.newDocSelected(docId).then(()=> {
+             this.fetchChildren()
+           });
         }
       }).catch((err)=>{
         this.get('cs').log('ERROR updateSourceFromSession', err)
