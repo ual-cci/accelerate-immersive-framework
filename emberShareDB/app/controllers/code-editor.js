@@ -77,6 +77,8 @@ export default Controller.extend({
     const display = displayEditor ? "inline" : "none"
     let drag = document.getElementById('drag-button')
     //drag.style.right = 10;
+    let tab = document.getElementById('project-tabs');
+    tab.style.width = aceW + "px"
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   displayEditor: computed('hideEditor', function() {
@@ -362,7 +364,6 @@ export default Controller.extend({
   setTabs: function(data) {
     const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      console.log("SETTING TAB",child.id,currentDoc.id)
       return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id};
     });
     console.log(tabs);
