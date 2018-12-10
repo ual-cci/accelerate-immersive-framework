@@ -10,6 +10,8 @@
     <button type="submit" id = "create-doc-btn">create</button>
     {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
   </form>
+{{else}}
+  <div id = "create-doc-placeholder"></div>
 {{/if}}
 </div>
 {{#if feedbackMessage}}
@@ -18,20 +20,49 @@
 {{#if hasNoDocuments}}
   <h2 style = "text-align:center;">No Results</h2>
 {{/if}}
-<div class = "center">
-  {{#bs-button onClick=(action 'recent')}} Newest {{/bs-button}}
-  {{#bs-button onClick=(action 'popular')}} Popular {{/bs-button}}
-  {{#bs-button onClick=(action 'updated')}} Updated {{/bs-button}}
-  {{#bs-button onClick=(action 'forked')}} Most Remixed {{/bs-button}}
-  {{#bs-button onClick=(action 'editted')}} Most Worked-on {{/bs-button}}
+<div class = "row">
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
+    <div class = "filter-item" onclick={{action 'recent'}}>
+      Newest
+    </div>
+  </div>
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
+    <div class = "filter-item" onclick={{action 'popular'}}>
+      Popular
+    </div>
+  </div>
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
+    <div class = "filter-item" onclick={{action 'updated'}}>
+      Updated
+    </div>
+  </div>
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
+    <div class = "filter-item" onclick={{action 'forked'}}>
+      Most Remixed
+    </div>
+  </div>
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
+    <div class = "filter-item" onclick={{action 'editted'}}>
+      Most Worked On
+    </div>
+  </div>
+  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
+    <div class = "filter-item" onclick={{action 'recent'}}>
+      Oldest
+    </div>
+  </div>
 </div>
-<div class = "center">
+<div class = "row hidden-md hidden-sm hidden-xs">
   {{#each tags as |tag|}}
-    {{#bs-button onClick=(action 'tag' tag._id)}} {{tag._id}} {{/bs-button}}
+  <div class = "col-sm-6 col-md-4 col-lg-2 filter-col">
+    <div class = "filter-item" onclick={{action 'tag' tag._id}}>
+      {{tag._id}}
+    </div>
+  </div>
   {{/each}}
 </div>
 <div class = "container-fluid">
-  <div class = "container-fluid">
+  <div class = "row">
     {{#each model as |document index|}}
         {{document-list-item
           document=document

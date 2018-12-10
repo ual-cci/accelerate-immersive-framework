@@ -30,6 +30,12 @@
  padding-bottom:30px;
 }
 
+#create-doc-placeholder
+{
+  width:100%;
+  height:70px;
+}
+
 .doc-create-container{
   position: relative;
 }
@@ -89,12 +95,29 @@ input[id="docName"]:-ms-input-placeholder {
   float:right;
 }
 
+.document-list-col {
+  height: 10vh;
+}
+
 .document-list-item {
   padding:4px 4px 4px 4px;
   border-radius: 5px;
   background-color: #416FE8;
+  height:90%;
   margin: 10px 10px 10px 10px;
+}
+
+.filter-col {
   height: 25vh;
+}
+
+.filter-item {
+  padding:4px 4px 4px 4px;
+  border-radius: 5px;
+  background-color: #416FE8;
+  height:90%;
+  margin: 10px 10px 10px 10px;
+  cursor:pointer;
 }
 
 .file-upload {
