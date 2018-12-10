@@ -3,13 +3,17 @@
   {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
 </form>
 </div>
-<div class = "container-fluid doc-create-container">
+<div class = "row" id = "doc-create-container">
 {{#if session.isAuthenticated}}
-  <form {{action 'createNewDocument' on='submit'}}>
-    {{input id='docName' placeholder='document name' value=docName}}
+  <div class = "col-sm-8" id = "create-btn-container">
+    <form id = "create-doc-form" {{action 'createNewDocument' on='submit'}}>
+      {{input id='docName' placeholder='document name' value=docName}}
+    </form>
+  </div>
+  <div class = "col-sm-4">
     <button type="submit" id = "create-doc-btn">create</button>
     {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
-  </form>
+  </div>
 {{else}}
   <div id = "create-doc-placeholder"></div>
 {{/if}}
@@ -22,40 +26,40 @@
 {{/if}}
 <div class = "row">
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "newest" onclick={{action 'recent'}}>
+    <div class = "filter-item" id = "filter0" onclick={{action 'recent'}}>
       <p class = "filter-text">NEWEST</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "popular" onclick={{action 'popular'}}>
+    <div class = "filter-item" id = "filter1" onclick={{action 'popular'}}>
       <p class = "filter-text">POPULAR</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "remixed" onclick={{action 'forked'}}>
+    <div class = "filter-item" id = "filter2" onclick={{action 'forked'}}>
       <p class = "filter-text">MOST REMIXED</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "editted" onclick={{action 'editted'}}>
+    <div class = "filter-item" id = "filter3" onclick={{action 'editted'}}>
       <p class = "filter-text">MOST WORKED ON</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" id = "updated" onclick={{action 'updated'}}>
+    <div class = "filter-item" id = "filter4" onclick={{action 'updated'}}>
       <p class = "filter-text">UPDATED</p>
     </div>
   </div>
   <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" id = "oldest" onclick={{action 'recent'}}>
+    <div class = "filter-item" id = "filter5" onclick={{action 'recent'}}>
       <p class = "filter-text">OLDEST</p>
     </div>
   </div>
 </div>
 <div class = "row hidden-md hidden-sm hidden-xs">
-  {{#each tags as |tag|}}
+  {{#each tags as |tag index|}}
   <div class = "col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" onclick={{action 'tag' tag._id}}>
+    <div class = "filter-item" id = {{concat 'filter'index}} onclick={{action 'tag' tag._id}}>
       <p class = "filter-text">{{tag._id}}</p>
     </div>
   </div>
