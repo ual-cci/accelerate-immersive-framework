@@ -3,10 +3,7 @@
   border-color: rgba(0,0,0,0);
 }
 
-#code-name-label {
-  color:black;
-  width:100%;
-}
+
 
 .center {
   display: flex;
@@ -286,9 +283,38 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
-.doc-title {
-  padding:4px 4px 4px 4px  !important;
+#doc-title-container {
+  background-color: darkgray;
+  height:50px;
+  overflow: hidden;
+}
+
+#doc-title {
+  padding-bottom:10px;
   margin: 1px 1px 1px 1px;
+  color:black;
+  background-color:transparent;
+  font-family: "muli";
+  float:left;
+  font-size: 100%;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#doc-name-input {
+  background-color:transparent;
+  color:black;
+  font-weight: bold;
+  box-sizing: border-box;
+  border-radius: .25em;
+  font-size: 100%;
+  height:50px;
+  font-family: "muli";
+  width:50vw;
+  position: relative;
+  top: 50%;
+  transform: translateY(50%);
 }
 
 #console {
@@ -428,16 +454,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
   background-color: black;
   color: white;
   border:none;
-}
-
-#doc-name-input {
-  background-color:#777;
-  color:white;
-  font-weight: bold;
-  box-sizing: border-box;
-  border-radius: .25em;
-  font-size: 100%;
-  height:50px;
 }
 
 .uncharted-token-input {

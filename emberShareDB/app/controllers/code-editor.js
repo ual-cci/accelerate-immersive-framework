@@ -82,6 +82,9 @@ export default Controller.extend({
   displayEditor: computed('hideEditor', function() {
     return this.get('hideEditor') != "true";
   }),
+  titleNoName: computed('titleName', function() {
+    return this.get('titleName').split("by")[0];
+  }),
   editLink: computed('model', function() {
     return config.localOrigin + "/code/" + this.get('model').id;
   }),
@@ -331,7 +334,8 @@ export default Controller.extend({
         clearInterval(this.get('loadingInterval'))
         this.set('loadingInterval', null);
       }
-      this.set('titleName', doc.data.name);
+      this.set('titleName', doc.data.name + " by " + doc.data.owner);
+      this.set('titleNoName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
       resolve();
@@ -956,7 +960,8 @@ export default Controller.extend({
     },
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
-      const newName = this.get('titleName');
+      const newName = this.get('titleNoName');
+      this.set('titleName', newName + " by " + this.get('model').data.owner)
       this.get('documentService').updateDoc(this.get('currentDoc').id, 'name', newName)
       .then(()=>this.fetchChildren()
       .then(()=>this.get('sessionAccount').updateOwnedDocuments()));
