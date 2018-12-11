@@ -1,5 +1,6 @@
 <div class="uncharted-form-control">
-    <div class="uncharted-token-container">
+    <div class="uncharted-token-main-container">
+      <div class="uncharted-token-container">
         {{#each tokens as |token index|}}
             {{component tokenComponent
             token=token
@@ -16,6 +17,7 @@
           icon="glyphicon glyphicon-plus"
           onClick=(action 'toggleInput')}}
         {{/bs-button}}
+        </div>
         {{#if showInput}}
         {{input type='text'
             class='uncharted-token-input'

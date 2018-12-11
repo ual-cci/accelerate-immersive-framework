@@ -1237,6 +1237,24 @@ export default Controller.extend({
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
+    mouseoverCodeTransport(e)
+    {
+      console.log("mouseover")
+      const transport = document.getElementById("code-transport-container")
+      const trackingArea = document.getElementById("code-transport-tracking-area")
+      //transport.style["pointer-events"] = "auto"
+      trackingArea.style["pointer-events"] = "none"
+      transport.style.display = "block"
+    },
+    mouseoutCodeTransport(e)
+    {
+      console.log("mouseout")
+      const transport = document.getElementById("code-transport-container")
+      const trackingArea = document.getElementById("code-transport-tracking-area")
+      //transport.style["pointer-events"] = "none"
+      trackingArea.style["pointer-events"] = "auto"
+      transport.style.display = "none"
+    },
 
     //OPERATIONS ON CODE
     renderCode() {

@@ -6,6 +6,20 @@
     {{else}}
       {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
+    <div id = "transport-container">
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+        <span class="tooltiptext">Render Code</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
+        <span class="tooltiptext">Pause Code</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
+        <span class="tooltiptext">Enter Fullscreen</span>
+      </div>
+    </div>
     <h4><span>{{feedbackMessage}}</span></h4>
   {{/if}}
   </div>
@@ -24,18 +38,6 @@
       <div class="tooltip">
         {{#bs-button active=notCollapsed icon="glyphicon glyphicon-cog" onClick=(action "toggleCollapsed")}}{{/bs-button}}
         <span class="tooltiptext">Settings</span>
-      </div>
-      <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
-        <span class="tooltiptext">Render Code</span>
-      </div>
-      <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
-        <span class="tooltiptext">Pause Code</span>
-      </div>
-      <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
-        <span class="tooltiptext">Enter Fullscreen</span>
       </div>
       {{#if canEditDoc}}
       <div class="tooltip">
@@ -101,15 +103,7 @@
           {{/if}}
           <div>
           {{#if showOpPlayer}}
-          <div>
-            <h5>Playback your coding</h5>
-            {{ops-player
-              onSkip = (action 'skipOp')
-              onPlay = (action 'playOps')
-              onRewind = (action 'rewindOps')
-              onPause = (action 'pauseOps')
-            }}
-          </div>
+
           {{/if}}
           {{#if showShare}}
             <label for="edit-link">Editable Link</label>
@@ -120,16 +114,6 @@
             {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
           {{/if}}
           {{#if showCodeOptions}}
-            {{#bs-button
-            icon="glyphicon glyphicon-zoom-in"
-            onClick=(action "zoomIn")}}
-            {{/bs-button}}
-            {{#bs-button
-            icon="glyphicon glyphicon-zoom-out"
-            onClick=(action "zoomOut")}}
-            {{/bs-button}}
-          {{/if}}
-          {{#if showTokens}}
 
           {{/if}}
           {{#if allowDocDelete}}
@@ -202,6 +186,28 @@
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
       </div>
       <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
+        <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
+          <div id = "playback-container">
+            <h5>Playback your coding</h5>
+            {{ops-player
+              onSkip = (action 'skipOp')
+              onPlay = (action 'playOps')
+              onRewind = (action 'rewindOps')
+              onPause = (action 'pauseOps')
+            }}
+          </div>
+            <div id = "zoom-container">
+            {{#bs-button
+            icon="glyphicon glyphicon-zoom-in"
+            onClick=(action "zoomIn")}}
+            {{/bs-button}}
+            {{#bs-button
+            icon="glyphicon glyphicon-zoom-out"
+            onClick=(action "zoomOut")}}
+            {{/bs-button}}
+          </div>
+        </div>
         {{#if isShowingCode}}
           {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
         {{else}}

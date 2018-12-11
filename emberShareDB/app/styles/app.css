@@ -215,15 +215,21 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .tab-btn:hover {
-  background-color: transparent;
-  border-color: white;
-  border-width: thin;
+  background-color: transparent ! important;
+  border:none ! important;
+  outline: none ! important;
 }
 
-.tab-btn:focus:active {
-  background-color: transparent;
-  border-color: white;
-  border-width: thin;
+.tab-btn:focus {
+  background-color: transparent ! important;
+  border:none ! important;
+  outline: none ! important;
+}
+
+.tab-btn:active {
+  background-color: transparent ! important;
+  border:none ! important;
+  outline: none ! important;
 }
 
 .tab-item {
@@ -265,10 +271,12 @@ input[id="docName"]:-ms-input-placeholder {
   float:right;
   width:30%;
   overflow-x:auto;
-  overflow-y: hidden;
+  overflow-y:hidden;
 }
 
 .editor-container {
+  position:relative;
+  display: block;
 }
 
 .main-site-container {
@@ -315,28 +323,63 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+#playback-container {
+  float:left;
+  width:18vw;
+  height:100%;
+  transform: translateY(-50%);
+}
+
+#zoom-container {
+  float:right;
+  width:auto;
+  height:100%;
+  transform: translateY(20%);
+}
+
+#code-transport-container {
+  top:0px;
+  width: 100%;
+  height: 50px;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 100;
+  display:none;
+}
+
+#code-transport-tracking-area {
+  position: absolute;
+  top:0px;
+  width: 100%;
+  height: 50px;
+  background-color: transparent;
+  z-index: 100;
+}
+
 #doc-title-container {
   background-color: darkgray;
   height:80px;
-  overflow: hidden;
 }
 
 #doc-title {
-  padding-bottom:10px;
-  margin: 1px 1px 1px 1px;
   color:black;
   background-color:transparent;
   font-family: "muli";
   float:left;
+  position: absolute;
   font-size: 20px;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  width:50vw;
+  height:50px;
+  text-align: left;
+  transform: translateY(50%);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #doc-name-input {
   background-color:transparent;
   color:black;
+  position: absolute;
+  float:left;
   font-weight: bold;
   box-sizing: border-box;
   border-radius: .25em;
@@ -344,8 +387,13 @@ input[id="docName"]:-ms-input-placeholder {
   height:50px;
   font-family: "muli";
   width:50vw;
+  transform: translateY(50%);
+}
+
+#transport-container
+{
+  float:right;
   position: relative;
-  top: 50%;
   transform: translateY(50%);
 }
 
@@ -366,10 +414,11 @@ input[id="docName"]:-ms-input-placeholder {
 
 .uncharted-token-input {
   padding-left:10px;
-  margin: 10px 10px 0px 0px;
+  margin: 10px 10px 10px 10px;
   border-color: white;
-  width:100%;
+  width:90%;
   background-color: white;
+  position:relative;
 }
 
 .uncharted-token-label:hover{
@@ -396,10 +445,13 @@ input[id="docName"]:-ms-input-placeholder {
   margin-bottom: 10px;
 }
 
+.uncharted-token-main-container {
+  background-color: lightgray;
+  height:auto;
+}
+
 .uncharted-token-container {
   background-color: lightgray;
-  height:50px;
-  margin-bottom: 10px;
 }
 
 #add-tag.add-file-button
@@ -532,7 +584,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .settings {
-  display:inline;
+  position:relative;
 }
 
 .tooltip {
