@@ -12,7 +12,11 @@
             mouseDown=(action 'selectToken' token index)
             doubleClick=(action 'editToken' token)}}
         {{/each}}
-        {{#if editable}}
+        {{#bs-button class = "add-file-button" id = "add-tag"
+          icon="glyphicon glyphicon-plus"
+          onClick=(action 'toggleInput')}}
+        {{/bs-button}}
+        {{#if showInput}}
         {{input type='text'
             class='uncharted-token-input'
             id=tokenfieldId

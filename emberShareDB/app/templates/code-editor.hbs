@@ -9,6 +9,15 @@
     <h4><span>{{feedbackMessage}}</span></h4>
   {{/if}}
   </div>
+  <div>
+    {{tokenfield-input
+      tokens=model.tags
+      allowDuplicates=false
+      placeholder="Enter Tags"
+      editable=canEditDoc
+      tokensChanged=(action 'tagsChanged')
+    }}
+    </div>
   <div class = "editor-container">
     {{#if displayEditor}}
     <div class="settings">
@@ -121,15 +130,7 @@
             {{/bs-button}}
           {{/if}}
           {{#if showTokens}}
-          <div>
-            {{tokenfield-input
-              tokens=model.tags
-              allowDuplicates=false
-              placeholder="Enter Tags"
-              editable=canEditDoc
-              tokensChanged=(action 'tagsChanged')
-            }}
-            </div>
+
           {{/if}}
           {{#if allowDocDelete}}
             <div>

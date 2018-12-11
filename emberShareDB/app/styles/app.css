@@ -264,7 +264,7 @@ input[id="docName"]:-ms-input-placeholder {
   max-height: 55px;
   float:right;
   width:30%;
-  overflow-x:scroll;
+  overflow-x:auto;
   overflow-y: hidden;
 }
 
@@ -317,7 +317,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #doc-title-container {
   background-color: darkgray;
-  height:50px;
+  height:80px;
   overflow: hidden;
 }
 
@@ -328,7 +328,7 @@ input[id="docName"]:-ms-input-placeholder {
   background-color:transparent;
   font-family: "muli";
   float:left;
-  font-size: 100%;
+  font-size: 20px;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
@@ -340,7 +340,7 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
   box-sizing: border-box;
   border-radius: .25em;
-  font-size: 100%;
+  font-size: 20px;
   height:50px;
   font-family: "muli";
   width:50vw;
@@ -359,24 +359,54 @@ input[id="docName"]:-ms-input-placeholder {
   padding:4px 4px 4px 4px;
   border-radius: 2px;
   border-width: 1px;
-  border-color: black;
+  border-color: darkgray;
   background-color: lightgray;
   margin: 10px 10px 0px 0px;
+}
+
+.uncharted-token-input {
+  padding-left:10px;
+  margin: 10px 10px 0px 0px;
+  border-color: white;
+  width:100%;
+  background-color: white;
+}
+
+.uncharted-token-label:hover{
+  background-color: white;
+}
+
+.inline-view {
+  display: inline;
+}
+
+.uncharted-token-label:focus{
+  background-color: blue;
 }
 
 .uncharted-token-label {
   float:left;
   padding:4px 4px 4px 4px;
-  border-radius: 2px;
+  border-radius: 6px;
+  border-style: solid;
   border-width: 1px;
-  border-color: black;
+  border-color: darkgray;
   background-color: lightgray;
-  margin: 10px 10px 0px 0px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .uncharted-token-container {
-  margin: 10px 10px 10px 10px;
-  background-color: white;
+  background-color: lightgray;
+  height:50px;
+  margin-bottom: 10px;
+}
+
+#add-tag.add-file-button
+{
+  background-color: lightgray;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .preview-image {
@@ -488,24 +518,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border:none;
 }
 
-.uncharted-token-input {
-  padding-left:10px;
-  margin: 10px 10px 0px 0px;
-  border-color: white;
-  width:100%
-}
 
-.uncharted-token-label:hover{
-  background-color: yellow;
-}
-
-.inline-view {
-  display: inline;
-}
-
-.uncharted-token-label:focus{
-  background-color: blue;
-}
 
 .container {
   background-color:rgb(255,255,255);
