@@ -4,6 +4,7 @@
     <th>
       {{tab-item name=parent.name
         id=parent.id
+        tabIndex = -1
         onSelect = onSelect
         onDelete = onDelete
         canDelete = false}}
@@ -12,6 +13,7 @@
     <th>
       {{tab-item name=tab.name
         id=tab.id
+        tabIndex = index
         onSelect = onSelect
         onDelete = onDelete
         canDelete = tab.isSelected

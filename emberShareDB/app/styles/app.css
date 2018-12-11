@@ -189,52 +189,82 @@ input[id="docName"]:-ms-input-placeholder {
   pointer-events: auto;
 }
 
-#add-file-button {
+.add-file-button {
   width: 50px;
   padding:1px 1px 1px 1px;
-  border-radius: 5px;
-  border-color: lightgray;
-  border-width: thin;
-  border-style: solid;
+  border-style: none!important;
   height: 35px;
   display: inline-block;
   position:relative;
+}
+
+#tab0.tab-item {
+  background-color: #F54B32;
+}
+
+#tab1.tab-item {
+  background-color: #07802A;
+}
+
+#tab2.tab-item {
+  background-color: #3929B8;
+}
+
+#tab3.tab-item {
+  background-color: #FFCC02;
+}
+
+.tab-btn:hover {
+  background-color: transparent;
+  border-color: white;
+  border-width: thin;
+}
+
+.tab-btn:focus:active {
+  background-color: transparent;
+  border-color: white;
+  border-width: thin;
 }
 
 .tab-item {
   padding:1px 1px 1px 1px;
-  border-radius: 5px;
-  border-color: lightgray;
-  border-width: thin;
-  border-style: solid;
-  height: 35px;
-  display: inline-block;
-  position:relative;
+  border-style:none;
+  height:35px;
+  width:130px;
 }
 
 .tab-btn {
+  display:inline;
   border-style: none;
-  position:relative;
-  float:left;
-  height:30px ! important;
+  font-family: "muli";
+  width:90px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height:100%;
   text-align: center;
   background-color: rgba(0,0,0,0);
 }
 
 .tab-delete-btn {
+  float:right;
+  display:inline;
   border-style: none;
   width:30px;
-  height:30px;
-  position:relative;
   text-align: center;
-  background-color: rgba(0,0,0,0);
+  background-color: transparent;
+}
+
+.tab-delete-btn:hover {
+  background-color: transparent;
+  border-color: white;
+  border-width: thin;
 }
 
 #project-tabs {
   max-height: 55px;
   float:right;
   width:30%;
-  overflow-x: auto;
+  overflow-x:scroll;
   overflow-y: hidden;
 }
 
