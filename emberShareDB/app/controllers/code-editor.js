@@ -228,6 +228,7 @@ export default Controller.extend({
   },
   selectRootDoc: function() {
     this.newDocSelected(this.get('model').id).then(()=> {
+      this.updateTabbarLocation();
       this.get('cs').log("loaded root doc, preloading assets");
       this.fetchChildren().then(()=> {
         this.preloadAssets().then(()=> {
@@ -512,6 +513,7 @@ export default Controller.extend({
           }
           this.showFeedback(text);
         }, 500);
+        this.set('preloadingInterval', interval);
         this.get('assetService').preloadAssets(model.data.assets)
         .then(()=>{
           this.showFeedback("");
@@ -735,7 +737,7 @@ export default Controller.extend({
       }
     }
   },
-  update() {
+  update:function() {
     this.set('consoleOutput', this.get('cs').output);
     var textarea = document.getElementById('console');
     textarea.scrollTop = textarea.scrollHeight;
@@ -903,6 +905,11 @@ export default Controller.extend({
     {
       $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
     }
+  },
+  updateTabbarLocation: function() {
+    const aceW = this.get('aceW');
+    let tab = document.getElementById('project-tabs');
+    tab.style.width = aceW + "px"
   },
   actions: {
     editorReady(editor) {
@@ -1154,6 +1161,8 @@ export default Controller.extend({
     cleanUp() {
       this.get('cs').log('cleaning up');
       const fn = () => {
+        clearInterval(this.get('preloadingInterval'))
+        this.showFeedback("");
         this.set('renderedSource',"");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");

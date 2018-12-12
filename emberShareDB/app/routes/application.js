@@ -25,7 +25,9 @@ export default Route.extend(ApplicationRouteMixin, {
       this.get('cs').log('loading current user');
       this.get('sessionAccount').loadCurrentUser()
       .then(()=> {
-        this.get('sessionAccount').getUserFromName().then(resolve())
+        this.get('sessionAccount').getUserFromName().then(()=> {
+          this.get('sessionAccount').updateOwnedDocuments().then(resolve())
+        });
       })
       .catch(() => {
         this.get('cs').log('no current user');

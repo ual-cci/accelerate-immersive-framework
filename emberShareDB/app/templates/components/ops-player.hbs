@@ -1,16 +1,16 @@
 <div class="tooltip">
   <span class="tooltiptext">Rewind to Beginning</span>
-  {{#bs-button class = "playback-button" icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
+  {{#bs-button class = "clear-btn " icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
 </div>
 <div class="tooltip">
-  {{#bs-button class = "playback-button" icon="glyphicon glyphicon-backward" onClick=(action 'prev')}}{{/bs-button}}
+  {{#bs-button class = "clear-btn " icon="glyphicon glyphicon-backward" onClick=(action 'prev')}}{{/bs-button}}
   <span class="tooltiptext">Step Back</span>
 </div>
 <div class="tooltip">
-  {{#bs-button class = "playback-button" id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'playOrPause')}}{{/bs-button}}
+  {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'playOrPause')}}{{/bs-button}}
   <span class="tooltiptext">Play to End / Pause</span>
 </div>
 <div class="tooltip">
-  {{#bs-button class = "playback-button" icon="glyphicon glyphicon-forward" onClick=(action 'next')}}{{/bs-button}}
+  {{#bs-button class = "clear-btn " icon="glyphicon glyphicon-forward" onClick=(action 'next')}}{{/bs-button}}
   <span class="tooltiptext">Step Forwards</span>
 </div>
