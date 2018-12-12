@@ -1124,6 +1124,13 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleShowShare() {
+      this.get('modalsManager')
+        .alert({title: this.get('model').data.name,
+                bodyComponent: 'share-modal',
+                editLink:this.get('editLink'),
+                embedLink:this.get('embedLink'),
+                displayLink:this.get('displayLink')
+              });
       this.toggleProperty('showShare');
     },
     toggleShowAssets() {

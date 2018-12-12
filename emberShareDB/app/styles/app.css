@@ -325,7 +325,27 @@ input[id="docName"]:-ms-input-placeholder {
   overflow: visible;
 }
 
-.playback-button
+.transport-btn
+{
+  width:40px !important;
+  height:40px !important;
+  padding:0;
+  margin:0;
+}
+
+.glyphicon.glyphicon-share,
+.glyphicon.glyphicon-remove,
+.glyphicon.glyphicon-file,
+.glyphicon.glyphicon-download-alt,
+.glyphicon.glyphicon-fullscreen {
+    font-size: 25px;
+}
+
+#code-play-btn:first-child {
+  font-size: 25px;
+}
+
+.clear-btn
 {
   width:40px;
   border:none;
@@ -347,7 +367,7 @@ input[id="docName"]:-ms-input-placeholder {
   width: 100%;
   height: 50px;
   background-color: black;
-  z-index: 100;
+  z-index: 1;
   display:none;
   overflow: visible;
 }
@@ -358,7 +378,7 @@ input[id="docName"]:-ms-input-placeholder {
   width: 100%;
   height: 50px;
   background-color: transparent;
-  z-index: 100;
+  z-index: 1;
 }
 
 #doc-title-container {
@@ -381,6 +401,34 @@ input[id="docName"]:-ms-input-placeholder {
   text-overflow: ellipsis;
 }
 
+.modal-dialog {
+  background-color: #3929B8;
+  color:white;
+  z-index: 2000;
+}
+
+.modal-content {
+  background-color: #3929B8;
+  color:white;
+  z-index: 2000;
+}
+
+#share-modal {
+  background-color: #3929B8;
+  color:white;
+  font-family: 'muli';
+  z-index: 2000;
+}
+
+.link-input {
+  color:black;
+  font-family: 'muli';
+}
+
+.btn-primary {
+  background-color: transparent;
+  border:none;
+}
 
 #doc-name-input {
   background-color:transparent;
@@ -404,9 +452,10 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #render-doc {
+  display:inline-block;
   position: absolute;
-  left:0vw;
   top:20px;
+  right:235px;
   width:150px;
   height:100%;
 }
@@ -417,7 +466,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #transport-container {
   position:absolute;
-  right:0;
+  right:5px;
   top: 0%;
   height: 80px;
   margin-top: 20px;
@@ -686,6 +735,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
   position: relative;
   display: inline-block;
   opacity: 1 !important;
+  z-index:500!important;
 }
 
 .tooltiptext {
@@ -702,7 +752,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
   left: 50%;
   margin-left: -60px;
   transition: opacity 0.3s;
-  z-index: 200;
 }
 
 .tooltiptext::after {

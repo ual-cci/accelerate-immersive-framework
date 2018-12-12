@@ -8,8 +8,8 @@
       {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
     <div id = "doc-controls-container">
-        <div id = "render-doc">
-        {{#if session.isAuthenticated}}
+      <div id = "render-doc">
+      {{#if session.isAuthenticated}}
         <div class = "fork-flag">
           <div class="tooltip">
             {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
@@ -19,29 +19,33 @@
             {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
             <span class="tooltiptext">Report as Inappropriate</span>
           </div>
+        </div>
+      {{/if}}
+        {{#if canEditDoc}}
+          <div class="tooltip">
+            <label for="autoRenderCheckbox">AUTO RENDER</label>
+            {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+            <span class="tooltiptext">Render Code Whilst Typing</span>
           </div>
         {{/if}}
-          {{#if canEditDoc}}
-            <div class="tooltip">
-              <label for="autoRenderCheckbox">AUTO RENDER</label>
-              {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-              <span class="tooltiptext">Render Code Whilst Typing</span>
-            </div>
-          {{/if}}
-          </div>
+        </div>
           <div id = "transport-container">
             {{#if isOwner}}
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-remove" class = "playback-button" onClick=(action "deleteDoc")}}{{/bs-button}}
+              {{#bs-button icon="glyphicon glyphicon-remove" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
               <span class="tooltiptext">Delete Document</span>
             </div>
             <div class="tooltip">
-              {{#bs-button class = "playback-button" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+              {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
               <span class="tooltiptext">Add Files to Use</span>
             </div>
             {{/if}}
+            <div class="tooltip">
+              {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
+              <span class="tooltiptext">Share links</span>
+            </div>
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "playback-button" onClick=(action "playOrPause")}}{{/bs-button}}
+              {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
               <span class="tooltiptext">Render Code</span>
             </div>
             <div class="tooltip col-2">
@@ -49,7 +53,7 @@
               <span class="tooltiptext">Download Project as Zip</span>
             </div>
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-fullscreen" class = "playback-button" onClick=(action "enterFullscreen")}}{{/bs-button}}
+              {{#bs-button icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
               <span class="tooltiptext">Enter Fullscreen</span>
             </div>
           </div>
@@ -74,19 +78,7 @@
             <label for="readOnlyCheckbox">Read Only?</label>
             {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
             <span class="tooltiptext">WARNING! Other users can edit your code</span>
-          </div>
-
-
-          <div>
-          {{#if showShare}}
-            <label for="edit-link">Editable Link</label>
-            {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}
-            <label for="display-link">Just Display Link</label>
-            {{input value=displayLink type="form-control" id="display-link" name="display-link"}}
-            <label for="embed-link">Embed Link</label>
-            {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
-          {{/if}}
-        </div> -->
+          </div>-->
     {{#if showAssets}}
       <div class = "file-upload-container">
         <table>
@@ -96,8 +88,8 @@
             <th>
               <div class = "asset-container">
                 <p class = "file-text file-name">{{asset.name}}</p>
-                {{#bs-button class = "playback-button delete-asset-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
-                {{#bs-button class = "playback-button preview-asset-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
+                {{#bs-button class = "clear-btn delete-asset-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
+                {{#bs-button class = "clear-btn preview-asset-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
               </div>
             </th>
             {{/each}}
@@ -142,12 +134,12 @@
           </div>
             <div id = "zoom-container">
             {{#bs-button
-              class = "playback-button"
+              class = "clear-btn"
             icon="glyphicon glyphicon-zoom-in"
             onClick=(action "zoomIn")}}
             {{/bs-button}}
             {{#bs-button
-              class = "playback-button"
+              class = "clear-btn"
             icon="glyphicon glyphicon-zoom-out"
             onClick=(action "zoomOut")}}
             {{/bs-button}}
