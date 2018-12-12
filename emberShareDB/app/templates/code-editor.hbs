@@ -1,4 +1,5 @@
 <div class = "container-fluid">
+  <h4><span>{{feedbackMessage}}</span></h4>
   <div id = "doc-title-container">
   {{#if showName}}
     {{#if isNotEdittingDocName}}
@@ -8,7 +9,6 @@
     {{/if}}
     <div id = "doc-controls-container">
         <div id = "render-doc">
-
         {{#if session.isAuthenticated}}
         <div class = "fork-flag">
           <div class="tooltip">
@@ -54,7 +54,6 @@
             </div>
           </div>
     </div>
-    <h4><span>{{feedbackMessage}}</span></h4>
   {{/if}}
   </div>
   <div>
@@ -97,25 +96,14 @@
             <th>
               <div class = "asset-container">
                 <p class = "file-text file-name">{{asset.name}}</p>
-                {{#bs-button id = "delete-asset-btn" class = "playback-button" icon="glyphicon glyphicon-remove" onClick=(action "toggleAllowAssetDelete" asset.fileId)}}{{/bs-button}}
-                {{#bs-button id = "preview-asset-btn" class = "playback-button" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
+                {{#bs-button class = "playback-button delete-asset-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
+                {{#bs-button class = "playback-button preview-asset-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
               </div>
             </th>
             {{/each}}
           </div>
           </tr>
         </table>
-        {{#if allowAssetDelete}}
-          <div>
-            Are you sure you want to delete this file?
-            {{#bs-button class = "btn-confirm" type="success" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset")}}
-              Yes
-            {{/bs-button}}
-            {{#bs-button class = "btn-confirm" type="danger" onClick=(action "toggleAllowAssetDelete")}}
-              No
-            {{/bs-button}}
-          </div>
-        {{/if}}
         {{#if canEditDoc}}
         <div id = "asset-progress"></div>
         <div class = "file-upload">

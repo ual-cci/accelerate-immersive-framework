@@ -16,10 +16,6 @@
   font-family: 'muli';
 }
 
-.btn {
-  background-color: transparent;
-}
-
 .navbar-right {
   margin:10px 10px 10px 10px;
 }
@@ -138,6 +134,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .p {
   font-family: 'muli'!important;
+  color:white;
 }
 
 .html {
@@ -646,12 +643,18 @@ input[id="searchTerm"]:-ms-input-placeholder {
   width:200px;
 }
 
-#preview-asset-btn {
+#asset-progress {
+  display: none;
+  background-color: yellow;
+  height:15px;
+}
+
+.preview-asset-btn {
   position: relative;
   display:inline;
 }
 
-#delete-asset-btn {
+.delete-asset-btn {
   display:inline;
   position: relative;
 }
@@ -715,10 +718,4 @@ input[id="searchTerm"]:-ms-input-placeholder {
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
-}
-
-#asset-progress {
-  display: none;
-  background-color: yellow;
-  height:15px;
 }
