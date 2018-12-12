@@ -16,8 +16,8 @@
   font-family: 'muli';
 }
 
-.btn-confirm {
-  margin:10px 10px 10px 10px;
+.btn {
+  background-color: transparent;
 }
 
 .navbar-right {
@@ -159,11 +159,6 @@ input[id="docName"]:-ms-input-placeholder {
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
-}
-
-.file-upload {
-  padding:4px 4px 4px 4px;
-  margin: 10px 10px 10px 10px;
 }
 
 .hide-code-btn {
@@ -381,13 +376,14 @@ input[id="docName"]:-ms-input-placeholder {
   float:left;
   position: absolute;
   font-size: 20px;
-  width:50vw;
+  width:25vw;
   height:50px;
   text-align: left;
   transform: translateY(50%);
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 #doc-name-input {
   background-color:transparent;
@@ -400,15 +396,58 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 20px;
   height:50px;
   font-family: "muli";
-  width:50vw;
+  width:25vw;
   transform: translateY(50%);
 }
 
-#transport-container
+#autoRenderCheckbox
 {
+  font-family: 'muli';
+  color:white;
+}
+
+#render-doc {
+  position: absolute;
+  left:0vw;
+  top:20px;
+  width:150px;
+  height:100%;
+}
+
+#fork-flag {
+
+}
+
+#transport-container {
+  position:absolute;
+  right:0;
+  top: 0%;
+  height: 80px;
+  margin-top: 20px;
+}
+
+#doc-controls-container {
   float:right;
+  display:inline;
   position: relative;
-  transform: translateY(50%);
+  width:40vw;
+  display:table;
+}
+
+.clear-text-btn {
+  background-color: transparent;
+  border-style: solid;
+  border-color: white;
+  border-radius: 4px;
+  color:white;
+  font-family: 'muli';
+  height:20px;
+  font-size: 12px;
+  padding-top: 0px;
+  margin-bottom: 10px;
+  padding-left:2px;
+  padding-right:2px;
+  width:50px;
 }
 
 #console {
@@ -455,8 +494,9 @@ input[id="docName"]:-ms-input-placeholder {
   border-width: 1px;
   border-color: darkgray;
   background-color: lightgray;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 2px;
+  margin-left:3px;
+  margin-bottom: 2px;
 }
 
 .uncharted-token-main-container {
@@ -471,8 +511,8 @@ input[id="docName"]:-ms-input-placeholder {
 #add-tag.add-file-button
 {
   background-color: lightgray;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .preview-image {
@@ -584,21 +624,59 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border:none;
 }
 
-
-
 .container {
   background-color:rgb(255,255,255);
 }
 
+.file-name {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width:100px;
+  display:inline;
+}
+
+.file-upload {
+  background-color: transparent;
+  color:white;
+  padding:4px 4px 4px 4px;
+  margin: 10px 10px 10px 10px;
+}
+
+.asset-container {
+  width:200px;
+}
+
+#preview-asset-btn {
+  position: relative;
+  display:inline;
+}
+
+#delete-asset-btn {
+  display:inline;
+  position: relative;
+}
+
+.file-text {
+  font-family: 'muli';
+  color:white;
+  padding-left:10px;
+}
+
+#uploaded-assets-container {
+  overflow-x:auto;
+  overflow-y:hidden;
+  max-height:30px;
+  width:40vw;
+}
+
 .file-upload-container {
-  width:100%;
+  width:40vw;
+  background-color: #3929B8;
   border-radius: 2;
   border-width: 5;
   border-color: black;
-}
-
-.settings {
-  position:relative;
+  float:right;
+  clear:right;
 }
 
 .tooltip {

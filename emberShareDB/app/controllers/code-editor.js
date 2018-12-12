@@ -48,9 +48,6 @@ export default Controller.extend({
   showShare:false,
   showAssets:false,
   showPreview:false,
-  showTokens:false,
-  showOpPlayer:false,
-  showCodeOptions:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -108,7 +105,6 @@ export default Controller.extend({
   },
   initUI: function() {
     this.set('collapsed', true);
-    this.collapseAllSubMenus();
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     if(embed)
@@ -117,16 +113,6 @@ export default Controller.extend({
       this.set('showName', !embed);
     }
     this.get('cs').observers.push(this);
-  },
-  collapseAllSubMenus: function() {
-    this.set('allowDocDelete', false);
-    this.set('allowAssetDelete', false);
-    this.set('showAssets', false);
-    this.set('showPreview', false);
-    this.set('showShare', false);
-    this.set('showTokens', false);
-    this.set('showOpPlayer', false);
-    this.set('showCodeOptions', false);
   },
   initAceEditor: function() {
     const editor = this.get('editor');
@@ -784,13 +770,15 @@ export default Controller.extend({
   },
   deleteCurrentDocument: function() {
     let model = this.get('model');
-    this.get('cs').log("deleting root doc");
-    this.get('documentService').deleteDoc(model.id).then(() => {
-      this.get('cs').log("completed deleting root doc and all children + assets");
-      this.transitionToRoute('application');
-    }).catch((err) => {
-      this.get('cs').log("error deleting doc", err);
-    });
+    if (confirm('Are you sure you want to delete?')) {
+      this.get('cs').log("deleting root doc");
+      this.get('documentService').deleteDoc(model.id).then(() => {
+        this.get('cs').log("completed deleting root doc and all children + assets");
+        this.transitionToRoute('application');
+      }).catch((err) => {
+        this.get('cs').log("error deleting doc", err);
+      });
+    }
   },
   skipOp:function(prev, rewind = false) {
     const editor = this.get('editor');
@@ -1133,13 +1121,6 @@ export default Controller.extend({
         });
       }
     },
-    toggleAllowDocDelete() {
-      this.collapseAllSubMenus();
-      if(this.get('canEditDoc'))
-      {
-        this.toggleProperty('allowDocDelete');
-      }
-    },
     toggleAllowAssetDelete(asset) {
       if(this.get('canEditDoc'))
       {
@@ -1147,31 +1128,15 @@ export default Controller.extend({
         this.toggleProperty('allowAssetDelete');
       }
     },
-    toggleCollapsed() {
-      this.toggleProperty('collapsed');
-    },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
     toggleShowShare() {
-      this.collapseAllSubMenus();
       this.toggleProperty('showShare');
     },
-    toggleShowCodeOptions() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showCodeOptions');
-    },
-    toggleShowTokens() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showTokens');
-    },
-    toggleShowOpPlayer() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showOpPlayer');
-    },
     toggleShowAssets() {
-      this.collapseAllSubMenus();
       this.toggleProperty('showAssets');
+      console.log(this.get('showAssets'))
     },
     enterFullscreen() {
       var target = document.getElementById("output-iframe");
@@ -1253,19 +1218,15 @@ export default Controller.extend({
     },
     mouseoverCodeTransport(e)
     {
-      console.log("mouseover")
       const transport = document.getElementById("code-transport-container")
       const trackingArea = document.getElementById("code-transport-tracking-area")
-      //transport.style["pointer-events"] = "auto"
       trackingArea.style["pointer-events"] = "none"
       transport.style.display = "block"
     },
     mouseoutCodeTransport(e)
     {
-      console.log("mouseout")
       const transport = document.getElementById("code-transport-container")
       const trackingArea = document.getElementById("code-transport-tracking-area")
-      //transport.style["pointer-events"] = "none"
       trackingArea.style["pointer-events"] = "auto"
       transport.style.display = "none"
     },
