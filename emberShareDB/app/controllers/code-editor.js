@@ -69,6 +69,7 @@ export default Controller.extend({
   consoleOutput:"",
   tabs:[],
   feedbackTimer:null,
+  doPlay:true,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
@@ -247,10 +248,12 @@ export default Controller.extend({
       this.get('cs').log("loaded root doc, preloading assets");
       this.fetchChildren().then(()=> {
         this.preloadAssets().then(()=> {
-          if(this.doPlay())
+          if(this.doPlayOnLoad())
           {
             this.updateIFrame();
           }
+          this.set('doPlay',!this.doPlayOnLoad());
+          this.updatePlayButton();
         });
       });
     });
@@ -495,7 +498,7 @@ export default Controller.extend({
     }
     editor.setFontSize(this.get('fontSize'));
   },
-  doPlay: function() {
+  doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('embed') == "true";
     const displayEditor = this.get('displayEditor');
@@ -905,6 +908,17 @@ export default Controller.extend({
         };
     })();
   },
+  updatePlayButton: function() {
+    let button = document.getElementById("code-play-btn");
+    if(!this.get('doPlay'))
+    {
+      $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+    }
+    else
+    {
+      $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
+    }
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
@@ -1257,6 +1271,18 @@ export default Controller.extend({
     },
 
     //OPERATIONS ON CODE
+    playOrPause() {
+      if(this.get('doPlay'))
+      {
+        this.updateIFrame();
+      }
+      else
+      {
+        this.set('renderedSource', "");
+      }
+      this.toggleProperty('doPlay')
+      this.updatePlayButton();
+    },
     renderCode() {
       this.updateIFrame();
     },

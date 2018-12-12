@@ -8,15 +8,11 @@
     {{/if}}
     <div id = "transport-container">
       <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-play" onClick=(action "renderCode")}}{{/bs-button}}
+        {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "playback-button" onClick=(action "playOrPause")}}{{/bs-button}}
         <span class="tooltiptext">Render Code</span>
       </div>
       <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-pause" onClick=(action "pauseCode")}}{{/bs-button}}
-        <span class="tooltiptext">Pause Code</span>
-      </div>
-      <div class="tooltip">
-        {{#bs-button icon="glyphicon glyphicon-fullscreen" onClick=(action "enterFullscreen")}}{{/bs-button}}
+        {{#bs-button icon="glyphicon glyphicon-fullscreen" class = "playback-button" onClick=(action "enterFullscreen")}}{{/bs-button}}
         <span class="tooltiptext">Enter Fullscreen</span>
       </div>
     </div>
@@ -102,9 +98,6 @@
             {{/bs-button}}
           {{/if}}
           <div>
-          {{#if showOpPlayer}}
-
-          {{/if}}
           {{#if showShare}}
             <label for="edit-link">Editable Link</label>
             {{input value=editLink type="form-control" id="edit-link" name="edit-link"}}
@@ -112,9 +105,6 @@
             {{input value=displayLink type="form-control" id="display-link" name="display-link"}}
             <label for="embed-link">Embed Link</label>
             {{input value=embedLink type="form-control" id="embed-link" name="embed-link"}}
-          {{/if}}
-          {{#if showCodeOptions}}
-
           {{/if}}
           {{#if allowDocDelete}}
             <div>
@@ -199,10 +189,12 @@
           </div>
             <div id = "zoom-container">
             {{#bs-button
+              class = "playback-button"
             icon="glyphicon glyphicon-zoom-in"
             onClick=(action "zoomIn")}}
             {{/bs-button}}
             {{#bs-button
+              class = "playback-button"
             icon="glyphicon glyphicon-zoom-out"
             onClick=(action "zoomOut")}}
             {{/bs-button}}
