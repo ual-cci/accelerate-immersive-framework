@@ -1,6 +1,9 @@
 <div class = "container-fluid">
   <h4><span>{{feedbackMessage}}</span></h4>
+  {{#if embed}}
+  {{else}}
   <div id = "doc-title-container">
+
   {{#if showName}}
     {{#if isNotEdittingDocName}}
       <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
@@ -79,6 +82,7 @@
             {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
             <span class="tooltiptext">WARNING! Other users can edit your code</span>
           </div>-->
+    {{/if}}
     {{#if showAssets}}
       <div class = "file-upload-container">
         <table>
@@ -117,10 +121,13 @@
         onCreate = (action 'newTab')}}
     {{/if}}
     <div id = "main-code-container">
+      {{#if displayEditor}}
       <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+      {{/if}}
       <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
       </div>
+      {{#if displayEditor}}
       <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
@@ -164,6 +171,7 @@
             suggestCompletions = (action 'suggestCompletions')
           }}
         </div>
+        {{/if}}
       </div>
       {{#if displayEditor}}
       <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>

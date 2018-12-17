@@ -264,7 +264,7 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y:visible;
 }
 
-.main-site-container {
+#main-site-container {
   padding-left: 15%;
   padding-right: 15%;
   padding-bottom: 25px;

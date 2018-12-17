@@ -104,6 +104,8 @@ export default Controller.extend({
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
     $("#mimic-navbar").css("display", embed ? "none" : "block");
+    $("#main-site-container").css("padding-left", embed ? "0%" : "15%");
+    $("#main-site-container").css("padding-right", embed ? "0%" : "15%");
     if(embed)
     {
       this.set('displayEditor', !embed);
