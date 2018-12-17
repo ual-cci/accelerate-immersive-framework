@@ -912,7 +912,10 @@ export default Controller.extend({
   updateTabbarLocation: function() {
     const aceW = this.get('aceW');
     let tab = document.getElementById('project-tabs');
-    tab.style.width = aceW + "px"
+    if(tab)
+    {
+      tab.style.width = aceW + "px"
+    }
   },
   actions: {
     editorReady(editor) {
