@@ -71,7 +71,7 @@ export default Controller.extend({
     const displayEditor = this.get('displayEditor');
     const display = displayEditor ? "inline" : "none"
     let drag = document.getElementById('drag-button')
-    //drag.style.right = 10;
+    drag.style.right =(aceW - 25) + "px";
     let tab = document.getElementById('project-tabs');
     tab.style.width = aceW + "px"
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
@@ -153,11 +153,12 @@ export default Controller.extend({
   },
   initWebSockets: function() {
     let socket = this.get('socket');
-    this.get('cs').log("init websockets", socket);
+    console.log("init websockets", socket);
     if(!isEmpty(socket) && socket.state == 1)
     {
+      console.log("websocket is empty")
       socket.onclose = ()=> {
-        this.get('cs').log("websocket closed");
+        console.log("websocket closed, reopening");
         this.set('socket', null);
         this.initWebSockets();
       }
@@ -168,28 +169,25 @@ export default Controller.extend({
       try {
         socket = new ReconnectingWebSocket(config.wsHost)
         this.set('socket', socket);
-        socket.addEventListener('open', () => {
+        socket.onopen = () => {
           this.get('cs').log("web socket open");
           this.set('wsAvailable', true);
           if(!this.get('fetchingDoc'))
           {
             this.selectRootDoc();
           }
-        });
-
-        socket.addEventListener('error',  () => {
+        };
+        socket.onerror =  () => {
           this.get('cs').log("web socket error");
           this.websocketError();
-        })
-
-        socket.addEventListener('close',  () =>  {
-          this.get('cs').log("web socket close");
+        }
+        socket.onclose =  () =>  {
+          this.get('cs').log("websocket closed, calling error");
           this.websocketError();
-        })
-
-        socket.addEventListener('message',  (event) =>  {
+        }
+        socket.onmessage = (event) =>  {
           this.get('cs').log("web socket message", event);
-        })
+        }
       }
       catch (err)
       {
@@ -199,6 +197,7 @@ export default Controller.extend({
     }
   },
   websocketError: function() {
+    console.log("websocket error")
     this.set('wsAvailable', false);
     if(!this.get('fetchingDoc'))
     {
@@ -1159,8 +1158,8 @@ export default Controller.extend({
 
     //TIDYING UP ON EXIT / REFRESH
     cleanUp() {
-      this.get('cs').log('cleaning up');
       const fn = () => {
+        console.log("clean up")
         clearInterval(this.get('preloadingInterval'))
         this.showFeedback("");
         this.set('renderedSource',"");
@@ -1170,18 +1169,19 @@ export default Controller.extend({
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))
         {
-          this.get('socket').onclose = ()=> {
-            this.get('cs').log("websocket closed");
-          };
           this.get('sharedDBDoc').destroy();
           this.set('sharedDBDoc', null);
           this.set('currentDoc', null);
-          this.get('connection').close();
-          this.get('socket').close();
+          this.get('socket').removeEventListener('error')
+          this.get('socket').removeEventListener('open')
+          this.get('socket').removeEventListener('close')
+          this.get('socket').removeEventListener('message')
           this.get('socket').onclose = null;
           this.get('socket').onopen = null;
           this.get('socket').onmessage = null;
           this.get('socket').onerror = null;
+          this.get('connection').close();
+          this.get('socket').close();
           this.set('socket', null);
           this.set('connection', null)
         }

@@ -1,4 +1,4 @@
-<div class = "container">
+<div class = "container document-container">
 <form {{action 'search' on='submit'}}>
   {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
 </form>
@@ -76,10 +76,12 @@
         }}
     {{/each}}
   </div>
+  <div id = "page-nav-container">
   {{#if canGoBack}}
-    <button {{action "prevPage"}}>Prev Page</button>
+    <button id = "prev-page-btn" {{action "prevPage"}}>Previous Projects</button>
   {{/if}}
   {{#if canGoForwards}}
-    <button {{action "nextPage"}}>Next Page</button>
+    <button id = "next-page-btn"  {{action "nextPage"}}>More Projects</button>
   {{/if}}
+  </div>
 </div>

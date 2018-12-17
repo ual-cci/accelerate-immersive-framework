@@ -3,7 +3,9 @@
   border-color: rgba(0,0,0,0);
 }
 
-
+body::-webkit-scrollbar {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
 
 .center {
   display: flex;
@@ -21,6 +23,7 @@
 }
 
 #mimic-navbar {
+ padding-top:30px;
  padding-bottom:30px;
 }
 
@@ -168,18 +171,7 @@ input[id="docName"]:-ms-input-placeholder {
   z-index: 20;
 }
 
-#drag-button {
-  position:absolute;
-  top: 40;
-  left: 10;
-  z-index: 20;
-  height:100%;
-  width:10px;
-  opacity:0.0;
-  cursor:col-resize;
-  background-color:white;
-  pointer-events: auto;
-}
+
 
 .add-file-button {
   width: 50px;
@@ -275,6 +267,7 @@ input[id="docName"]:-ms-input-placeholder {
 .main-site-container {
   padding-left: 15%;
   padding-right: 15%;
+  padding-bottom: 25px;
 }
 
 #main-code-container {
@@ -308,13 +301,24 @@ input[id="docName"]:-ms-input-placeholder {
   opacity:0.9;
   z-index: 10;
   width: 70vw;
-  /* max-width: 90vw;
-  min-width: 40vw; */
   position: absolute;
   padding-left: 2em;
   height: 100%;
-  overflow-x: visible;
+  overflow-x: hidden;
   overflow-y: scroll;
+}
+
+#drag-button {
+  position:absolute;
+  top: 40;
+  right: 50vw;
+  z-index: 20;
+  height:100%;
+  width:10px;
+  opacity:0.0;
+  cursor:col-resize;
+  background-color:red;
+  pointer-events: auto;
 }
 
 #playback-container {
@@ -334,11 +338,14 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .glyphicon.glyphicon-share,
-.glyphicon.glyphicon-remove,
 .glyphicon.glyphicon-file,
 .glyphicon.glyphicon-download-alt,
 .glyphicon.glyphicon-fullscreen {
     font-size: 25px;
+}
+
+#code-delete-btn:first-child {
+  font-size: 25px;
 }
 
 #code-play-btn:first-child {
@@ -480,6 +487,22 @@ input[id="docName"]:-ms-input-placeholder {
   display:table;
 }
 
+#document-container {
+  margin: 20px;
+}
+
+#page-nav-container {
+  margin: 20px;
+}
+
+#next-page-btn{
+  float: right;
+}
+
+#prev-page-btn{
+  float: left;
+}
+
 .clear-text-btn {
   background-color: transparent;
   border-style: solid;
@@ -578,23 +601,13 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .main-logo {
-  width: 250px;
-  height: 150px;
+  width:auto;
+  height:60px;
   background-position: center center;
   overflow: hidden;
   display:block;
-  margin:auto
-}
-
-.main-logo img {
-  min-height: 100%;
-   min-width: 100%;
-   /* IE 8 */
-   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-   /* IE 5-7 */
-   filter: alpha(opacity=0);
-   /* modern browsers */
-   opacity: 0;
+  margin:auto;
+  padding-bottom:5px;
 }
 
 .nav-link {
@@ -717,8 +730,9 @@ input[id="searchTerm"]:-ms-input-placeholder {
 #uploaded-assets-container {
   overflow-x:auto;
   overflow-y:hidden;
-  max-height:30px;
+  max-height:40px;
   width:40vw;
+  padding-bottom: 10px;
 }
 
 .file-upload-container {

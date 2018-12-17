@@ -72,7 +72,7 @@ export default Service.extend({
                     newSrc = newSrc + children[j].data.source;
                     newSrc = newSrc +"\n</style>";
                     added = true;
-                    console.log(newSrc);
+                    //console.log(newSrc);
                     break;
                   }
                 }

@@ -6,7 +6,7 @@ export default Component.extend({
   session: inject('session'),
   sessionAccount: inject('session-account'),
   store: inject('store'),
-  logoURL:config.localOrigin + "/images/mimic-logo.gif",
+  logoURL:config.localOrigin + "/images/cropped-logo.gif",
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
   }),

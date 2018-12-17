@@ -32,7 +32,7 @@
           <div id = "transport-container">
             {{#if isOwner}}
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-remove" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
+              {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
               <span class="tooltiptext">Delete Document</span>
             </div>
             <div class="tooltip">
@@ -117,6 +117,7 @@
         onCreate = (action 'newTab')}}
     {{/if}}
     <div id = "main-code-container">
+      <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
       <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
       </div>
@@ -150,7 +151,6 @@
         {{else}}
           {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
         {{/if}}
-        <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
           {{ember-ace
             minLines = 40
             maxLines = 10000

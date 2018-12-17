@@ -212,7 +212,7 @@ export default Service.extend({
             mainText = doc.data.source;
           }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
-          console.log(combined)
+          //console.log(combined)
           if(replaceAssets)
           {
             combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);
