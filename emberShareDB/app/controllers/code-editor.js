@@ -45,6 +45,7 @@ export default Controller.extend({
   showShare:false,
   showAssets:false,
   showPreview:false,
+  showTitleBar:true,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -103,6 +104,7 @@ export default Controller.extend({
   initUI: function() {
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
+    this.set('showTitleBar', !embed)
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "15%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "15%");

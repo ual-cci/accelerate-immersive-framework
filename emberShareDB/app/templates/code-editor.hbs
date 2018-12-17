@@ -1,9 +1,7 @@
 <div class = "container-fluid">
   <h4><span>{{feedbackMessage}}</span></h4>
-  {{#if embed}}
-  {{else}}
+  {{#if showTitleBar}}
   <div id = "doc-title-container">
-
   {{#if showName}}
     {{#if isNotEdittingDocName}}
       <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
