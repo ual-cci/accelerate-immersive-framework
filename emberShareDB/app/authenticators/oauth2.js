@@ -22,6 +22,7 @@ export default OAuth2PasswordGrant.extend({
       }
       this.makeRequest(serverTokenEndpoint, data, headers).then((response) => {
         run(() => {
+          console.log(response)
           if (!this._validate(response)) {
             console.log('access_token is missing in server response');
             reject('access_token is missing in server response');

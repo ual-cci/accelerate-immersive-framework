@@ -39,18 +39,20 @@ mongoose.model('user', new Schema({
   lastname: { type: String },
   password: { type: String },
   username: { type: String },
+  accountId: {type: String},
+  created: {type: Date},
   passwordResetToken: {type: String},
-  passwordResetExpiry: {type: Date}
+  passwordResetExpiry: {type: Date},
+  flaggedDocs: {type:[String]}
 }));
 
 var OAuthTokensModel = mongoose.model('token');
 var OAuthClientsModel = mongoose.model('client');
 var OAuthUsersModel = mongoose.model('user');
 
-
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	console.log("getAccessToken", bearerToken);
+	console.log("getAccessToken");
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
@@ -60,7 +62,7 @@ model.getAccessToken = function(bearerToken) {
 			}
 			else
 			{
-				console.log("got token", token);
+				console.log("got token");
 				resolve(token)
 			}
 		});
@@ -68,7 +70,7 @@ model.getAccessToken = function(bearerToken) {
 };
 
 model.getClient = function(clientId, clientSecret) {
-	console.log("geting Client");
+	console.log("getting Client");
   return new Promise ((resolve, reject) => {
 		OAuthClientsModel.findOne({ clientId: clientId, clientSecret: clientSecret },
 		(err, client) => {
@@ -107,7 +109,7 @@ model.getUser = function(username, password) {
       bcrypt.compare(password, hash).then((res) => {
         if(res)
         {
-					console.log('got user', user)
+					console.log('got user')
           resolve(user);
 					return;
         }
@@ -133,7 +135,7 @@ model.saveToken = function(token, client, user) {
     user : user,
     userId: user._id,
   });
-	console.log("save token", token, accessToken);
+	console.log("save token");
   // Can't just chain `lean()` to `save()` as we did with `findOne()` elsewhere. Instead we use `Promise` to resolve the data.
   return new Promise( function(resolve,reject){
     accessToken.save(function(err,data){
@@ -162,7 +164,8 @@ var initUserAPI = function(app, config)
 {
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
-	oauthDBName = config.oauthDBName;
+	oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName : config.oauthDBName;
+  console.log("USER DB", oauthDBName);
   replicaSet = config.replicaSet;
   siteURL = config.siteURL;
 	startAuthAPI(app);
@@ -179,6 +182,7 @@ function startAuthAPI(app)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
+  console.log(mongoUri);
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
 
@@ -198,7 +202,27 @@ function startAuthAPI(app)
 
   app.all('/oauth/token', app.oauth.token());
 
+  app.get('/accounts', function (req, res) {
+    console.log("find user", req.query.username);
+    OAuthUsersModel.find({username:req.query.username}, function(err,users) {
+      console.log("returned user", users.length, err);
+			if(users.length > 0 && !err)
+			{
+        console.log("found user");
+        let user = users[0];
+        user.password = "";
+        user.email = "";
+        user.created = "";
+        user._id = "";
+        console.log(user);
+				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
+				return;
+			}
+    });
+  });
+
   app.post('/accounts', function (req, res) {
+    console.log("new user", req.body.data.attributes);
     let attr = req.body.data.attributes;
     newUser(attr.username,attr.password,attr.email)
     .then( (user) => {
@@ -214,8 +238,11 @@ function startAuthAPI(app)
     requestPasswordReset(req.body.username)
     .then( (user) => {
       console.log('success reset', siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
-      sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
-      res.status(200).send({link:"/password-reset?username="+user.username+"&token="+user.passwordResetToken})
+      if(!req.body.test)
+      {
+        sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
+      }
+      res.status(200).send()
     })
     .catch( (err) =>  {
       console.log('failed reset');
@@ -245,18 +272,21 @@ function startAuthAPI(app)
     });
   });
 
-	app.get('/canFlag', app.oauth.authenticate(), (req, res) => {
+	app.get('/flagDoc', app.oauth.authenticate(), (req, res) => {
 		const username = req.query.user;
 		const doc = req.query.documentId;
+    console.log("flag doc", req.query)
 		OAuthUsersModel.findOne({
 			username: username
 		}, (err, user) => {
-			if(err)
+      console.log(err, user)
+			if(err || !user)
 			{
 				res.status(400).send(err);
 			}
 			else
 			{
+        console.log(user);
 				flagged = user.flaggedDocs;
 				if(flagged.includes(doc))
 				{
@@ -296,7 +326,7 @@ var setup = function() {
 
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
-		OAuthUsersModel.find({username:username}, function(err,user) {
+		OAuthUsersModel.find({username:username}, function(err, user) {
 			if(user.length > 0 || err)
 			{
 				reject("user already exists");
@@ -317,7 +347,8 @@ var newUser = function(username, password, email) {
 								reject("internal error creating user");
 								return;
 							}
-							resolve(user);
+              //console.log("CREATED USER",user, savedUser);
+							resolve(savedUser);
 							return;
 						});
 					});
@@ -462,19 +493,42 @@ var sendResetEmail = (email, link)=> {
   transporter.sendMail(message);
 }
 
-
-module.exports = {
-	initUserAPI:initUserAPI,
-};
-
 //HELPER
 
-var dropUsers = function() {
-	OAuthUsersModel.remove({},function(err){console.log('cleared all users')});
+var dropUsers = ()=> {
+  return new Promise((resolve, reject)=> {
+    OAuthUsersModel.remove({},function(err){
+      if (err)
+      {
+        reject();
+      }
+      else
+      {
+        resolve();
+        console.log('cleared all users')
+      }
+    });
+  });
 }
 
-var dropTokens = function() {
-	OAuthTokensModel.remove({},function(err){console.log('cleared all tokens')});
+const dropUser = (accountId)=>
+{
+  return new Promise((resolve, request)=> {
+    OAuthUsersModel.remove({accountId:accountId}, function(err) {
+      if(err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  });
+}
+
+var dropTokens = async function() {
+	OAuthTokensModel.remove({},function(err){
+    console.log('cleared all tokens')
+    return err;
+  });
 }
 
 var dump = function() {
@@ -498,6 +552,10 @@ var dump = function() {
 		console.log('users', users);
 	});
 };
-//dump();
-// dropUsers();
-// dropTokens();
+
+module.exports = {
+  newUser:newUser,
+  dropUser:dropUser,
+  dropTokens:dropTokens,
+	initUserAPI:initUserAPI,
+};

@@ -32,7 +32,8 @@ export default Component.extend({
     placeholder: null,
     addTokenOnBlur: true,
     allowDuplicates: false,
-    editable:true,
+    editable:false,
+    showInput:false,
     tokenComponent: 'base-token',
 
     tokenfieldId: computed('elementId', function () {
@@ -86,6 +87,12 @@ export default Component.extend({
 
     // Actions
     actions: {
+
+        toggleInput() {
+          this.toggleProperty('showInput')
+          this.set('showDuplicateMessage', false);
+        },
+
         editToken(token) {
             this._editToken(token);
         },
@@ -303,6 +310,7 @@ export default Component.extend({
                 this.get('tokens').pushObject(value);
                 this.set('inputValue', '');
                 this.get('tokensChanged')(this.get('tokens'));
+                this.set('showDuplicateMessage', false);
             } else if (!allowDuplicates && isDuplicate) {
                 this.set('showDuplicateMessage', true);
             }

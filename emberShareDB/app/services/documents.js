@@ -16,9 +16,11 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("making doc");
       const currentUser = this.get('sessionAccount').currentUserName;
+      const currentUserId = this.get('sessionAccount').currentUserId;
       let doc = this.get('store').createRecord('document', {
         source:data.source,
         owner:currentUser,
+        ownerId:currentUserId,
         isPrivate:data.isPrivate,
         name:data.name,
         documentId:null,
@@ -170,7 +172,7 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "GET",
-          url: config.serverHost + "/canFlag" + params,
+          url: config.serverHost + "/flagDoc" + params,
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
         }).then((res) => {
           resolve();
@@ -210,7 +212,7 @@ export default Service.extend({
             mainText = doc.data.source;
           }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
-          console.log(combined)
+          //console.log(combined)
           if(replaceAssets)
           {
             combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);

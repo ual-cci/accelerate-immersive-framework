@@ -1,5 +1,6 @@
 <div class="uncharted-form-control">
-    <div class="uncharted-token-container">
+    <div class="uncharted-token-main-container">
+      <div class="uncharted-token-container">
         {{#each tokens as |token index|}}
             {{component tokenComponent
             token=token
@@ -12,7 +13,12 @@
             mouseDown=(action 'selectToken' token index)
             doubleClick=(action 'editToken' token)}}
         {{/each}}
-        {{#if editable}}
+        {{#bs-button class = "add-file-button" id = "add-tag"
+          icon="glyphicon glyphicon-plus"
+          onClick=(action 'toggleInput')}}
+        {{/bs-button}}
+        </div>
+        {{#if showInput}}
         {{input type='text'
             class='uncharted-token-input'
             id=tokenfieldId

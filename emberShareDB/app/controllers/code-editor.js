@@ -39,17 +39,13 @@ export default Controller.extend({
   isNotEdittingDocName:true,
   canEditDoc:false,
   isOwner:false,
-  allowDocDelete:false,
-  allowAssetDelete:false,
-  assetToDelete:"",
   autoRender:false,
+  codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
   showAssets:false,
   showPreview:false,
-  showTokens:false,
-  showOpPlayer:false,
-  showCodeOptions:false,
+  showTitleBar:true,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -68,16 +64,24 @@ export default Controller.extend({
   consoleOutput:"",
   tabs:[],
   feedbackTimer:null,
+  doPlay:true,
 
   //Computed parameters
   aceStyle: computed('aceW','displayEditor', function() {
     const aceW = this.get('aceW');
     const displayEditor = this.get('displayEditor');
     const display = displayEditor ? "inline" : "none"
+    let drag = document.getElementById('drag-button')
+    drag.style.right =(aceW - 25) + "px";
+    let tab = document.getElementById('project-tabs');
+    tab.style.width = aceW + "px"
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   displayEditor: computed('hideEditor', function() {
     return this.get('hideEditor') != "true";
+  }),
+  titleNoName: computed('titleName', function() {
+    return this.get('titleName').split("by")[0];
   }),
   editLink: computed('model', function() {
     return config.localOrigin + "/code/" + this.get('model').id;
@@ -99,9 +103,11 @@ export default Controller.extend({
   },
   initUI: function() {
     this.set('collapsed', true);
-    this.collapseAllSubMenus();
     const embed = this.get('embed') == "true";
+    this.set('showTitleBar', !embed)
     $("#mimic-navbar").css("display", embed ? "none" : "block");
+    $("#main-site-container").css("padding-left", embed ? "0%" : "15%");
+    $("#main-site-container").css("padding-right", embed ? "0%" : "15%");
     if(embed)
     {
       this.set('displayEditor', !embed);
@@ -109,23 +115,14 @@ export default Controller.extend({
     }
     this.get('cs').observers.push(this);
   },
-  collapseAllSubMenus: function() {
-    this.set('allowDocDelete', false);
-    this.set('allowAssetDelete', false);
-    this.set('showAssets', false);
-    this.set('showPreview', false);
-    this.set('showShare', false);
-    this.set('showTokens', false);
-    this.set('showOpPlayer', false);
-    this.set('showCodeOptions', false);
-  },
   initAceEditor: function() {
     const editor = this.get('editor');
     const session = editor.getSession();
-
+    console.log("Adding in commands");
     editor.commands.addCommand({
       name: "executeLines",
       exec: ()=>{
+        console.log("executeLines");
         this.updateIFrame(true)
       },
       bindKey: {mac: "shift-enter", win: "shift-enter"}
@@ -160,11 +157,12 @@ export default Controller.extend({
   },
   initWebSockets: function() {
     let socket = this.get('socket');
-    this.get('cs').log("init websockets", socket);
+    console.log("init websockets", socket);
     if(!isEmpty(socket) && socket.state == 1)
     {
+      console.log("websocket is empty")
       socket.onclose = ()=> {
-        this.get('cs').log("websocket closed");
+        console.log("websocket closed, reopening");
         this.set('socket', null);
         this.initWebSockets();
       }
@@ -173,7 +171,7 @@ export default Controller.extend({
     else
     {
       try {
-        socket = new ReconnectingWebSocket(config.wsHost);
+        socket = new ReconnectingWebSocket(config.wsHost)
         this.set('socket', socket);
         socket.onopen = () => {
           this.get('cs').log("web socket open");
@@ -182,18 +180,15 @@ export default Controller.extend({
           {
             this.selectRootDoc();
           }
-        }
-
-        socket.onerror = () => {
+        };
+        socket.onerror =  () => {
           this.get('cs').log("web socket error");
           this.websocketError();
         }
-
-        socket.onclose = () =>  {
-          this.get('cs').log("web socket close");
+        socket.onclose =  () =>  {
+          this.get('cs').log("websocket closed, calling error");
           this.websocketError();
         }
-
         socket.onmessage = (event) =>  {
           this.get('cs').log("web socket message", event);
         }
@@ -206,6 +201,7 @@ export default Controller.extend({
     }
   },
   websocketError: function() {
+    console.log("websocket error")
     this.set('wsAvailable', false);
     if(!this.get('fetchingDoc'))
     {
@@ -235,13 +231,16 @@ export default Controller.extend({
   },
   selectRootDoc: function() {
     this.newDocSelected(this.get('model').id).then(()=> {
+      this.updateTabbarLocation();
       this.get('cs').log("loaded root doc, preloading assets");
       this.fetchChildren().then(()=> {
         this.preloadAssets().then(()=> {
-          if(this.doPlay())
+          if(this.doPlayOnLoad())
           {
             this.updateIFrame();
           }
+          this.set('doPlay',!this.doPlayOnLoad());
+          this.updatePlayButton();
         });
       });
     });
@@ -254,12 +253,12 @@ export default Controller.extend({
       // {
         const socket = this.get('socket');
         let con = this.get('connection');
-        if(isEmpty(con))
+        if(isEmpty(con) && !isEmpty(socket))
         {
           this.get('cs').log('connecting to ShareDB');
           con = new ShareDB.Connection(socket);
         }
-        if(isEmpty(con) || con.state == "disconnected")
+        if(isEmpty(con) || con.state == "disconnected" || isEmpty(socket))
         {
           this.get('cs').log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
@@ -322,7 +321,13 @@ export default Controller.extend({
         return;
       });
       editor.setReadOnly(!this.get('canEditDoc'));
-      this.set('titleName', doc.data.name);
+      if(!isEmpty(this.get('loadingInterval')))
+      {
+        clearInterval(this.get('loadingInterval'))
+        this.set('loadingInterval', null);
+      }
+      this.set('titleName', doc.data.name + " by " + doc.data.owner);
+      this.set('titleNoName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
       resolve();
@@ -336,10 +341,22 @@ export default Controller.extend({
       assets:data.assets
     });
   },
+  clearTabs: function() {
+    // this.setParentData({
+    //     name:"",
+    //     id:"",
+    //     children:[],
+    //     source:"",
+    //     assets:""
+    // })
+    this.set('tabs',[]);
+  },
   setTabs: function(data) {
+    const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      return {name:child.data.name, id:child.id};
+      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id};
     });
+    console.log(tabs);
     this.set('tabs', tabs);
   },
   fetchChildren: function() {
@@ -468,7 +485,7 @@ export default Controller.extend({
     }
     editor.setFontSize(this.get('fontSize'));
   },
-  doPlay: function() {
+  doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('embed') == "true";
     const displayEditor = this.get('displayEditor');
@@ -499,6 +516,7 @@ export default Controller.extend({
           }
           this.showFeedback(text);
         }, 500);
+        this.set('preloadingInterval', interval);
         this.get('assetService').preloadAssets(model.data.assets)
         .then(()=>{
           this.showFeedback("");
@@ -516,16 +534,22 @@ export default Controller.extend({
       }
     });
   },
-  getSelectedText: function()
-  {
+  getSelectionRange: function() {
     const editor = this.get('editor');
     let selectionRange = editor.getSelectionRange();
     if(selectionRange.start.row == selectionRange.end.row &&
       selectionRange.start.column == selectionRange.end.column)
       {
+        //editor.selection.selectLine();
         selectionRange.start.column = 0;
         selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
       }
+      return selectionRange;
+  },
+  getSelectedText: function()
+  {
+    const editor = this.get('editor');
+    let selectionRange = this.getSelectionRange();
     const content = editor.session.getTextRange(selectionRange);
     return content;
   },
@@ -564,11 +588,13 @@ export default Controller.extend({
           this.get('cs').clear();
           if(selection)
           {
+            this.flashSelectedText();
+            document.getElementById("output-iframe").contentWindow.eval(combined);
             this.get('documentService').updateDoc(model.id, 'newEval', combined)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
-            document.getElementById("output-iframe").contentWindow.eval(combined);
+
           }
           else
           {
@@ -578,6 +604,43 @@ export default Controller.extend({
         });
       });
     })
+  },
+  flashAutoRender:function()
+  {
+    let autoInput = document.getElementsByClassName('ace_content').item(0)
+    autoInput.style["border-style"] = "solid"
+    autoInput.style["border-width"] = "5px"
+    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    setTimeout(()=> {
+        autoInput.style["border-style"] = "none"
+    }, 250);
+  },
+  flashSelectedText: function() {
+    let selectionMarkers = document.getElementsByClassName('ace_selection');
+    for(let i = 0; i < selectionMarkers.length; i++)
+    {
+      selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
+    }
+    setTimeout(()=> {
+      for(let i = 0; i < selectionMarkers.length; i++)
+      {
+        selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
+      }
+    }, 500);
+    if(selectionMarkers.length < 1)
+    {
+      let activeMarkers = document.getElementsByClassName('ace_active-line');
+      for(let j = 0; j < activeMarkers.length; j++)
+      {
+        activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
+      }
+      setTimeout(()=> {
+        for(let j = 0; j < activeMarkers.length; j++)
+        {
+          activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
+        }
+      }, 500);
+    }
   },
   updateLinting: function() {
     const doc = this.get('currentDoc');
@@ -591,6 +654,7 @@ export default Controller.extend({
   onCodingFinished: function() {
     if(this.get('autoRender'))
     {
+      this.flashAutoRender();
       this.updateIFrame();
     }
     this.updateLinting();
@@ -603,7 +667,7 @@ export default Controller.extend({
     }
     this.set('codeTimer', setTimeout(() => {
       this.onCodingFinished();
-    }, 500));
+    }, this.get('codeTimerRefresh')));
   },
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
@@ -676,13 +740,13 @@ export default Controller.extend({
       }
     }
   },
-  update() {
+  update:function() {
     this.set('consoleOutput', this.get('cs').output);
     var textarea = document.getElementById('console');
     textarea.scrollTop = textarea.scrollHeight;
   },
   setCanEditDoc: function() {
-    const currentUser = this.get('sessionAccount').currentUserName;
+    const currentUser = this.get('sessionAccount').currentUserId;
     let model = this.get('model');
     console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
@@ -691,7 +755,7 @@ export default Controller.extend({
       this.set('isOwner', false);
       return;
     }
-    if(currentUser != model.data.owner)
+    if(currentUser != model.data.ownerId)
     {
       this.set('isOwner', false);
       if(model.data.readOnly)
@@ -708,13 +772,15 @@ export default Controller.extend({
   },
   deleteCurrentDocument: function() {
     let model = this.get('model');
-    this.get('cs').log("deleting root doc");
-    this.get('documentService').deleteDoc(model.id).then(() => {
-      this.get('cs').log("completed deleting root doc and all children + assets");
-      this.transitionToRoute('application');
-    }).catch((err) => {
-      this.get('cs').log("error deleting doc", err);
-    });
+    if (confirm('Are you sure you want to delete?')) {
+      this.get('cs').log("deleting root doc");
+      this.get('documentService').deleteDoc(model.id).then(() => {
+        this.get('cs').log("completed deleting root doc and all children + assets");
+        this.transitionToRoute('application');
+      }).catch((err) => {
+        this.get('cs').log("error deleting doc", err);
+      });
+    }
   },
   skipOp:function(prev, rewind = false) {
     const editor = this.get('editor');
@@ -832,11 +898,49 @@ export default Controller.extend({
         };
     })();
   },
+  updatePlayButton: function() {
+    let button = document.getElementById("code-play-btn");
+    if(!this.get('doPlay'))
+    {
+      $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+    }
+    else
+    {
+      $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
+    }
+  },
+  updateTabbarLocation: function() {
+    const aceW = this.get('aceW');
+    let tab = document.getElementById('project-tabs');
+    if(tab)
+    {
+      tab.style.width = aceW + "px"
+    }
+  },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
       this.get('cs').log('editor ready', editor)
+      let text = "loading code.";
+      this.set('titleName', text);
+      this.clearTabs();
+      this.set('loadingInterval', setInterval(()=>{
+        if(text=="loading code.")
+        {
+          text = "loading code.."
+        }
+        else if (text=="loading code..")
+        {
+          text = "loading code"
+        }
+        else if (text=="loading code")
+        {
+          text = "loading code."
+        }
+        this.set('titleName', text);
+      }, 500));
+      editor.setReadOnly(true);
       this.initShareDB();
     },
     suggestCompletions(editor, session, position, prefix) {
@@ -872,7 +976,8 @@ export default Controller.extend({
     },
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
-      const newName = this.get('titleName');
+      const newName = this.get('titleNoName');
+      this.set('titleName', newName + " by " + this.get('model').data.owner)
       this.get('documentService').updateDoc(this.get('currentDoc').id, 'name', newName)
       .then(()=>this.fetchChildren()
       .then(()=>this.get('sessionAccount').updateOwnedDocuments()));
@@ -937,11 +1042,11 @@ export default Controller.extend({
       alert("Error"+err);
     },
     assetProgress(e) {
-      this.get('cs').log("assetProgress", e);
+      this.get('cs').log("assetProgress", e.percent);
       if(parseInt(e.percent) < 100)
       {
         $("#asset-progress").css("display", "block");
-        $("#asset-progress").css("width", (parseInt(e.percent)/2)+"vw");
+        $("#asset-progress").css("width", (parseInt(e.percent) * 40/100)+"vw");
       }
       else
       {
@@ -962,28 +1067,30 @@ export default Controller.extend({
         }
       }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
     },
-    deleteAsset()
+    deleteAsset(asset)
     {
       if(this.get('canEditDoc'))
       {
-        this.get('assetService').deleteAsset(this.get('assetToDelete')).then(()=> {
-          const doc = this.get('model');
-          let newAssets = doc.data.assets;
-          newAssets = newAssets.filter((asset) => {
-              return asset.fileId !== this.get('assetToDelete')
+        if (confirm('Are you sure you want to delete?')) {
+          this.get('assetService').deleteAsset(asset).then(()=> {
+            const doc = this.get('model');
+            let newAssets = doc.data.assets;
+            newAssets = newAssets.filter((oldAsset) => {
+                console.log(oldAsset.fileId,asset)
+                return oldAsset.fileId !== asset
+            });
+
+            this.get('documentService').updateDoc(doc.id, "assets", newAssets)
+            .then(()=>{
+              if(!this.get('wsAvailable'))
+              {
+                this.refreshDoc();
+              }
+            }).catch((err)=>{this.get('cs').log(err)});
+          }).catch((err)=>{
+            this.get('cs').log('ERROR deleting asset', err, asset);
           });
-          this.set('assetToDelete',"");
-          this.toggleProperty('allowAssetDelete');
-          this.get('documentService').updateDoc(doc.id, "assets", newAssets)
-          .then(()=>{
-            if(!this.get('wsAvailable'))
-            {
-              this.refreshDoc();
-            }
-          }).catch((err)=>{this.get('cs').log(err)});
-        }).catch((err)=>{
-          this.get('cs').log('ERROR deleting asset', err, this.get('assetToDelete'));
-        });
+        }
       }
     },
     previewAsset(asset)
@@ -1026,45 +1133,22 @@ export default Controller.extend({
         });
       }
     },
-    toggleAllowDocDelete() {
-      this.collapseAllSubMenus();
-      if(this.get('canEditDoc'))
-      {
-        this.toggleProperty('allowDocDelete');
-      }
-    },
-    toggleAllowAssetDelete(asset) {
-      if(this.get('canEditDoc'))
-      {
-        this.set('assetToDelete',asset);
-        this.toggleProperty('allowAssetDelete');
-      }
-    },
-    toggleCollapsed() {
-      this.toggleProperty('collapsed');
-    },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
     toggleShowShare() {
-      this.collapseAllSubMenus();
+      this.get('modalsManager')
+        .alert({title: this.get('model').data.name,
+                bodyComponent: 'share-modal',
+                editLink:this.get('editLink'),
+                embedLink:this.get('embedLink'),
+                displayLink:this.get('displayLink')
+              });
       this.toggleProperty('showShare');
     },
-    toggleShowCodeOptions() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showCodeOptions');
-    },
-    toggleShowTokens() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showTokens');
-    },
-    toggleShowOpPlayer() {
-      this.collapseAllSubMenus();
-      this.toggleProperty('showOpPlayer');
-    },
     toggleShowAssets() {
-      this.collapseAllSubMenus();
       this.toggleProperty('showAssets');
+      console.log(this.get('showAssets'))
     },
     enterFullscreen() {
       var target = document.getElementById("output-iframe");
@@ -1081,8 +1165,10 @@ export default Controller.extend({
 
     //TIDYING UP ON EXIT / REFRESH
     cleanUp() {
-      this.get('cs').log('cleaning up');
       const fn = () => {
+        console.log("clean up")
+        clearInterval(this.get('preloadingInterval'))
+        this.showFeedback("");
         this.set('renderedSource',"");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");
@@ -1090,18 +1176,19 @@ export default Controller.extend({
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))
         {
-          this.get('socket').onclose = ()=> {
-            this.get('cs').log("websocket closed");
-          };
           this.get('sharedDBDoc').destroy();
           this.set('sharedDBDoc', null);
           this.set('currentDoc', null);
-          this.get('connection').close();
-          this.get('socket').close();
+          this.get('socket').removeEventListener('error')
+          this.get('socket').removeEventListener('open')
+          this.get('socket').removeEventListener('close')
+          this.get('socket').removeEventListener('message')
           this.get('socket').onclose = null;
           this.get('socket').onopen = null;
           this.get('socket').onmessage = null;
           this.get('socket').onerror = null;
+          this.get('connection').close();
+          this.get('socket').close();
           this.set('socket', null);
           this.set('connection', null)
         }
@@ -1140,11 +1227,38 @@ export default Controller.extend({
       if(this.get('isDragging'))
       {
         //this.get('cs').log('mouseMove',e.target);
+
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
+    mouseoverCodeTransport(e)
+    {
+      const transport = document.getElementById("code-transport-container")
+      const trackingArea = document.getElementById("code-transport-tracking-area")
+      trackingArea.style["pointer-events"] = "none"
+      transport.style.display = "block"
+    },
+    mouseoutCodeTransport(e)
+    {
+      const transport = document.getElementById("code-transport-container")
+      const trackingArea = document.getElementById("code-transport-tracking-area")
+      trackingArea.style["pointer-events"] = "auto"
+      transport.style.display = "none"
+    },
 
     //OPERATIONS ON CODE
+    playOrPause() {
+      if(this.get('doPlay'))
+      {
+        this.updateIFrame();
+      }
+      else
+      {
+        this.set('renderedSource', "");
+      }
+      this.toggleProperty('doPlay')
+      this.updatePlayButton();
+    },
     renderCode() {
       this.updateIFrame();
     },
@@ -1237,12 +1351,16 @@ export default Controller.extend({
         {
           if(docId != doc.data.documentId)
           {
-            this.newDocSelected(docId);
+            this.newDocSelected(docId).then(()=> {
+              this.fetchChildren()
+            });
           }
         }
         else
         {
-           this.newDocSelected(docId);
+           this.newDocSelected(docId).then(()=> {
+             this.fetchChildren()
+           });
         }
       }).catch((err)=>{
         this.get('cs').log('ERROR updateSourceFromSession', err)

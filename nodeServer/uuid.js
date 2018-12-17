@@ -1,5 +1,4 @@
 var guid = function () {
-  console.log('generating uuid');
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
     s4() + '-' + s4() + s4() + s4();
 }

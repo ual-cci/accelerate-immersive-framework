@@ -1,6 +1,7 @@
 import { inject } from '@ember/service';
 import Route from '@ember/routing/route';
 import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mixin';
+import RSVP from 'rsvp';
 
 export default Route.extend(ApplicationRouteMixin, {
   activate() {
@@ -9,22 +10,31 @@ export default Route.extend(ApplicationRouteMixin, {
   cs:inject('console'),
   sessionAccount: inject('session-account'),
   session: inject('session'),
-  beforeModel() {
+  async beforeModel() {
     this.get('cs').log('beforeModel application route');
-     this._loadCurrentUser();
+    await this._loadCurrentUser();
+    this.get('cs').log('ending beforeModel application route');
   },
   sessionAuthenticated() {
     this._super(...arguments);
+    console.log("session authenticated");
     this._loadCurrentUser();
   },
   _loadCurrentUser() {
-    this.get('cs').log('loading current user');
-    this.get('sessionAccount').loadCurrentUser()
-    .then(() => {
-      this.get('sessionAccount').updateOwnedDocuments();
+    return new RSVP.Promise((resolve, reject)=> {
+      this.get('cs').log('loading current user');
+      this.get('sessionAccount').loadCurrentUser()
+      .then(()=> {
+        this.get('sessionAccount').getUserFromName().then(()=> {
+          this.get('sessionAccount').updateOwnedDocuments().then(resolve())
+        });
+      })
+      .catch(() => {
+        this.get('cs').log('no current user');
+        this.get('session').invalidate();
+        resolve();
+      });
     })
-    .catch(() => {
-      this.get('session').invalidate();
-    });
+
   }
 });

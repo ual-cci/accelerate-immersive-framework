@@ -1,7 +1,6 @@
 import Component from '@ember/component';
 import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
 import JSZip from 'npm:jszip';
-import config from  '../config/environment';
 import { inject }  from '@ember/service';
 
 export default Component.extend(FileSaverMixin, {

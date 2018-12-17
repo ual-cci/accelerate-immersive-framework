@@ -1,4 +1,5 @@
-<div class = "col-md-3 document-list-item">
+<div class = "col-xs-12 col-sm-6 document-list-col">
+<div class = "document-list-item">
   {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}} {{/link-to}}
   by {{#link-to "documents" document.owner 0 'views' class='document-link'}}{{document.owner}} {{/link-to}}
   {{#if document.readOnly}}
@@ -24,5 +25,5 @@
     onClick=(action 'delete')}}
     {{/bs-button}}
   {{/if}}
-
+</div>
 </div>

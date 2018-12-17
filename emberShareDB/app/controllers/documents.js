@@ -10,6 +10,9 @@ export default Controller.extend({
   documentService: inject('documents'),
   docName:"",
   isPrivate:true,
+  isPrivateText:computed('isPrivate', function() {
+    return this.get('isPrivate') ? "private":"public";
+  }),
   feedbackMessage: "",
   sort:"views",
   page:0,
@@ -32,6 +35,7 @@ export default Controller.extend({
   }),
   updateResults()
   {
+    this.get('sessionAccount').getUserFromName();
     let searchTerm = this.get('searchTerm');
     if(isEmpty(searchTerm))
     {
@@ -57,7 +61,7 @@ export default Controller.extend({
         });
       }
     },
-    checkboxClicked() {
+    isPrivateChanged() {
       this.toggleProperty('isPrivate');
     },
     createNewDocument() {
@@ -71,11 +75,11 @@ export default Controller.extend({
         this.get('documentService').makeNewDoc(data)
           .then(() => {
             this.get('cs').log("new doc created");
-            const currentUser = this.get('sessionAccount').currentUserName;
+            const currentUserId = this.get('sessionAccount').currentUserId;
             this.get('store').query('document', {
               filter: {search: docName,
                 page: 0,
-                currentUser: currentUser,
+                currentUser: currentUserId,
                 sortBy: 'date'}
             }).then((documents) => {
               this.get('cs').log("new doc found, transitioning", documents);
