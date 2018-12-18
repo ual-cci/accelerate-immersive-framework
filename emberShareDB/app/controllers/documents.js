@@ -28,6 +28,7 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
+  isMore:true,
   loadMoreCtr:0,
   sortingFilters:[
     {title:"NEWEST", id:"sortByRecent"},
@@ -77,6 +78,7 @@ export default Controller.extend({
      toShow += this.get('loadMoreCtr')
      if(toShow >= this.get('allFilters').length)
      {
+       this.set('isMore', false)
        toShow = this.get('allFilters').length
      }
      this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))

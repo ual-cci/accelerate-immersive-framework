@@ -29,7 +29,47 @@ body::-webkit-scrollbar {
 
 .document-link {
   color:black;
+  float:left;
   font-family: 'muli';
+  font-size: 14px;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  overflow: hidden;
+}
+
+.document-name-link {
+  color:black;
+  font-family: 'muli';
+  font-size: 14px;
+}
+
+.doc-list-icon-container
+{
+  display: inline;
+  margin-left:15px;
+  float:right;
+}
+
+.doc-list-name-container
+{
+  display: inline;
+  margin-left:10px;
+}
+
+.document-list-col {
+  height: 60px;
+  margin-top:10px;
+  padding-left: 10px;
+}
+
+.document-list-item {
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 5px;
+  background-color: #CCCBCB;
+  height:90%;
+  width:auto;
+  margin: 10px 10px 10px 10px;
 }
 
 .navbar-right {
@@ -119,17 +159,7 @@ input[id="docName"]:-ms-input-placeholder {
   float:right;
 }
 
-.document-list-col {
-  height: 60px;
-}
 
-.document-list-item {
-  padding:4px 4px 4px 4px;
-  background-color: lightgray;
-  height:90%;
-  margin: 10px 10px 10px 10px;
-  overflow:hidden;
-}
 
 .flexrow {
   display: flex;
@@ -574,7 +604,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #document-container {
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 #page-nav-container {
