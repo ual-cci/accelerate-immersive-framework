@@ -8,6 +8,19 @@ body::-webkit-scrollbar {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 
+.a {
+  font-family: 'muli' ! important;
+}
+
+.p {
+  font-family: 'muli' ! important;
+  color:white;
+}
+
+.html {
+  font-family: 'muli' ! important;
+}
+
 .center {
   display: flex;
   align-items: center;
@@ -129,7 +142,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #filter-container {
-  height:200px;
+  padding-bottom: 20px;
 }
 
 .sortByForked {
@@ -152,31 +165,50 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: #07802A;
 }
 
-.a {
-  font-family: 'muli' ! important;
-}
-
-.p {
-  font-family: 'muli' ! important;
-  color:white;
-}
-
-.html {
-  font-family: 'muli' ! important;
-}
-
 #filter-row {
-  height:75px ! important;;
+  padding-bottom: 20px;
+}
+
+.filter-col-xs {
+  width: 50%;
+}
+
+.filter-col-sm {
+  width: 33%;
+}
+
+.filter-col-md {
+  width: 25%;
+}
+
+.filter-col-lg {
+  width: 20%;
 }
 
 .filter-col {
-  height: 75px;
+  min-width: 125px;
+  /* whatever width you want */
+  display: inline-block;
+  position: relative;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.filter-col:after {
+  padding-top: 80.25%;
+  /* 16:9 ratio */
+  display: block;
+  content: '';
 }
 
 .filter-item {
   padding:10px 10px 10px 10px;
-  height:90%;
-  margin: 10px 10px 10px 10px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin:10px;
   cursor:pointer;
   font-size: 14px;
   font-family: 'muli';
@@ -537,8 +569,12 @@ input[id="docName"]:-ms-input-placeholder {
   display:table;
 }
 
-#document-container {
+#main-document-container {
   display: block;
+}
+
+#document-container {
+  margin-top: 20px;
 }
 
 #page-nav-container {

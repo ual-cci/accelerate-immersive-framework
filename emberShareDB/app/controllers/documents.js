@@ -61,7 +61,7 @@ export default Controller.extend({
     })
   },
   updateFiltersToShow() {
-     var toShow = 12;
+     var toShow = 10;
      if(this.get('mediaQueries.isXs'))
      {
        toShow = 4

@@ -1,4 +1,4 @@
-<div class = "document-container">
+<div class = "main-document-container">
 <form {{action 'search' on='submit'}}>
   {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
 </form>
@@ -27,13 +27,13 @@
 {{#if mediaQueries.isXs}}
 <div class = "row">
   {{#each showingFilters as |filter index|}}
-  <div class = "col-xs-6 filter-col">
+  <div class = "col-xs-6 filter-col filter-col-xs">
     <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
-  <div class = "col-xs-6 filter-col">
+  <div class = "col-xs-6 filter-col filter-col-xs">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 2}}>
       <p class = "filter-text">Load More</p>
     </div>
@@ -42,13 +42,13 @@
 {{else if mediaQueries.isSm}}
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
-  <div class = "col-xs-4 filter-col">
+  <div class = "col-xs-4 filter-col filter-col-sm">
     <div class = {{concat "filter-item " filter.id}} onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
-  <div class = "col-xs-4 filter-col">
+  <div class = "col-xs-4 filter-col filter-col-sm">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 3}}>
       <p class = "filter-text">Load More</p>
     </div>
@@ -57,13 +57,13 @@
 {{else if mediaQueries.isMd}}
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
-  <div class = "col-xs-3 filter-col">
+  <div class = "col-xs-3 filter-col filter-col-md">
     <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
-  <div class = "col-xs-3 filter-col">
+  <div class = "col-xs-3 filter-col filter-col-md">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 4}}>
       <p class = "filter-text">Load More</p>
     </div>
@@ -72,13 +72,13 @@
 {{else}}
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
-  <div class = "col-xs-2 filter-col">
+  <div class = "col-xs-2 filter-col filter-col-lg">
     <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
       <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
-  <div class = "col-xs-2 filter-col">
+  <div class = "col-xs-2 filter-col filter-col-lg">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 6}}>
       <p class = "filter-text">Load More</p>
     </div>
@@ -86,7 +86,7 @@
 </div>
 {{/if}}
 </div>
-<div class = "container-fluid">
+<div class = "container-fluid" id = "document-container">
   <div class = "row">
     {{#each model as |document index|}}
         {{document-list-item
