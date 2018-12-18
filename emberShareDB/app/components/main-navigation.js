@@ -4,6 +4,7 @@ import { computed } from '@ember/object';
 import config from  '../config/environment';
 export default Component.extend({
   session: inject('session'),
+  mediaQueries:inject(),
   sessionAccount: inject('session-account'),
   store: inject('store'),
   logoURL:config.localOrigin + "/images/cropped-logo.gif",

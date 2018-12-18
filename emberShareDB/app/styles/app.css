@@ -1,3 +1,4 @@
+
 .main-delete-button {
   background-color: rgba(0,0,0,0);
   border-color: rgba(0,0,0,0);
@@ -5,6 +6,19 @@
 
 body::-webkit-scrollbar {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.a {
+  font-family: 'muli' ! important;
+}
+
+.p {
+  font-family: 'muli' ! important;
+  color:white;
+}
+
+.html {
+  font-family: 'muli' ! important;
 }
 
 .center {
@@ -15,7 +29,47 @@ body::-webkit-scrollbar {
 
 .document-link {
   color:black;
+  float:left;
   font-family: 'muli';
+  font-size: 14px;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  overflow: hidden;
+}
+
+.document-name-link {
+  color:black;
+  font-family: 'muli';
+  font-size: 14px;
+}
+
+.doc-list-icon-container
+{
+  display: inline;
+  margin-left:15px;
+  float:right;
+}
+
+.doc-list-name-container
+{
+  display: inline;
+  margin-left:10px;
+}
+
+.document-list-col {
+  height: 60px;
+  margin-top:10px;
+  padding-left: 10px;
+}
+
+.document-list-item {
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 5px;
+  background-color: #CCCBCB;
+  height:90%;
+  width:auto;
+  margin: 10px 10px 10px 10px;
 }
 
 .navbar-right {
@@ -37,16 +91,27 @@ body::-webkit-scrollbar {
   width:100%;
 }
 
-#docName {
+#create-doc-name {
   border-color:black;
   height:35px;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
   width:100%;
   overflow:hidden;
+  font-size:18px;
+  font-family: 'muli';
+  padding-left:20px;
+  color:black;
 }
 
-#create-btn-container {
-  padding-right: 2px !important;
+#create-doc-form-container {
+  padding-right: 2px ! important;
+  padding-left: 2px ! important;
+}
+
+#create-doc-btn-container {
+  padding-right: 2px ! important;
+  padding-left: 2px ! important;
 }
 
 input[id="docName"]::-webkit-input-placeholder {
@@ -77,7 +142,9 @@ input[id="docName"]:-ms-input-placeholder {
   border-radius: 0;
   width:70px;
   height:35px;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
+  margin-right: 5px;
   float:right;
 }
 
@@ -85,80 +152,120 @@ input[id="docName"]:-ms-input-placeholder {
   border:none;
   color:black;
   background-color: darkgray;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
   width:60px;
   height:35px;
   float:right;
 }
 
-.document-list-col {
-  height: 60px;
+
+
+.flexrow {
+  display: flex;
+  background: lightgray; /*for debug*/
+}
+.flexrow > * {
+  flex: 1;
+  margin: 1em;
+  outline: auto green;
 }
 
-.document-list-item {
-  padding:4px 4px 4px 4px;
-  background-color: lightgray;
-  height:90%;
-  margin: 10px 10px 10px 10px;
-  overflow:hidden;
+#filter-container {
+  padding-bottom: 20px;
 }
 
-.filter-col {
-  height: 25vh;
-}
-
-#filter3.filter-item {
+.sortByForked {
   background-color: #FFCC02;
 }
 
-#filter2.filter-item {
-  background-color: #3929B8;
-}
-
-#filter1.filter-item {
-  background-color: #07802A;
-}
-
-#filter0.filter-item {
+.sortByRecent {
   background-color: #F54B32;
 }
 
-#filter5.filter-item {
+.sortByUpdated {
   background-color: #07802A;
 }
 
-#filter4.filter-item {
+.sortByEditted {
   background-color: #F54B32;
 }
 
-.a {
-  font-family: 'muli'!important;
+.sortByPopular {
+  background-color: #07802A;
 }
 
-.p {
-  font-family: 'muli'!important;
-  color:white;
+#filter-row {
+  padding-bottom: 20px;
 }
 
-.html {
-  font-family: 'muli' !important;
+.filter-col-xs {
+  width: 50%;
+}
+
+.filter-col-sm {
+  width: 33%;
+}
+
+.filter-col-md {
+  width: 25%;
+}
+
+.filter-col-lg {
+  width: 20%;
+}
+
+.filter-col {
+  min-width: 125px;
+  /* whatever width you want */
+  display: inline-block;
+  position: relative;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.filter-col:after {
+  padding-top: 80.25%;
+  /* 16:9 ratio */
+  display: block;
+  content: '';
 }
 
 .filter-item {
   padding:10px 10px 10px 10px;
-  height:90%;
-  margin: 10px 10px 10px 10px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin:10px;
   cursor:pointer;
-  font-size: 18px;
+  font-size: 14px;
   font-family: 'muli';
   font-weight: bold;
+  overflow: hidden;
 }
 
 .filter-text {
   position: relative;
+  color: black;
+  font-weight: bold;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+}
+
+.load-more-item {
+  background-color: lightgray;
+}
+
+.tag-item {
+  background-color: #3929B8;
+  color:white ! important;
+}
+
+.filter-text-tag-item {
+  color:white ! important;
 }
 
 .hide-code-btn {
@@ -492,8 +599,12 @@ input[id="docName"]:-ms-input-placeholder {
   display:table;
 }
 
+#main-document-container {
+  display: block;
+}
+
 #document-container {
-  margin: 20px;
+  margin-top: 0px;
 }
 
 #page-nav-container {
@@ -606,8 +717,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .main-logo {
-  width:auto;
-  height:60px;
+  width:185px;
+  height:auto;
   background-position: center center;
   overflow: hidden;
   display:block;
@@ -615,9 +726,40 @@ input[id="docName"]:-ms-input-placeholder {
   padding-bottom:5px;
 }
 
+.nav-link:focus {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-link:hover {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-link:active {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:focus {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:hover {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:active {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
 .nav-link {
   color:black;
   font-weight: bold;
+  font-size: 14px;
 }
 
 #signed-in-link {
@@ -653,39 +795,57 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
 }
 
+.row {
+  margin-left: 0px ! important;
+  margin-right: 0px ! important;
+}
 
 input[id="searchTerm"]::-webkit-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-}
+   font-family: "muli";
+   font-size: 18px;
+ }
 
 input[id="searchTerm"]:-moz-placeholder { /* Firefox 18- */
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
+   opacity:1;
 }
 
 input[id="searchTerm"]::-moz-placeholder {  /* Firefox 19+ */
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
+   opacity:1;
 }
 
 input[id="searchTerm"]:-ms-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
 }
 
 #searchTerm {
-  width: 67vw;
+  padding-right: 20px;
+  width: 100%;
   box-sizing: border-box;
   height:50px;
   text-align: center;
   background-color: black;
   color: white;
   border:none;
+  font-family: "muli";
+  font-size: 18px;
+  margin-bottom: 20px;
 }
 
 .container {

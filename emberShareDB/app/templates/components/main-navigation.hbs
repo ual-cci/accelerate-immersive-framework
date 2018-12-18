@@ -1,28 +1,32 @@
 <div id = "mimic-navbar">
 <img src={{logoURL}} class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
- {{#nav.item}}{{#nav.link-to "index" class = "nav-link"}}home{{/nav.link-to}}{{/nav.item}}
- {{#nav.item}}{{#nav.link-to "about" class = "nav-link"}}about{{/nav.link-to}}{{/nav.item}}
- {{#nav.item}}{{#nav.link-to "terms" class = "nav-link"}}terms{{/nav.link-to}}{{/nav.item}}
- {{#if session.isAuthenticated}}
-    <div style = "position:relative">
-      {{#if sessionAccount.currentUserName}}
-        <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{#nav.link-to "login" id = "signed-in-link" }}{{sessionAccount.currentUserName}}{{/nav.link-to}}</p>
-      {{/if}}
-      <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
-    </div>
-   {{#nav.dropdown as |dd|}}
-     {{#dd.toggle id = "my-docs" }}my docs <span  class="caret"></span>{{/dd.toggle}}
-     {{#dd.menu as |ddm|}}
-       {{#each ownedDocuments as |doc|}}
-       {{#ddm.item}}
-           <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
-       {{/ddm.item}}
-       {{/each}}
-     {{/dd.menu}}
-   {{/nav.dropdown}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "index" class = "nav-link"}}home{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "about" class = "nav-link"}}about{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "terms" class = "nav-link"}}terms{{/nav.link-to}}{{/nav.item}}
+ {{#if mediaQueries.isXs}}
+ <div></div>
  {{else}}
-   <a {{action 'login'}} id = "login-button" class="navbar-right">log in</a>
- {{/if}}
+   {{#if session.isAuthenticated}}
+      <div style = "position:relative">
+        {{#if sessionAccount.currentUserName}}
+          <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{sessionAccount.currentUserName}}</p>
+        {{/if}}
+        <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
+      </div>
+     {{#nav.dropdown as |dd|}}
+       {{#dd.toggle id = "my-docs" }}my docs <span  class="caret"></span>{{/dd.toggle}}
+       {{#dd.menu as |ddm|}}
+         {{#each ownedDocuments as |doc|}}
+         {{#ddm.item}}
+             <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
+         {{/ddm.item}}
+         {{/each}}
+       {{/dd.menu}}
+     {{/nav.dropdown}}
+   {{else}}
+     <a {{action 'login'}} id = "login-button" class="navbar-right">log in</a>
+   {{/if}}
+{{/if}}
 {{/bs-nav}}
 </div>

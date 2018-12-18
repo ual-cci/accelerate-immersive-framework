@@ -1,16 +1,15 @@
-<div class = "container document-container">
+<div class = "main-document-container">
 <form {{action 'search' on='submit'}}>
   {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
 </form>
-</div>
 <div class = "row" id = "doc-create-container">
 {{#if session.isAuthenticated}}
-  <div class = "col-sm-8" id = "create-btn-container">
+  <div class = "col-sm-9" id = "create-doc-form-container">
     <form id = "create-doc-form" {{action 'createNewDocument' on='submit'}}>
-      {{input id='docName' placeholder='document name' value=docName}}
+      {{input id='create-doc-name' placeholder='document name' value=docName}}
     </form>
   </div>
-  <div class = "col-sm-4">
+  <div class = "col-sm-3" id = "create-doc-btn-container">
     <button type="submit" id = "create-doc-btn">create</button>
     {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
   </div>
@@ -24,48 +23,78 @@
 {{#if hasNoDocuments}}
   <h2 style = "text-align:center;">No Results</h2>
 {{/if}}
+<div id = "filter-container container-fluid">
+{{#if mediaQueries.isXs}}
 <div class = "row">
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "filter0" onclick={{action 'recent'}}>
-      <p class = "filter-text">NEWEST</p>
-    </div>
-  </div>
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "filter1" onclick={{action 'popular'}}>
-      <p class = "filter-text">POPULAR</p>
-    </div>
-  </div>
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "filter2" onclick={{action 'forked'}}>
-      <p class = "filter-text">MOST REMIXED</p>
-    </div>
-  </div>
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = "filter3" onclick={{action 'editted'}}>
-      <p class = "filter-text">MOST WORKED ON</p>
-    </div>
-  </div>
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" id = "filter4" onclick={{action 'updated'}}>
-      <p class = "filter-text">UPDATED</p>
-    </div>
-  </div>
-  <div class = "col-xs-6 col-sm-6 col-md-4 col-lg-2 hidden-sm hidden-xs filter-col">
-    <div class = "filter-item" id = "filter5" onclick={{action 'recent'}}>
-      <p class = "filter-text">OLDEST</p>
-    </div>
-  </div>
-</div>
-<div class = "row hidden-md hidden-sm hidden-xs">
-  {{#each tags as |tag index|}}
-  <div class = "col-sm-6 col-md-4 col-lg-2 filter-col">
-    <div class = "filter-item" id = {{concat 'filter'index}} onclick={{action 'tag' tag._id}}>
-      <p class = "filter-text">{{tag._id}}</p>
+  {{#each showingFilters as |filter index|}}
+  <div class = "col-xs-6 filter-col filter-col-xs">
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
+      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
+  {{#if isMore}}
+  <div class = "col-xs-6 filter-col filter-col-xs">
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 2}}>
+      <p class = "filter-text">Load More</p>
+    </div>
+  </div>
+  {{/if}}
 </div>
-<div class = "container-fluid">
+{{else if mediaQueries.isSm}}
+<div class = "row" id = "filter-row">
+  {{#each showingFilters as |filter index|}}
+  <div class = "col-xs-4 filter-col filter-col-sm">
+    <div class = {{concat "filter-item " filter.id}} onclick={{action 'filter' filter}}>
+      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+    </div>
+  </div>
+  {{/each}}
+  {{#if isMore}}
+  <div class = "col-xs-4 filter-col filter-col-sm">
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 3}}>
+      <p class = "filter-text">Load More</p>
+    </div>
+  </div>
+  {{/if}}
+</div>
+{{else if mediaQueries.isMd}}
+<div class = "row" id = "filter-row">
+  {{#each showingFilters as |filter index|}}
+  <div class = "col-xs-3 filter-col filter-col-md">
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
+      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+    </div>
+  </div>
+  {{/each}}
+  {{#if isMore}}
+  <div class = "col-xs-3 filter-col filter-col-md">
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 4}}>
+      <p class = "filter-text">Load More</p>
+    </div>
+  </div>
+  {{/if}}
+</div>
+{{else}}
+<div class = "row" id = "filter-row">
+  {{#each showingFilters as |filter index|}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
+      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+    </div>
+  </div>
+  {{/each}}
+  {{#if isMore}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 6}}>
+      <p class = "filter-text">Load More</p>
+    </div>
+  </div>
+  {{/if}}
+</div>
+{{/if}}
+</div>
+<div class = "container-fluid" id = "document-container">
   <div class = "row">
     {{#each model as |document index|}}
         {{document-list-item
@@ -84,4 +113,5 @@
     <button id = "next-page-btn"  {{action "nextPage"}}>More Projects</button>
   {{/if}}
   </div>
+</div>
 </div>
