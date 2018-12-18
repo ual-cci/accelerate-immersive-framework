@@ -1,14 +1,16 @@
 <div id = "mimic-navbar">
 <img src={{logoURL}} class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
- {{#nav.item}}{{#nav.link-to "index" class = "nav-link"}}home{{/nav.link-to}}{{/nav.item}}
- {{#nav.item}}{{#nav.link-to "about" class = "nav-link"}}about{{/nav.link-to}}{{/nav.item}}
- {{#nav.item}}{{#nav.link-to "terms" class = "nav-link"}}terms{{/nav.link-to}}{{/nav.item}}
- {{#if mediaQueries.isDesktop}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "index" class = "nav-link"}}home{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "about" class = "nav-link"}}about{{/nav.link-to}}{{/nav.item}}
+ {{#nav.item class = "nav-item"}}{{#nav.link-to "terms" class = "nav-link"}}terms{{/nav.link-to}}{{/nav.item}}
+ {{#if mediaQueries.isXs}}
+ <div></div>
+ {{else}}
    {{#if session.isAuthenticated}}
       <div style = "position:relative">
         {{#if sessionAccount.currentUserName}}
-          <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{#nav.link-to "login" id = "signed-in-link" }}{{sessionAccount.currentUserName}}{{/nav.link-to}}</p>
+          <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{sessionAccount.currentUserName}}</p>
         {{/if}}
         <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
       </div>

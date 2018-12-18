@@ -7,6 +7,8 @@ export default Controller.extend({
   store:inject(),
   session:inject('session'),
   cs:inject('console'),
+  mediaQueries:inject(),
+  resizeService:inject('resize'),
   documentService: inject('documents'),
   docName:"",
   isPrivate:true,
@@ -26,13 +28,60 @@ export default Controller.extend({
   hasNoDocuments:computed('model', function() {
     return this.get('model').length == 0;
   }),
-  tags:computed('model', function() {
+  loadMoreCtr:0,
+  sortingFilters:[
+    {title:"NEWEST", id:"sortByRecent"},
+    {title:"POPULAR", id:"sortByPopular"},
+    {title:"MOST REMIXED", id:"sortByForked"},
+    {title:"MOST WORKED ON", id:"sortByEditted"},
+    {title:"UPDATED", id:"sortByUpdated"},
+  ],
+  allFilters:[],
+  showingFilters:computed('model', function() {
+    console.log("getting tags")
     this.get('documentService').getPopularTags(12)
     .then((results) => {
-      this.set('tags', results.data);
+      var all = this.get('sortingFilters');
+      let tags = results.data.map((t, i)=> {
+        return {
+          title:t._id, id:"filterBy"+t._id
+        }
+      });
+      all = all.concat(tags);
+      this.set('allFilters', all)
+      console.log("ALL", all.length)
+      this.updateFiltersToShow()
     });
     return [];
   }),
+  init: function () {
+    this._super();
+    this.get('resizeService').on('didResize', event => {
+      this.updateFiltersToShow();
+    })
+  },
+  updateFiltersToShow() {
+     var toShow = 12;
+     if(this.get('mediaQueries.isXs'))
+     {
+       toShow = 4
+     }
+     else if (this.get('mediaQueries.isSm'))
+     {
+       toShow = 6
+     }
+     else if(this.get('mediaQueries.isMd'))
+     {
+       toShow = 8
+     }
+     toShow += this.get('loadMoreCtr')
+     if(toShow >= this.get('allFilters').length)
+     {
+       toShow = this.get('allFilters').length
+     }
+     this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))
+     //console.log("updating filters", this.get('allFilters').slice(0, toShow))
+  },
   updateResults()
   {
     this.get('sessionAccount').getUserFromName();
@@ -43,6 +92,42 @@ export default Controller.extend({
     }
     this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
+  },
+  recent() {
+    //this.set('searchTerm', " ");
+    this.set('page', 0);
+    this.set('sort', "date");
+    this.updateResults();
+  },
+  popular() {
+    //this.set('searchTerm', " ");
+    this.set('page', 0);
+    this.set('sort', "views");
+    this.updateResults();
+  },
+  forked() {
+    //this.set('searchTerm', " ");
+    this.set('page', 0);
+    this.set('sort', "forks");
+    this.updateResults();
+  },
+  editted() {
+    //this.set('searchTerm', " ");
+    this.set('page', 0);
+    this.set('sort', "edits");
+    this.updateResults();
+  },
+  updated() {
+    //this.set('searchTerm', " ");
+    this.set('page', 0);
+    this.set('sort', "updated");
+    this.updateResults();
+  },
+  tag(tag) {
+    this.set('searchTerm', tag);
+    this.set('page', 0);
+    this.set('sort', "views");
+    this.updateResults();
   },
   actions: {
     openDocument(documentId) {
@@ -108,41 +193,36 @@ export default Controller.extend({
       this.decrementProperty('page');
       this.updateResults();
     },
-    recent() {
-      //this.set('searchTerm', " ");
-      this.set('page', 0);
-      this.set('sort', "date");
-      this.updateResults();
+    filter(f) {
+      console.log(f)
+      if(f.id == "sortByForked")
+      {
+        this.forked()
+      }
+      else if(f.id == "sortByRecent")
+      {
+        this.recent()
+      }
+      else if(f.id == "sortByPopular")
+      {
+        this.popular()
+      }
+      else if(f.id == "sortByEditted")
+      {
+        this.editted()
+      }
+      else if(f.id == "sortByUpdated")
+      {
+        this.updated()
+      }
+      else
+      {
+        this.tag(f.title)
+      }
     },
-    popular() {
-      //this.set('searchTerm', " ");
-      this.set('page', 0);
-      this.set('sort', "views");
-      this.updateResults();
-    },
-    forked() {
-      //this.set('searchTerm', " ");
-      this.set('page', 0);
-      this.set('sort', "forks");
-      this.updateResults();
-    },
-    editted() {
-      //this.set('searchTerm', " ");
-      this.set('page', 0);
-      this.set('sort', "edits");
-      this.updateResults();
-    },
-    updated() {
-      //this.set('searchTerm', " ");
-      this.set('page', 0);
-      this.set('sort', "updated");
-      this.updateResults();
-    },
-    tag(tag) {
-      this.set('searchTerm', tag);
-      this.set('page', 0);
-      this.set('sort', "views");
-      this.updateResults();
+    loadMore(numMore) {
+      this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)
+      this.updateFiltersToShow();
     }
   }
 });

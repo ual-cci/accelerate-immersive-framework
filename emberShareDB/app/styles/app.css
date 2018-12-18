@@ -38,16 +38,27 @@ body::-webkit-scrollbar {
   width:100%;
 }
 
-#docName {
+#create-doc-name {
   border-color:black;
   height:35px;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
   width:100%;
   overflow:hidden;
+  font-size:18px;
+  font-family: 'muli';
+  padding-left:20px;
+  color:black;
 }
 
-#create-btn-container {
-  padding-right: 2px !important;
+#create-doc-form-container {
+  padding-right: 2px ! important;
+  padding-left: 2px ! important;
+}
+
+#create-doc-btn-container {
+  padding-right: 2px ! important;
+  padding-left: 2px ! important;
 }
 
 input[id="docName"]::-webkit-input-placeholder {
@@ -78,7 +89,9 @@ input[id="docName"]:-ms-input-placeholder {
   border-radius: 0;
   width:70px;
   height:35px;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
+  margin-right: 5px;
   float:right;
 }
 
@@ -86,7 +99,8 @@ input[id="docName"]:-ms-input-placeholder {
   border:none;
   color:black;
   background-color: darkgray;
-  margin:10px;
+  margin-top:10px;
+  margin-bottom:10px;
   width:60px;
   height:35px;
   float:right;
@@ -104,16 +118,26 @@ input[id="docName"]:-ms-input-placeholder {
   overflow:hidden;
 }
 
-.filter-col {
-  height: 25vh;
+.flexrow {
+  display: flex;
+  background: lightgray; /*for debug*/
+}
+.flexrow > * {
+  flex: 1;
+  margin: 1em;
+  outline: auto green;
+}
+
+#filter-container {
+  height:200px;
 }
 
 #filter3.filter-item {
-  background-color: #FFCC02;
+  background-color: #3929B8;
 }
 
 #filter2.filter-item {
-  background-color: #3929B8;
+  background-color: #FFCC02;
 }
 
 #filter1.filter-item {
@@ -133,16 +157,24 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .a {
-  font-family: 'muli'!important;
+  font-family: 'muli' ! important;
 }
 
 .p {
-  font-family: 'muli'!important;
+  font-family: 'muli' ! important;
   color:white;
 }
 
 .html {
-  font-family: 'muli' !important;
+  font-family: 'muli' ! important;
+}
+
+#filter-row {
+  height:75px ! important;;
+}
+
+.filter-col {
+  height: 75px;
 }
 
 .filter-item {
@@ -150,16 +182,22 @@ input[id="docName"]:-ms-input-placeholder {
   height:90%;
   margin: 10px 10px 10px 10px;
   cursor:pointer;
-  font-size: 18px;
+  font-size: 14px;
   font-family: 'muli';
   font-weight: bold;
 }
 
 .filter-text {
   position: relative;
+  color: black;
+  font-weight: bold;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+}
+
+.tag-item {
+  background-color: #3929B8;
 }
 
 .hide-code-btn {
@@ -494,7 +532,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #document-container {
-  margin: 20px;
+  display: block;
 }
 
 #page-nav-container {
@@ -607,8 +645,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .main-logo {
-  width:auto;
-  height:60px;
+  width:185px;
+  height:auto;
   background-position: center center;
   overflow: hidden;
   display:block;
@@ -616,9 +654,40 @@ input[id="docName"]:-ms-input-placeholder {
   padding-bottom:5px;
 }
 
+.nav-link:focus {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-link:hover {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-link:active {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:focus {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:hover {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
+.nav-item:active {
+  color: black  ! important;
+  background-color: lightgray ! important;
+}
+
 .nav-link {
   color:black;
   font-weight: bold;
+  font-size: 14px;
 }
 
 #signed-in-link {
@@ -654,39 +723,57 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
 }
 
+.row {
+  margin-left: 0px ! important;
+  margin-right: 0px ! important;
+}
 
 input[id="searchTerm"]::-webkit-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-}
+   font-family: "muli";
+   font-size: 18px;
+ }
 
 input[id="searchTerm"]:-moz-placeholder { /* Firefox 18- */
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
+   opacity:1;
 }
 
 input[id="searchTerm"]::-moz-placeholder {  /* Firefox 19+ */
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
+   opacity:1;
 }
 
 input[id="searchTerm"]:-ms-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
+   font-family: "muli";
+   font-size: 18px;
 }
 
 #searchTerm {
-  width: 67vw;
+  padding-right: 20px;
+  width: 100%;
   box-sizing: border-box;
   height:50px;
   text-align: center;
   background-color: black;
   color: white;
   border:none;
+  font-family: "muli";
+  font-size: 18px;
+  margin-bottom: 20px;
 }
 
 .container {
