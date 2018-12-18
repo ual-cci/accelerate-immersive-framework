@@ -63,6 +63,7 @@
   },
   "dependencies": {
     "acorn": "^5.7.3",
+    "ember-cli-media-queries": "^0.1.0",
     "htmlhint": "^0.10.1",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
