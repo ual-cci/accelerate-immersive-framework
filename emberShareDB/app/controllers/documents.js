@@ -44,7 +44,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:t._id, id:"filterBy"+t._id
+          title:t._id, id:"tag-item"
         }
       });
       all = all.concat(tags);

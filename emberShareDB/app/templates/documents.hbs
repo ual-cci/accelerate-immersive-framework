@@ -28,13 +28,13 @@
 <div class = "row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-6 filter-col">
-    <div class = "filter-item" onclick={{action 'filter' filter}}>
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
   <div class = "col-xs-6 filter-col">
-    <div class = "filter-item" onclick={{action 'loadMore' 2}}>
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 2}}>
       <p class = "filter-text">Load More</p>
     </div>
   </div>
@@ -43,13 +43,13 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-4 filter-col">
-    <div class = "filter-item" onclick={{action 'filter' filter}}>
+    <div class = {{concat "filter-item " filter.id}} onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
   <div class = "col-xs-4 filter-col">
-    <div class = "filter-item" onclick={{action 'loadMore' 3}}>
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 3}}>
       <p class = "filter-text">Load More</p>
     </div>
   </div>
@@ -58,13 +58,13 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-3 filter-col">
-    <div class = "filter-item" onclick={{action 'filter' filter}}>
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
       <p class = "filter-text">{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
   <div class = "col-xs-3 filter-col">
-    <div class = "filter-item" onclick={{action 'loadMore' 4}}>
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 4}}>
       <p class = "filter-text">Load More</p>
     </div>
   </div>
@@ -73,13 +73,13 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-2 filter-col">
-    <div class = "filter-item" onclick={{action 'filter' filter}}>
-      <p class = "filter-text">{{filter.title}}</p>
+    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
+      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
     </div>
   </div>
   {{/each}}
   <div class = "col-xs-2 filter-col">
-    <div class = "filter-item" onclick={{action 'loadMore' 6}}>
+    <div class = "filter-item load-more-item" onclick={{action 'loadMore' 6}}>
       <p class = "filter-text">Load More</p>
     </div>
   </div>
