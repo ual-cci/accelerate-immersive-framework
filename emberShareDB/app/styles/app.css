@@ -41,6 +41,7 @@ body::-webkit-scrollbar {
   color:black;
   font-family: 'muli';
   font-size: 14px;
+  padding-top: 50px;
 }
 
 .doc-list-icon-container
@@ -53,7 +54,7 @@ body::-webkit-scrollbar {
 .doc-list-name-container
 {
   display: inline;
-  margin-left:10px;
+  margin-left:4px;
 }
 
 .document-list-col {
@@ -225,7 +226,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .filter-col:after {
-  padding-top: 80.25%;
+  padding-top: 67.25%;
   /* 16:9 ratio */
   display: block;
   content: '';
@@ -372,8 +373,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #main-site-container {
-  padding-left: 15%;
-  padding-right: 15%;
+  padding-left: 10%;
+  padding-right: 10%;
   padding-bottom: 25px;
 }
 
