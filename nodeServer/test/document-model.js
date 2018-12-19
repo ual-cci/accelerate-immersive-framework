@@ -106,6 +106,16 @@ describe('documents searching', () => {
       parent:null,
       source:"<code>"
     };
+    const public_attr_2 = {
+      isPrivate:false,
+      name:"more-tags",
+      owner:"test-user",
+      ownerId:"456",
+      tags:["tag1", "tag2", "tag3"],
+      forkedFrom:null,
+      parent:null,
+      source:"<code>"
+    };
     const private_attr = {
       isPrivate:true,
       name:"private-me",
@@ -148,6 +158,7 @@ describe('documents searching', () => {
     };
     const actions = [
       documentModel.createDoc(public_attr),
+      documentModel.createDoc(public_attr_2),
       documentModel.createDoc(private_attr),
       documentModel.createDoc(private_not_owned_attr),
       documentModel.createDoc(public_not_owned_attr),
@@ -189,6 +200,7 @@ describe('documents searching', () => {
                 names.push(doc.attributes.name);
               });
               assert.isTrue(names.includes("public-me"));
+              assert.isTrue(names.includes("more-tags"));
               assert.isTrue(names.includes("private-me"));
               assert.isTrue(names.includes("public-not-me"));
               assert.isFalse(names.includes("private-not-me"));
@@ -228,6 +240,24 @@ describe('documents searching', () => {
               assert.isTrue(tags.includes('tag3'));
               assert.isTrue(tags.includes('tag4'));
               assert.isTrue(tags.includes('tag5'));
+              res.should.have.status(200);
+              done();
+            });
+      });
+  });
+
+  describe('/GET tags different number', () => {
+      it('it should GET the three most popular public tags', (done) => {
+        chai.request(server)
+            .get('/tags')
+            .query({limit:3})
+            .end((err, res) => {
+              console.log(res.body.data);
+              assert.equal(res.body.data.length, 3);
+              const tags = res.body.data.map((t)=> {return t._id});
+              assert.isTrue(tags.includes('tag1'));
+              assert.isTrue(tags.includes('tag2'));
+              assert.isTrue(tags.includes('tag3'));
               res.should.have.status(200);
               done();
             });

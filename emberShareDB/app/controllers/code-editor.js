@@ -116,7 +116,7 @@ export default Controller.extend({
   updateDragPos: function() {
     const aceW = this.get('aceW');
     let drag = document.getElementById('drag-button')
-    drag.style.right =(aceW - 25) + "px";
+    drag.style.right =(aceW - 31) + "px";
     let tab = document.getElementById('project-tabs');
     tab.style.width = aceW + "px"
   },

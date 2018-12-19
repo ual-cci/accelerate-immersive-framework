@@ -127,7 +127,7 @@ export default Service.extend({
           type: "GET",
           url: config.serverHost + "/tags?limit=" + limit,
         }).then((res) => {
-          this.get('cs').log("tags", res);
+          console.log("tags", res);
           resolve(res);
         }).catch((err) => {
           reject(err);

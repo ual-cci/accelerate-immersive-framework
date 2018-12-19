@@ -269,16 +269,6 @@ input[id="docName"]:-ms-input-placeholder {
   color:white ! important;
 }
 
-.hide-code-btn {
-  position:absolute;
-  display:inline-block;
-  top: 0;
-  left: 0;
-  height:2em;
-  width: 2em;
-  z-index: 20;
-}
-
 #tab0.tab-item {
   background-color: #F54B32;
 }
@@ -349,7 +339,9 @@ input[id="docName"]:-ms-input-placeholder {
 
 #project-tabs {
   max-height: 55px;
-  float:right;
+  margin-left:auto;
+  margin-right:0;
+  clear:right;
   width:30%;
   overflow-x:auto;
   overflow-y:hidden;
@@ -410,18 +402,41 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+#drag-button:hover {
+  border-right-color: rgba(255, 255, 255, 1.0);
+}
+
 #drag-button {
   position:absolute;
-  top: 40;
+  top: 30px;
   right: 50vw;
   z-index: 20;
   height:100%;
   width:10px;
-  opacity:0.0;
+  opacity:1.0;
+  border-right-style: dashed;
+  border-right-color: rgba(200, 200, 200, 0.5);
+  border-right-width: 4px;
   cursor:col-resize;
-  background-color:red;
   pointer-events: auto;
 }
+
+.hide-code-btn {
+  position:absolute;
+  display:inline-block;
+  top: 0;
+  left: 0;
+  height:2em;
+  width: 2em;
+  z-index: 15;
+  background-color: rgba(200, 200, 200, 0.5);
+  border:none;
+}
+
+.hide-code-btn:hover {
+  background-color: rgba(200, 200, 200, 1.0);
+}
+
 
 #playback-container {
   float:left;
@@ -554,16 +569,25 @@ input[id="docName"]:-ms-input-placeholder {
   transform: translateY(50%);
 }
 
-#autoRenderCheckbox
+.doc-checkbox
 {
   font-family: 'muli';
   color:white;
 }
 
+#doc-checkbox-container {
+  display:inline-block;
+  position: absolute;
+  top:5px;
+  right:365px;
+  width:130px;
+  height:100%;
+}
+
 #render-doc {
   display:inline-block;
   position: absolute;
-  top:20px;
+  top:28px;
   right:235px;
   width:150px;
   height:100%;
@@ -627,6 +651,9 @@ input[id="docName"]:-ms-input-placeholder {
 
 #console {
   width:100%;
+  background-color: #e6e6e6;
+  border: none;
+  color: #999999;
   display:block;
 }
 

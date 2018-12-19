@@ -9,6 +9,27 @@
       {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
     <div id = "doc-controls-container">
+      {{#if isOwner}}
+      <div id = "doc-checkbox-container" style = "display:block;">
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
+        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+        <span class="tooltiptext">Other users can discover</span>
+      </div>
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
+        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+        <span class="tooltiptext">WARNING! Other users can edit your code</span>
+      </div>
+      {{#if canEditDoc}}
+        <div class="tooltip">
+          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+          <span class="tooltiptext">Render Code Whilst Typing</span>
+        </div>
+      {{/if}}
+      </div>
+      {{/if}}
       <div id = "render-doc">
       {{#if session.isAuthenticated}}
         <div class = "fork-flag">
@@ -22,13 +43,6 @@
           </div>
         </div>
       {{/if}}
-        {{#if canEditDoc}}
-          <div class="tooltip">
-            <label for="autoRenderCheckbox">AUTO RENDER</label>
-            {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-            <span class="tooltiptext">Render Code Whilst Typing</span>
-          </div>
-        {{/if}}
         </div>
           <div id = "transport-container">
             {{#if isOwner}}
@@ -70,16 +84,7 @@
       tokensChanged=(action 'tagsChanged')
     }}
     </div>
-          <!-- <div class="tooltip">
-            <label for="privacyCheckbox">Private?</label>
-            {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-            <span class="tooltiptext">Other users can discover</span>
-          </div>
-          <div class="tooltip">
-            <label for="readOnlyCheckbox">Read Only?</label>
-            {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-            <span class="tooltiptext">WARNING! Other users can edit your code</span>
-          </div>-->
+
     {{/if}}
     {{#if showAssets}}
       <div class = "file-upload-container">
@@ -172,6 +177,6 @@
         {{/if}}
       </div>
       {{#if displayEditor}}
-      <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+      <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
       {{/if}}
 </div>

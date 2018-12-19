@@ -40,7 +40,7 @@ export default Controller.extend({
   allFilters:[],
   showingFilters:computed('model', function() {
     console.log("getting tags")
-    this.get('documentService').getPopularTags(12)
+    this.get('documentService').getPopularTags(11)
     .then((results) => {
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
@@ -80,6 +80,10 @@ export default Controller.extend({
      {
        this.set('isMore', false)
        toShow = this.get('allFilters').length
+     }
+     else
+     {
+       this.set('isMore', true)
      }
      this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))
      //console.log("updating filters", this.get('allFilters').slice(0, toShow))

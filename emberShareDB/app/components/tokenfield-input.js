@@ -99,12 +99,16 @@ export default Component.extend({
             .off('blur', this._componentWasBlurred.bind(this));
     },
 
+    toggleInput() {
+      this.toggleProperty('showInput')
+      this.set('showDuplicateMessage', false);
+    },
+
     // Actions
     actions: {
 
-        toggleInput() {
-          this.toggleProperty('showInput')
-          this.set('showDuplicateMessage', false);
+        addPressed() {
+          this.toggleInput()
         },
 
         editToken(token) {
@@ -344,5 +348,7 @@ export default Component.extend({
             this._textInputElement.focus();
             this._textInputElement.select();
         });
+        this.set('showInput', true)
+        this.set('showDuplicateMessage', false);
     }
 });
