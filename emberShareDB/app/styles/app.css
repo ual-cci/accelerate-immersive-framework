@@ -160,8 +160,6 @@ input[id="docName"]:-ms-input-placeholder {
   float:right;
 }
 
-
-
 .flexrow {
   display: flex;
   background: lightgray; /*for debug*/
@@ -587,17 +585,27 @@ input[id="docName"]:-ms-input-placeholder {
 #doc-checkbox-container {
   display:inline-block;
   position: absolute;
+  background-color: darkgray;
   top:5px;
   right:365px;
   width:130px;
   height:100%;
 }
 
-#render-doc {
+#render-doc-true {
   display:inline-block;
   position: absolute;
   top:28px;
   right:235px;
+  width:150px;
+  height:100%;
+}
+
+#render-doc-false {
+  display:inline-block;
+  position: absolute;
+  top:28px;
+  right:145px;
   width:150px;
   height:100%;
 }

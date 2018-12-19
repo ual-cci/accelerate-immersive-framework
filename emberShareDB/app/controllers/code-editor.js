@@ -1386,24 +1386,27 @@ export default Controller.extend({
       });
     },
     tabDeleted(docId) {
-      console.log('deleting tab', docId);
-      if (confirm('Are you sure you want to delete?')) {
-        //SWITCH TO HOME TAB FIRST
-        this.newDocSelected(this.get('model').id).then(()=>{
-          this.get('documentService').deleteDoc(docId).then(()=> {
-            const children = this.get('model').data.children;
-            var newChildren = children.filter((c) => {return c != docId})
-            this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
-            .then(()=> {
-              this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
-              this.fetchChildren();
+      if(self.get('isOwner'))
+      {
+        console.log('deleting tab', docId);
+        if (confirm('Are you sure you want to delete?')) {
+          //SWITCH TO HOME TAB FIRST
+          this.newDocSelected(this.get('model').id).then(()=>{
+            this.get('documentService').deleteDoc(docId).then(()=> {
+              const children = this.get('model').data.children;
+              var newChildren = children.filter((c) => {return c != docId})
+              this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
+              .then(()=> {
+                this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
+                this.fetchChildren();
+              }).catch((err)=> {
+                this.get('cs').log(err);
+              })
             }).catch((err)=> {
               this.get('cs').log(err);
             })
-          }).catch((err)=> {
-            this.get('cs').log(err);
-          })
-        });
+          });
+        }
       }
     }
   }
