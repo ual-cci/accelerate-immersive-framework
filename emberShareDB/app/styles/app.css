@@ -269,27 +269,6 @@ input[id="docName"]:-ms-input-placeholder {
   color:white ! important;
 }
 
-.hide-code-btn {
-  position:absolute;
-  display:inline-block;
-  top: 0;
-  left: 0;
-  height:2em;
-  width: 2em;
-  z-index: 20;
-}
-
-
-
-.add-file-button {
-  width: 50px;
-  padding:1px 1px 1px 1px;
-  border-style: none!important;
-  height: 35px;
-  display: inline-block;
-  position:relative;
-}
-
 #tab0.tab-item {
   background-color: #F54B32;
 }
@@ -360,7 +339,9 @@ input[id="docName"]:-ms-input-placeholder {
 
 #project-tabs {
   max-height: 55px;
-  float:right;
+  margin-left:auto;
+  margin-right:0;
+  clear:right;
   width:30%;
   overflow-x:auto;
   overflow-y:hidden;
@@ -373,8 +354,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #main-site-container {
-  padding-left: 10%;
-  padding-right: 10%;
+  padding-left: 8%;
+  padding-right: 8%;
   padding-bottom: 25px;
 }
 
@@ -408,7 +389,7 @@ input[id="docName"]:-ms-input-placeholder {
     background-color: white;
 }
 
-.ace-container {
+#ace-container {
   top: 0;
   right: 0;
   opacity:0.9;
@@ -421,18 +402,41 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+#drag-button:hover {
+  border-right-color: rgba(255, 255, 255, 1.0);
+}
+
 #drag-button {
   position:absolute;
-  top: 40;
+  top: 30px;
   right: 50vw;
   z-index: 20;
   height:100%;
   width:10px;
-  opacity:0.0;
+  opacity:1.0;
+  border-right-style: dashed;
+  border-right-color: rgba(200, 200, 200, 0.5);
+  border-right-width: 4px;
   cursor:col-resize;
-  background-color:red;
   pointer-events: auto;
 }
+
+.hide-code-btn {
+  position:absolute;
+  display:inline-block;
+  top: 0;
+  left: 0;
+  height:2em;
+  width: 2em;
+  z-index: 15;
+  background-color: rgba(200, 200, 200, 0.5);
+  border:none;
+}
+
+.hide-code-btn:hover {
+  background-color: rgba(200, 200, 200, 1.0);
+}
+
 
 #playback-container {
   float:left;
@@ -463,6 +467,15 @@ input[id="docName"]:-ms-input-placeholder {
 
 #code-play-btn:first-child {
   font-size: 25px;
+}
+
+#mobile-play-btn:first-child {
+  font-size: 25px;
+}
+
+#mobile-play-btn{
+  float: right;
+  clear: right;
 }
 
 .clear-btn
@@ -565,16 +578,25 @@ input[id="docName"]:-ms-input-placeholder {
   transform: translateY(50%);
 }
 
-#autoRenderCheckbox
+.doc-checkbox
 {
   font-family: 'muli';
   color:white;
 }
 
+#doc-checkbox-container {
+  display:inline-block;
+  position: absolute;
+  top:5px;
+  right:365px;
+  width:130px;
+  height:100%;
+}
+
 #render-doc {
   display:inline-block;
   position: absolute;
-  top:20px;
+  top:28px;
   right:235px;
   width:150px;
   height:100%;
@@ -638,6 +660,9 @@ input[id="docName"]:-ms-input-placeholder {
 
 #console {
   width:100%;
+  background-color: #e6e6e6;
+  border: none;
+  color: #999999;
   display:block;
 }
 
@@ -646,9 +671,42 @@ input[id="docName"]:-ms-input-placeholder {
   padding:4px 4px 4px 4px;
   border-radius: 2px;
   border-width: 1px;
+  height:35px;
   border-color: darkgray;
   background-color: lightgray;
   margin: 10px 10px 0px 0px;
+}
+
+.add-file-button {
+  width: 50px;
+  padding:1px 1px 1px 1px;
+  border-style: none ! important;
+  height: 35px;
+  background-color: transparent ! important;
+  display: inline-block;
+  position:relative;
+}
+
+.tag-delete-btn {
+  float:right;
+  display:inline;
+  border-style: none;
+  width:30px;
+  height:20px;
+  font-size: 10px;
+  text-align: center;
+  padding-top:3px;
+  margin-left:10px;
+  margin-right:0px;
+  color:#999999;
+  text-align: center;
+  background-color: transparent;
+}
+
+.tag-delete-btn:hover {
+  background-color: transparent;
+  border-color: white;
+  border-width: thin;
 }
 
 .uncharted-token-input {
@@ -678,20 +736,22 @@ input[id="docName"]:-ms-input-placeholder {
   border-radius: 6px;
   border-style: solid;
   border-width: 1px;
-  border-color: darkgray;
-  background-color: lightgray;
+  border-color: #b3b3b3;
+  color: #999999;
+  background-color: transparent;
   margin-top: 2px;
   margin-left:3px;
   margin-bottom: 2px;
 }
 
 .uncharted-token-main-container {
-  background-color: lightgray;
+  background-color: #e6e6e6;
   height:auto;
 }
 
 .uncharted-token-container {
-  background-color: lightgray;
+  background-color: #e6e6e6;
+  height:35px;
 }
 
 #add-tag.add-file-button

@@ -55,6 +55,20 @@ export default Component.extend({
         }
     },
 
+    didUpdateAttrs() {
+      this._super(...arguments);
+      console.log("updating token attrs", this.get('editable'))
+      const addBtn = $(".add-file-button");
+      if (this.get('editable'))
+      {
+        addBtn.css('display','block')
+      }
+      else
+      {
+        addBtn.css('display','none')
+      }
+    },
+
     didInsertElement() {
         this._super(...arguments);
 
@@ -85,12 +99,16 @@ export default Component.extend({
             .off('blur', this._componentWasBlurred.bind(this));
     },
 
+    toggleInput() {
+      this.toggleProperty('showInput')
+      this.set('showDuplicateMessage', false);
+    },
+
     // Actions
     actions: {
 
-        toggleInput() {
-          this.toggleProperty('showInput')
-          this.set('showDuplicateMessage', false);
+        addPressed() {
+          this.toggleInput()
         },
 
         editToken(token) {
@@ -330,5 +348,7 @@ export default Component.extend({
             this._textInputElement.focus();
             this._textInputElement.select();
         });
+        this.set('showInput', true)
+        this.set('showDuplicateMessage', false);
     }
 });

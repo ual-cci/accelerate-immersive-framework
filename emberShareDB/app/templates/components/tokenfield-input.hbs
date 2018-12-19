@@ -5,6 +5,7 @@
             {{component tokenComponent
             token=token
             index=index
+            canDelete=editable
             existingTokens=tokens
             allowDuplicates=allowDuplicates
             selectedTokenIndex=selectedTokenIndex
@@ -15,7 +16,7 @@
         {{/each}}
         {{#bs-button class = "add-file-button" id = "add-tag"
           icon="glyphicon glyphicon-plus"
-          onClick=(action 'toggleInput')}}
+          onClick=(action 'addPressed')}}
         {{/bs-button}}
         </div>
         {{#if showInput}}

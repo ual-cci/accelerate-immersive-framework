@@ -25,62 +25,63 @@ export default Service.extend({
         });
     });
   },
-  _fetchAsset(asset, ctr, callback) {
-    this.get('cs').log("fetching asset:"+asset);
-    const fileId = asset.fileId;
-    const fileName = asset.name;
-    const fileType = asset.fileType;
-    const inStoreAsset = this.get('store').peekRecord('asset',fileId);
-    if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
-    {
-        this.get('cs').log("asset already preloaded:"+fileId);
-        callback(ctr);
-        return;
-    }
-    var xhr = new XMLHttpRequest();
-    var url = config.serverHost + "/asset/"+fileId;
-    xhr.onload = () => {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        this.get('cs').log("fetched asset:"+fileId);
-        this.get('store').push({
-          data:[{
-            id:fileId,
-            type:"asset",
-            attributes:{
-              fileId:fileId,
-              name:fileName,
-              b64data:this._b64e(xhr.responseText),
-              fileType:fileType
-            }
-          }]
-        });
-        callback(ctr);
+  fetchAsset: async function(asset) {
+    return new RSVP.Promise((resolve, reject) => {
+      console.log("fetching asset:"+asset);
+      const fileId = asset.fileId;
+      const fileName = asset.name;
+      const fileType = asset.fileType;
+      const inStoreAsset = this.get('store').peekRecord('asset',fileId);
+      if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
+      {
+          this.get('cs').log("asset already preloaded:"+fileId);
+          resolve();
+          return;
       }
-    };
-    xhr.onerror = () => {
-      this.get('cs').log("error fetching/converting asset:"+fileId);
-      callback(ctr);
-    };
-    xhr.overrideMimeType("text/plain; charset=x-user-defined");
-    xhr.open("GET", url, true);
-    xhr.send(null);
+      var xhr = new XMLHttpRequest();
+      var url = config.serverHost + "/asset/"+fileId;
+      xhr.onload = () => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          this.get('cs').log("fetched asset:"+fileId);
+          this.get('store').push({
+            data:[{
+              id:fileId,
+              type:"asset",
+              attributes:{
+                fileId:fileId,
+                name:fileName,
+                b64data:this._b64e(xhr.responseText),
+                fileType:fileType
+              }
+            }]
+          });
+          resolve();
+        }
+      };
+      xhr.onerror = () => {
+        this.get('cs').log("error fetching/converting asset:"+fileId);
+        reject("error fetching/converting asset:"+fileId);
+      };
+      xhr.overrideMimeType("text/plain; charset=x-user-defined");
+      xhr.open("GET", url, true);
+      xhr.send(null);
+    })
+
   },
   preloadAssets(assets) {
     this.get('cs').log("preloadAssets:"+assets);
     return new RSVP.Promise((resolve, reject) => {
-      var ctr = 0;
-      var callback = (newCtr) => {
-        newCtr++;
-        if(newCtr == assets.length)
-        {
-          resolve();
+      const getAllASync = async (c) => {
+        for(const a of assets) {
+          await this.fetchAsset(a).catch((err)=> {
+            console.log("ERROR IN FETCHING ASSET")
+            reject(err)
+            return
+          });
         }
-        else
-        {
-          this._fetchAsset(assets[newCtr], newCtr, callback);
-        }
-      }
-      this._fetchAsset(assets[ctr], ctr, callback);
+        resolve();
+      };
+      getAllASync();
     })
   },
   _b64e(str) {

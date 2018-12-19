@@ -1,14 +1,37 @@
 <div class = "container-fluid">
   <h4><span>{{feedbackMessage}}</span></h4>
-  {{#if showTitleBar}}
+  {{#if isEmbedded}}
+  <div></div>
+  {{else}}
   <div id = "doc-title-container">
-  {{#if showName}}
     {{#if isNotEdittingDocName}}
       <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
     {{else}}
       {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
+    {{#if mediaQueries.isDesktop}}
     <div id = "doc-controls-container">
+      {{#if isOwner}}
+      <div id = "doc-checkbox-container" style = "display:block;">
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
+        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+        <span class="tooltiptext">Other users can discover</span>
+      </div>
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
+        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+        <span class="tooltiptext">WARNING! Other users can edit your code</span>
+      </div>
+      {{#if canEditDoc}}
+        <div class="tooltip">
+          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+          <span class="tooltiptext">Render Code Whilst Typing</span>
+        </div>
+      {{/if}}
+      </div>
+      {{/if}}
       <div id = "render-doc">
       {{#if session.isAuthenticated}}
         <div class = "fork-flag">
@@ -22,13 +45,6 @@
           </div>
         </div>
       {{/if}}
-        {{#if canEditDoc}}
-          <div class="tooltip">
-            <label for="autoRenderCheckbox">AUTO RENDER</label>
-            {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-            <span class="tooltiptext">Render Code Whilst Typing</span>
-          </div>
-        {{/if}}
         </div>
           <div id = "transport-container">
             {{#if isOwner}}
@@ -59,8 +75,14 @@
             </div>
           </div>
     </div>
-  {{/if}}
+    {{else}}
+    <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
+      {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
+      <span class="tooltiptext">Render Code</span>
+    </div>
+    {{/if}}
   </div>
+  {{#if mediaQueries.isDesktop}}
   <div>
     {{tokenfield-input
       tokens=model.tags
@@ -70,16 +92,7 @@
       tokensChanged=(action 'tagsChanged')
     }}
     </div>
-          <!-- <div class="tooltip">
-            <label for="privacyCheckbox">Private?</label>
-            {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-            <span class="tooltiptext">Other users can discover</span>
-          </div>
-          <div class="tooltip">
-            <label for="readOnlyCheckbox">Read Only?</label>
-            {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-            <span class="tooltiptext">WARNING! Other users can edit your code</span>
-          </div>-->
+    {{/if}}
     {{/if}}
     {{#if showAssets}}
       <div class = "file-upload-container">
@@ -110,7 +123,11 @@
         {{/if}}
       </div>
     {{/if}}
-    {{#if displayEditor}}
+
+    {{#if mediaQueries.isDesktop}}
+    {{#if isEmbedded}}
+    <div></div>
+    {{else}}
       {{project-tabs
         parent = parentData
         tabs = tabs
@@ -118,15 +135,19 @@
         onDelete = (action 'tabDeleted')
         onCreate = (action 'newTab')}}
     {{/if}}
+    {{/if}}
     <div id = "main-code-container">
-      {{#if displayEditor}}
+      {{#if mediaQueries.isDesktop}}
+      {{#if isEmbedded}}
+      <div></div>
+      {{else}}
       <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+      {{/if}}
       {{/if}}
       <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
       </div>
-      {{#if displayEditor}}
-      <div class = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+      <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
           <div id = "playback-container">
@@ -169,9 +190,12 @@
             suggestCompletions = (action 'suggestCompletions')
           }}
         </div>
-        {{/if}}
       </div>
-      {{#if displayEditor}}
-      <textarea id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+      {{#if mediaQueries.isDesktop}}
+      {{#if isEmbedded}}
+      <div></div>
+      {{else}}
+      <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+      {{/if}}
       {{/if}}
 </div>
