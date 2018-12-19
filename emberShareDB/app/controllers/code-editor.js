@@ -1386,7 +1386,7 @@ export default Controller.extend({
       });
     },
     tabDeleted(docId) {
-      this.get('cs').log('deleting tab', docId);
+      console.log('deleting tab', docId);
       if (confirm('Are you sure you want to delete?')) {
         //SWITCH TO HOME TAB FIRST
         this.newDocSelected(this.get('model').id).then(()=>{

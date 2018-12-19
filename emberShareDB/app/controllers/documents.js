@@ -157,7 +157,6 @@ export default Controller.extend({
     },
     createNewDocument() {
       let docName = this.get('docName');
-      docName = docName.replace(/\s/g, "-");
       const isPrivate = this.get('isPrivate');
       if(docName.length > 1)
       {
