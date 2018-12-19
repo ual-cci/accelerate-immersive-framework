@@ -16,6 +16,8 @@ export default Controller.extend({
 
   //Services
   websockets: inject('websockets'),
+  mediaQueries:inject(),
+  resizeService:inject('resize'),
   sessionAccount: inject('session-account'),
   assetService: inject('assets'),
   store: inject('store'),
@@ -45,7 +47,6 @@ export default Controller.extend({
   showShare:false,
   showAssets:false,
   showPreview:false,
-  showTitleBar:true,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -54,7 +55,6 @@ export default Controller.extend({
   savedVals:null,
   hideEditor:'false',
   embed:'false',
-  showName:true,
   titleName:"",
   wsAvailable:true,
   editCtr:0,
@@ -67,15 +67,11 @@ export default Controller.extend({
   doPlay:true,
 
   //Computed parameters
-  aceStyle: computed('aceW','displayEditor', function() {
+  aceStyle: computed('aceW', function() {
     const aceW = this.get('aceW');
-    const displayEditor = this.get('displayEditor');
-    const display = displayEditor ? "inline" : "none"
     this.updateDragPos();
+    const display = this.get("mediaQueries.isDesktop") ? "inline":"none"
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
-  }),
-  displayEditor: computed('hideEditor', function() {
-    return this.get('hideEditor') != "true";
   }),
   titleNoName: computed('titleName', function() {
     return this.get('titleName').split("by")[0];
@@ -91,6 +87,17 @@ export default Controller.extend({
   }),
 
   //Functions
+  init: function () {
+    this._super();
+    this.get('resizeService').on('didResize', event => {
+      const display = this.get("mediaQueries.isDesktop") ? "inline":"none"
+      if(this.get("mediaQueries.isDesktop"))
+      {
+        this.updateDragPos()
+      }
+      $("#ace-container").css("display", display);
+    })
+  },
   initShareDB: function() {
     this.get('cs').log('initShareDB')
     this.initWebSockets();
@@ -101,24 +108,24 @@ export default Controller.extend({
   initUI: function() {
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
-    this.set('showTitleBar', !embed)
+    this.set('isEmbedded', embed)
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
+    const display = embed || this.get("mediaQueries.isMobile") ? "none":"inline"
+    $("#ace-container").css("display", display);
     this.updateDragPos();
-    if(embed)
-    {
-      this.set('displayEditor', !embed);
-      this.set('showName', !embed);
-    }
     this.get('cs').observers.push(this);
   },
   updateDragPos: function() {
     const aceW = this.get('aceW');
     let drag = document.getElementById('drag-button')
-    drag.style.right =(aceW - 31) + "px";
-    let tab = document.getElementById('project-tabs');
-    tab.style.width = aceW + "px"
+    if(drag)
+    {
+      drag.style.right =(aceW - 31) + "px";
+      let tab = document.getElementById('project-tabs');
+      tab.style.width = aceW + "px"
+    }
   },
   initAceEditor: function() {
     const editor = this.get('editor');
@@ -325,6 +332,7 @@ export default Controller.extend({
         reject(err);
         return;
       });
+      console.log("CAN EDIT?", this.get('canEditDoc'))
       editor.setReadOnly(!this.get('canEditDoc'));
       if(!isEmpty(this.get('loadingInterval')))
       {
@@ -493,8 +501,7 @@ export default Controller.extend({
   doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('embed') == "true";
-    const displayEditor = this.get('displayEditor');
-    if(embed || !displayEditor) {
+    if(embed) {
       return true;
     }
     return model.data.dontPlay === "false" || !model.data.dontPlay;
@@ -756,15 +763,18 @@ export default Controller.extend({
     console.log("setCanEditDoc")
     if(isEmpty(currentUser) || isEmpty(model.data))
     {
+      console.log("NO USER OR MODEL")
       this.set('canEditDoc', false);
       this.set('isOwner', false);
       return;
     }
     if(currentUser != model.data.ownerId)
     {
+      console.log("NOT OWNER")
       this.set('isOwner', false);
       if(model.data.readOnly)
       {
+        console.log("READ ONLY")
         this.set('canEditDoc', false);
         return;
       }
@@ -772,8 +782,12 @@ export default Controller.extend({
     else
     {
       this.set('isOwner', true);
+      this.set('canEditDoc', true);
+      console.log("IS OWNER")
+      return;
     }
-    this.set('canEditDoc', this.get('displayEditor'));
+    console.log("IS DESKTOP?", this.get('mediaQueries.isDesktop'))
+    this.set('canEditDoc', this.get('mediaQueries.isDesktop'));
   },
   deleteCurrentDocument: function() {
     let model = this.get('model');
@@ -1211,7 +1225,7 @@ export default Controller.extend({
     mouseDown(e) {
       //this.get('cs').log('mouseDown',e.target);
       this.set('isDragging', true);
-      const startWidth = document.querySelector('.ace-container').clientWidth;
+      const startWidth = document.querySelector('#ace-container').clientWidth;
       const startX = e.clientX;
       this.set('startWidth', startWidth);
       this.set('startX', startX);

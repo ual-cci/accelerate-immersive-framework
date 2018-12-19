@@ -354,8 +354,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #main-site-container {
-  padding-left: 8% ! important;
-  padding-right: 8% ! important;
+  padding-left: 8%;
+  padding-right: 8%;
   padding-bottom: 25px;
 }
 
@@ -389,7 +389,7 @@ input[id="docName"]:-ms-input-placeholder {
     background-color: white;
 }
 
-.ace-container {
+#ace-container {
   top: 0;
   right: 0;
   opacity:0.9;
@@ -467,6 +467,15 @@ input[id="docName"]:-ms-input-placeholder {
 
 #code-play-btn:first-child {
   font-size: 25px;
+}
+
+#mobile-play-btn:first-child {
+  font-size: 25px;
+}
+
+#mobile-play-btn{
+  float: right;
+  clear: right;
 }
 
 .clear-btn
