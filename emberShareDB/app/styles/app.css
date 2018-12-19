@@ -279,17 +279,6 @@ input[id="docName"]:-ms-input-placeholder {
   z-index: 20;
 }
 
-
-
-.add-file-button {
-  width: 50px;
-  padding:1px 1px 1px 1px;
-  border-style: none!important;
-  height: 35px;
-  display: inline-block;
-  position:relative;
-}
-
 #tab0.tab-item {
   background-color: #F54B32;
 }
@@ -373,8 +362,8 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #main-site-container {
-  padding-left: 10%;
-  padding-right: 10%;
+  padding-left: 8% ! important;
+  padding-right: 8% ! important;
   padding-bottom: 25px;
 }
 
@@ -646,9 +635,42 @@ input[id="docName"]:-ms-input-placeholder {
   padding:4px 4px 4px 4px;
   border-radius: 2px;
   border-width: 1px;
+  height:35px;
   border-color: darkgray;
   background-color: lightgray;
   margin: 10px 10px 0px 0px;
+}
+
+.add-file-button {
+  width: 50px;
+  padding:1px 1px 1px 1px;
+  border-style: none ! important;
+  height: 35px;
+  background-color: transparent ! important;
+  display: inline-block;
+  position:relative;
+}
+
+.tag-delete-btn {
+  float:right;
+  display:inline;
+  border-style: none;
+  width:30px;
+  height:20px;
+  font-size: 10px;
+  text-align: center;
+  padding-top:3px;
+  margin-left:10px;
+  margin-right:0px;
+  color:#999999;
+  text-align: center;
+  background-color: transparent;
+}
+
+.tag-delete-btn:hover {
+  background-color: transparent;
+  border-color: white;
+  border-width: thin;
 }
 
 .uncharted-token-input {
@@ -678,20 +700,22 @@ input[id="docName"]:-ms-input-placeholder {
   border-radius: 6px;
   border-style: solid;
   border-width: 1px;
-  border-color: darkgray;
-  background-color: lightgray;
+  border-color: #b3b3b3;
+  color: #999999;
+  background-color: transparent;
   margin-top: 2px;
   margin-left:3px;
   margin-bottom: 2px;
 }
 
 .uncharted-token-main-container {
-  background-color: lightgray;
+  background-color: #e6e6e6;
   height:auto;
 }
 
 .uncharted-token-container {
-  background-color: lightgray;
+  background-color: #e6e6e6;
+  height:35px;
 }
 
 #add-tag.add-file-button

@@ -1,4 +1,11 @@
-<div class="uncharted-token-label">{{token}}</div>
+<div class="uncharted-token-label">{{token}}
+{{#if canDelete}}
+  {{#bs-button class = "tag-delete-btn"
+  onClick=(action 'onDelete')
+  icon="glyphicon glyphicon-remove"}}
+  {{/bs-button}}
+{{/if}}
+</div>
 <div class="uncharted-token-actions">
     <span class="fa fa-times uncharted-remove-action" {{action 'removeToken'}}></span>
 </div>

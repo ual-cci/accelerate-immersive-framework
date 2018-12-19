@@ -6,12 +6,15 @@ export default Ember.Component.extend({
     layout, // For more info: https://discuss.emberjs.com/t/layout-property-for-declaring-html-in-component/12844/2
     classNames: ['uncharted-token'],
     classNameBindings: ['isSelected:uncharted-selected-token'],
-
+    didUpdateAttrs() {
+      this._super(...arguments);
+      console.log("updating token attrs", this.get('canDelete'))
+    },
     // Properties
     token: null,
     index: null,
     selectedTokenIndex: null,
-
+    canDelete:true,
     // State
     isSelected: Ember.computed('index', 'selectedTokenIndex', function() {
         return this.get('index') === this.get('selectedTokenIndex');
@@ -21,6 +24,9 @@ export default Ember.Component.extend({
     actions: {
         removeToken() {
             this.removeToken();
+        },
+        onDelete() {
+          this.removeToken();
         }
     }
 });

@@ -71,10 +71,7 @@ export default Controller.extend({
     const aceW = this.get('aceW');
     const displayEditor = this.get('displayEditor');
     const display = displayEditor ? "inline" : "none"
-    let drag = document.getElementById('drag-button')
-    drag.style.right =(aceW - 25) + "px";
-    let tab = document.getElementById('project-tabs');
-    tab.style.width = aceW + "px"
+    this.updateDragPos();
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   displayEditor: computed('hideEditor', function() {
@@ -106,14 +103,22 @@ export default Controller.extend({
     const embed = this.get('embed') == "true";
     this.set('showTitleBar', !embed)
     $("#mimic-navbar").css("display", embed ? "none" : "block");
-    $("#main-site-container").css("padding-left", embed ? "0%" : "15%");
-    $("#main-site-container").css("padding-right", embed ? "0%" : "15%");
+    $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
+    $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
+    this.updateDragPos();
     if(embed)
     {
       this.set('displayEditor', !embed);
       this.set('showName', !embed);
     }
     this.get('cs').observers.push(this);
+  },
+  updateDragPos: function() {
+    const aceW = this.get('aceW');
+    let drag = document.getElementById('drag-button')
+    drag.style.right =(aceW - 25) + "px";
+    let tab = document.getElementById('project-tabs');
+    tab.style.width = aceW + "px"
   },
   initAceEditor: function() {
     const editor = this.get('editor');
