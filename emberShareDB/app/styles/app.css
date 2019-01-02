@@ -364,7 +364,7 @@ input[id="docName"]:-ms-input-placeholder {
   display:inline-block;
   position:relative;
   overflow-x:hidden;
-  overflow-y:visible;
+  overflow-y:hidden;
 }
 
 .output-container {
@@ -400,6 +400,13 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+#drag-container {
+  position:absolute;
+  top: 0px;
+  height:100%;
+  width:30px;
+}
+
 #drag-button:hover {
   border-right-color: rgba(255, 255, 255, 1.0);
 }
@@ -407,7 +414,7 @@ input[id="docName"]:-ms-input-placeholder {
 #drag-button {
   position:absolute;
   top: 30px;
-  right: 50vw;
+  right: 0px;
   z-index: 20;
   height:100%;
   width:10px;

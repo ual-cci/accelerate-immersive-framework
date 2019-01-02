@@ -119,7 +119,7 @@ export default Controller.extend({
   },
   updateDragPos: function() {
     const aceW = this.get('aceW');
-    let drag = document.getElementById('drag-button')
+    let drag = document.getElementById('drag-container')
     if(drag)
     {
       drag.style.right =(aceW - 31) + "px";
@@ -261,8 +261,8 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      // if(this.get('wsAvailable'))
-      // {
+      if(this.get('wsAvailable'))
+      {
         const socket = this.get('socket');
         let con = this.get('connection');
         if(isEmpty(con) && !isEmpty(socket))
@@ -289,11 +289,11 @@ export default Controller.extend({
           }
         });
         sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
-      // }
-      // else
-      // {
-      //   this.fetchDoc(docId).then((doc)=>resolve(doc));
-      // }
+      }
+      else
+      {
+        this.fetchDoc(docId).then((doc)=>resolve(doc));
+      }
     })
   },
   fetchDoc: function(docId) {
@@ -355,19 +355,20 @@ export default Controller.extend({
     });
   },
   clearTabs: function() {
-    // this.setParentData({
-    //     name:"",
-    //     id:"",
-    //     children:[],
-    //     source:"",
-    //     assets:""
-    // })
+    this.setParentData({
+        name:"",
+        id:"",
+        children:[],
+        source:"",
+        assets:""
+    })
     this.set('tabs',[]);
   },
   setTabs: function(data) {
     const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id};
+      const canDelete = this.get('canEditDoc') && child.id==currentDoc.id;
+      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id, canDelete:canDelete};
     });
     console.log(tabs);
     this.set('tabs', tabs);
@@ -944,6 +945,7 @@ export default Controller.extend({
       let text = "loading code.";
       this.set('titleName', text);
       this.clearTabs();
+
       this.set('loadingInterval', setInterval(()=>{
         if(text=="loading code.")
         {
@@ -1285,12 +1287,13 @@ export default Controller.extend({
       this.set('renderedSource', "");
     },
     hideCode() {
+      const min = 30;
       var hide = ()=> {
         let aceW = this.get('aceW')
-        if(aceW > 0.0)
+        if(aceW > min)
         {
           setTimeout(()=> {
-            this.set('aceW', Math.max(0.0, aceW - 10));
+            this.set('aceW', Math.max(min, aceW - 10));
             hide();
           }, 2);
         }
@@ -1302,12 +1305,14 @@ export default Controller.extend({
       hide();
     },
     showCode() {
+      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
+      console.log("main-code-container width", max)
       var show = ()=> {
         let aceW = this.get('aceW')
-        if(aceW < 700)
+        if(aceW < max)
         {
           setTimeout(()=> {
-            this.set('aceW', Math.min(700, aceW + 10));
+            this.set('aceW', Math.min(max, aceW + 10));
             show();
           }, 2);
         }
@@ -1382,7 +1387,7 @@ export default Controller.extend({
            });
         }
       }).catch((err)=>{
-        this.get('cs').log('ERROR updateSourceFromSession', err)
+        this.get('cs').log('ERROR', err)
       });
     },
     tabDeleted(docId) {

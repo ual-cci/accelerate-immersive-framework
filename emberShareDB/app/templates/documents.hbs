@@ -1,6 +1,6 @@
 <div class = "main-document-container">
 <form {{action 'search' on='submit'}}>
-  {{input id='searchTerm' placeholder='search' value=searchTerm key-press="search"}}
+  {{input id='searchTerm' placeholder='search' value=searchTerm key-press=(action "search")}}
 </form>
 <div class = "row" id = "doc-create-container">
 {{#if session.isAuthenticated}}
