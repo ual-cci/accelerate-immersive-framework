@@ -28,9 +28,7 @@
 <div class = "row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-6 filter-col filter-col-xs">
-    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
-      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
-    </div>
+    {{filter-item filter=filter onFilter = (action 'filter' filter) isSelected = filter.isSelected}}
   </div>
   {{/each}}
   {{#if isMore}}
@@ -45,9 +43,7 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-4 filter-col filter-col-sm">
-    <div class = {{concat "filter-item " filter.id}} onclick={{action 'filter' filter}}>
-      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
-    </div>
+    {{filter-item filter=filter onFilter = (action 'filter' filter) isSelected = filter.isSelected}}
   </div>
   {{/each}}
   {{#if isMore}}
@@ -62,9 +58,7 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-3 filter-col filter-col-md">
-    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
-      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
-    </div>
+    {{filter-item filter=filter onFilter = (action 'filter' filter) isSelected = filter.isSelected}}
   </div>
   {{/each}}
   {{#if isMore}}
@@ -79,9 +73,7 @@
 <div class = "row" id = "filter-row">
   {{#each showingFilters as |filter index|}}
   <div class = "col-xs-2 filter-col filter-col-lg">
-    <div class = {{concat "filter-item " filter.id}}  onclick={{action 'filter' filter}}>
-      <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
-    </div>
+    {{filter-item filter=filter onFilter = (action 'filter' filter) isSelected = filter.isSelected}}
   </div>
   {{/each}}
   {{#if isMore}}

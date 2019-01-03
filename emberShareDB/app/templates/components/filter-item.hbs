@@ -1,0 +1,8 @@
+<div class = {{concat "filter-item " filter.id}}  onclick={{action 'onFilter'}}>
+  <svg style="width:100%;height:100%;position:absolute;top:0px;left:0px;">
+    {{#each shapes as |s|}}
+      <circle cx = {{s.x}} cy = {{s.y}} r = {{s.r}} fill="white" opacity="0.5" />
+    {{/each}}
+  </svg>
+  <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+</div>

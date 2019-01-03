@@ -31,11 +31,11 @@ export default Controller.extend({
   isMore:true,
   loadMoreCtr:0,
   sortingFilters:[
-    {title:"NEWEST", id:"sortByRecent"},
-    {title:"POPULAR", id:"sortByPopular"},
-    {title:"MOST REMIXED", id:"sortByForked"},
-    {title:"MOST WORKED ON", id:"sortByEditted"},
-    {title:"UPDATED", id:"sortByUpdated"},
+    {title:"NEWEST", id:"sortByRecent", isSelected:false},
+    {title:"POPULAR", id:"sortByPopular", isSelected:true},
+    {title:"MOST REMIXED", id:"sortByForked", isSelected:false},
+    {title:"MOST WORKED ON", id:"sortByEditted", isSelected:false},
+    {title:"UPDATED", id:"sortByUpdated", isSelected:false},
   ],
   allFilters:[],
   showingFilters:computed('model', function() {
@@ -45,7 +45,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:t._id, id:"tag-item"
+          title:t._id, id:"tag-item", isSelect:false
         }
       });
       all = all.concat(tags);
@@ -60,6 +60,16 @@ export default Controller.extend({
     this.get('resizeService').on('didResize', event => {
       this.updateFiltersToShow();
     })
+  },
+  selectFilter(selected) {
+    var newF = []
+    this.get('showingFilters').forEach((f)=> {
+      Ember.set(f, "isSelected", f.title == selected.title);
+      newF.push(f)
+    })
+    Ember.run(()=> {
+      this.set('showingFilters', newF);
+    });
   },
   updateFiltersToShow() {
      var toShow = 10;
@@ -86,7 +96,7 @@ export default Controller.extend({
        this.set('isMore', true)
      }
      this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))
-     //console.log("updating filters", this.get('allFilters').slice(0, toShow))
+     console.log("updating filters", this.get('allFilters').slice(0, toShow))
   },
   updateResults()
   {
@@ -96,7 +106,7 @@ export default Controller.extend({
     {
       searchTerm = " ";
     }
-    this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+    console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
   },
   recent() {
@@ -199,7 +209,6 @@ export default Controller.extend({
       this.updateResults();
     },
     filter(f) {
-      console.log(f)
       if(f.id == "sortByForked")
       {
         this.forked()
@@ -224,6 +233,7 @@ export default Controller.extend({
       {
         this.tag(f.title)
       }
+      this.selectFilter(f);
     },
     loadMore(numMore) {
       this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)

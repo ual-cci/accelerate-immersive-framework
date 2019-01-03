@@ -216,7 +216,6 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-col {
   min-width: 125px;
-  /* whatever width you want */
   display: inline-block;
   position: relative;
   padding-left: 5px;
@@ -225,7 +224,6 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-col:after {
   padding-top: 67.25%;
-  /* 16:9 ratio */
   display: block;
   content: '';
 }
