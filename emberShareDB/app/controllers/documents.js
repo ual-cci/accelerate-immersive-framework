@@ -59,16 +59,6 @@ export default Controller.extend({
       this.updateFiltersToShow();
     })
   },
-  highlightTitle(title) {
-    // var newF = []
-    // this.get('showingFilters').forEach((f)=> {
-    //   Ember.set(f, "highlightTitle", f.title == title);
-    //   newF.push(f)
-    // })
-    // Ember.run(()=> {
-    //   this.set('showingFilters', newF);
-    // });
-  },
   updateSelectedFilter() {
     var newF = []
     console.log("updating selected filter", this.get('sort'))
@@ -111,15 +101,18 @@ export default Controller.extend({
   },
   updateResults()
   {
-    this.get('sessionAccount').getUserFromName();
-    let searchTerm = this.get('searchTerm');
-    if(isEmpty(searchTerm))
-    {
-      searchTerm = " ";
-    }
-    console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
-    this.updateSelectedFilter();
-    this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
+    $("#document-container").addClass("fading-out")
+    setTimeout(()=> {
+      this.get('sessionAccount').getUserFromName();
+      let searchTerm = this.get('searchTerm');
+      if(isEmpty(searchTerm))
+      {
+        searchTerm = " ";
+      }
+      console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+      this.updateSelectedFilter();
+      this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
+    }, 500)
   },
   recent() {
     //this.set('searchTerm', " ");
@@ -213,7 +206,14 @@ export default Controller.extend({
     },
     search() {
       this.set('page', 0);
-      this.updateResults();
+      if(!isEmpty(this.get('searchTimeout')))
+      {
+        clearTimeout(this.get('searchTimeout'))
+      }
+      this.set('searchTimeout', setTimeout(()=> {
+        this.updateResults();
+        this.set('searchTimeout', nil);
+      }, 500))
     },
     nextPage() {
       this.incrementProperty('page');
@@ -248,11 +248,25 @@ export default Controller.extend({
       {
         this.tag(f.title)
       }
-      this.highlightTitle(f.title)
     },
     loadMore(numMore) {
       this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)
       this.updateFiltersToShow();
+    },
+    flashResults()
+    {
+      console.log("flashing results")
+      $("#document-container").addClass("fading-in")
+      $("#document-container").removeClass("fading-out")
+      if(!isEmpty(this.get('fadeTimeout')))
+      {
+        clearTimeout(this.get('fadeTimeout'))
+      }
+      this.set('fadeTimeout', setTimeout(()=> {
+        $("#document-container").removeClass("fading-out")
+        $("#document-container").removeClass("fading-in")
+        this.set('fadeTimeout', null);
+      }, 300));
     }
   }
 });

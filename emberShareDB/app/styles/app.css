@@ -654,6 +654,28 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 0px;
 }
 
+@keyframes fadingOutAnimation {
+  to {opacity: 0.0;}
+}
+
+@keyframes fadingInAnimation {
+  to {opacity: 1.0;}
+}
+
+.fading-out {
+  animation-name: fadingOutAnimation;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+}
+
+.fading-in {
+  animation-name: fadingInAnimation;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+}
+
 #page-nav-container {
   margin: 20px;
 }

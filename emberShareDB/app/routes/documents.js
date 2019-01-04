@@ -12,13 +12,13 @@ export default Route.extend({
     {
       console.log("setupController document", model.query.filter.sortBy)
       controller.send('updateSelectedFilter', model.query.filter.sortBy);
+      controller.send('flashResults')
     }
   },
   model(params) {
     let currentUserId = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
     console.log("document model", currentUserId, currentUserName, params.sort);
-    //controller.send('updateSelectedFilter');
     const sort = params.sort ? params.sort : "views";
     let filter = {
       filter:{
