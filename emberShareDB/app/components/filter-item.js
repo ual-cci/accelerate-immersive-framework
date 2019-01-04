@@ -123,7 +123,6 @@ export default Component.extend({
         i.xr = i.x + i.r
         i.x2r = i.x + i.r / 2
       })
-      console.log(sh)
       this.set('shapes', sh);
       this.updateAnimationState();
     }

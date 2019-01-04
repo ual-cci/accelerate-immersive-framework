@@ -214,6 +214,7 @@ export default Controller.extend({
           const d = JSON.parse(event.data);
           if(d.a == "init" && d.type == "http://sharejs.org/types/JSONv0")
           {
+            this.set('fetchingDoc', false)
             this.websocketError()
           }
         }
@@ -225,15 +226,48 @@ export default Controller.extend({
       }
     }
   },
+  cleanUpConnections: function() {
+    return new RSVP.Promise((resolve, reject)=> {
+      if(!isEmpty(this.get('sharedDBDoc')))
+      {
+        this.get('sharedDBDoc').destroy();
+        this.set('sharedDBDoc', null);
+      }
+      this.set('currentDoc', null);
+      if(!isEmpty(this.get('socket')))
+      {
+        this.get('socket').removeEventListener('error')
+        this.get('socket').removeEventListener('open')
+        this.get('socket').removeEventListener('close')
+        this.get('socket').removeEventListener('message')
+        this.get('socket').onclose = null;
+        this.get('socket').onopen = null;
+        this.get('socket').onmessage = null;
+        this.get('socket').onerror = null;
+        this.get('socket').close();
+        this.set('socket', null);
+      }
+      if(!isEmpty(this.get('connection')))
+      {
+        this.get('connection').close();
+        this.set('connection', null);
+      }
+      resolve();
+    })
+  },
   websocketError: function() {
     console.log("websocket error")
     this.set('wsAvailable', false);
-    if(!this.get('fetchingDoc') && !this.get('leftCodeEditor'))
-    {
-      this.selectRootDoc();
-    }
+    this.cleanUpConnections().then(()=>{
+      if(!this.get('fetchingDoc') && !this.get('leftCodeEditor'))
+      {
+        console.log("selecting doc")
+        this.selectRootDoc();
+      }
+    })
   },
   newDocSelected: function(docId) {
+    console.log("newDocSelected")
     return new RSVP.Promise((resolve, reject)=> {
       let doc = this.get('currentDoc');
       this.get('cs').log("newDocSelected", docId);
@@ -255,6 +289,7 @@ export default Controller.extend({
     })
   },
   selectRootDoc: function() {
+    console.log("selectRootDoc")
     this.newDocSelected(this.get('model').id).then(()=> {
       this.updateTabbarLocation();
       this.get('cs').log("loaded root doc, preloading assets");
@@ -272,7 +307,7 @@ export default Controller.extend({
   },
   connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("connectToDoc doc");
+      console.log("connectToDoc doc");
       this.set('fetchingDoc', true);
       if(this.get('wsAvailable'))
       {
@@ -1201,6 +1236,7 @@ export default Controller.extend({
     cleanUp() {
       const fn = () => {
         console.log("clean up")
+        this.set('fetchingDoc', false);
         clearInterval(this.get('preloadingInterval'))
         clearInterval(this.get('loadingInterval'))
         this.showFeedback("");
@@ -1211,21 +1247,7 @@ export default Controller.extend({
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))
         {
-          this.get('sharedDBDoc').destroy();
-          this.set('sharedDBDoc', null);
-          this.set('currentDoc', null);
-          this.get('socket').removeEventListener('error')
-          this.get('socket').removeEventListener('open')
-          this.get('socket').removeEventListener('close')
-          this.get('socket').removeEventListener('message')
-          this.get('socket').onclose = null;
-          this.get('socket').onopen = null;
-          this.get('socket').onmessage = null;
-          this.get('socket').onerror = null;
-          this.get('connection').close();
-          this.get('socket').close();
-          this.set('socket', null);
-          this.set('connection', null);
+          this.cleanUpConnections();
         }
         console.log('cleaned up');
         this.removeWindowListener();
