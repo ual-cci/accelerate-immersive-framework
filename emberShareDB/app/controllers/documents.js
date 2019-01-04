@@ -112,7 +112,7 @@ export default Controller.extend({
       console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
       this.updateSelectedFilter();
       this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
-    }, 500)
+    }, 400)
   },
   recent() {
     //this.set('searchTerm', " ");
@@ -266,7 +266,7 @@ export default Controller.extend({
         $("#document-container").removeClass("fading-out")
         $("#document-container").removeClass("fading-in")
         this.set('fadeTimeout', null);
-      }, 300));
+      }, 500));
     }
   }
 });

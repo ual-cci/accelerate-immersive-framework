@@ -663,17 +663,19 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .fading-out {
-  animation-name: fadingOutAnimation;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
-  animation-iteration-count: 1;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+   opacity: 0;
 }
 
 .fading-in {
-  animation-name: fadingInAnimation;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
-  animation-iteration-count: 1;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+   opacity: 1;
 }
 
 #page-nav-container {

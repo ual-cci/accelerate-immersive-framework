@@ -64,6 +64,7 @@ export default Component.extend({
       var xShift;
       var yShift;
       var xIndent;
+      var yStart = 0;
 
       //CIRCLE
       if(this.get('filter').id == "date" || this.get('filter').id == "edits")
@@ -84,6 +85,8 @@ export default Component.extend({
         yShift = r;
         xIndent = r;
         isRect = true;
+        // yStart = -r * 0.7;
+        // xStart = -r * 0.4;
       }
       //TRIANGLE
       else
@@ -92,11 +95,13 @@ export default Component.extend({
         xShift = 2 * r;
         yShift = r * 0.75;
         xIndent = r;
+        // yStart = -r * 0.7;
+        // xStart = -r * 0.4;
       }
 
       const w = 100 + 2 * r;
       const h = 60;
-      var y = 0;
+      var y = yStart;
       var x = xStart;
 
       while(y <= h)
