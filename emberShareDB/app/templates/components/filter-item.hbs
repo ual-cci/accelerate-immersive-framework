@@ -2,11 +2,11 @@
   <svg style="width:100%;height:100%;position:absolute;top:0px;left:0px;" viewBox="0 0 100 60" preserveAspectRatio="none" >
     {{#each shapes as |s|}}
       {{#if s.isCircle}}
-      <circle cx = {{s.x}} cy = {{s.y}} r = {{s.r}} fill="white" opacity="0.5" />
+      <circle cx = {{s.x}} cy = {{s.y}} r = {{s.r}} fill="white" opacity="0.175" />
       {{else if s.isRect}}
-      <rect x = {{s.x}} y = {{s.y}} width = {{s.r}} height = {{s.r}} fill="white" opacity="0.5" />
+      <rect x = {{s.x}} y = {{s.y}} width = {{s.r}} height = {{s.r}} fill="white" opacity="0.175" />
       {{else}}
-      <polygon points = {{concat s.x "," s.y " " s.xr "," s.y " " s.x2r "," s.yr }} fill="white" opacity="0.5" />
+      <polygon points = {{concat s.x "," s.y " " s.xr "," s.y " " s.x2r "," s.yr }} fill="white" opacity="0.3" />
       {{/if}}
     {{/each}}
   </svg>

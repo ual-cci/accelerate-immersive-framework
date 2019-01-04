@@ -27,10 +27,20 @@ export default Component.extend({
           //var y = parseFloat(s.y.substring(0, s.y.length-1))
           var y = s.y
           y = y + s.dy;
-          if(x >= 100-s.r || x<= 0)  {
+          if(x >= 100-s.r && newS.dx > 0)
+          {
             newS.dx = -newS.dx;
           }
-          if(y >= 60 || y <= 0) {
+          if(x <= 0 && newS.dx < 0)
+          {
+            newS.dx = -newS.dx;
+          }
+          if(y >= 60 && newS.dy > 0)
+          {
+            newS.dy = -newS.dy;
+          }
+          if(y <= 0 && newS.dy < 0) 
+          {
             newS.dy = -newS.dy;
           }
           newS.x = x
@@ -47,16 +57,68 @@ export default Component.extend({
   initShapes() {
     if(isEmpty(this.get('shapes')) && !this.get('filter').id.includes('tag'))
     {
-      const sh = Array(10).fill(1).map((i)=>{
-      return {
-        isCircle:this.get('filter').id == "sortByRecent" || this.get('filter').id == "sortByEditted",
-        isRect:this.get('filter').id == "sortByPopular" || this.get('filter').id == "sortByUpdated",
-        r:20,
-        x:(Math.random()*80),
-        y:(Math.random()*40),
-        dx: Math.random() < 0.5 ? Math.random() : -1 * Math.random(),
-        dy: Math.random() < 0.5 ? Math.random() : -1 * Math.random()}
-      });
+      var sh = [];
+      //CIRCLE
+      var r;
+      var xStart = 0;
+      var indent = false;
+      var isCircle = false;
+      var isRect = false;
+      var xShift;
+      var yShift;
+      var xIndent;
+      if(this.get('filter').id == "sortByRecent" || this.get('filter').id == "sortByEditted")
+      {
+        r = 8;
+        xStart = 20;
+        indent = true;
+        xShift = 40;
+        yShift = 12;
+        xIndent = 20;
+        isCircle = true;
+      }
+      //RECT
+      else if (this.get('filter').id == "sortByPopular" || this.get('filter').id == "sortByUpdated")
+      {
+        r = 15;
+        xShift = 2 * r;
+        yShift = r;
+        xIndent = r;
+        isRect = true;
+      }
+      //TRIANGLE
+      else
+      {
+        r = 20;
+        xShift = 2 * r;
+        yShift = r;
+        xIndent = r;
+      }
+
+      const w = 100 + 2 * r;
+      const h = 60;
+      var y = 0;
+      var x = xStart;
+
+      while(y <= h)
+      {
+        while(x <= w)
+        {
+          sh.push({
+            isCircle:isCircle,
+            isRect:isRect,
+            r:r,
+            x:x,
+            y:y,
+            dx: Math.random() < 0.5 ? Math.random() : -1 * Math.random(),
+            dy: Math.random() < 0.5 ? Math.random() : -1 * Math.random()
+          })
+          x += xShift
+        }
+        x = indent ? 0 : xIndent;
+        indent = !indent;
+        y += yShift
+      }
       sh.forEach((i)=>{
         i.yr = i.y - i.r
         i.xr = i.x + i.r

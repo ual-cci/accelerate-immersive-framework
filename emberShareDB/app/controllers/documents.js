@@ -39,7 +39,6 @@ export default Controller.extend({
   ],
   allFilters:[],
   showingFilters:computed('model', function() {
-    console.log("getting tags")
     this.get('documentService').getPopularTags(11)
     .then((results) => {
       var all = this.get('sortingFilters');
@@ -50,7 +49,6 @@ export default Controller.extend({
       });
       all = all.concat(tags);
       this.set('allFilters', all)
-      console.log("ALL", all.length)
       this.updateFiltersToShow()
     });
     return [];
