@@ -99,7 +99,8 @@ export default Controller.extend({
     })
   },
   initShareDB: function() {
-    this.get('cs').log('initShareDB')
+    this.get('cs').log('initShareDB');
+    this.set('leftCodeEditor', false);
     this.initWebSockets();
     this.initAceEditor();
     this.addWindowListener();
@@ -119,7 +120,7 @@ export default Controller.extend({
   },
   updateDragPos: function() {
     const aceW = this.get('aceW');
-    let drag = document.getElementById('drag-button')
+    let drag = document.getElementById('drag-container')
     if(drag)
     {
       drag.style.right =(aceW - 31) + "px";
@@ -187,10 +188,17 @@ export default Controller.extend({
         this.set('socket', socket);
         socket.onopen = () => {
           this.get('cs').log("web socket open");
-          this.set('wsAvailable', true);
-          if(!this.get('fetchingDoc'))
+          if(this.get('leftCodeEditor'))
           {
-            this.selectRootDoc();
+            console.log("opened connection but had already left code editor")
+          }
+          else
+          {
+            this.set('wsAvailable', true);
+            if(!this.get('fetchingDoc'))
+            {
+              this.selectRootDoc();
+            }
           }
         };
         socket.onerror =  () => {
@@ -203,6 +211,12 @@ export default Controller.extend({
         }
         socket.onmessage = (event) =>  {
           this.get('cs').log("web socket message", event);
+          const d = JSON.parse(event.data);
+          if(d.a == "init" && d.type == "http://sharejs.org/types/JSONv0")
+          {
+            this.set('fetchingDoc', false)
+            this.websocketError()
+          }
         }
       }
       catch (err)
@@ -212,15 +226,48 @@ export default Controller.extend({
       }
     }
   },
+  cleanUpConnections: function() {
+    return new RSVP.Promise((resolve, reject)=> {
+      if(!isEmpty(this.get('sharedDBDoc')))
+      {
+        this.get('sharedDBDoc').destroy();
+        this.set('sharedDBDoc', null);
+      }
+      this.set('currentDoc', null);
+      if(!isEmpty(this.get('socket')))
+      {
+        this.get('socket').removeEventListener('error')
+        this.get('socket').removeEventListener('open')
+        this.get('socket').removeEventListener('close')
+        this.get('socket').removeEventListener('message')
+        this.get('socket').onclose = null;
+        this.get('socket').onopen = null;
+        this.get('socket').onmessage = null;
+        this.get('socket').onerror = null;
+        this.get('socket').close();
+        this.set('socket', null);
+      }
+      if(!isEmpty(this.get('connection')))
+      {
+        this.get('connection').close();
+        this.set('connection', null);
+      }
+      resolve();
+    })
+  },
   websocketError: function() {
     console.log("websocket error")
     this.set('wsAvailable', false);
-    if(!this.get('fetchingDoc'))
-    {
-      this.selectRootDoc();
-    }
+    this.cleanUpConnections().then(()=>{
+      if(!this.get('fetchingDoc') && !this.get('leftCodeEditor'))
+      {
+        console.log("selecting doc")
+        this.selectRootDoc();
+      }
+    })
   },
   newDocSelected: function(docId) {
+    console.log("newDocSelected")
     return new RSVP.Promise((resolve, reject)=> {
       let doc = this.get('currentDoc');
       this.get('cs').log("newDocSelected", docId);
@@ -242,6 +289,7 @@ export default Controller.extend({
     })
   },
   selectRootDoc: function() {
+    console.log("selectRootDoc")
     this.newDocSelected(this.get('model').id).then(()=> {
       this.updateTabbarLocation();
       this.get('cs').log("loaded root doc, preloading assets");
@@ -259,10 +307,10 @@ export default Controller.extend({
   },
   connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("connectToDoc doc");
+      console.log("connectToDoc doc");
       this.set('fetchingDoc', true);
-      // if(this.get('wsAvailable'))
-      // {
+      if(this.get('wsAvailable'))
+      {
         const socket = this.get('socket');
         let con = this.get('connection');
         if(isEmpty(con) && !isEmpty(socket))
@@ -289,11 +337,11 @@ export default Controller.extend({
           }
         });
         sharedDBDoc.on('op', (ops,source) => {this.didReceiveOp(ops, source)});
-      // }
-      // else
-      // {
-      //   this.fetchDoc(docId).then((doc)=>resolve(doc));
-      // }
+      }
+      else
+      {
+        this.fetchDoc(docId).then((doc)=>resolve(doc));
+      }
     })
   },
   fetchDoc: function(docId) {
@@ -355,19 +403,20 @@ export default Controller.extend({
     });
   },
   clearTabs: function() {
-    // this.setParentData({
-    //     name:"",
-    //     id:"",
-    //     children:[],
-    //     source:"",
-    //     assets:""
-    // })
+    this.setParentData({
+        name:"",
+        id:"",
+        children:[],
+        source:"",
+        assets:""
+    })
     this.set('tabs',[]);
   },
   setTabs: function(data) {
     const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id};
+      const canDelete = this.get('canEditDoc') && child.id==currentDoc.id;
+      return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id, canDelete:canDelete};
     });
     console.log(tabs);
     this.set('tabs', tabs);
@@ -944,6 +993,7 @@ export default Controller.extend({
       let text = "loading code.";
       this.set('titleName', text);
       this.clearTabs();
+
       this.set('loadingInterval', setInterval(()=>{
         if(text=="loading code.")
         {
@@ -1186,7 +1236,9 @@ export default Controller.extend({
     cleanUp() {
       const fn = () => {
         console.log("clean up")
+        this.set('fetchingDoc', false);
         clearInterval(this.get('preloadingInterval'))
+        clearInterval(this.get('loadingInterval'))
         this.showFeedback("");
         this.set('renderedSource',"");
         this.set('droppedOps', []);
@@ -1195,25 +1247,12 @@ export default Controller.extend({
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))
         {
-          this.get('sharedDBDoc').destroy();
-          this.set('sharedDBDoc', null);
-          this.set('currentDoc', null);
-          this.get('socket').removeEventListener('error')
-          this.get('socket').removeEventListener('open')
-          this.get('socket').removeEventListener('close')
-          this.get('socket').removeEventListener('message')
-          this.get('socket').onclose = null;
-          this.get('socket').onopen = null;
-          this.get('socket').onmessage = null;
-          this.get('socket').onerror = null;
-          this.get('connection').close();
-          this.get('socket').close();
-          this.set('socket', null);
-          this.set('connection', null)
+          this.cleanUpConnections();
         }
-        this.get('cs').log('cleaned up');
+        console.log('cleaned up');
         this.removeWindowListener();
       }
+      this.set('leftCodeEditor', true);
       const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },
@@ -1285,12 +1324,13 @@ export default Controller.extend({
       this.set('renderedSource', "");
     },
     hideCode() {
+      const min = 30;
       var hide = ()=> {
         let aceW = this.get('aceW')
-        if(aceW > 0.0)
+        if(aceW > min)
         {
           setTimeout(()=> {
-            this.set('aceW', Math.max(0.0, aceW - 10));
+            this.set('aceW', Math.max(min, aceW - 10));
             hide();
           }, 2);
         }
@@ -1302,12 +1342,14 @@ export default Controller.extend({
       hide();
     },
     showCode() {
+      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
+      console.log("main-code-container width", max)
       var show = ()=> {
         let aceW = this.get('aceW')
-        if(aceW < 700)
+        if(aceW < max)
         {
           setTimeout(()=> {
-            this.set('aceW', Math.min(700, aceW + 10));
+            this.set('aceW', Math.min(max, aceW + 10));
             show();
           }, 2);
         }
@@ -1382,7 +1424,7 @@ export default Controller.extend({
            });
         }
       }).catch((err)=>{
-        this.get('cs').log('ERROR updateSourceFromSession', err)
+        this.get('cs').log('ERROR', err)
       });
     },
     tabDeleted(docId) {

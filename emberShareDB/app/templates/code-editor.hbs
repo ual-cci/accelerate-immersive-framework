@@ -141,8 +141,16 @@
       {{#if isEmbedded}}
       <div></div>
       {{else}}
-      <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+      <div id = "drag-container">
+        {{#if isShowingCode}}
+          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+        {{else}}
+          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+        {{/if}}
+        <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+      </div>
       {{/if}}
+
       {{/if}}
       <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
@@ -172,11 +180,7 @@
             {{/bs-button}}
           </div>
         </div>
-        {{#if isShowingCode}}
-          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
-        {{else}}
-          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
-        {{/if}}
+
           {{ember-ace
             minLines = 40
             maxLines = 10000

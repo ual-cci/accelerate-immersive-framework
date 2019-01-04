@@ -6,10 +6,19 @@ import RSVP from 'rsvp';
 export default Route.extend({
   sessionAccount:inject("session-account"),
   cs:inject('console'),
+  setupController: function(controller, model){
+    this._super(controller, model);
+    if(controller)
+    {
+      console.log("setupController document", model.query.filter.sortBy)
+      controller.send('updateSelectedFilter', model.query.filter.sortBy);
+      controller.send('flashResults')
+    }
+  },
   model(params) {
     let currentUserId = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
-    console.log("document model", currentUserId, currentUserName);
+    console.log("document model", currentUserId, currentUserName, params.sort);
     const sort = params.sort ? params.sort : "views";
     let filter = {
       filter:{

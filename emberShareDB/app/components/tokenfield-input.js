@@ -57,7 +57,6 @@ export default Component.extend({
 
     didUpdateAttrs() {
       this._super(...arguments);
-      console.log("updating token attrs", this.get('editable'))
       const addBtn = $(".add-file-button");
       if (this.get('editable'))
       {

@@ -60,9 +60,6 @@ export default Service.extend({
       this.get('store').findRecord('document', docId).then((doc) => {
         this.get('cs').log("found record, making copy of parent", doc.data);
         this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
-
-          this.get('cs').log("made copy of root doc, copying children", newDoc.data);
-
           const makeChildren = async (c) => {
             for(const child of c) {
               this.get('cs').log("making copy of child", child.data);
@@ -212,7 +209,6 @@ export default Service.extend({
             mainText = doc.data.source;
           }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
-          //console.log(combined)
           if(replaceAssets)
           {
             combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);

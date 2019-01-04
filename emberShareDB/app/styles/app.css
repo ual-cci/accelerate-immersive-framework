@@ -29,12 +29,15 @@ body::-webkit-scrollbar {
 
 .document-link {
   color:black;
+  height:20px;
   float:left;
   font-family: 'muli';
   font-size: 14px;
   text-overflow: ellipsis;
-  max-width: 100px;
+  max-width: 15vw;
+  display:inline-block;
   overflow: hidden;
+  white-space:nowrap;
 }
 
 .document-name-link {
@@ -174,23 +177,24 @@ input[id="docName"]:-ms-input-placeholder {
   padding-bottom: 20px;
 }
 
-.sortByForked {
+.forks {
   background-color: #FFCC02;
+  border: none;
 }
 
-.sortByRecent {
+.date {
   background-color: #F54B32;
 }
 
-.sortByUpdated {
+.updated {
   background-color: #07802A;
 }
 
-.sortByEditted {
+.edits {
   background-color: #F54B32;
 }
 
-.sortByPopular {
+.views {
   background-color: #07802A;
 }
 
@@ -216,7 +220,6 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-col {
   min-width: 125px;
-  /* whatever width you want */
   display: inline-block;
   position: relative;
   padding-left: 5px;
@@ -225,7 +228,6 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-col:after {
   padding-top: 67.25%;
-  /* 16:9 ratio */
   display: block;
   content: '';
 }
@@ -245,13 +247,23 @@ input[id="docName"]:-ms-input-placeholder {
   overflow: hidden;
 }
 
+.filter-item:hover {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 5px;
+}
+
 .filter-text {
   position: relative;
   color: black;
-  font-weight: bold;
+  font-weight:500;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+}
+
+.filter-text-selected {
+  font-weight:700 ! important;
 }
 
 .load-more-item {
@@ -364,7 +376,7 @@ input[id="docName"]:-ms-input-placeholder {
   display:inline-block;
   position:relative;
   overflow-x:hidden;
-  overflow-y:visible;
+  overflow-y:hidden;
 }
 
 .output-container {
@@ -400,6 +412,13 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+#drag-container {
+  position:absolute;
+  top: 0px;
+  height:100%;
+  width:30px;
+}
+
 #drag-button:hover {
   border-right-color: rgba(255, 255, 255, 1.0);
 }
@@ -407,7 +426,7 @@ input[id="docName"]:-ms-input-placeholder {
 #drag-button {
   position:absolute;
   top: 30px;
-  right: 50vw;
+  right: 0px;
   z-index: 20;
   height:100%;
   width:10px;
@@ -636,6 +655,30 @@ input[id="docName"]:-ms-input-placeholder {
 
 #document-container {
   margin-top: 0px;
+}
+
+@keyframes fadingOutAnimation {
+  to {opacity: 0.0;}
+}
+
+@keyframes fadingInAnimation {
+  to {opacity: 1.0;}
+}
+
+.fading-out {
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+   opacity: 0;
+}
+
+.fading-in {
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+   opacity: 1;
 }
 
 #page-nav-container {
