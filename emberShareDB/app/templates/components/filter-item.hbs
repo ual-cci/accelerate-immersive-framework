@@ -10,5 +10,9 @@
       {{/if}}
     {{/each}}
   </svg>
-  <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+  {{#if filter.highlightTitle}}
+    <p class = {{concat "filter-text filter-text-selected " "filter-text-" filter.id}}>{{filter.title}}</p>
+  {{else}}
+    <p class = {{concat "filter-text " "filter-text-" filter.id}}>{{filter.title}}</p>
+  {{/if}}
 </div>

@@ -90,7 +90,7 @@ export default Component.extend({
       {
         r = 20;
         xShift = 2 * r;
-        yShift = r;
+        yShift = r * 0.75;
         xIndent = r;
       }
 

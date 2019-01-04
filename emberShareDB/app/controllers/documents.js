@@ -31,11 +31,11 @@ export default Controller.extend({
   isMore:true,
   loadMoreCtr:0,
   sortingFilters:[
-    {title:"NEWEST", id:"date", isSelected:false},
-    {title:"POPULAR", id:"views", isSelected:false},
-    {title:"MOST REMIXED", id:"forks", isSelected:false},
-    {title:"MOST WORKED ON", id:"edits", isSelected:false},
-    {title:"UPDATED", id:"updated", isSelected:false},
+    {title:"NEWEST", id:"date", isSelected:false, highlightTitle:false},
+    {title:"POPULAR", id:"views", isSelected:false, highlightTitle:false},
+    {title:"MOST REMIXED", id:"forks", isSelected:false, highlightTitle:false},
+    {title:"MOST WORKED ON", id:"edits", isSelected:false, highlightTitle:false},
+    {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
   ],
   allFilters:[],
   showingFilters:computed('model', function() {
@@ -44,7 +44,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:t._id, id:"tag-item", isSelected:false
+          title:t._id, id:"tag-item", isSelected:false, highlightTitle:false
         }
       });
       all = all.concat(tags);
@@ -59,11 +59,22 @@ export default Controller.extend({
       this.updateFiltersToShow();
     })
   },
+  highlightTitle(title) {
+    // var newF = []
+    // this.get('showingFilters').forEach((f)=> {
+    //   Ember.set(f, "highlightTitle", f.title == title);
+    //   newF.push(f)
+    // })
+    // Ember.run(()=> {
+    //   this.set('showingFilters', newF);
+    // });
+  },
   updateSelectedFilter() {
     var newF = []
     console.log("updating selected filter", this.get('sort'))
     this.get('showingFilters').forEach((f)=> {
       Ember.set(f, "isSelected", f.id == this.get('sort'));
+      Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == this.get('searchTerm'));
       newF.push(f)
     })
     Ember.run(()=> {
@@ -143,7 +154,6 @@ export default Controller.extend({
   tag(tag) {
     this.set('searchTerm', tag);
     this.set('page', 0);
-    this.set('sort', "views");
     this.updateResults();
   },
   actions: {
@@ -238,6 +248,7 @@ export default Controller.extend({
       {
         this.tag(f.title)
       }
+      this.highlightTitle(f.title)
     },
     loadMore(numMore) {
       this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)

@@ -176,6 +176,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .forks {
   background-color: #FFCC02;
+  border: none;
 }
 
 .date {
@@ -243,13 +244,23 @@ input[id="docName"]:-ms-input-placeholder {
   overflow: hidden;
 }
 
+.filter-item:hover {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 5px;
+}
+
 .filter-text {
   position: relative;
   color: black;
-  font-weight: bold;
+  font-weight:500;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+}
+
+.filter-text-selected {
+  font-weight:700 ! important;
 }
 
 .load-more-item {
