@@ -29,12 +29,15 @@ body::-webkit-scrollbar {
 
 .document-link {
   color:black;
+  height:20px;
   float:left;
   font-family: 'muli';
   font-size: 14px;
   text-overflow: ellipsis;
-  max-width: 100px;
+  max-width: 140px;
+  display:inline-block;
   overflow: hidden;
+  white-space:nowrap;
 }
 
 .document-name-link {

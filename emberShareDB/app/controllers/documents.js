@@ -176,6 +176,7 @@ export default Controller.extend({
     createNewDocument() {
       let docName = this.get('docName');
       const isPrivate = this.get('isPrivate');
+      console.log("new doc", docName);
       if(docName.length > 1)
       {
         const src = this.get('documentService').getDefaultSource();

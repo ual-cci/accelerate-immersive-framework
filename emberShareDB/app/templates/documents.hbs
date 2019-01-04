@@ -10,7 +10,7 @@
     </form>
   </div>
   <div class = "col-sm-3" id = "create-doc-btn-container">
-    <button type="submit" id = "create-doc-btn">create</button>
+    <button type="submit"  onclick = {{action 'createNewDocument'}} id = "create-doc-btn">create</button>
     {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
   </div>
 {{else}}
