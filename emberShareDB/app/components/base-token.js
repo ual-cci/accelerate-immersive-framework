@@ -8,7 +8,6 @@ export default Ember.Component.extend({
     classNameBindings: ['isSelected:uncharted-selected-token'],
     didUpdateAttrs() {
       this._super(...arguments);
-      console.log("updating token attrs", this.get('canDelete'))
     },
     // Properties
     token: null,

@@ -99,7 +99,8 @@ export default Controller.extend({
     })
   },
   initShareDB: function() {
-    this.get('cs').log('initShareDB')
+    this.get('cs').log('initShareDB');
+    this.set('leftCodeEditor', false);
     this.initWebSockets();
     this.initAceEditor();
     this.addWindowListener();
@@ -187,10 +188,17 @@ export default Controller.extend({
         this.set('socket', socket);
         socket.onopen = () => {
           this.get('cs').log("web socket open");
-          this.set('wsAvailable', true);
-          if(!this.get('fetchingDoc'))
+          if(this.get('leftCodeEditor'))
           {
-            this.selectRootDoc();
+            console.log("opened connection but had already left code editor")
+          }
+          else
+          {
+            this.set('wsAvailable', true);
+            if(!this.get('fetchingDoc'))
+            {
+              this.selectRootDoc();
+            }
           }
         };
         socket.onerror =  () => {
@@ -203,6 +211,11 @@ export default Controller.extend({
         }
         socket.onmessage = (event) =>  {
           this.get('cs').log("web socket message", event);
+          const d = JSON.parse(event.data);
+          if(d.a == "init" && d.type == "http://sharejs.org/types/JSONv0")
+          {
+            this.websocketError()
+          }
         }
       }
       catch (err)
@@ -215,7 +228,7 @@ export default Controller.extend({
   websocketError: function() {
     console.log("websocket error")
     this.set('wsAvailable', false);
-    if(!this.get('fetchingDoc'))
+    if(!this.get('fetchingDoc') && !this.get('leftCodeEditor'))
     {
       this.selectRootDoc();
     }
@@ -1189,6 +1202,7 @@ export default Controller.extend({
       const fn = () => {
         console.log("clean up")
         clearInterval(this.get('preloadingInterval'))
+        clearInterval(this.get('loadingInterval'))
         this.showFeedback("");
         this.set('renderedSource',"");
         this.set('droppedOps', []);
@@ -1211,11 +1225,12 @@ export default Controller.extend({
           this.get('connection').close();
           this.get('socket').close();
           this.set('socket', null);
-          this.set('connection', null)
+          this.set('connection', null);
         }
-        this.get('cs').log('cleaned up');
+        console.log('cleaned up');
         this.removeWindowListener();
       }
+      this.set('leftCodeEditor', true);
       const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];
       Promise.all(actions).then(() => {fn();}).catch(()=>{fn();});
     },

@@ -21,10 +21,8 @@ export default Component.extend({
         {
           var s = sh[i];
           var newS = {x:s.x, y:s.y, r:s.r, dy:s.dy, dx:s.dx, isCircle:s.isCircle,isRect:s.isRect};
-          //var x = parseFloat(s.x.substring(0, s.x.length-1))
           var x = s.x
           x = x + s.dx;
-          //var y = parseFloat(s.y.substring(0, s.y.length-1))
           var y = s.y
           y = y + s.dy;
           if(x >= 100-s.r && newS.dx > 0)
@@ -39,7 +37,7 @@ export default Component.extend({
           {
             newS.dy = -newS.dy;
           }
-          if(y <= 0 && newS.dy < 0) 
+          if(y <= 0 && newS.dy < 0)
           {
             newS.dy = -newS.dy;
           }
@@ -58,7 +56,6 @@ export default Component.extend({
     if(isEmpty(this.get('shapes')) && !this.get('filter').id.includes('tag'))
     {
       var sh = [];
-      //CIRCLE
       var r;
       var xStart = 0;
       var indent = false;
@@ -67,6 +64,8 @@ export default Component.extend({
       var xShift;
       var yShift;
       var xIndent;
+
+      //CIRCLE
       if(this.get('filter').id == "sortByRecent" || this.get('filter').id == "sortByEditted")
       {
         r = 8;

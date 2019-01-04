@@ -9,7 +9,7 @@ export default Route.extend({
   model(params) {
     let currentUserId = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
-    console.log("document model", currentUserId, currentUserName);
+    console.log("document model", currentUserId, currentUserName, params.sort);
     const sort = params.sort ? params.sort : "views";
     let filter = {
       filter:{
