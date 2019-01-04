@@ -31,11 +31,11 @@ export default Controller.extend({
   isMore:true,
   loadMoreCtr:0,
   sortingFilters:[
-    {title:"NEWEST", id:"sortByRecent", isSelected:false},
-    {title:"POPULAR", id:"sortByPopular", isSelected:true},
-    {title:"MOST REMIXED", id:"sortByForked", isSelected:false},
-    {title:"MOST WORKED ON", id:"sortByEditted", isSelected:false},
-    {title:"UPDATED", id:"sortByUpdated", isSelected:false},
+    {title:"NEWEST", id:"date", isSelected:false},
+    {title:"POPULAR", id:"views", isSelected:false},
+    {title:"MOST REMIXED", id:"forks", isSelected:false},
+    {title:"MOST WORKED ON", id:"edits", isSelected:false},
+    {title:"UPDATED", id:"updated", isSelected:false},
   ],
   allFilters:[],
   showingFilters:computed('model', function() {
@@ -44,7 +44,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:t._id, id:"tag-item", isSelect:false
+          title:t._id, id:"tag-item", isSelected:false
         }
       });
       all = all.concat(tags);
@@ -59,10 +59,11 @@ export default Controller.extend({
       this.updateFiltersToShow();
     })
   },
-  selectFilter(selected) {
+  updateSelectedFilter() {
     var newF = []
+    console.log("updating selected filter", this.get('sort'))
     this.get('showingFilters').forEach((f)=> {
-      Ember.set(f, "isSelected", f.title == selected.title);
+      Ember.set(f, "isSelected", f.id == this.get('sort'));
       newF.push(f)
     })
     Ember.run(()=> {
@@ -94,6 +95,7 @@ export default Controller.extend({
        this.set('isMore', true)
      }
      this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))
+     this.updateSelectedFilter();
      console.log("updating filters", this.get('allFilters').slice(0, toShow))
   },
   updateResults()
@@ -105,6 +107,7 @@ export default Controller.extend({
       searchTerm = " ";
     }
     console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+    this.updateSelectedFilter();
     this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
   },
   recent() {
@@ -144,6 +147,10 @@ export default Controller.extend({
     this.updateResults();
   },
   actions: {
+    updateSelectedFilter(sort) {
+      this.set('sort', sort)
+      this.updateSelectedFilter();
+    },
     openDocument(documentId) {
       this.transitionToRoute("code-editor", documentId);
     },
@@ -207,23 +214,23 @@ export default Controller.extend({
       this.updateResults();
     },
     filter(f) {
-      if(f.id == "sortByForked")
+      if(f.id == "forks")
       {
         this.forked()
       }
-      else if(f.id == "sortByRecent")
+      else if(f.id == "date")
       {
         this.recent()
       }
-      else if(f.id == "sortByPopular")
+      else if(f.id == "views")
       {
         this.popular()
       }
-      else if(f.id == "sortByEditted")
+      else if(f.id == "edits")
       {
         this.editted()
       }
-      else if(f.id == "sortByUpdated")
+      else if(f.id == "updated")
       {
         this.updated()
       }
@@ -231,7 +238,6 @@ export default Controller.extend({
       {
         this.tag(f.title)
       }
-      this.selectFilter(f);
     },
     loadMore(numMore) {
       this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)

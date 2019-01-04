@@ -66,7 +66,7 @@ export default Component.extend({
       var xIndent;
 
       //CIRCLE
-      if(this.get('filter').id == "sortByRecent" || this.get('filter').id == "sortByEditted")
+      if(this.get('filter').id == "date" || this.get('filter').id == "edits")
       {
         r = 8;
         xStart = 20;
@@ -77,7 +77,7 @@ export default Component.extend({
         isCircle = true;
       }
       //RECT
-      else if (this.get('filter').id == "sortByPopular" || this.get('filter').id == "sortByUpdated")
+      else if (this.get('filter').id == "views" || this.get('filter').id == "updated")
       {
         r = 15;
         xShift = 2 * r;

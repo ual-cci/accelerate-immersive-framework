@@ -174,23 +174,23 @@ input[id="docName"]:-ms-input-placeholder {
   padding-bottom: 20px;
 }
 
-.sortByForked {
+.forks {
   background-color: #FFCC02;
 }
 
-.sortByRecent {
+.date {
   background-color: #F54B32;
 }
 
-.sortByUpdated {
+.updated {
   background-color: #07802A;
 }
 
-.sortByEditted {
+.edits {
   background-color: #F54B32;
 }
 
-.sortByPopular {
+.views {
   background-color: #07802A;
 }
 
