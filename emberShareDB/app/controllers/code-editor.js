@@ -65,6 +65,7 @@ export default Controller.extend({
   tabs:[],
   feedbackTimer:null,
   doPlay:true,
+  isPlayingOps:false,
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
@@ -952,10 +953,26 @@ export default Controller.extend({
     }, 5000));
   },
   pauseOps: function() {
+    this.set('isPlayingOps', false);
     if(this.get('opsInterval'))
     {
       clearInterval(this.get('opsInterval'));
     }
+  },
+  playOps: function() {
+    this.pauseOps();
+    this.set('isPlayingOps', true);
+    this.set('opsInterval', setInterval(()=> {
+      if(!this.get('opsPlayer').reachedEnd)
+      {
+        this.skipOp(false);
+      }
+      else
+      {
+        this.set('isPlayingOps', false);
+        clearInterval(this.get('opsInterval'));
+      }
+    }, 100));
   },
   hijackConsoleOutput: function() {
     (()=>{
@@ -1373,17 +1390,7 @@ export default Controller.extend({
       this.skipOp(false, true);
     },
     playOps() {
-      this.pauseOps();
-      this.set('opsInterval', setInterval(()=> {
-        if(!this.get('opsPlayer').reachedEnd)
-        {
-          this.skipOp(false);
-        }
-        else
-        {
-          clearInterval(this.get('opsInterval'));
-        }
-      }, 100));
+      this.playOps();
     },
     pauseOps() {
       this.pauseOps();

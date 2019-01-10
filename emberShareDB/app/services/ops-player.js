@@ -12,7 +12,7 @@ export default Service.extend({
   ptr: 0,
   prevDir: null,
   doc:null,
-  atHead: function() {
+  atHead() {
     const ptr = this.get('ptr');
     if(isEmpty(this.get('ops')))
     {
@@ -23,12 +23,12 @@ export default Service.extend({
       return ptr >= this.get('ops').length - 1;
     }
   },
-  reset: function(doc) {
+  reset(doc) {
     this.set('doc', doc);
     this.set('ptr', 0);
     this.set('ops', null);
   },
-  loadOps:function() {
+  loadOps() {
     const doc = this.get('doc');
     console.log("loading ops", doc);
     return new RSVP.Promise((resolve, reject) => {
@@ -44,7 +44,7 @@ export default Service.extend({
         });
     });
   },
-  shift:function(prev, editor, rewind = false) {
+  shift(prev, editor, rewind = false) {
     this.set('reachedEnd', false);
     return new RSVP.Promise((resolve, reject) => {
       const fetch = () => {
@@ -68,7 +68,7 @@ export default Service.extend({
       }
     });
   },
-  inBounds:function(ptr) {
+  inBounds(ptr) {
     const ops = this.get('ops');
     const inBounds = ptr >= 0 && ptr < ops.length;
     return inBounds;
@@ -138,13 +138,13 @@ export default Service.extend({
   clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
   },
-  prevOp:function(editor, rewind = false) {
+  prevOp(editor, rewind = false) {
     return this.shift(true, editor, rewind);
   },
-  nextOp:function(editor, rewind = false) {
+  nextOp(editor, rewind = false) {
     return this.shift(false, editor, rewind);
   },
-  getTransform:function(editor) {
+  getTransform(editor) {
     if(!isEmpty(this.get('opsToApply')))
     {
       return this.get('parser').opTransform(this.get('opsToApply'), editor);

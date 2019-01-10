@@ -7,7 +7,11 @@
   <span class="tooltiptext">Step Back</span>
 </div>
 <div class="tooltip">
-  {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'playOrPause')}}{{/bs-button}}
+  {{#if isPlaying}}
+    {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-pause" onClick=(action 'pause')}}{{/bs-button}}
+  {{else}}
+    {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'play')}}{{/bs-button}}
+  {{/if}}
   <span class="tooltiptext">Play to End / Pause</span>
 </div>
 <div class="tooltip">

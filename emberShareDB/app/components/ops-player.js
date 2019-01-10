@@ -1,7 +1,15 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-  doPlay:true,
+  isPlaying:false,
+  init() {
+    this._super(...arguments);
+    console.log("init op player", this.get('isPlaying'))
+  },
+  didUpdateAttrs() {
+    this._super(...arguments);
+    console.log("did upate op player", this.get('isPlaying'))
+  },
   actions:{
     prev() {
       this.get('onSkip')(true);
@@ -9,19 +17,17 @@ export default Component.extend({
     next() {
       this.get('onSkip')(false);
     },
-    playOrPause() {
-      let button = document.getElementById("ops-play-btn");
-      if(this.get('doPlay'))
+    play() {
+      if(!this.get('isPlaying'))
       {
         this.get('onPlay')();
-        $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
       }
-      else
+    },
+    pause() {
+      if(this.get('isPlaying'))
       {
         this.get('onPause')();
-        $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
       }
-      this.toggleProperty('doPlay')
     },
     rewind() {
       this.get('onRewind')();

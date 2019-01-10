@@ -165,18 +165,19 @@
               onPlay = (action 'playOps')
               onRewind = (action 'rewindOps')
               onPause = (action 'pauseOps')
+              isPlaying = isPlayingOps
             }}
           </div>
             <div id = "zoom-container">
             {{#bs-button
               class = "clear-btn"
-            icon="glyphicon glyphicon-zoom-in"
-            onClick=(action "zoomIn")}}
+              icon="glyphicon glyphicon-zoom-in"
+              onClick=(action "zoomIn")}}
             {{/bs-button}}
             {{#bs-button
               class = "clear-btn"
-            icon="glyphicon glyphicon-zoom-out"
-            onClick=(action "zoomOut")}}
+              icon="glyphicon glyphicon-zoom-out"
+              onClick=(action "zoomOut")}}
             {{/bs-button}}
           </div>
         </div>
