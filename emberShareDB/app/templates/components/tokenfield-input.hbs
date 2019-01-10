@@ -14,10 +14,17 @@
             mouseDown=(action 'selectToken' token index)
             doubleClick=(action 'editToken' token)}}
         {{/each}}
-        {{#bs-button class = "add-file-button" id = "add-tag"
-          icon="glyphicon glyphicon-plus"
-          onClick=(action 'addPressed')}}
-        {{/bs-button}}
+        {{#if showInput}}
+          {{#bs-button class = "add-file-button" id = "add-tag"
+            icon="glyphicon glyphicon-chevron-up"
+            onClick=(action 'addPressed')}}
+          {{/bs-button}}
+        {{else}}
+          {{#bs-button class = "add-file-button" id = "add-tag"
+            icon="glyphicon glyphicon-plus"
+            onClick=(action 'addPressed')}}
+          {{/bs-button}}
+        {{/if}}
         </div>
         {{#if showInput}}
         {{input type='text'
@@ -25,7 +32,7 @@
             id=tokenfieldId
             placeholder=placeholder
             value=inputValue}}
-          {{/if}}
+        {{/if}}
     </div>
 </div>
 {{#if showDuplicateMessage}}
