@@ -209,12 +209,12 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .forks {
-  background-color: #FFCC02;
+  background-color: #4D42EB;
   border: none;
 }
 
 .date {
-  background-color: #F54B32;
+  background-color: #0ED779;
 }
 
 .updated {
@@ -222,11 +222,11 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .edits {
-  background-color: #F54B32;
+  background-color: #ED3D05;
 }
 
 .views {
-  background-color: #07802A;
+  background-color: #F79994;
 }
 
 #filter-row {
@@ -255,12 +255,7 @@ input[id="docName"]:-ms-input-placeholder {
   position: relative;
   padding-left: 5px;
   padding-right: 5px;
-}
-
-.filter-col:after {
-  padding-top: 67.25%;
-  display: block;
-  content: '';
+  height:70px;
 }
 
 .filter-item {
@@ -280,21 +275,26 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-item:hover {
   border-style: solid;
-  border-color: transparent;
-  border-width: 5px;
+  border-color: white;
+  border-width: 1px;
 }
 
 .filter-text {
   position: relative;
   color: black;
+  font-size: 14pt;
   font-weight:500;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height:100%;
+  white-space: nowrap;
 }
 
 .filter-text-selected {
-  font-weight:700 ! important;
+  color:white;
 }
 
 .load-more-item {
@@ -302,12 +302,11 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .tag-item {
-  background-color: #3929B8;
+  background-color: lightgray;
   color:white ! important;
 }
 
 .filter-text-tag-item {
-  color:white ! important;
 }
 
 #tab0.tab-item {

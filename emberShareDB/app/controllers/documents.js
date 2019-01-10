@@ -34,8 +34,8 @@ export default Controller.extend({
     {title:"NEWEST", id:"date", isSelected:false, highlightTitle:false},
     {title:"POPULAR", id:"views", isSelected:false, highlightTitle:false},
     {title:"MOST REMIXED", id:"forks", isSelected:false, highlightTitle:false},
-    {title:"MOST WORKED ON", id:"edits", isSelected:false, highlightTitle:false},
-    {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
+    {title:"MOST EDITED", id:"edits", isSelected:false, highlightTitle:false},
+    // {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
   ],
   allFilters:[],
   showingFilters:computed('model', function() {
@@ -44,7 +44,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:t._id, id:"tag-item", isSelected:false, highlightTitle:false
+          title:"#"+t._id, id:"tag-item", isSelected:false, highlightTitle:false
         }
       });
       all = all.concat(tags);
@@ -72,18 +72,18 @@ export default Controller.extend({
     });
   },
   updateFiltersToShow() {
-     var toShow = 10;
+     var toShow = 5;
      if(this.get('mediaQueries.isXs'))
      {
-       toShow = 4
+       toShow = 2
      }
      else if (this.get('mediaQueries.isSm'))
      {
-       toShow = 6
+       toShow = 3
      }
      else if(this.get('mediaQueries.isMd'))
      {
-       toShow = 8
+       toShow = 4
      }
      toShow += this.get('loadMoreCtr')
      if(toShow >= this.get('allFilters').length)
@@ -145,7 +145,7 @@ export default Controller.extend({
     this.updateResults();
   },
   tag(tag) {
-    this.set('searchTerm', tag);
+    this.set('searchTerm', tag.substr(1));
     this.set('page', 0);
     this.updateResults();
   },

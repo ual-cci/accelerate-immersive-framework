@@ -134,16 +134,16 @@ export default Component.extend({
   },
   willDestroyElement(){
     this._super(...arguments);
-    this.killAnimation();
+    //this.killAnimation();
   },
   didUpdateAttrs() {
     this._super(...arguments);
-    this.initShapes();
-    this.updateAnimationState();
+    //this.initShapes();
+    //this.updateAnimationState();
   },
   didReceiveAttrs() {
     this._super(...arguments);
-    this.initShapes();
+    //this.initShapes();
   },
   actions: {
     onFilter() {
