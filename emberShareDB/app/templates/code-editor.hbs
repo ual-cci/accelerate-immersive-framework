@@ -11,42 +11,17 @@
     {{/if}}
     {{#if mediaQueries.isDesktop}}
     <div id = "doc-controls-container">
-      {{#if isOwner}}
-      <div id = "doc-checkbox-container" style = "display:block;">
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
-        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-        <span class="tooltiptext">Other users can discover</span>
-      </div>
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
-        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-        <span class="tooltiptext">WARNING! Other users can edit your code</span>
-      </div>
-      {{#if canEditDoc}}
-        <div class="tooltip">
-          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-          <span class="tooltiptext">Render Code Whilst Typing</span>
-        </div>
-      {{/if}}
-      </div>
-      {{/if}}
       <div id = {{concat "render-doc-" isOwner}}>
-      {{#if session.isAuthenticated}}
-        <div class = "fork-flag">
-          <div class="tooltip">
-            {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
-            <span class="tooltiptext">Make Your Own Copy</span>
-          </div>
-          <div class="tooltip">
-            {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
-            <span class="tooltiptext">Report as Inappropriate</span>
-          </div>
-        </div>
-      {{/if}}
         </div>
           <div id = "transport-container">
+            <div class="tooltip">
+              {{#if showSettings}}
+                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+              {{else}}
+                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+              {{/if}}
+              <span class="tooltiptext">Show Document Settings</span>
+            </div>
             {{#if isOwner}}
             <div class="tooltip col-2">
               {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
@@ -86,6 +61,39 @@
     </div>
     {{/if}}
   </div>
+  {{#if showSettings}}
+  <div id = "settings-container">
+    {{#if session.isAuthenticated}}
+      <div class="tooltip">
+        {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
+        <span class="tooltiptext">Make Your Own Copy</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
+        <span class="tooltiptext">Report as Inappropriate</span>
+      </div>
+    {{/if}}
+    {{#if isOwner}}
+    <div class="tooltip">
+      <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
+      {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+      <span class="tooltiptext">Other users can discover</span>
+    </div>
+    <div class="tooltip">
+      <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
+      {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+      <span class="tooltiptext">WARNING! Other users can edit your code</span>
+    </div>
+    {{#if canEditDoc}}
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+        {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+        <span class="tooltiptext">Render Code Whilst Typing</span>
+      </div>
+    {{/if}}
+    {{/if}}
+  </div>
+  {{/if}}
   {{#if mediaQueries.isDesktop}}
   <div>
     {{tokenfield-input
@@ -98,6 +106,7 @@
     </div>
     {{/if}}
     {{/if}}
+
     {{#if showAssets}}
       <div class = "file-upload-container">
         <table>

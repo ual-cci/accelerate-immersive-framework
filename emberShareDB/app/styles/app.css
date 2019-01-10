@@ -42,9 +42,9 @@ body::-webkit-scrollbar {
 }
 
 .doc-by-label {
-  width:10px;
-  height:20px;
-  color:black;
+  width: 10px;
+  height: 20px;
+  color: black;
   font-size: 12pt;
   padding-left: 3px;
   display: inline;
@@ -59,7 +59,7 @@ body::-webkit-scrollbar {
   text-overflow: ellipsis;
   max-width: 50px;
   overflow: hidden;
-  white-space:nowrap;
+  white-space: nowrap;
 }
 
 .doc-list-icon-container
@@ -380,6 +380,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #project-tabs {
   max-height: 55px;
+  padding-left: 30px;
   margin-left:auto;
   margin-right:0;
   clear:right;
@@ -521,6 +522,10 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 25px;
 }
 
+#settings-btn:first-child {
+  font-size: 25px;
+}
+
 #mobile-play-btn{
   float: right;
   clear: right;
@@ -631,16 +636,37 @@ input[id="docName"]:-ms-input-placeholder {
 {
   font-family: 'raleway';
   color:white;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+#settings-container {
+  height:40px;
+  background-color: lightgray;
+  padding-left: 10px;
+}
+
+.clear-text-btn {
+  background-color: transparent;
+  border-style: solid;
+  border-color: white;
+  border-radius: 4px;
+  color:white;
+  font-family: 'raleway';
+  height:20px;
+  font-size: 9pt;
+  padding-top: 2px;
+  margin-top: 10px;
+  margin-left:10px;
+  margin-bottom: 10px;
+  padding-left:2px;
+  padding-right:2px;
+  width:50px;
 }
 
 #doc-checkbox-container {
   display:inline-block;
-  position: absolute;
   background-color: darkgray;
-  top:5px;
-  right:365px;
-  width:130px;
-  height:100%;
 }
 
 #render-doc-true {
@@ -659,10 +685,6 @@ input[id="docName"]:-ms-input-placeholder {
   right:145px;
   width:150px;
   height:100%;
-}
-
-#fork-flag {
-
 }
 
 #transport-container {
@@ -728,21 +750,7 @@ input[id="docName"]:-ms-input-placeholder {
   float: left;
 }
 
-.clear-text-btn {
-  background-color: transparent;
-  border-style: solid;
-  border-color: white;
-  border-radius: 4px;
-  color:white;
-  font-family: 'raleway';
-  height:20px;
-  font-size: 12pt;
-  padding-top: 0px;
-  margin-bottom: 10px;
-  padding-left:2px;
-  padding-right:2px;
-  width:50px;
-}
+
 
 #console {
   width:100%;

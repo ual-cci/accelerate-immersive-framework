@@ -47,6 +47,7 @@ export default Controller.extend({
   showShare:false,
   showAssets:false,
   showPreview:false,
+  showSettings:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -1247,6 +1248,9 @@ export default Controller.extend({
     },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
+    },
+    toggleShowSettings() {
+      this.toggleProperty('showSettings');
     },
     toggleShowShare() {
       this.get('modalsManager')
