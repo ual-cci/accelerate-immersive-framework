@@ -1,4 +1,5 @@
 <div class = "container-fluid">
+  <div id = "code-header-container">
   <h4><span>{{feedbackMessage}}</span></h4>
   {{#if isEmbedded}}
   <div></div>
@@ -55,10 +56,10 @@
           </div>
     </div>
     {{else}}
-    <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
-      {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
-      <span class="tooltiptext">Render Code</span>
-    </div>
+      <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
+        {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
+        <span class="tooltiptext">Render Code</span>
+      </div>
     {{/if}}
   </div>
   {{#if showSettings}}
@@ -74,28 +75,27 @@
       </div>
     {{/if}}
     {{#if isOwner}}
-    <div class="tooltip">
-      <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
-      {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-      <span class="tooltiptext">Other users can discover</span>
-    </div>
-    <div class="tooltip">
-      <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
-      {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-      <span class="tooltiptext">WARNING! Other users can edit your code</span>
-    </div>
-    {{#if canEditDoc}}
       <div class="tooltip">
-        <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-        {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-        <span class="tooltiptext">Render Code Whilst Typing</span>
+        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
+        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+        <span class="tooltiptext">Other users can discover</span>
       </div>
-    {{/if}}
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
+        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+        <span class="tooltiptext">WARNING! Other users can edit your code</span>
+      </div>
+      {{#if canEditDoc}}
+        <div class="tooltip">
+          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+          <span class="tooltiptext">Render Code Whilst Typing</span>
+        </div>
+      {{/if}}
     {{/if}}
   </div>
   {{/if}}
   {{#if mediaQueries.isDesktop}}
-  <div>
     {{tokenfield-input
       tokens=model.tags
       allowDuplicates=false
@@ -103,9 +103,8 @@
       editable=canEditDoc
       tokensChanged=(action 'tagsChanged')
     }}
-    </div>
-    {{/if}}
-    {{/if}}
+  {{/if}}
+  {{/if}}
 
     {{#if showAssets}}
       <div class = "file-upload-container">
@@ -136,7 +135,7 @@
         {{/if}}
       </div>
     {{/if}}
-
+  </div>
     {{#if mediaQueries.isDesktop}}
     {{#if isEmbedded}}
     <div></div>
