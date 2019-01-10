@@ -208,25 +208,24 @@ input[id="docName"]:-ms-input-placeholder {
   padding-bottom: 20px;
 }
 
-.forks {
-  background-color: #4D42EB;
-  border: none;
-}
-
 .date {
-  background-color: #0ED779;
-}
-
-.updated {
-  background-color: #07802A;
-}
-
-.edits {
   background-color: #ED3D05;
 }
 
 .views {
+  background-color: #FFCE00;
+}
+
+.forks {
+  background-color: #0ED779;
+}
+
+.edits {
   background-color: #F79994;
+}
+
+.updated {
+  background-color: #07802A;
 }
 
 #filter-row {
@@ -310,19 +309,23 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #tab0.tab-item {
-  background-color: #F54B32;
+  background-color: #ED3D05;
 }
 
 #tab1.tab-item {
-  background-color: #07802A;
+  background-color: #FFCE00;
 }
 
 #tab2.tab-item {
-  background-color: #3929B8;
+  background-color: #0ED779;
 }
 
 #tab3.tab-item {
-  background-color: #FFCC02;
+  background-color: #F79994;
+}
+
+#tab4.tab-item {
+  background-color: #4D42EB;
 }
 
 .tab-btn:hover {
@@ -574,7 +577,15 @@ input[id="docName"]:-ms-input-placeholder {
 
 #doc-title-container {
   background-color: darkgray;
-  height:80px;
+  height:70px;
+}
+
+#doc-controls-container {
+  float:right;
+  display:inline;
+  position: relative;
+  font-size: 14pt;
+  width:320px;
 }
 
 #doc-title {
@@ -585,10 +596,11 @@ input[id="docName"]:-ms-input-placeholder {
   float:left;
   position: absolute;
   font-size: 20pt;
-  width:25vw;
+  max-width:45vw;
+  display: inline;
   height:50px;
   text-align: left;
-  transform: translateY(50%);
+  transform: translateY(35%);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -625,7 +637,6 @@ input[id="docName"]:-ms-input-placeholder {
 #doc-name-input {
   background-color:transparent;
   color:black;
-  position: absolute;
   float:left;
   font-weight: normal;
   box-sizing: border-box;
@@ -633,8 +644,8 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 20pt;
   height:50px;
   font-family: "raleway";
-  width:25vw;
-  transform: translateY(50%);
+  max-width:45vw;
+  transform: translateY(35%);
 }
 
 .doc-checkbox
@@ -698,14 +709,6 @@ input[id="docName"]:-ms-input-placeholder {
   top: 0%;
   height: 80px;
   margin-top: 20px;
-}
-
-#doc-controls-container {
-  float:right;
-  display:inline;
-  position: relative;font-size: 14pt;
-  width:40vw;
-  display:table;
 }
 
 #main-document-container {
