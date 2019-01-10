@@ -1,8 +1,8 @@
 <div class = "col-sm-12 col-md-6 document-list-col">
 <div class = "document-list-item">
   <div class = "doc-list-name-container">
-    {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}} {{/link-to}}
-    by {{#link-to "documents" document.owner 0 'views' class='document-name-link'}}{{document.owner}} {{/link-to}}
+    {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}}  {{/link-to}}
+     <p class = "doc-by-label"> by </p> {{#link-to "documents" document.owner 0 'views' class='document-name-link'}}{{document.owner}}{{/link-to}}
   </div>
   <div class = "doc-list-icon-container">
     {{#if document.readOnly}}

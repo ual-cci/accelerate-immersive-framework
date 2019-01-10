@@ -66,6 +66,7 @@ export default Controller.extend({
   feedbackTimer:null,
   doPlay:true,
   isPlayingOps:false,
+  scrollPositions:{},
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
@@ -277,7 +278,7 @@ export default Controller.extend({
         const sharedDBDoc = this.get('sharedDBDoc');
         if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
-          this.get('cs').log("destroying connection to old doc");
+          //Destroy connection to old doc
           sharedDBDoc.destroy();
           this.set('sharedDBDoc', null);
         }
@@ -289,12 +290,36 @@ export default Controller.extend({
       }).catch((err)=>reject(err));
     })
   },
+  resetScrollPositions: function() {
+    var scrollPositions = {}
+    scrollPositions[this.get('model').id] = 0;
+    this.get('children').forEach((child)=> {
+      scrollPositions[child.id] = 0;
+    });
+    this.set('scrollPositions', scrollPositions);
+  },
+  updateScrollPosition: function() {
+    const range = this.getSelectionRange();
+    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
+    console.log("SCROLL POS", this.get('scrollPositions'))
+  },
+  scrollToSavedPosition: function() {
+    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
+    const editor = this.get('editor');
+    console.log("scrolling to ", pos)
+    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
+    editor.resize(true);
+    editor.gotoLine(pos);
+    editor.scrollToLine(pos, true, true, {})
+    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
+  },
   selectRootDoc: function() {
     console.log("selectRootDoc")
     this.newDocSelected(this.get('model').id).then(()=> {
       this.updateTabbarLocation();
       this.get('cs').log("loaded root doc, preloading assets");
       this.fetchChildren().then(()=> {
+        this.resetScrollPositions();
         this.preloadAssets().then(()=> {
           if(this.doPlayOnLoad())
           {
@@ -388,6 +413,7 @@ export default Controller.extend({
         clearInterval(this.get('loadingInterval'))
         this.set('loadingInterval', null);
       }
+      this.scrollToSavedPosition();
       this.set('titleName', doc.data.name + " by " + doc.data.owner);
       this.set('titleNoName', doc.data.name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
@@ -428,23 +454,24 @@ export default Controller.extend({
       let model = this.get('model').data;
       if(model.children.length == 0)
       {
-        this.set('tabs', model.children);
-        this.set('children', null);
-        this.set('children', model.children);
+        this.set('tabs', []);
+        this.set('children', []);
         this.setParentData(model);
         resolve();
-        return;
       }
-      this.get('documentService').getChildren(model.children).then((data)=> {
-        this.get('cs').log("got children", data.children);
-        this.set('children', data.children);
-        this.setTabs(data.children);
-        this.setParentData(data.parent.data);
-        resolve();
-      }).catch((err)=>{
-        this.get('cs').log(err);
-        reject(err);
-      });
+      else
+      {
+        this.get('documentService').getChildren(model.children).then((data)=> {
+          this.get('cs').log("got children", data.children);
+          this.set('children', data.children);
+          this.setTabs(data.children);
+          this.setParentData(data.parent.data);
+          resolve();
+        }).catch((err)=>{
+          this.get('cs').log(err);
+          reject(err);
+        });
+      }
     })
   },
   didReceiveOp: function (ops,source) {
@@ -602,7 +629,6 @@ export default Controller.extend({
     if(selectionRange.start.row == selectionRange.end.row &&
       selectionRange.start.column == selectionRange.end.column)
       {
-        //editor.selection.selectLine();
         selectionRange.start.column = 0;
         selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
       }
@@ -1408,27 +1434,25 @@ export default Controller.extend({
       this.fetchChildren().then(()=>{
         const children = this.get('model').children;
         const newChild = children[children.length-1]
+        this.resetScrollPositions();
         //this.newDocSelected(newChild);
       });
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);
       this.updateSourceFromSession().then(()=> {
+        this.updateScrollPosition();
         const doc = this.get("currentDoc");
+        var currentDocId = "";
         if(!isEmpty(doc))
         {
-          if(docId != doc.data.documentId)
-          {
-            this.newDocSelected(docId).then(()=> {
-              this.fetchChildren()
-            });
-          }
+          currentDocId = doc.data.documentId
         }
-        else
+        if(docId != currentDocId)
         {
-           this.newDocSelected(docId).then(()=> {
-             this.fetchChildren()
-           });
+          this.newDocSelected(docId).then(()=> {
+            this.fetchChildren()
+          });
         }
       }).catch((err)=>{
         this.get('cs').log('ERROR', err)
@@ -1447,7 +1471,9 @@ export default Controller.extend({
               this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
               .then(()=> {
                 this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
-                this.fetchChildren();
+                this.fetchChildren().then(()=>{
+                  this.resetScrollPositions();
+                });
               }).catch((err)=> {
                 this.get('cs').log(err);
               })
