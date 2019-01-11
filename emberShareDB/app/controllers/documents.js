@@ -254,6 +254,10 @@ export default Controller.extend({
       this.set('loadMoreCtr', this.get('loadMoreCtr')+ numMore)
       this.updateFiltersToShow();
     },
+    loadLess() {
+      this.set('loadMoreCtr', 0)
+      this.updateFiltersToShow();
+    },
     flashResults()
     {
       console.log("flashing results")

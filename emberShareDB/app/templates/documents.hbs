@@ -37,6 +37,12 @@
       <p class = "filter-text">More...</p>
     </div>
   </div>
+  {{else}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = "filter-item load-more-item" onclick={{action 'loadLess'}}>
+      <p class = "filter-text">Less...</p>
+    </div>
+  </div>
   {{/if}}
 </div>
 {{else if mediaQueries.isSm}}
@@ -50,6 +56,12 @@
   <div class = "col-xs-4 filter-col filter-col-sm">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 2}}>
       <p class = "filter-text">More...</p>
+    </div>
+  </div>
+  {{else}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = "filter-item load-more-item" onclick={{action 'loadLess'}}>
+      <p class = "filter-text">Less...</p>
     </div>
   </div>
   {{/if}}
@@ -67,6 +79,12 @@
       <p class = "filter-text">More...</p>
     </div>
   </div>
+  {{else}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = "filter-item load-more-item" onclick={{action 'loadLess'}}>
+      <p class = "filter-text">Less...</p>
+    </div>
+  </div>
   {{/if}}
 </div>
 {{else}}
@@ -80,6 +98,12 @@
   <div class = "col-xs-2 filter-col filter-col-lg">
     <div class = "filter-item load-more-item" onclick={{action 'loadMore' 5}}>
       <p class = "filter-text">More...</p>
+    </div>
+  </div>
+  {{else}}
+  <div class = "col-xs-2 filter-col filter-col-lg">
+    <div class = "filter-item load-more-item" onclick={{action 'loadLess'}}>
+      <p class = "filter-text">Less...</p>
     </div>
   </div>
   {{/if}}
