@@ -6,19 +6,20 @@
 
 body::-webkit-scrollbar {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    font-family: "raleway"
 }
 
 .a {
-  font-family: 'muli' ! important;
+  font-family: 'raleway' ! important;
 }
 
 .p {
-  font-family: 'muli' ! important;
+  font-family: 'raleway' ! important;
   color:white;
 }
 
 .html {
-  font-family: 'muli' ! important;
+  font-family: 'raleway' ! important;
 }
 
 .center {
@@ -30,21 +31,35 @@ body::-webkit-scrollbar {
 .document-link {
   color:black;
   height:20px;
-  float:left;
-  font-family: 'muli';
-  font-size: 14px;
+  font-family: 'raleway';
+  font-size: 12pt;
   text-overflow: ellipsis;
-  max-width: 15vw;
-  display:inline-block;
+  max-width: 50px;
+  width:auto;
   overflow: hidden;
   white-space:nowrap;
+  display: inline;
+}
+
+.doc-by-label {
+  width: 10px;
+  height: 20px;
+  color: black;
+  font-size: 12pt;
+  padding-left: 3px;
+  display: inline;
 }
 
 .document-name-link {
   color:black;
-  font-family: 'muli';
-  font-size: 14px;
-  padding-top: 50px;
+  display: inline;
+  width:auto;
+  font-family: 'raleway';
+  font-size: 12pt;
+  text-overflow: ellipsis;
+  max-width: 50px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .doc-list-icon-container
@@ -52,12 +67,21 @@ body::-webkit-scrollbar {
   display: inline;
   margin-left:15px;
   float:right;
+  height:100%;
+  padding-top: 11px;
 }
 
 .doc-list-name-container
 {
   display: inline;
   margin-left:4px;
+  height:100%;
+  float:left;
+  padding-top: 17px;
+  text-overflow: ellipsis;
+  max-width: 19vw;
+  overflow: hidden;
+  white-space:nowrap;
 }
 
 .document-list-col {
@@ -67,8 +91,8 @@ body::-webkit-scrollbar {
 }
 
 .document-list-item {
-  padding-top: 15px;
-  padding-left: 10px;
+  padding-top: 0px;
+  padding-left: 20px;
   padding-right: 5px;
   background-color: #CCCBCB;
   height:90%;
@@ -81,8 +105,11 @@ body::-webkit-scrollbar {
 }
 
 #mimic-navbar {
- padding-top:30px;
- padding-bottom:30px;
+ padding-top:15px;
+ padding-bottom:10px;
+ max-width: 950px;
+ margin-left: auto;
+ margin-right: auto;
 }
 
 #create-doc-placeholder
@@ -97,13 +124,14 @@ body::-webkit-scrollbar {
 
 #create-doc-name {
   border-color:black;
-  height:35px;
+  border-width: thin;
+  height:42px;
   margin-top:10px;
   margin-bottom:10px;
   width:100%;
   overflow:hidden;
-  font-size:18px;
-  font-family: 'muli';
+  font-size:18pt;
+  font-family: 'raleway';
   padding-left:20px;
   color:black;
 }
@@ -111,11 +139,15 @@ body::-webkit-scrollbar {
 #create-doc-form-container {
   padding-right: 2px ! important;
   padding-left: 2px ! important;
+  float:left;
+  width:75%;
 }
 
 #create-doc-btn-container {
   padding-right: 2px ! important;
   padding-left: 2px ! important;
+  float:right;
+  width:25%;
 }
 
 input[id="docName"]::-webkit-input-placeholder {
@@ -139,13 +171,17 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #private-btn {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
   background-color: white;
+  max-width: 80px;
+  min-width: 40px;
   color:black;
   border-color: black;
-  border-width: 2px;
+  border-width: thin;
   border-radius: 0;
-  width:70px;
-  height:35px;
+  width:47%;
+  height:42px;
   margin-top:10px;
   margin-bottom:10px;
   margin-right: 5px;
@@ -153,48 +189,42 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #create-doc-btn {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
   border:none;
   color:black;
   background-color: darkgray;
   margin-top:10px;
   margin-bottom:10px;
-  width:60px;
-  height:35px;
+  width:47%;
+  height:42px;
   float:right;
 }
 
-.flexrow {
-  display: flex;
-  background: lightgray; /*for debug*/
-}
-.flexrow > * {
-  flex: 1;
-  margin: 1em;
-  outline: auto green;
-}
 
 #filter-container {
+  padding-top: 30px;
   padding-bottom: 20px;
 }
 
-.forks {
-  background-color: #FFCC02;
-  border: none;
-}
-
 .date {
-  background-color: #F54B32;
-}
-
-.updated {
-  background-color: #07802A;
-}
-
-.edits {
-  background-color: #F54B32;
+  background-color: #ED3D05;
 }
 
 .views {
+  background-color: #FFCE00;
+}
+
+.forks {
+  background-color: #0ED779;
+}
+
+.edits {
+  background-color: #F79994;
+}
+
+.updated {
   background-color: #07802A;
 }
 
@@ -224,12 +254,7 @@ input[id="docName"]:-ms-input-placeholder {
   position: relative;
   padding-left: 5px;
   padding-right: 5px;
-}
-
-.filter-col:after {
-  padding-top: 67.25%;
-  display: block;
-  content: '';
+  height:70px;
 }
 
 .filter-item {
@@ -241,29 +266,34 @@ input[id="docName"]:-ms-input-placeholder {
   left: 0;
   margin:10px;
   cursor:pointer;
-  font-size: 14px;
-  font-family: 'muli';
+  font-size: 14pt;
+  font-family: 'raleway';
   font-weight: bold;
   overflow: hidden;
 }
 
 .filter-item:hover {
   border-style: solid;
-  border-color: transparent;
-  border-width: 5px;
+  border-color: white;
+  border-width: 1px;
 }
 
 .filter-text {
   position: relative;
   color: black;
+  font-size: 14pt;
   font-weight:500;
   top: 50%;
   transform: translateY(-50%);
   text-align:center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height:100%;
+  white-space: nowrap;
 }
 
 .filter-text-selected {
-  font-weight:700 ! important;
+  color:white;
 }
 
 .load-more-item {
@@ -271,28 +301,31 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .tag-item {
-  background-color: #3929B8;
+  background-color: lightgray;
   color:white ! important;
 }
 
 .filter-text-tag-item {
-  color:white ! important;
 }
 
 #tab0.tab-item {
-  background-color: #F54B32;
+  background-color: #ED3D05;
 }
 
 #tab1.tab-item {
-  background-color: #07802A;
+  background-color: #FFCE00;
 }
 
 #tab2.tab-item {
-  background-color: #3929B8;
+  background-color: #0ED779;
 }
 
 #tab3.tab-item {
-  background-color: #FFCC02;
+  background-color: #F79994;
+}
+
+#tab4.tab-item {
+  background-color: #4D42EB;
 }
 
 .tab-btn:hover {
@@ -323,7 +356,7 @@ input[id="docName"]:-ms-input-placeholder {
 .tab-btn {
   display:inline;
   border-style: none;
-  font-family: "muli";
+  font-family: "raleway";
   width:90px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -349,6 +382,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #project-tabs {
   max-height: 55px;
+  padding-left: 30px;
   margin-left:auto;
   margin-right:0;
   clear:right;
@@ -377,6 +411,12 @@ input[id="docName"]:-ms-input-placeholder {
   position:relative;
   overflow-x:hidden;
   overflow-y:hidden;
+}
+
+#code-header-container {
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .output-container {
@@ -442,9 +482,9 @@ input[id="docName"]:-ms-input-placeholder {
   position:absolute;
   display:inline-block;
   top: 0;
-  left: 0;
+  left: -13px;
   height:2em;
-  width: 2em;
+  width: 40px;
   z-index: 15;
   background-color: rgba(200, 200, 200, 0.5);
   border:none;
@@ -456,11 +496,14 @@ input[id="docName"]:-ms-input-placeholder {
 
 
 #playback-container {
-  float:left;
-  width:300px;
-  height:100%;
-  transform: translateY(-50%);
-  overflow: visible;
+  position:absolute;
+  display:inline-block;
+  background-color: rgba(100,100,100,0.6);
+  top: 30px;
+  left: -13px;
+  height:180px;
+  width: 40px;
+  z-index: 15;
 }
 
 .transport-btn
@@ -487,6 +530,10 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #mobile-play-btn:first-child {
+  font-size: 25px;
+}
+
+#settings-btn:first-child {
   font-size: 25px;
 }
 
@@ -533,20 +580,30 @@ input[id="docName"]:-ms-input-placeholder {
 
 #doc-title-container {
   background-color: darkgray;
-  height:80px;
+  height:70px;
+}
+
+#doc-controls-container {
+  float:right;
+  display:inline;
+  position: relative;
+  font-size: 14pt;
+  width:320px;
 }
 
 #doc-title {
   color:black;
   background-color:transparent;
-  font-family: "muli";
+  font-family: "raleway";
+  font-weight: normal;
   float:left;
   position: absolute;
-  font-size: 20px;
-  width:25vw;
+  font-size: 20pt;
+  max-width:45vw;
+  display: inline;
   height:50px;
   text-align: left;
-  transform: translateY(50%);
+  transform: translateY(35%);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -566,13 +623,13 @@ input[id="docName"]:-ms-input-placeholder {
 #share-modal {
   background-color: #3929B8;
   color:white;
-  font-family: 'muli';
+  font-family: 'raleway';
   z-index: 2000;
 }
 
 .link-input {
   color:black;
-  font-family: 'muli';
+  font-family: 'raleway';
 }
 
 .btn-primary {
@@ -583,32 +640,52 @@ input[id="docName"]:-ms-input-placeholder {
 #doc-name-input {
   background-color:transparent;
   color:black;
-  position: absolute;
   float:left;
-  font-weight: bold;
+  font-weight: normal;
   box-sizing: border-box;
   border-radius: .25em;
-  font-size: 20px;
+  font-size: 20pt;
   height:50px;
-  font-family: "muli";
-  width:25vw;
-  transform: translateY(50%);
+  font-family: "raleway";
+  max-width:45vw;
+  transform: translateY(35%);
 }
 
 .doc-checkbox
 {
-  font-family: 'muli';
+  font-family: 'raleway';
   color:white;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+#settings-container {
+  height:35px;
+  background-color: lightgray;
+  padding-left: 10px;
+}
+
+.clear-text-btn {
+  background-color: transparent;
+  border-style: solid;
+  border-color: white;
+  border-radius: 4px;
+  color:white;
+  font-family: 'raleway';
+  height:20px;
+  font-size: 9pt;
+  padding-top: 2px;
+  margin-top: 7px;
+  margin-left:10px;
+  margin-bottom: 8px;
+  padding-left:2px;
+  padding-right:2px;
+  width:50px;
 }
 
 #doc-checkbox-container {
   display:inline-block;
-  position: absolute;
   background-color: darkgray;
-  top:5px;
-  right:365px;
-  width:130px;
-  height:100%;
 }
 
 #render-doc-true {
@@ -629,10 +706,6 @@ input[id="docName"]:-ms-input-placeholder {
   height:100%;
 }
 
-#fork-flag {
-
-}
-
 #transport-container {
   position:absolute;
   right:5px;
@@ -641,16 +714,11 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 20px;
 }
 
-#doc-controls-container {
-  float:right;
-  display:inline;
-  position: relative;
-  width:40vw;
-  display:table;
-}
-
 #main-document-container {
   display: block;
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #document-container {
@@ -693,21 +761,7 @@ input[id="docName"]:-ms-input-placeholder {
   float: left;
 }
 
-.clear-text-btn {
-  background-color: transparent;
-  border-style: solid;
-  border-color: white;
-  border-radius: 4px;
-  color:white;
-  font-family: 'muli';
-  height:20px;
-  font-size: 12px;
-  padding-top: 0px;
-  margin-bottom: 10px;
-  padding-left:2px;
-  padding-right:2px;
-  width:50px;
-}
+
 
 #console {
   width:100%;
@@ -744,7 +798,7 @@ input[id="docName"]:-ms-input-placeholder {
   border-style: none;
   width:30px;
   height:20px;
-  font-size: 10px;
+  font-size: 10pt;
   text-align: center;
   padding-top:3px;
   margin-left:10px;
@@ -829,7 +883,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .main-logo {
-  width:185px;
+  width:250px;
   height:auto;
   background-position: center center;
   overflow: hidden;
@@ -871,23 +925,26 @@ input[id="docName"]:-ms-input-placeholder {
 .nav-link {
   color:black;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 14pt;
 }
 
 #signed-in-link {
   color:black;
   font-weight: bold;
+  font-size: 14pt;
 }
 
 #signed-in-label {
   position:absolute;
   color:black;
-  right:0px;
-  top:-12px;
+  right:-5px;
+  top:-10px;
+  font-size: 14pt;
 }
 
 #my-docs {
   color:black;
+  font-size: 14pt;
 }
 
 #login-button {
@@ -895,16 +952,18 @@ input[id="docName"]:-ms-input-placeholder {
   color:black;
   font-weight: bold;
   float:right ! important;
+  font-size: 14pt;
 }
 
 #logout-button {
   position:absolute;
   right:0px;
-  top:10px;
+  top:16px;
   background-color: transparent;
   color:black;
   border:none;
   font-weight: bold;
+  font-size: 14pt;
 }
 
 .row {
@@ -916,16 +975,16 @@ input[id="searchTerm"]::-webkit-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "muli";
-   font-size: 18px;
+   font-family: "raleway";
+   font-size: 18pt;
  }
 
 input[id="searchTerm"]:-moz-placeholder { /* Firefox 18- */
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "muli";
-   font-size: 18px;
+   font-family: "raleway";
+   font-size: 18pt;
    opacity:1;
 }
 
@@ -933,8 +992,8 @@ input[id="searchTerm"]::-moz-placeholder {  /* Firefox 19+ */
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "muli";
-   font-size: 18px;
+   font-family: "raleway";
+   font-size: 18pt;
    opacity:1;
 }
 
@@ -942,22 +1001,25 @@ input[id="searchTerm"]:-ms-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "muli";
-   font-size: 18px;
+   font-family: "raleway";
+   font-size: 18pt;
 }
 
 #searchTerm {
   padding-right: 20px;
   width: 100%;
+  max-width: 950px;
   box-sizing: border-box;
-  height:50px;
+  height:70px;
   text-align: center;
   background-color: black;
   color: white;
   border:none;
-  font-family: "muli";
-  font-size: 18px;
-  margin-bottom: 20px;
+  font-family: "raleway";
+  font-size: 18pt;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .container {
@@ -999,7 +1061,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .file-text {
-  font-family: 'muli';
+  font-family: 'raleway';
   color:white;
   padding-left:10px;
 }

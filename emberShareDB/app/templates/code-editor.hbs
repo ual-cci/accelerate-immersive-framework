@@ -1,4 +1,5 @@
 <div class = "container-fluid">
+  <div id = "code-header-container">
   <h4><span>{{feedbackMessage}}</span></h4>
   {{#if isEmbedded}}
   <div></div>
@@ -11,49 +12,28 @@
     {{/if}}
     {{#if mediaQueries.isDesktop}}
     <div id = "doc-controls-container">
-      {{#if isOwner}}
-      <div id = "doc-checkbox-container" style = "display:block;">
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
-        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-        <span class="tooltiptext">Other users can discover</span>
-      </div>
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
-        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-        <span class="tooltiptext">WARNING! Other users can edit your code</span>
-      </div>
-      {{#if canEditDoc}}
-        <div class="tooltip">
-          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-          <span class="tooltiptext">Render Code Whilst Typing</span>
-        </div>
-      {{/if}}
-      </div>
-      {{/if}}
       <div id = {{concat "render-doc-" isOwner}}>
-      {{#if session.isAuthenticated}}
-        <div class = "fork-flag">
-          <div class="tooltip">
-            {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
-            <span class="tooltiptext">Make Your Own Copy</span>
-          </div>
-          <div class="tooltip">
-            {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
-            <span class="tooltiptext">Report as Inappropriate</span>
-          </div>
-        </div>
-      {{/if}}
         </div>
           <div id = "transport-container">
+            <div class="tooltip">
+              {{#if showSettings}}
+                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+              {{else}}
+                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+              {{/if}}
+              <span class="tooltiptext">Show Document Settings</span>
+            </div>
             {{#if isOwner}}
             <div class="tooltip col-2">
               {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
               <span class="tooltiptext">Delete Document</span>
             </div>
             <div class="tooltip">
-              {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+              {{#if showAssets}}
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+              {{else}}
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+              {{/if}}
               <span class="tooltiptext">Add Files to Use</span>
             </div>
             {{/if}}
@@ -76,14 +56,46 @@
           </div>
     </div>
     {{else}}
-    <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
-      {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
-      <span class="tooltiptext">Render Code</span>
-    </div>
+      <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
+        {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
+        <span class="tooltiptext">Render Code</span>
+      </div>
     {{/if}}
   </div>
+  {{#if showSettings}}
+  <div id = "settings-container">
+    {{#if session.isAuthenticated}}
+      <div class="tooltip">
+        {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
+        <span class="tooltiptext">Make Your Own Copy</span>
+      </div>
+      <div class="tooltip">
+        {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
+        <span class="tooltiptext">Report as Inappropriate</span>
+      </div>
+    {{/if}}
+    {{#if isOwner}}
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
+        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+        <span class="tooltiptext">Other users can discover</span>
+      </div>
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
+        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+        <span class="tooltiptext">WARNING! Other users can edit your code</span>
+      </div>
+      {{#if canEditDoc}}
+        <div class="tooltip">
+          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+          <span class="tooltiptext">Render Code Whilst Typing</span>
+        </div>
+      {{/if}}
+    {{/if}}
+  </div>
+  {{/if}}
   {{#if mediaQueries.isDesktop}}
-  <div>
     {{tokenfield-input
       tokens=model.tags
       allowDuplicates=false
@@ -91,9 +103,9 @@
       editable=canEditDoc
       tokensChanged=(action 'tagsChanged')
     }}
-    </div>
-    {{/if}}
-    {{/if}}
+  {{/if}}
+  {{/if}}
+
     {{#if showAssets}}
       <div class = "file-upload-container">
         <table>
@@ -123,7 +135,7 @@
         {{/if}}
       </div>
     {{/if}}
-
+  </div>
     {{#if mediaQueries.isDesktop}}
     {{#if isEmbedded}}
     <div></div>
@@ -148,7 +160,28 @@
           {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
         {{/if}}
         <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-      </div>
+          {{#if isShowingCode}}
+          <div id = "playback-container">
+            {{ops-player
+              onSkip = (action 'skipOp')
+              onPlay = (action 'playOps')
+              onRewind = (action 'rewindOps')
+              onPause = (action 'pauseOps')
+              isPlaying = isPlayingOps
+            }}
+            {{#bs-button
+              class = "clear-btn"
+              icon="glyphicon glyphicon-zoom-in"
+              onClick=(action "zoomIn")}}
+            {{/bs-button}}
+            {{#bs-button
+              class = "clear-btn"
+              icon="glyphicon glyphicon-zoom-out"
+              onClick=(action "zoomOut")}}
+            {{/bs-button}}
+          </div>
+          {{/if}}
+        </div>
       {{/if}}
 
       {{/if}}
@@ -156,30 +189,9 @@
         <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
       </div>
       <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
+        <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
-          <div id = "playback-container">
-            <h5>Playback your coding</h5>
-            {{ops-player
-              onSkip = (action 'skipOp')
-              onPlay = (action 'playOps')
-              onRewind = (action 'rewindOps')
-              onPause = (action 'pauseOps')
-            }}
-          </div>
-            <div id = "zoom-container">
-            {{#bs-button
-              class = "clear-btn"
-            icon="glyphicon glyphicon-zoom-in"
-            onClick=(action "zoomIn")}}
-            {{/bs-button}}
-            {{#bs-button
-              class = "clear-btn"
-            icon="glyphicon glyphicon-zoom-out"
-            onClick=(action "zoomOut")}}
-            {{/bs-button}}
-          </div>
-        </div>
+        </div> -->
 
           {{ember-ace
             minLines = 40

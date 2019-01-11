@@ -7,7 +7,7 @@ export default Component.extend({
   mediaQueries:inject(),
   sessionAccount: inject('session-account'),
   store: inject('store'),
-  logoURL:config.localOrigin + "/images/cropped-logo.gif",
+  logoURL:config.localOrigin + "/images/logo-animation-cropped.gif",
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
   }),
