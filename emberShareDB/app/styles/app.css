@@ -482,9 +482,9 @@ input[id="docName"]:-ms-input-placeholder {
   position:absolute;
   display:inline-block;
   top: 0;
-  left: 0;
+  left: -13px;
   height:2em;
-  width: 2em;
+  width: 40px;
   z-index: 15;
   background-color: rgba(200, 200, 200, 0.5);
   border:none;
@@ -496,11 +496,14 @@ input[id="docName"]:-ms-input-placeholder {
 
 
 #playback-container {
-  float:left;
-  width:300px;
-  height:100%;
-  transform: translateY(-50%);
-  overflow: visible;
+  position:absolute;
+  display:inline-block;
+  background-color: rgba(100,100,100,0.6);
+  top: 30px;
+  left: -13px;
+  height:180px;
+  width: 40px;
+  z-index: 15;
 }
 
 .transport-btn

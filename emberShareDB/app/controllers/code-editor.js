@@ -1317,6 +1317,8 @@ export default Controller.extend({
       this.set('startX', startX);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "none";
+      let playback = document.querySelector('#playback-container');
+      playback.style["pointer-events"] = "none";
       let overlay2 = document.querySelector('.output-container');
       overlay2.style["pointer-events"] = "auto";
     },
@@ -1325,6 +1327,8 @@ export default Controller.extend({
       this.set('isDragging', false);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
+      let playback = document.querySelector('#playback-container');
+      playback.style["pointer-events"] = "auto";
       let overlay2 = document.querySelector('.output-container');
       overlay2.style["pointer-events"] = "none";
     },

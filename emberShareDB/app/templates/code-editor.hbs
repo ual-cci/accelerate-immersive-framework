@@ -160,18 +160,8 @@
           {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
         {{/if}}
         <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-      </div>
-      {{/if}}
-
-      {{/if}}
-      <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
-      </div>
-      <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
-        <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
+          {{#if isShowingCode}}
           <div id = "playback-container">
-            <h5>Playback your coding</h5>
             {{ops-player
               onSkip = (action 'skipOp')
               onPlay = (action 'playOps')
@@ -179,8 +169,6 @@
               onPause = (action 'pauseOps')
               isPlaying = isPlayingOps
             }}
-          </div>
-            <div id = "zoom-container">
             {{#bs-button
               class = "clear-btn"
               icon="glyphicon glyphicon-zoom-in"
@@ -192,7 +180,18 @@
               onClick=(action "zoomOut")}}
             {{/bs-button}}
           </div>
+          {{/if}}
         </div>
+      {{/if}}
+
+      {{/if}}
+      <div class = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        <iframe id = "output-iframe" srcdoc={{renderedSource}}></iframe>
+      </div>
+      <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
+        <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
+        </div> -->
 
           {{ember-ace
             minLines = 40
