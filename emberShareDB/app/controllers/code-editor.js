@@ -93,7 +93,7 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = this.get("mediaQueries.isDesktop") ? "inline":"none"
+      const display = this.get("mediaQueries.isDesktop") && !this.get('isEmbedded') ? "inline":"none"
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -1004,11 +1004,11 @@ export default Controller.extend({
   },
   hijackConsoleOutput: function() {
     (()=>{
-        var oldLog = console.log;
-        console.log = (msg) => {
-            this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
-            oldLog.apply(console, arguments);
-        };
+        // var oldLog = console.log;
+        // console.log = (msg) => {
+        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+        //     oldLog.apply(console, arguments);
+        // };
         // var oldWarn = console.warn;
         // console.warn = (msg) => {
         //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
