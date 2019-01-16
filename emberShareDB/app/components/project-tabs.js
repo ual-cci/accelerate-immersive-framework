@@ -6,6 +6,7 @@ export default Component.extend({
   tabs:[],
   actions:{
     createNewDocument() {
+      console.log("creating new tab")
       const parent = this.get('parent');
       const name = "newTab" + this.get('tabs').length;
       const data = {name:name, isPrivate:true, source:""}

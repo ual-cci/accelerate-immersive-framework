@@ -22,8 +22,9 @@
     {{/each}}
     <th>
       {{#bs-button class = "add-file-button"
+        onClick=(action 'createNewDocument')
         icon="glyphicon glyphicon-plus"
-        onClick=(action 'createNewDocument')}}
+        }}
       {{/bs-button}}
     </th>
    </tr>
