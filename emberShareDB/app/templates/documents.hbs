@@ -1,6 +1,6 @@
-<div id = "main-document-container">
+<div id = "main-document-container" class = "limited-width-container">
 <form {{action 'search' on='submit'}}>
-  {{input id='searchTerm' placeholder='search' value=searchTerm key-press=(action "search")}}
+  {{input id='searchTerm' class = "limited-width-container" placeholder='search' value=searchTerm key-press=(action "search")}}
 </form>
 <div class = "row" id = "doc-create-container">
 {{#if session.isAuthenticated}}
@@ -23,7 +23,7 @@
 {{#if hasNoDocuments}}
   <h2 style = "text-align:center;">No Results</h2>
 {{/if}}
-<div id = "filter-container" class = "container-fluid">
+<div id = "filter-container">
 {{#if mediaQueries.isXs}}
 <div class = "row">
   {{#each showingFilters as |filter index|}}

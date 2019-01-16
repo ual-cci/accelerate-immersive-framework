@@ -1,5 +1,5 @@
 <div class = "container-fluid">
-  <div id = "code-header-container">
+  <div id = "code-header-container" class = "limited-width-container">
   <h4><span>{{feedbackMessage}}</span></h4>
   {{#if isEmbedded}}
   <div></div>
@@ -38,7 +38,11 @@
             </div>
             {{/if}}
             <div class="tooltip">
-              {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
+              {{#if showShare}}
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowShare")}}{{/bs-button}}
+              {{else}}
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
+              {{/if}}
               <span class="tooltiptext">Share links</span>
             </div>
             <div class="tooltip col-2">
@@ -62,6 +66,12 @@
       </div>
     {{/if}}
   </div>
+  {{#if showShare}}
+  <div id = "share-container">
+    <p>Editable Link : {{editLink}}</p>
+    <p>Embed Link : {{embedLink}}</p>
+  </div>
+  {{/if}}
   {{#if showSettings}}
   <div id = "settings-container">
     {{#if session.isAuthenticated}}
@@ -95,6 +105,29 @@
     {{/if}}
   </div>
   {{/if}}
+  {{#if showAssets}}
+    <div class = "file-upload-container">
+         <div id = "uploaded-assets-container">
+          {{#each model.assets as |asset|}}
+            <div class = "asset-container">
+              <p class = "file-text file-name">{{asset.name}}</p>
+              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
+              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
+            </div>
+          {{/each}}
+        </div>
+      {{#if canEditDoc}}
+      <div id = "asset-progress"></div>
+      <div class = "file-upload">
+        {{file-upload
+          onProgress = (action 'assetProgress')
+          onCompletion = (action 'assetUploaded')
+          onError = (action 'assetError')
+        }}
+      </div>
+      {{/if}}
+    </div>
+  {{/if}}
   {{#if mediaQueries.isDesktop}}
     {{tokenfield-input
       tokens=model.tags
@@ -106,35 +139,7 @@
   {{/if}}
   {{/if}}
 
-    {{#if showAssets}}
-      <div class = "file-upload-container">
-        <table>
-         <tr>
-           <div id = "uploaded-assets-container">
-            {{#each model.assets as |asset|}}
-            <th>
-              <div class = "asset-container">
-                <p class = "file-text file-name">{{asset.name}}</p>
-                {{#bs-button class = "clear-btn delete-asset-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
-                {{#bs-button class = "clear-btn preview-asset-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
-              </div>
-            </th>
-            {{/each}}
-          </div>
-          </tr>
-        </table>
-        {{#if canEditDoc}}
-        <div id = "asset-progress"></div>
-        <div class = "file-upload">
-          {{file-upload
-            onProgress = (action 'assetProgress')
-            onCompletion = (action 'assetUploaded')
-            onError = (action 'assetError')
-          }}
-        </div>
-        {{/if}}
-      </div>
-    {{/if}}
+
   </div>
     {{#if mediaQueries.isDesktop}}
     {{#if isEmbedded}}

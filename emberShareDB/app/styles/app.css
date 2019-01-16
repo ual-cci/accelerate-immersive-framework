@@ -4,22 +4,22 @@
   border-color: rgba(0,0,0,0);
 }
 
+body {
+  font-family: "raleway";
+}
+
 body::-webkit-scrollbar {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    font-family: "raleway"
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 
 .a {
-  font-family: 'raleway' ! important;
 }
 
 .p {
-  font-family: 'raleway' ! important;
   color:white;
 }
 
 .html {
-  font-family: 'raleway' ! important;
 }
 
 .center {
@@ -31,7 +31,6 @@ body::-webkit-scrollbar {
 .document-link {
   color:black;
   height:20px;
-  font-family: 'raleway';
   font-size: 12pt;
   text-overflow: ellipsis;
   max-width: 50px;
@@ -46,7 +45,6 @@ body::-webkit-scrollbar {
   height: 20px;
   color: black;
   font-size: 12pt;
-  padding-left: 3px;
   display: inline;
 }
 
@@ -54,12 +52,18 @@ body::-webkit-scrollbar {
   color:black;
   display: inline;
   width:auto;
-  font-family: 'raleway';
   font-size: 12pt;
   text-overflow: ellipsis;
   max-width: 50px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.doc-item-icon
+{
+  padding-right: 5px;
+  padding-top: 5px;
+  font-size: 10pt;
 }
 
 .doc-list-icon-container
@@ -94,7 +98,7 @@ body::-webkit-scrollbar {
   padding-top: 0px;
   padding-left: 20px;
   padding-right: 5px;
-  background-color: #CCCBCB;
+  background-color: #E6E6E6;
   height:90%;
   width:auto;
   margin: 10px 10px 10px 10px;
@@ -107,9 +111,6 @@ body::-webkit-scrollbar {
 #mimic-navbar {
  padding-top:15px;
  padding-bottom:10px;
- max-width: 950px;
- margin-left: auto;
- margin-right: auto;
 }
 
 #create-doc-placeholder
@@ -123,15 +124,14 @@ body::-webkit-scrollbar {
 }
 
 #create-doc-name {
-  border-color:black;
-  border-width: thin;
+  border:solid thin black;
   height:42px;
   margin-top:10px;
   margin-bottom:10px;
   width:100%;
   overflow:hidden;
   font-size:18pt;
-  font-family: 'raleway';
+  font-weight: 300;
   padding-left:20px;
   color:black;
 }
@@ -170,7 +170,18 @@ input[id="docName"]:-ms-input-placeholder {
    padding-left:10px;
 }
 
+#private-btn:hover {
+  width:46%;
+  height:40px;
+  margin-top:11px;
+}
+
+#create-doc-btn:hover {
+  border:solid white 1px;
+}
+
 #private-btn {
+  padding: 0px;
   overflow-x: hidden;
   text-overflow: ellipsis;
   background-color: white;
@@ -194,7 +205,7 @@ input[id="docName"]:-ms-input-placeholder {
   max-width: 80px;
   border:none;
   color:black;
-  background-color: darkgray;
+  background-color: #B3B3B3;
   margin-top:10px;
   margin-bottom:10px;
   width:47%;
@@ -205,7 +216,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #filter-container {
   padding-top: 30px;
-  padding-bottom: 20px;
+  padding-bottom: 0px;
 }
 
 .date {
@@ -254,20 +265,19 @@ input[id="docName"]:-ms-input-placeholder {
   position: relative;
   padding-left: 5px;
   padding-right: 5px;
-  height:70px;
+  height:60px;
 }
 
 .filter-item {
-  padding:10px 10px 10px 10px;
+  padding:12px 10px 10px 10px;
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   left: 0;
-  margin:10px;
+  margin:5px 5px 5px 5px;
   cursor:pointer;
   font-size: 14pt;
-  font-family: 'raleway';
   font-weight: bold;
   overflow: hidden;
 }
@@ -297,11 +307,11 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .load-more-item {
-  background-color: lightgray;
+  background-color: #4D42EB;
 }
 
 .tag-item {
-  background-color: lightgray;
+  background-color: #B3B3B3;
   color:white ! important;
 }
 
@@ -355,13 +365,15 @@ input[id="docName"]:-ms-input-placeholder {
 
 .tab-btn {
   display:inline;
+  padding-left: 8px ! important;
   border-style: none;
-  font-family: "raleway";
   width:90px;
   text-overflow: ellipsis;
   overflow: hidden;
   height:100%;
-  text-align: center;
+  text-align: left;
+  font-size: 9pt;
+  font-weight:600;
   background-color: rgba(0,0,0,0);
 }
 
@@ -414,9 +426,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #code-header-container {
-  max-width: 950px;
-  margin-left: auto;
-  margin-right: auto;
+
 }
 
 .output-container {
@@ -433,6 +443,7 @@ input[id="docName"]:-ms-input-placeholder {
   width:100%;
   height:100%;
   background-color: white;
+  border:solid black 1px;
 }
 
 *:fullscreen, *:-webkit-full-screen, *:-moz-full-screen {
@@ -452,6 +463,11 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y: scroll;
 }
 
+.ace_editor {
+  border:none ! important;
+  border-radius: 0px;
+}
+
 #drag-container {
   position:absolute;
   top: 0px;
@@ -466,7 +482,7 @@ input[id="docName"]:-ms-input-placeholder {
 #drag-button {
   position:absolute;
   top: 30px;
-  right: 0px;
+  right: 1px;
   z-index: 20;
   height:100%;
   width:10px;
@@ -481,6 +497,7 @@ input[id="docName"]:-ms-input-placeholder {
 .hide-code-btn {
   position:absolute;
   display:inline-block;
+  border-radius: 0px;
   top: 0;
   left: -13px;
   height:2em;
@@ -594,8 +611,7 @@ input[id="docName"]:-ms-input-placeholder {
 #doc-title {
   color:black;
   background-color:transparent;
-  font-family: "raleway";
-  font-weight: normal;
+  font-weight: 400;
   float:left;
   position: absolute;
   font-size: 20pt;
@@ -623,13 +639,11 @@ input[id="docName"]:-ms-input-placeholder {
 #share-modal {
   background-color: #3929B8;
   color:white;
-  font-family: 'raleway';
   z-index: 2000;
 }
 
 .link-input {
   color:black;
-  font-family: 'raleway';
 }
 
 .btn-primary {
@@ -641,19 +655,17 @@ input[id="docName"]:-ms-input-placeholder {
   background-color:transparent;
   color:black;
   float:left;
-  font-weight: normal;
+  font-weight: 400;
   box-sizing: border-box;
   border-radius: .25em;
   font-size: 20pt;
   height:50px;
-  font-family: "raleway";
   max-width:45vw;
   transform: translateY(35%);
 }
 
 .doc-checkbox
 {
-  font-family: 'raleway';
   color:white;
   margin-top: 10px;
   margin-left: 10px;
@@ -665,22 +677,28 @@ input[id="docName"]:-ms-input-placeholder {
   padding-left: 10px;
 }
 
+#share-container {
+  height:70px;
+  background-color: lightgray;
+  padding:10px;
+}
+
 .clear-text-btn {
   background-color: transparent;
   border-style: solid;
+  font-weight: 500;
   border-color: white;
   border-radius: 4px;
   color:white;
-  font-family: 'raleway';
   height:20px;
   font-size: 9pt;
-  padding-top: 2px;
+  padding-top: 1px;
   margin-top: 7px;
   margin-left:10px;
   margin-bottom: 8px;
   padding-left:2px;
   padding-right:2px;
-  width:50px;
+  width:60px;
 }
 
 #doc-checkbox-container {
@@ -710,15 +728,11 @@ input[id="docName"]:-ms-input-placeholder {
   position:absolute;
   right:5px;
   top: 0%;
-  height: 80px;
   margin-top: 20px;
 }
 
 #main-document-container {
   display: block;
-  max-width: 950px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 #document-container {
@@ -760,8 +774,6 @@ input[id="docName"]:-ms-input-placeholder {
 #prev-page-btn{
   float: left;
 }
-
-
 
 #console {
   width:100%;
@@ -894,32 +906,32 @@ input[id="docName"]:-ms-input-placeholder {
 
 .nav-link:focus {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-link:hover {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-link:active {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-item:focus {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-item:hover {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-item:active {
   color: black  ! important;
-  background-color: lightgray ! important;
+  background-color: #E6E6E6 ! important;
 }
 
 .nav-link {
@@ -928,18 +940,9 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 14pt;
 }
 
-#signed-in-link {
-  color:black;
-  font-weight: bold;
-  font-size: 14pt;
-}
-
-#signed-in-label {
-  position:absolute;
-  color:black;
-  right:-5px;
-  top:-10px;
-  font-size: 14pt;
+#my-docs:hover {
+  border-radius: 0px;
+  background-color: #E6E6E6 ! important;
 }
 
 #my-docs {
@@ -947,23 +950,43 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 14pt;
 }
 
+#login-container {
+  width:200px;
+  height:50px;
+  margin-right: 5px;
+  float:right ! important;
+  position: relative;
+}
+
 #login-button {
   background-color: transparent;
   color:black;
   font-weight: bold;
-  float:right ! important;
   font-size: 14pt;
+  float:right;
 }
 
 #logout-button {
-  position:absolute;
-  right:0px;
-  top:16px;
+  position: absolute;
   background-color: transparent;
   color:black;
   border:none;
   font-weight: bold;
   font-size: 14pt;
+  margin-top: 0px;
+  top:30px;
+  right:0px;
+}
+
+#signed-in-label {
+  color:black;
+  font-size: 14pt;
+  margin-bottom: 0px ! important;
+  margin-right: 8px;
+  margin-top: 10px;
+  position: absolute;
+  top:0px;
+  right:0px;
 }
 
 .row {
@@ -975,7 +998,6 @@ input[id="searchTerm"]::-webkit-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "raleway";
    font-size: 18pt;
  }
 
@@ -983,7 +1005,6 @@ input[id="searchTerm"]:-moz-placeholder { /* Firefox 18- */
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "raleway";
    font-size: 18pt;
    opacity:1;
 }
@@ -992,7 +1013,6 @@ input[id="searchTerm"]::-moz-placeholder {  /* Firefox 19+ */
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "raleway";
    font-size: 18pt;
    opacity:1;
 }
@@ -1001,25 +1021,21 @@ input[id="searchTerm"]:-ms-input-placeholder {
    text-align: right;
    padding-right: 20px;
    color:white;
-   font-family: "raleway";
    font-size: 18pt;
 }
 
 #searchTerm {
   padding-right: 20px;
   width: 100%;
-  max-width: 950px;
   box-sizing: border-box;
   height:70px;
   text-align: center;
   background-color: black;
   color: white;
   border:none;
-  font-family: "raleway";
   font-size: 18pt;
+  font-weight: 300;
   margin-bottom: 10px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .container {
@@ -1028,60 +1044,66 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 .file-name {
   text-overflow: ellipsis;
+  text-align: left;
   overflow: hidden;
-  width:100px;
+  width:120px;
+  max-width:120px;
+  white-space: nowrap;
+  padding-top: 5px;
+  display: inline-block;
+}
+
+.file-btn {
   display:inline;
+  width:30px;
+  float:right;
+  font-weight: 200;
+}
+
+.file-btn:hover {
+  color: rgba(200,200,200, 1);
+  background-color:transparent;
+}
+
+.file-text {
+  color:white;
 }
 
 .file-upload {
   background-color: transparent;
   color:white;
-  padding:4px 4px 4px 4px;
-  margin: 10px 10px 10px 10px;
+  padding:4px 2px 4px 4px;
+}
+
+#uploaded-assets-container {
+  overflow: scroll;
+  white-space: nowrap;
+  padding:5px;
 }
 
 .asset-container {
   width:200px;
+  height:30px;
+  border:solid white 1px;
+  border-radius: 8px;
+  display: inline-block;
+  color: white;
+  text-align: center;
+  text-decoration: none;
 }
 
 #asset-progress {
   display: none;
-  background-color: yellow;
+  background-color: #FFCE00;
   height:15px;
 }
 
-.preview-asset-btn {
-  position: relative;
-  display:inline;
-}
-
-.delete-asset-btn {
-  display:inline;
-  position: relative;
-}
-
-.file-text {
-  font-family: 'raleway';
-  color:white;
-  padding-left:10px;
-}
-
-#uploaded-assets-container {
-  overflow-x:auto;
-  overflow-y:hidden;
-  max-height:40px;
-  width:40vw;
-  padding-bottom: 10px;
-}
-
 .file-upload-container {
-  width:40vw;
+  width:100%;
   background-color: #3929B8;
   border-radius: 2;
   border-width: 5;
   border-color: black;
-  float:right;
-  clear:right;
 }
 
 .tooltip {
@@ -1120,4 +1142,32 @@ input[id="searchTerm"]:-ms-input-placeholder {
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+.limited-width-container {
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-label {
+  margin-right: 10px;
+  width:120px;
+}
+
+.login-btn:hover {
+  background-color: lightgray;
+}
+
+.login-btn {
+  margin-top: 10px;
+  background-color: #E6E6E6;
+  color:black;
+  border-radius: 3px;
+  border:none;
+  padding: 5px 15px 5px 15px;
+}
+
+.login-input {
+  width:250px;
 }

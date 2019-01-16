@@ -100,6 +100,7 @@ export default Controller.extend({
       }
       $("#ace-container").css("display", display);
     })
+    this.hijackConsoleOutput()
   },
   initShareDB: function() {
     this.get('cs').log('initShareDB');
@@ -1006,8 +1007,18 @@ export default Controller.extend({
         var oldLog = console.log;
         console.log = (msg) => {
             this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
-            //oldLog.apply(console, arguments);
+            oldLog.apply(console, arguments);
         };
+        // var oldWarn = console.warn;
+        // console.warn = (msg) => {
+        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+        //     oldWarn.apply(console, arguments);
+        // };
+        // var oldError = console.error;
+        // console.error = (msg) => {
+        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+        //     oldError.apply(console, arguments);
+        // };
     })();
   },
   updatePlayButton: function() {
@@ -1159,7 +1170,7 @@ export default Controller.extend({
       if(parseInt(e.percent) < 100)
       {
         $("#asset-progress").css("display", "block");
-        $("#asset-progress").css("width", (parseInt(e.percent) * 40/100)+"vw");
+        $("#asset-progress").css("width", (parseInt(e.percent))+"%");
       }
       else
       {
@@ -1253,13 +1264,13 @@ export default Controller.extend({
       this.toggleProperty('showSettings');
     },
     toggleShowShare() {
-      this.get('modalsManager')
-        .alert({title: this.get('model').data.name,
-                bodyComponent: 'share-modal',
-                editLink:this.get('editLink'),
-                embedLink:this.get('embedLink'),
-                displayLink:this.get('displayLink')
-              });
+      // this.get('modalsManager')
+      //   .alert({title: this.get('model').data.name,
+      //           bodyComponent: 'share-modal',
+      //           editLink:this.get('editLink'),
+      //           embedLink:this.get('embedLink'),
+      //           displayLink:this.get('displayLink')
+      //         });
       this.toggleProperty('showShare');
     },
     toggleShowAssets() {
