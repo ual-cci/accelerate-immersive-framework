@@ -100,7 +100,7 @@ export default Controller.extend({
       }
       $("#ace-container").css("display", display);
     })
-    this.hijackConsoleOutput()
+    //this.hijackConsoleOutput()
   },
   initShareDB: function() {
     this.get('cs').log('initShareDB');
