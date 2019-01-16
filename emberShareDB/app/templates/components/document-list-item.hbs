@@ -2,18 +2,18 @@
 <div class = "document-list-item">
   <div class = "doc-list-name-container">
     {{#link-to "code-editor" document.documentId class='document-link'}}{{document.name}}  {{/link-to}}
-     <p class = "doc-by-label"> by </p> {{#link-to "documents" document.owner 0 'views' class='document-name-link'}}{{document.owner}}{{/link-to}}
+     <p class = "doc-by-label">by </p> {{#link-to "documents" document.owner 0 'views' class='document-name-link'}}{{document.owner}}{{/link-to}}
   </div>
   <div class = "doc-list-icon-container">
     {{#if document.readOnly}}
     <div class="tooltip">
-      <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+      <span class="glyphicon glyphicon-lock doc-item-icon" aria-hidden="true"></span>
       <span class="tooltiptext">Read Only</span>
     </div>
     {{/if}}
     {{#if document.isPrivate}}
     <div class="tooltip">
-      <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+      <span class="glyphicon glyphicon-eye-close doc-item-icon" aria-hidden="true"></span>
       <span class="tooltiptext">Private</span>
     </div>
     {{/if}}
