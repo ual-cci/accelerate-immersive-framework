@@ -114,6 +114,22 @@ export default Controller.extend({
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
     this.set('isEmbedded', embed)
+    console.log("OUTOPUY", )
+    var iframe = document.getElementById("output-iframe");
+    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDocument.body.style.padding = "0px";
+    iframeDocument.body.style.margin = "0px";
+    console.log(iframe,iframeDocument)
+    if(embed) {
+      document.getElementById("main-code-container").style.height="97vh"
+      document.getElementById("main-code-container").style.width="100vw"
+      document.getElementById("output-container").style["border-top-width"]=0;
+      document.getElementById("output-container").style["border-bottom-width"]=0;
+      document.getElementById("output-container").style["border"]="none";
+      document.getElementById("main-site-container").style.padding="0px"
+      document.getElementById("main-site-container").style.border="none"
+    }
+
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
