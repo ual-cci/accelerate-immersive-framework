@@ -728,7 +728,6 @@ input[id="docName"]:-ms-input-placeholder {
   position:absolute;
   right:5px;
   top: 0%;
-  height: 80px;
   margin-top: 20px;
 }
 
@@ -1054,37 +1053,39 @@ input[id="searchTerm"]:-ms-input-placeholder {
   display: inline-block;
 }
 
-.preview-asset-btn {
-  display: inline;
+.file-btn {
+  display:inline;
   width:30px;
   float:right;
+  font-weight: 200;
 }
 
-.delete-asset-btn {
-  display: inline;
-  width:30px;
-  float:right;
+.file-btn:hover {
+  color: rgba(200,200,200, 1);
+  background-color:transparent;
 }
 
 .file-text {
   color:white;
-  padding-left:10px;
 }
 
 .file-upload {
   background-color: transparent;
   color:white;
-  padding:4px 4px 4px 4px;
-  margin: 10px 10px 10px 10px;
+  padding:4px 2px 4px 4px;
 }
 
 #uploaded-assets-container {
   overflow: scroll;
   white-space: nowrap;
+  padding:5px;
 }
 
 .asset-container {
   width:200px;
+  height:30px;
+  border:solid white 1px;
+  border-radius: 8px;
   display: inline-block;
   color: white;
   text-align: center;
@@ -1093,7 +1094,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #asset-progress {
   display: none;
-  background-color: yellow;
+  background-color: #FFCE00;
   height:15px;
 }
 

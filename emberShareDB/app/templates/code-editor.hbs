@@ -111,8 +111,8 @@
           {{#each model.assets as |asset|}}
             <div class = "asset-container">
               <p class = "file-text file-name">{{asset.name}}</p>
-              {{#bs-button class = "clear-btn delete-asset-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
-              {{#bs-button class = "clear-btn preview-asset-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
+              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.fileId)}}{{/bs-button}}
+              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
             </div>
           {{/each}}
         </div>
