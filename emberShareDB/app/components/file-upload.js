@@ -7,11 +7,11 @@ export default EmberUploader.FileField.extend({
   sessionAccount:inject('session-account'),
   cs:inject('console'),
   url:config.serverHost + "/asset",
-  filesDidChange(files) {
+  uploadFile:  function (file){
     const uploader = EmberUploader.Uploader.create({
       url: this.get('url')
     });
-    if (!isEmpty(files))
+    if (!isEmpty(file))
     {
       let user = this.get('sessionAccount').currentUserName;
       let doc = this.get('sessionAccount').currentDoc;
@@ -29,7 +29,14 @@ export default EmberUploader.FileField.extend({
         this.get('cs').log('didError',jqXHR, textStatus, errorThrown);
         this.get('onError')(errorThrown);
       });
-      uploader.upload(files[0], data);
+      uploader.upload(file)
+    }
+  },
+  filesDidChange: async function(files) {
+    console.log("files to upload", files)
+    for(var i = 0; i < files.length; i++)
+    {
+      await this.uploadFile(files[i])
     }
   }
 });
