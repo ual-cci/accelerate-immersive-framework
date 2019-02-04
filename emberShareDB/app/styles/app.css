@@ -1136,6 +1136,17 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border-color: black;
 }
 
+#connection-warning-text {
+  color:white;
+  text-align: center;
+}
+
+#connection-warning-container {
+  height:100px;
+  width: 100%;
+  background-color: rgba(255,0,0,0.8)
+}
+
 .tooltip {
   position: relative;
   display: inline-block;

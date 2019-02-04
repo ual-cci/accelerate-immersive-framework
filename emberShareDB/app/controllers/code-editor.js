@@ -48,6 +48,7 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showSettings:false,
+  showConnectionWarning:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -532,9 +533,12 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       const MAX_RETRIES = 5;
       let droppedOps = this.get('droppedOps');
+      //let droppedOps = [1,2,3]
       if(droppedOps.length > 0) {
+        this.set('showConnectionWarning', true);
         this.set('droppedOps', droppedOps.push(op));
-        return reject();
+        reject();
+        return;
       }
 
       if(this.get('wsAvailable'))
@@ -552,10 +556,12 @@ export default Controller.extend({
               droppedOps.push(op);
             }
             reject(err);
+            return;
           }
           else
           {
             resolve();
+            return;
           }
         });
       }
@@ -564,6 +570,7 @@ export default Controller.extend({
         this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
+          return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
           if(retry < MAX_RETRIES)
@@ -575,6 +582,7 @@ export default Controller.extend({
             droppedOps.push(op);
           }
           reject(err);
+          return;
         });
       }
     });
@@ -708,8 +716,8 @@ export default Controller.extend({
           }
           this.updateLinting();
         });
-      });
-    })
+      }).catch((err)=>{console.log(err)});
+    }).catch((err)=>{console.log(err)});
   },
   flashAutoRender:function()
   {
@@ -778,7 +786,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    if(!surpress)
+    if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.editor;
       const session = editor.getSession();
@@ -787,27 +795,31 @@ export default Controller.extend({
 
       if(!this.get('opsPlayer').atHead())
       {
-        this.get('cs').log("not at head");
+        console.log("not at head", doc.data.source, session.getValue());
         this.submitOp({p: ["source", 0], sd: doc.data.source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
+      else
+      {
+        const aceDoc = session.getDocument();
+        const op = {};
+        const start = aceDoc.positionToIndex(delta.start);
+        op.p = ['source', parseInt(start)];
+        let action;
+        if (delta.action === 'insert') {
+          action = 'si';
+        } else if (delta.action === 'remove') {
+          action = 'sd';
+        } else {
+          throw new Error(`action ${action} not supported`);
+        }
+        const str = delta.lines.join('\n');
+        op[action] = str;
+        this.submitOp(op);
+      }
+
       this.get('opsPlayer').reset(doc.id);
 
-      const aceDoc = session.getDocument();
-      const op = {};
-      const start = aceDoc.positionToIndex(delta.start);
-      op.p = ['source', parseInt(start)];
-      let action;
-      if (delta.action === 'insert') {
-        action = 'si';
-      } else if (delta.action === 'remove') {
-        action = 'sd';
-      } else {
-        throw new Error(`action ${action} not supported`);
-      }
-      const str = delta.lines.join('\n');
-      op[action] = str;
-      this.submitOp(op);
       this.restartCodeTimer();
     }
   },
@@ -896,22 +908,32 @@ export default Controller.extend({
     }
   },
   skipOp:function(prev, rewind = false) {
-    const editor = this.get('editor');
-    const doc = this.get('currentDoc').id;
-    const fn = (deltas) => {
-      this.set('surpress', true);
-      editor.session.getDocument().applyDeltas(deltas);
-      this.set('surpress', false);
+    const fn = ()=> {
+      const editor = this.get('editor');
+      const doc = this.get('currentDoc').id;
+      const fn = (deltas) => {
+        this.set('surpress', true);
+        editor.session.getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+      }
+      if(prev)
+      {
+        this.get('opsPlayer').prevOp(editor, rewind)
+        .then((deltas)=>{fn(deltas)});
+      }
+      else
+      {
+        this.get('opsPlayer').nextOp(editor, rewind)
+        .then((deltas)=>{fn(deltas)});
+      }
     }
-    if(prev)
+    if(this.get('opsPlayer').atHead())
     {
-      this.get('opsPlayer').prevOp(editor, rewind)
-      .then((deltas)=>{fn(deltas)});
+      this.updateSourceFromSession().then(fn).catch((err)=>{console.log(err)})
     }
     else
     {
-      this.get('opsPlayer').nextOp(editor, rewind)
-      .then((deltas)=>{fn(deltas)});
+      fn()
     }
   },
   updateSavedVals: function()
@@ -1007,11 +1029,8 @@ export default Controller.extend({
     this.pauseOps();
     this.set('isPlayingOps', true);
     this.set('opsInterval', setInterval(()=> {
-      if(!this.get('opsPlayer').reachedEnd)
-      {
-        this.skipOp(false);
-      }
-      else
+      this.skipOp(false);
+      if(this.get('opsPlayer').reachedEnd)
       {
         this.set('isPlayingOps', false);
         clearInterval(this.get('opsInterval'));
@@ -1346,7 +1365,7 @@ export default Controller.extend({
       overlay.style["pointer-events"] = "none";
       let playback = document.querySelector('#playback-container');
       playback.style["pointer-events"] = "none";
-      let overlay2 = document.querySelector('.output-container');
+      let overlay2 = document.querySelector('#output-container');
       overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
@@ -1356,7 +1375,7 @@ export default Controller.extend({
       overlay.style["pointer-events"] = "auto";
       let playback = document.querySelector('#playback-container');
       playback.style["pointer-events"] = "auto";
-      let overlay2 = document.querySelector('.output-container');
+      let overlay2 = document.querySelector('#output-container');
       overlay2.style["pointer-events"] = "none";
     },
     mouseMove(e) {

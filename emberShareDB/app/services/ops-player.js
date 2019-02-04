@@ -20,12 +20,12 @@ export default Service.extend({
     }
     else
     {
+      console.log("checking head", ptr, this.get('ops').length)
       return ptr >= this.get('ops').length - 1;
     }
   },
   reset(doc) {
     this.set('doc', doc);
-    this.set('ptr', 0);
     this.set('ops', null);
   },
   loadOps() {
@@ -37,6 +37,7 @@ export default Service.extend({
           url: config.serverHost + "/documents/ops/" + doc,
         }).then((res) => {
           this.set('ops', res.data);
+          console.log("GOT OPS", res.data)
           this.set('ptr', this.get('ops').length);
           resolve(res.data);
         }).catch((err) => {
@@ -102,11 +103,11 @@ export default Service.extend({
               //INVERT
               if(prev)
               {
-                if(op.si)
+                if(!isEmpty(op.si))
                 {
                   op = {p:op.p, sd:op.si};
                 }
-                else if(op.sd)
+                else if(!isEmpty(op.sd))
                 {
                   op = {p:op.p, si:op.sd};
                 }
@@ -114,9 +115,14 @@ export default Service.extend({
               toApply.push(op);
             }
           }
+          if(prev)
+          {
+            //You have to reverse if youre going backwards
+            toApply = toApply.reverse()
+          }
           if(toApply.length > 0)
           {
-            this.get('cs').log(toApply);
+            console.log(toApply);
             this.set('opsToApply', toApply);
           }
         }
@@ -126,6 +132,7 @@ export default Service.extend({
         hasHitBounds = true;
       }
     }
+    console.log("newPtr", newPtr, "oldPtr", this.get('ptr'))
     if(this.inBounds(newPtr))
     {
       this.set('ptr', newPtr);
