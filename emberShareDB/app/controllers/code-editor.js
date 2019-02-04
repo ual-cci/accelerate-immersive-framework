@@ -506,11 +506,11 @@ export default Controller.extend({
       }
       else if (ops[0].p[0] == "assets")
       {
-        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-          toChange.set('assets',ops[0].oi);
-        });
-        this.get('cs').log("didReceiveOp", "preloadAssets")
-        this.preloadAssets();
+        // this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+        //   toChange.set('assets',ops[0].oi);
+        // });
+        // this.get('cs').log("didReceiveOp", "preloadAssets")
+        // this.preloadAssets();
       }
       else if (!source && ops[0].p[0] == "newEval")
       {
