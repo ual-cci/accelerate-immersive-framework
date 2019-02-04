@@ -534,7 +534,8 @@ export default Controller.extend({
       let droppedOps = this.get('droppedOps');
       if(droppedOps.length > 0) {
         this.set('droppedOps', droppedOps.push(op));
-        return reject();
+        reject();
+        return;
       }
 
       if(this.get('wsAvailable'))
@@ -552,10 +553,12 @@ export default Controller.extend({
               droppedOps.push(op);
             }
             reject(err);
+            return;
           }
           else
           {
             resolve();
+            return;
           }
         });
       }
@@ -564,6 +567,7 @@ export default Controller.extend({
         this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
+          return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
           if(retry < MAX_RETRIES)
@@ -575,6 +579,7 @@ export default Controller.extend({
             droppedOps.push(op);
           }
           reject(err);
+          return;
         });
       }
     });
@@ -708,8 +713,8 @@ export default Controller.extend({
           }
           this.updateLinting();
         });
-      });
-    })
+      }).catch((err)=>{console.log(err)});
+    }).catch((err)=>{console.log(err)});
   },
   flashAutoRender:function()
   {
@@ -778,7 +783,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    if(!surpress)
+    if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.editor;
       const session = editor.getSession();
@@ -921,7 +926,7 @@ export default Controller.extend({
     }
     if(this.get('opsPlayer').atHead())
     {
-      this.updateSourceFromSession().then(fn)
+      this.updateSourceFromSession().then(fn).catch((err)=>{console.log(err)})
     }
     else
     {
