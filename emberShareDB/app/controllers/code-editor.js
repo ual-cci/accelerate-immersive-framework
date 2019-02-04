@@ -48,6 +48,7 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showSettings:false,
+  showConnectionWarning:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
@@ -532,7 +533,9 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       const MAX_RETRIES = 5;
       let droppedOps = this.get('droppedOps');
+      //let droppedOps = [1,2,3]
       if(droppedOps.length > 0) {
+        this.set('showConnectionWarning', true);
         this.set('droppedOps', droppedOps.push(op));
         reject();
         return;
