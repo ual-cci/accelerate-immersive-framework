@@ -1106,7 +1106,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #uploaded-assets-container {
-  overflow: scroll;
+  overflow: auto;
   white-space: nowrap;
   padding:5px;
 }

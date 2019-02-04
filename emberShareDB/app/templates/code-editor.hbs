@@ -120,6 +120,7 @@
       <div id = "asset-progress"></div>
       <div class = "file-upload">
         {{file-upload
+          multiple = true
           onProgress = (action 'assetProgress')
           onCompletion = (action 'assetUploaded')
           onError = (action 'assetError')
