@@ -82,6 +82,29 @@ function startAssetAPI(app)
         });
       });
 
+      app.post('/assetWithURL', function(req,res) {
+        const mimetype = req.body.mimetype;
+        const name = req.body.name;
+        const url = req.body.url;
+        var writestream = gridFS.createWriteStream({
+          filename: name,
+          mode: 'w',
+          content_type: mimetype,
+        });
+
+        fs.createReadStream(url).pipe(writestream);
+        writestream.on('close', function(file) {
+          const content_type = mimetype;
+          const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
+          console.log('success uploading asset');
+          res.status(200);
+          res.json(newAsset);
+          fs.unlink(url, function(err) {
+             console.log('success!')
+           });
+        });
+      });
+
       app.get('/asset/:id', function(req, res) {
        var readstream = gridFS.createReadStream({
           _id: req.params.id
@@ -222,25 +245,25 @@ function startDocAPI(app)
       s[sortBy] = -1;
     }
 
-    console.log("Searching for docs with no ownerID")
-    shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
-      results.forEach((doc)=> {
-        //console.log("NO OWNER ID", doc.data)
-        const docId = doc.data.documentId;
-        var doc = shareDBConnection.get(contentCollectionName, docId);
-        doc.fetch(function(err) {
-          if (err || !doc.data) {
-            res.status(404).send("database error making document");
-            return;
-          }
-          else
-          {
-            // const op = {p:["ownerId"], oi:[currentUser]};
-            // submitOp(docId, op);
-          };
-        });
-      });
-    });
+    // console.log("Searching for docs with no ownerID")
+    // shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
+    //   results.forEach((doc)=> {
+    //     //console.log("NO OWNER ID", doc.data)
+    //     const docId = doc.data.documentId;
+    //     var doc = shareDBConnection.get(contentCollectionName, docId);
+    //     doc.fetch(function(err) {
+    //       if (err || !doc.data) {
+    //         res.status(404).send("database error making document");
+    //         return;
+    //       }
+    //       else
+    //       {
+    //         // const op = {p:["ownerId"], oi:[currentUser]};
+    //         // submitOp(docId, op);
+    //       };
+    //     });
+    //   });
+    // });
 
     const query = {
       $and: [searchTermOr,
@@ -357,7 +380,7 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
-  app.post('/documents', app.oauth.authenticate(), (req,res) => {
+  app.post('/documents', (req,res) => {
     console.log("POST document")
     let attr = req.body.data.attributes;
     createDoc(attr)
