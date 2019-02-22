@@ -17,6 +17,7 @@ var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
+const http = require("http")
 
 var initDocAPI = function(server, app, config)
 {
@@ -83,6 +84,7 @@ function startAssetAPI(app)
       });
 
       app.post('/assetWithURL', function(req,res) {
+        console.log("assetWITHURL", req.body)
         const mimetype = req.body.mimetype;
         const name = req.body.name;
         const url = req.body.url;
@@ -92,17 +94,22 @@ function startAssetAPI(app)
           content_type: mimetype,
         });
 
-        fs.createReadStream(url).pipe(writestream);
-        writestream.on('close', function(file) {
-          const content_type = mimetype;
-          const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
-          console.log('success uploading asset');
-          res.status(200);
-          res.json(newAsset);
-          fs.unlink(url, function(err) {
-             console.log('success!')
-           });
+        http.get(url, response => {
+          console.log('got resource', response)
+          var stream = response.pipe(writestream);
+          writestream.on('close', function(file) {
+            const content_type = mimetype;
+            const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
+            console.log('success uploading asset');
+            res.status(200);
+            res.json(newAsset);
+            fs.unlink(url, function(err) {
+               console.log('success!')
+             });
+          });
         });
+
+
       });
 
       app.get('/asset/:id', function(req, res) {
