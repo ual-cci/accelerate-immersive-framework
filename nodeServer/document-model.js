@@ -95,7 +95,7 @@ function startAssetAPI(app)
         });
 
         http.get(url, response => {
-          console.log('got resource', response)
+          console.log('got resource')
           var stream = response.pipe(writestream);
           writestream.on('close', function(file) {
             const content_type = mimetype;
@@ -387,9 +387,13 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
+  app.options('/documents', (req,res) => {
+    res.send(200)
+  });
+
   app.post('/documents', (req,res) => {
-    console.log("POST document")
     let attr = req.body.data.attributes;
+    console.log("POST document", req.route, req.body)
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');
