@@ -1,9 +1,5 @@
 const mongo = require('mongodb');
-var cc_mongoIP = "127.0.0.1";
-var cc_mongoPort = "27017";
-var cc_contentDBName = "cc2_live";
-var mimicURL = "https://www.dev.codecircle.gold.ac.uk/api/"
-var cc_mongoUri = 'mongodb://'+cc_mongoIP+':'+cc_mongoPort+'/'+cc_contentDBName;
+
 const Grid = require('gridfs');
 var http = require('http');
 var express = require('express');
@@ -13,8 +9,14 @@ var db
 var gridFS
 const CODE_CIRCLE_USER_ID = "52cdaefb-ac09-82cd-ef02-678b26b842a9"
 const CODE_CIRCLE_USER_NAME = "codecircle"
-
+const ASSET_SERVING_PORT = 3000
+const cc_mongoIP = "127.0.0.1";
+const cc_mongoPort = "27017";
+const cc_contentDBName = "cc2_live";
+var MIMIC_API_URL = "http://localhost:8080"
+const cc_mongoUri = 'mongodb://'+cc_mongoIP+':'+cc_mongoPort+'/'+cc_contentDBName;
 const app = express();
+
 
 console.log("STARTING SERVER")
 app.use(express.static('static'));
@@ -40,7 +42,7 @@ app.options("/*", function(req, res, next){
 });
 
 var server = http.createServer(app);
-server.listen(3000);
+server.listen(ASSET_SERVING_PORT);
 
 mongo.MongoClient.connect(cc_mongoUri, (err, client)=> {
   if(err)
@@ -59,9 +61,28 @@ mongo.MongoClient.connect(cc_mongoUri, (err, client)=> {
        });
        readstream.pipe(res);
     });
-    transferDoc("5yafjXHiWzLFNZBNw")
+    //transferDoc("5yafjXHiWzLFNZBNw")
   }
 });
+
+
+var transferDoc = (docid)=> {
+  console.log("tranferring", docid)
+  return new Promise((resolve, reject)=> {
+    getSnapshot(docid).then((snapshot)=> {
+      getDocumentData(docid).then((doc)=> {
+        postDoc(snapshot, doc).then((newDocID)=>{
+          postAssets(docid, newDocID).then((uploaded)=> {
+            patchAssets(uploaded, newDocID).then(()=> {
+              resolve()
+            })
+          })
+        })
+      })
+    })
+  }).catch(err=>reject(err))
+}
+
 
 var getSnapshot = (docid) =>
 {
@@ -121,23 +142,6 @@ var getAssets = (docid)=> {
   })
 }
 
-var transferDoc = (docid)=> {
-  console.log("tranferring", docid)
-  return new Promise((resolve, reject)=> {
-    getSnapshot(docid).then((snapshot)=> {
-      getDocumentData(docid).then((doc)=> {
-        postDoc(snapshot, doc).then((newDocID)=>{
-          postAssets(docid, newDocID).then((uploaded)=> {
-            patchAssets(uploaded, newDocID).then(()=> {
-              resolve()
-            })
-          })
-        })
-      })
-    })
-  }).catch(err=>reject(err))
-}
-
 var postDoc = (snapshot, doc)=> {
   console.log("POSTing", doc)
   var tags = doc.tags
@@ -166,7 +170,7 @@ var postDoc = (snapshot, doc)=> {
         }
     }
 
-    docHTTP.open("POST", "http://localhost:8080/documents", true);
+    docHTTP.open("POST", MIMIC_API_URL + "/documents", true);
     docHTTP.setRequestHeader("Content-Type", "application/json");
     docHTTP.send(JSON.stringify(data));
   })
@@ -182,7 +186,7 @@ var postAssets = (docid, newDocID)=> {
         var uploaded = [];
         var assetHTTP = new XMLHttpRequest();
         var assetData = {
-          url: 'http://localhost:3000/asset/'+file.copies.doc_assets.key,
+          url: 'http://localhost:' + ASSET_SERVING_PORT +  '/asset/'+file.copies.doc_assets.key,
           mimetype: file.original.type,
           name:file.original.name
         }
@@ -198,7 +202,7 @@ var postAssets = (docid, newDocID)=> {
               }
           }
         }
-        assetHTTP.open("POST", "http://localhost:8080/assetWithURL", true);
+        assetHTTP.open("POST", MIMIC_API_URL + "/assetWithURL", true);
         assetHTTP.setRequestHeader("Content-Type", "application/json");
         assetHTTP.send(JSON.stringify(assetData));
       })
@@ -224,7 +228,7 @@ var patchAssets = (uploaded, docid)=> {
         resolve()
       }
     }
-    patchHTTP.open("PATCH", 'http://localhost:8080/documents/' + docid, true);
+    patchHTTP.open("PATCH", MIMIC_API_URL + '/documents/' + docid, true);
     patchHTTP.setRequestHeader("Content-Type", "application/json");
     patchHTTP.send(JSON.stringify(patchData));
   })
