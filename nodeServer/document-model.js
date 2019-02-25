@@ -83,7 +83,7 @@ function startAssetAPI(app)
         });
       });
 
-      app.post('/assetWithURL', function(req,res) {
+      app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
         console.log("assetWITHURL", req.body)
         const mimetype = req.body.mimetype;
         const name = req.body.name;
@@ -108,8 +108,6 @@ function startAssetAPI(app)
              });
           });
         });
-
-
       });
 
       app.get('/asset/:id', function(req, res) {
@@ -119,7 +117,7 @@ function startAssetAPI(app)
        readstream.pipe(res);
       });
 
-      app.delete('/asset/:id', function(req, res) {
+      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
@@ -371,7 +369,7 @@ function startDocAPI(app)
     res.send(200)
   });
 
-  app.post('/documents', (req,res) => {
+  app.post('/documents', app.oauth.authenticate(), (req,res) => {
     let attr = req.body.data.attributes;
     console.log("POST document", req.route, req.body)
     createDoc(attr)
