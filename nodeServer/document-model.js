@@ -217,7 +217,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs",req.query.filter);
+    //console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -252,26 +252,6 @@ function startDocAPI(app)
       s[sortBy] = -1;
     }
 
-    // console.log("Searching for docs with no ownerID")
-    // shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
-    //   results.forEach((doc)=> {
-    //     //console.log("NO OWNER ID", doc.data)
-    //     const docId = doc.data.documentId;
-    //     var doc = shareDBConnection.get(contentCollectionName, docId);
-    //     doc.fetch(function(err) {
-    //       if (err || !doc.data) {
-    //         res.status(404).send("database error making document");
-    //         return;
-    //       }
-    //       else
-    //       {
-    //         // const op = {p:["ownerId"], oi:[currentUser]};
-    //         // submitOp(docId, op);
-    //       };
-    //     });
-    //   });
-    // });
-
     const query = {
       $and: [searchTermOr,
              {parent: null},
@@ -289,7 +269,7 @@ function startDocAPI(app)
       }
       else
       {
-        console.log("found " + results.length + " docs");
+        //console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
