@@ -17,6 +17,7 @@ var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
+const http = require("http")
 
 var initDocAPI = function(server, app, config)
 {
@@ -82,6 +83,33 @@ function startAssetAPI(app)
         });
       });
 
+      app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
+        console.log("assetWITHURL", req.body)
+        const mimetype = req.body.mimetype;
+        const name = req.body.name;
+        const url = req.body.url;
+        var writestream = gridFS.createWriteStream({
+          filename: name,
+          mode: 'w',
+          content_type: mimetype,
+        });
+
+        http.get(url, response => {
+          console.log('got resource')
+          var stream = response.pipe(writestream);
+          writestream.on('close', function(file) {
+            const content_type = mimetype;
+            const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
+            console.log('success uploading asset');
+            res.status(200);
+            res.json(newAsset);
+            fs.unlink(url, function(err) {
+               console.log('success!')
+             });
+          });
+        });
+      });
+
       app.get('/asset/:id', function(req, res) {
        var readstream = gridFS.createReadStream({
           _id: req.params.id
@@ -89,7 +117,7 @@ function startAssetAPI(app)
        readstream.pipe(res);
       });
 
-      app.delete('/asset/:id', function(req, res) {
+      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
@@ -187,7 +215,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs",req.query.filter);
+    //console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -222,26 +250,6 @@ function startDocAPI(app)
       s[sortBy] = -1;
     }
 
-    console.log("Searching for docs with no ownerID")
-    shareDBMongo.query(contentCollectionName, {ownerId: {$exists:false}}, null, null, function (err, results, extra) {
-      results.forEach((doc)=> {
-        //console.log("NO OWNER ID", doc.data)
-        const docId = doc.data.documentId;
-        var doc = shareDBConnection.get(contentCollectionName, docId);
-        doc.fetch(function(err) {
-          if (err || !doc.data) {
-            res.status(404).send("database error making document");
-            return;
-          }
-          else
-          {
-            // const op = {p:["ownerId"], oi:[currentUser]};
-            // submitOp(docId, op);
-          };
-        });
-      });
-    });
-
     const query = {
       $and: [searchTermOr,
              {parent: null},
@@ -259,7 +267,7 @@ function startDocAPI(app)
       }
       else
       {
-        console.log("found " + results.length + " docs");
+        //console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -357,9 +365,13 @@ function startDocAPI(app)
     shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
   });
 
+  app.options('/documents', (req,res) => {
+    res.send(200)
+  });
+
   app.post('/documents', app.oauth.authenticate(), (req,res) => {
-    console.log("POST document")
     let attr = req.body.data.attributes;
+    console.log("POST document", req.route, req.body)
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');

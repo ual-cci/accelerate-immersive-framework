@@ -7,8 +7,17 @@ export default Controller.extend({
     transitionToLoginRoute() {
       this.transitionToRoute('login');
     },
-    transitionToIndexRoute() {
-      this.transitionToRoute('index');
+    transitionToDocRoute() {
+      this.transitionToRoute('documents'," ",0,"views");
+    },
+    transitionToDocsRoute() {
+      this.transitionToRoute('documents'," ",0,"views");
+    },
+    transitionToAboutRoute() {
+      this.transitionToRoute('about');
+    },
+    transitionToTermsRoute() {
+      this.transitionToRoute('terms');
     },
     transitionToDoc(doc) {
       this.transitionToRoute('code-editor', doc);

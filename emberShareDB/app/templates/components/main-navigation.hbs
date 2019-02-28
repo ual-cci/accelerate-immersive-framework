@@ -1,9 +1,9 @@
 <div id = "mimic-navbar" class = "limited-width-container">
 <img src={{logoURL}} class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
- {{#nav.item class = "nav-item"}}{{#nav.link-to "index" class = "nav-link"}}home{{/nav.link-to}}{{/nav.item}}
- {{#nav.item class = "nav-item"}}{{#nav.link-to "about" class = "nav-link"}}about{{/nav.link-to}}{{/nav.item}}
- {{#nav.item class = "nav-item"}}{{#nav.link-to "terms" class = "nav-link"}}terms{{/nav.link-to}}{{/nav.item}}
+ <a {{action 'docs'}} class = "nav-button">docs</a>
+ <a {{action 'about'}} class = "nav-button">about</a>
+ <a {{action 'terms'}} class = "nav-button">terms</a>
  {{#if mediaQueries.isXs}}
  <div></div>
  {{else}}
