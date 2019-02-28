@@ -1,5 +1,5 @@
 <div id = "main-site-container">
-  {{main-navigation onLogin='transitionToLoginRoute' onHome='transitionToIndexRoute' openDoc=(action 'transitionToDoc')}}
+  {{main-navigation onLogin='transitionToLoginRoute' onAbout='transitionToAboutRoute' onDocs='transitionToDocsRoute' onTerms='transitionToTermsRoute' openDoc=(action 'transitionToDoc')}}
   <div>
     {{outlet}}
     {{modals-container}}

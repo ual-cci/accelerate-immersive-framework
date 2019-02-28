@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: "raleway";
+  font-family: "karla";
   outline:0;
   margin:0;
   border:0;
@@ -335,7 +335,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 #tab0.tab-item {
-  background-color: #ED3D05;
+  background-color: w;
 }
 
 #tab1.tab-item {
@@ -970,6 +970,30 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 14pt;
 }
 
+.nav-button:hover {
+  border-radius: 0px;
+  background-color: #E6E6E6 ! important;
+  color:black;
+  text-decoration:none;
+}
+
+.nav-button {
+  float:left;
+  width:70px;
+  margin-left:10px;
+  padding: 10px;
+  color:black;
+  font-size: 14pt;
+  height:45px;
+  text-align: center;
+  -webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
 #my-docs:hover {
   border-radius: 0px;
   background-color: #E6E6E6 ! important;
@@ -1215,4 +1239,135 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 .login-input {
   width:250px;
+}
+
+#about-container {
+
+}
+
+#logo-footer {
+  background-color: #303030;
+  height:100px;
+  padding:20px;
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+
+.footer-logo-img {
+  margin-right: 10px;
+  margin-left: 10px;
+  padding-left:20px;
+  padding-right:20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#logo-container {
+  width:900px;
+  margin:auto;
+}
+
+#about-header-image {
+  width:100%;
+  margin-top: 20px;
+  margin-bottom: 110px;
+  height: 500px;
+}
+
+#about-overlay-title {
+  background-color: rgba(237,61,5,0.95);
+  width:50%;
+  left:25vw;
+  height:150px;
+  position: absolute;
+  top:250px;
+}
+
+#about-overlay-title-text {
+  height:100%;
+  font-family: 'Overpass Mono';
+  padding-top: 30px;
+  color: white;
+  font-size: 22pt;
+  font-weight: 500;
+  text-align: center;
+}
+
+#about-overlay-desc {
+  background-color: rgba(255,206,0,0.95);
+  width:50%;
+  left:25vw;
+  height:270px;
+  padding-left: 50px;
+  padding-right: 50px;
+  position: absolute;
+  top:470px;
+}
+
+
+#about-overlay-desc-text {
+  height:210px;
+  font-family: 'Overpass Mono';
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-top: 30px;
+  color: white;
+  font-size: 18pt;
+  font-weight:100;
+  text-align: left;
+}
+
+#getting-started-link {
+  background-color: #303030;
+  color:white;
+  padding:10px;
+  height:30px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 8em
+}
+
+#about-text-container {
+  width:50%;
+  margin-top:70px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#about-text {
+  text-align: left;
+  font-weight: 500;
+  font-size: 14pt;
+}
+
+#gs-logo {
+  width:100px;
+}
+
+#durham-logo {
+  width:100px;
+}
+
+#sussex-logo {
+  width:80px;
+}
+
+#ahrc-logo {
+  width:150px;
+}
+
+#google-logo {
+  width:100px;
+}
+
+#ual-logo {
+  width:200px;
+}
+
+.center-cropped {
+  width: 100%;
+  height: 550px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }

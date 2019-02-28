@@ -18,8 +18,14 @@ export default Component.extend({
     logout() {
       this.get('session').invalidate();
     },
-    home() {
-      this.sendAction('onHome')
+    docs() {
+      this.sendAction('onDocs')
+    },
+    about() {
+      this.sendAction('onAbout')
+    },
+    terms() {
+      this.sendAction('onTerms')
     },
     openDoc(doc){
       console.log(doc);

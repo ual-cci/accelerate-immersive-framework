@@ -2,6 +2,6 @@ import Route from '@ember/routing/route';
 
 export default Route.extend({
   beforeModel() {
-    this.transitionTo('documents', " ", 0, "views");
+    this.transitionTo('about');
   }
 });
