@@ -975,6 +975,7 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: #E6E6E6 ! important;
   color:black;
   text-decoration:none;
+  cursor: pointer;
 }
 
 .nav-button {
@@ -996,6 +997,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .nav-dropdown:hover {
   border-radius: 0px;
+  color:black;
   background-color: #E6E6E6 ! important;
 }
 
