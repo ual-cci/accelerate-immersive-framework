@@ -13,6 +13,9 @@ Router.map(function() {
   this.route('password-reset');
   this.route('about');
   this.route('terms');
+  this.route('getting-started');
+  this.route('guides', { path: '/guides/:topic' });
+  this.route('examples');
 });
 
 export default Router;

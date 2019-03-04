@@ -1,9 +1,8 @@
 <div id = "mimic-navbar" class = "limited-width-container">
 <img src={{logoURL}} class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
- <a {{action 'docs'}} class = "nav-button">docs</a>
  <a {{action 'about'}} class = "nav-button">about</a>
- <a {{action 'terms'}} class = "nav-button">terms</a>
+ <a {{action 'docs'}} class = "nav-button">projects</a>
  {{#if mediaQueries.isXs}}
  <div></div>
  {{else}}
@@ -15,7 +14,7 @@
         {{/if}}
       </div>
      {{#nav.dropdown as |dd|}}
-       {{#dd.toggle id = "my-docs" }}my docs <span  class="caret"></span>{{/dd.toggle}}
+       {{#dd.toggle class = "nav-dropdown" }}my docs <span  class="caret"></span>{{/dd.toggle}}
        {{#dd.menu as |ddm|}}
          {{#each ownedDocuments as |doc|}}
          {{#ddm.item}}
@@ -30,5 +29,17 @@
    </div>
    {{/if}}
 {{/if}}
+ <a {{action 'gettingStarted'}} class = "nav-button">getting started</a>
+ {{#nav.dropdown as |dd|}}
+   {{#dd.toggle class = "nav-dropdown" }}guides <span  class="caret"></span>{{/dd.toggle}}
+   {{#dd.menu as |ddm|}}
+     {{#each guides as |guide|}}
+     {{#ddm.item}}
+         <a class="dropdown-item" {{action 'openGuide' guide.id}}>{{guide.name}}</a>
+     {{/ddm.item}}
+     {{/each}}
+   {{/dd.menu}}
+ {{/nav.dropdown}}
+ <a {{action 'examples'}} class = "nav-button">examples</a>
 {{/bs-nav}}
 </div>
