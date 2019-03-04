@@ -978,6 +978,11 @@ input[id="docName"]:-ms-input-placeholder {
   cursor: pointer;
 }
 
+.libraries-dropdown {
+  width:100;
+  height:100;
+}
+
 .nav-button {
   float:left;
   width:auto;

@@ -28,6 +28,7 @@ export default Controller.extend({
   autocomplete: inject('autocomplete'),
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
+  library: inject(),
 
   //Parameters
   con: null,
@@ -88,6 +89,9 @@ export default Controller.extend({
   }),
   displayLink: computed('editLink', function() {
     return this.get('editLink') + "?hideEditor=true";
+  }),
+  libraries: computed('library.libraryMap', function() {
+    return this.get("library").libraryMap
   }),
 
   //Functions
@@ -494,6 +498,7 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
+    console.log("did receive op", ops, source)
     const embed = this.get('embed') == "true";
     if(!embed && ops.length > 0)
     {
@@ -1296,7 +1301,18 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleShowSettings() {
+
       this.toggleProperty('showSettings');
+    },
+    insertLibrary(lib) {
+      this.updateSourceFromSession().then(()=>{
+        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+        this.submitOp(op);
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
+        this.get('editor.session').getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+      })
     },
     toggleShowShare() {
       // this.get('modalsManager')
