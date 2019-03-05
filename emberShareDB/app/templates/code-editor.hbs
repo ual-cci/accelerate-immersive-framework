@@ -37,16 +37,14 @@
               <span class="tooltiptext">Add Files to Use</span>
             </div>
             <div class="tooltip">
-              {{#nav.dropdown as |dd|}}
-                {{#dd.toggle class = "libraries-dropdown" }}libs <span  class="caret"></span>{{/dd.toggle}}
-                {{#dd.menu as |ddm|}}
-                  {{#each libraries as |doc|}}
-                  {{#ddm.item}}
-                      <a class="dropdown-item" {{action 'insertLibrary' lib.id}}>{{lib.name}}</a>
-                  {{/ddm.item}}
-                  {{/each}}
-                {{/dd.menu}}
-              {{/nav.dropdown}}
+              <div class="dropdown">
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+               <div id="myDropdown" class="dropdown-content">
+                {{#each libraries as |lib|}}
+                  {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
+                {{/each}}
+               </div>
+              </div>
               <span class="tooltiptext">Add libraries</span>
             </div>
             {{/if}}

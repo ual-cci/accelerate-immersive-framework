@@ -835,6 +835,18 @@ export default Controller.extend({
     window.self = this;
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
   	eventer(messageEvent, this.handleWindowEvent, false);
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
   },
   removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
@@ -1301,8 +1313,10 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleShowSettings() {
-
       this.toggleProperty('showSettings');
+    },
+    toggleLibraryDropdown(){
+      document.getElementById("myDropdown").classList.toggle("show");
     },
     insertLibrary(lib) {
       this.updateSourceFromSession().then(()=>{
@@ -1312,16 +1326,10 @@ export default Controller.extend({
         const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
         this.get('editor.session').getDocument().applyDeltas(deltas);
         this.set('surpress', false);
+        document.getElementById("myDropdown").classList.toggle("show");
       })
     },
     toggleShowShare() {
-      // this.get('modalsManager')
-      //   .alert({title: this.get('model').data.name,
-      //           bodyComponent: 'share-modal',
-      //           editLink:this.get('editLink'),
-      //           embedLink:this.get('embedLink'),
-      //           displayLink:this.get('displayLink')
-      //         });
       this.toggleProperty('showShare');
     },
     toggleShowAssets() {
