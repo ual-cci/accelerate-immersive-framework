@@ -52,7 +52,7 @@ describe('doc delete', () => {
           tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
           forkedFrom:null,
           parent:null,
-          source:"<code>"
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
         };
         documentModel.createDoc(public_attr).then((res)=>{
           docId = res.id;
@@ -90,8 +90,6 @@ describe('doc delete', () => {
   })
 })
 
-
-
 describe('documents searching', () => {
   let docsAdded = [];
   let accountId = ""
@@ -104,7 +102,7 @@ describe('documents searching', () => {
       tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const public_attr_2 = {
       isPrivate:false,
@@ -114,7 +112,7 @@ describe('documents searching', () => {
       tags:["tag1", "tag2", "tag3"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const private_attr = {
       isPrivate:true,
@@ -124,7 +122,7 @@ describe('documents searching', () => {
       tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const private_not_owned_attr = {
       isPrivate:true,
@@ -134,7 +132,7 @@ describe('documents searching', () => {
       tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const private_not_owned_attr2 = {
       isPrivate:true,
@@ -144,7 +142,7 @@ describe('documents searching', () => {
       tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const public_not_owned_attr = {
       isPrivate:false,
@@ -154,7 +152,7 @@ describe('documents searching', () => {
       tags:["tag1", "tag2","tag3", "tag4", "tag5","tag6", "tag7","tag8", "tag9", "tag10"],
       forkedFrom:null,
       parent:null,
-      source:"<code>"
+      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
     };
     const actions = [
       documentModel.createDoc(public_attr),
@@ -296,7 +294,7 @@ describe('documents searching', () => {
             .end((err, res) => {
               res.should.have.status(200);
               assert.equal(res.body.data.length, 1);
-              assert.equal(res.body.data[0].attributes.source, "<code>");
+              assert.equal(res.body.data[0].attributes.source, "<html><head></head><body><script>console.log(\"hello world\")</script></body></html>");
               done();
             });
       });
@@ -350,6 +348,38 @@ describe('documents searching', () => {
       done();
     })
 
+  });
+
+  describe('/POST library', () => {
+    before((done)=> {
+      getToken().then(done);
+    });
+
+    it('it should insert script tag linking to library', (done)=> {
+      chai.request(server)
+      .post("/library")
+      .set('Authorization', 'Bearer ' + token)
+      .send({data:{lib:"mmll", documentId:docsAdded[0]}})
+      .end((err, res) => {
+        res.should.have.status(200);
+        chai.request(server)
+          .get("/documents/" + docsAdded[0])
+          .then((res) => {
+            const newSource = res.body.data.attributes.source;
+            res.should.have.status(200);
+            assert.equal(newSource, '<html><head>\n <script src = "http://localhost:4200/libs/MMLL.js"></script></head><body><script>console.log("hello world")</script></body></html>')
+            done()
+          }).catch((err)=>{
+            console.log("ERROR", err)
+          });
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      done();
+    })
   });
 
   describe('/POST op', () => {

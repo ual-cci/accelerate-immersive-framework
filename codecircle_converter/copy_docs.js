@@ -16,7 +16,8 @@ const cc_contentDBName = "cc2_live";
 var MIMIC_API_URL = "http://localhost:8080"
 const cc_mongoUri = 'mongodb://'+cc_mongoIP+':'+cc_mongoPort+'/'+cc_contentDBName;
 const app = express();
-
+let token = "";
+var FormData = require('form-data');
 
 console.log("STARTING SERVER")
 app.use(express.static('static'));
@@ -61,7 +62,7 @@ mongo.MongoClient.connect(cc_mongoUri, (err, client)=> {
        });
        readstream.pipe(res);
     });
-    //transferDoc("5yafjXHiWzLFNZBNw")
+    transferDoc("5yafjXHiWzLFNZBNw")
   }
 });
 
@@ -71,10 +72,14 @@ var transferDoc = (docid)=> {
   return new Promise((resolve, reject)=> {
     getSnapshot(docid).then((snapshot)=> {
       getDocumentData(docid).then((doc)=> {
-        postDoc(snapshot, doc).then((newDocID)=>{
-          postAssets(docid, newDocID).then((uploaded)=> {
-            patchAssets(uploaded, newDocID).then(()=> {
-              resolve()
+        getToken().then(()=> {
+          postDoc(snapshot, doc).then((newDocID)=>{
+            postLibraries(newDocID, doc.libs).then(()=>{
+              postAssets(docid, newDocID).then((uploaded)=> {
+                patchAssets(uploaded, newDocID).then(()=> {
+                  resolve()
+                })
+              })
             })
           })
         })
@@ -142,6 +147,32 @@ var getAssets = (docid)=> {
   })
 }
 
+var getToken = ()=> {
+  return new Promise((resolve, reject)=> {
+    var tokenHTTP = new XMLHttpRequest();
+    var data = 'client_id=application&'+
+    'client_secret=secret&' +
+    'grant_type=password&'+
+    'username=codecircle&'+
+    'password=password'
+    tokenHTTP.onreadystatechange = ()=> {
+        console.log(tokenHTTP.readyState, tokenHTTP.status)
+        if (tokenHTTP.readyState == 4 && tokenHTTP.status == 200)
+        {
+          console.log("success  doc", )
+          token =  JSON.parse(tokenHTTP.responseText).access_token
+          resolve()
+        }
+    }
+    tokenHTTP.onerror = (err)=> {
+      console.log("ERROR", err)
+    }
+    tokenHTTP.open("POST", MIMIC_API_URL + "/oauth/token", true);
+    tokenHTTP.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    tokenHTTP.send(data);
+  })
+}
+
 var postDoc = (snapshot, doc)=> {
   console.log("POSTing", doc)
   var tags = doc.tags
@@ -172,8 +203,41 @@ var postDoc = (snapshot, doc)=> {
 
     docHTTP.open("POST", MIMIC_API_URL + "/documents", true);
     docHTTP.setRequestHeader("Content-Type", "application/json");
+    docHTTP.setRequestHeader('Authorization', 'Bearer ' + token);
     docHTTP.send(JSON.stringify(data));
   })
+}
+
+var postLibraries = (docid, libs)=> {
+  return new Promise((resolve, reject)=> {
+    console.log("NUM libs",libs.length)
+    libs.forEach((lib)=> {
+      console.log(lib)
+      var uploaded = 0;
+      var libHTTP = new XMLHttpRequest();
+      var libData = {
+        data:{
+          documentId: docid,
+          lib:lib
+        }
+      }
+      libHTTP.onreadystatechange = async ()=> {
+        if (libHTTP.readyState == 4 && libHTTP.status == 200)
+        {
+          console.log("success adding lib",)
+          uploaded++
+          if(uploaded == libs.length)
+          {
+            resolve(uploaded)
+          }
+        }
+      }
+      libHTTP.open("POST", MIMIC_API_URL + "/library", true);
+      libHTTP.setRequestHeader("Content-Type", "application/json");
+      libHTTP.setRequestHeader('Authorization', 'Bearer ' + token);
+      libHTTP.send(JSON.stringify(libData));
+    });
+  });
 }
 
 var postAssets = (docid, newDocID)=> {
@@ -204,6 +268,7 @@ var postAssets = (docid, newDocID)=> {
         }
         assetHTTP.open("POST", MIMIC_API_URL + "/assetWithURL", true);
         assetHTTP.setRequestHeader("Content-Type", "application/json");
+        assetHTTP.setRequestHeader('Authorization', 'Bearer ' + token);
         assetHTTP.send(JSON.stringify(assetData));
       })
     })

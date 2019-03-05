@@ -52,17 +52,17 @@ var OAuthUsersModel = mongoose.model('user');
 
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	console.log("getAccessToken");
+	//console.log("getAccessToken");
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
 			if(err || !token) {
-        console.log("error fetching token", token);
+        //console.log("error fetching token", token);
 				reject(err);
 			}
 			else
 			{
-				console.log("got token");
+				//console.log("got token");
 				resolve(token)
 			}
 		});
@@ -70,7 +70,7 @@ model.getAccessToken = function(bearerToken) {
 };
 
 model.getClient = function(clientId, clientSecret) {
-	console.log("getting Client");
+	//console.log("getting Client");
   return new Promise ((resolve, reject) => {
 		OAuthClientsModel.findOne({ clientId: clientId, clientSecret: clientSecret },
 		(err, client) => {
@@ -82,7 +82,7 @@ model.getClient = function(clientId, clientSecret) {
 	        id: client.id,
 	        grants: ["password"]
       	};
-				console.log("got client");
+				//console.log("got client");
 				resolve(client)
 			}
 		});
@@ -90,12 +90,12 @@ model.getClient = function(clientId, clientSecret) {
 };
 
 model.getRefreshToken = function(refreshToken) {
-	console.log("get refresh token");
+	//console.log("get refresh token");
   return OAuthTokensModel.findOne({ refreshToken: refreshToken }).lean();
 };
 
 model.getUser = function(username, password) {
-	console.log('getting user')
+	//console.log('getting user')
   return new Promise((resolve, reject)=> {
     OAuthUsersModel.findOne({ username: username},
       (err, user) => {
@@ -109,13 +109,13 @@ model.getUser = function(username, password) {
       bcrypt.compare(password, hash).then((res) => {
         if(res)
         {
-					console.log('got user')
+					//console.log('got user')
           resolve(user);
 					return;
         }
         else
         {
-					console.log('ERROR getting user')
+					//console.log('ERROR getting user')
           reject(err);
 					return;
         }
@@ -135,7 +135,7 @@ model.saveToken = function(token, client, user) {
     user : user,
     userId: user._id,
   });
-	console.log("save token");
+	//console.log("save token");
   // Can't just chain `lean()` to `save()` as we did with `findOne()` elsewhere. Instead we use `Promise` to resolve the data.
   return new Promise( function(resolve,reject){
     accessToken.save(function(err,data){
@@ -165,7 +165,7 @@ var initUserAPI = function(app, config)
 	mongoIP = config.mongoIP;
   mongoPort = config.mongoPort;
 	oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName : config.oauthDBName;
-  console.log("USER DB", oauthDBName);
+  //console.log("USER DB", oauthDBName);
   replicaSet = config.replicaSet;
   siteURL = config.siteURL;
 	startAuthAPI(app);
