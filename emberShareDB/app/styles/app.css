@@ -1039,6 +1039,10 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 14pt;
 }
 
+.burger-btn {
+  font-size: 20pt;
+}
+
 #login-container {
   width:200px;
   height:50px;
@@ -1077,9 +1081,11 @@ input[id="docName"]:-ms-input-placeholder {
   top:0px;
   right:0px;
   max-height: 25px;
-  width:auto;
   white-space: nowrap;
-  overflow: visible;
+  text-overflow: ellipsis;
+  width: 200px;
+  display: block;
+  overflow: hidden
 }
 
 .row {
