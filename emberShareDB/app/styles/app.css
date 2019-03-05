@@ -1319,7 +1319,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
   background-color: rgba(237,61,5,0.95);
   width:50%;
   left:25vw;
-  height:150px;
+  height:auto;
   position: absolute;
   top:250px;
 }
@@ -1353,7 +1353,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
   text-overflow: ellipsis;
   padding-top: 30px;
   color: white;
-  font-size: 18pt;
+  font-size: calc(4px + 1.5vw);
   font-weight:100;
   text-align: left;
 }

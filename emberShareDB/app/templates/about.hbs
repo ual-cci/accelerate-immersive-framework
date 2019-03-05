@@ -7,6 +7,9 @@
     Make Music and Art <br>with Machine Intelligence
     </p>
   </div>
+  {{#if mediaQueries.isXs}}
+  <div></div>
+  {{else}}
   <div id = "about-overlay-desc">
     <p id = "about-overlay-desc-text">
       The mimic project offers a way to make
@@ -17,6 +20,7 @@
     </p>
     <a id = "getting-started-link" href = {{docURL}}> Getting Started → </a>
   </div>
+  {{/if}}
   <div id = "about-text-container">
     <p id = "about-text">
     "Musically Intelligent Machines Interacting Creatively" is an AHRC-funded project to develop a web platform for the exploration of Musical Machine Learning and Listening. We have specifically designed this platform as an interactive coding environment, engineered to help bring new technologies in AI and signal processing to artists, composers, musicians and performers all over the world.
