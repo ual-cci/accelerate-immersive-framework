@@ -7,10 +7,20 @@ import config from  '../config/environment';
 export default Service.extend({
   store:inject('store'),
   cs:inject('console'),
+  library:inject(),
   script:"",
   savedVals:null,
   hasPVals:false,
   parser:new DOMParser(),
+  insertLibrary(lib, source) {
+    let insertAfter = "<head>"
+    let index = source.indexOf(insertAfter) + insertAfter.length;
+    let insert = "\n <script src = \"" +
+    config.localOrigin + "/libs/" + this.get('library').url(lib) +
+    "\"></script>"
+    const op = {p: ["source", index], si:insert};
+    return op;
+  },
   insertStyleSheets(source, children) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
     let linkStartIndex = 0, tagStartIndex = 0;

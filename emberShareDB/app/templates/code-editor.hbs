@@ -36,6 +36,17 @@
               {{/if}}
               <span class="tooltiptext">Add Files to Use</span>
             </div>
+            <div class="tooltip">
+              <div class="dropdown">
+                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+               <div id="myDropdown" class="dropdown-content">
+                {{#each libraries as |lib|}}
+                  {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
+                {{/each}}
+               </div>
+              </div>
+              <span class="tooltiptext">Add libraries</span>
+            </div>
             {{/if}}
             <div class="tooltip">
               {{#if showShare}}

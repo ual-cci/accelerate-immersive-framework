@@ -11,6 +11,10 @@ export default Component.extend({
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
   }),
+  guides:[
+    {id:"mmll", name:"Musical Machine Listening with MMLL.js"},
+    {id:"maximJS", name:"Making Music in the Browser with maximJS"}
+  ],
   actions: {
     login() {
       this.sendAction('onLogin');
@@ -24,12 +28,19 @@ export default Component.extend({
     about() {
       this.sendAction('onAbout')
     },
-    terms() {
-      this.sendAction('onTerms')
+    gettingStarted() {
+      this.sendAction('onGettingStarted')
+    },
+    examples() {
+      this.sendAction('onExamples')
     },
     openDoc(doc){
       console.log(doc);
       this.get('openDoc')(doc);
+    },
+    openGuide(guide){
+      console.log(guide);
+      this.get('openGuide')(guide);
     }
   }
 });

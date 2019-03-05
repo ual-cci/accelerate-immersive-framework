@@ -7,11 +7,14 @@ export default Controller.extend({
     transitionToLoginRoute() {
       this.transitionToRoute('login');
     },
-    transitionToDocRoute() {
-      this.transitionToRoute('documents'," ",0,"views");
-    },
     transitionToDocsRoute() {
       this.transitionToRoute('documents'," ",0,"views");
+    },
+    transitionToExamplesRoute() {
+      this.transitionToRoute('examples');
+    },
+    transitionToGSRoute() {
+      this.transitionToRoute('getting-started');
     },
     transitionToAboutRoute() {
       this.transitionToRoute('about');
@@ -21,6 +24,9 @@ export default Controller.extend({
     },
     transitionToDoc(doc) {
       this.transitionToRoute('code-editor', doc);
+    },
+    transitionToGuide(guide) {
+      this.transitionToRoute('guides', guide);
     }
   }
 });

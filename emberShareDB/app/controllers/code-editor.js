@@ -28,6 +28,7 @@ export default Controller.extend({
   autocomplete: inject('autocomplete'),
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
+  library: inject(),
 
   //Parameters
   con: null,
@@ -88,6 +89,9 @@ export default Controller.extend({
   }),
   displayLink: computed('editLink', function() {
     return this.get('editLink') + "?hideEditor=true";
+  }),
+  libraries: computed('library.libraryMap', function() {
+    return this.get("library").libraryMap
   }),
 
   //Functions
@@ -494,6 +498,7 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
+    console.log("did receive op", ops, source)
     const embed = this.get('embed') == "true";
     if(!embed && ops.length > 0)
     {
@@ -830,6 +835,18 @@ export default Controller.extend({
     window.self = this;
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
   	eventer(messageEvent, this.handleWindowEvent, false);
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
   },
   removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
@@ -1298,14 +1315,21 @@ export default Controller.extend({
     toggleShowSettings() {
       this.toggleProperty('showSettings');
     },
+    toggleLibraryDropdown(){
+      document.getElementById("myDropdown").classList.toggle("show");
+    },
+    insertLibrary(lib) {
+      this.updateSourceFromSession().then(()=>{
+        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+        this.submitOp(op);
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
+        this.get('editor.session').getDocument().applyDeltas(deltas);
+        this.set('surpress', false);
+        document.getElementById("myDropdown").classList.toggle("show");
+      })
+    },
     toggleShowShare() {
-      // this.get('modalsManager')
-      //   .alert({title: this.get('model').data.name,
-      //           bodyComponent: 'share-modal',
-      //           editLink:this.get('editLink'),
-      //           embedLink:this.get('embedLink'),
-      //           displayLink:this.get('displayLink')
-      //         });
       this.toggleProperty('showShare');
     },
     toggleShowAssets() {

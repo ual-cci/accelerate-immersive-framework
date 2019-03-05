@@ -8,6 +8,8 @@ export default MediaQueriesService.extend({
     lg:'(min-width: 992px) and (max-width: 1999px)',
     xl:'(min-width: 1200px)',
     mobile: '(max-width: 767px)',
-    desktop: '(min-width: 768px)'
+    desktop: '(min-width: 768px)',
+    docs: '(min-width: 1050px)',
+    burger: '(max-width: 898px)'
   },
 });

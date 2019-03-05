@@ -18,6 +18,7 @@ var shareDB;
 var shareDBConnection;
 var gridFS;
 const http = require("http")
+var siteURL;
 
 var initDocAPI = function(server, app, config)
 {
@@ -33,7 +34,7 @@ var initDocAPI = function(server, app, config)
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
   startAssetAPI(app);
-
+  siteURL = config.siteURL;
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
@@ -294,7 +295,6 @@ function startDocAPI(app)
 
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
-    console.log("getting doc", doc.data)
     doc.fetch(function(err) {
       if (err || !doc.data) {
         console.log(err);
@@ -400,6 +400,32 @@ function startDocAPI(app)
        res.json({errors:[err]});
      });
   });
+
+  app.post('/library', app.oauth.authenticate(), (req, res)=> {
+    console.log(req.body)
+    let lib = req.body.data.lib;
+    let documentId = req.body.data.documentId;
+    let doc = shareDBConnection.get(contentCollectionName, documentId);
+    doc.fetch(function(err) {
+      console.log("fetched doc")
+      if (err || !doc.data) {
+        console.log("error making doc");
+        res.status(404).send("database error making document" + err);
+        return;
+      }
+      else
+      {
+        let op = insertLibrary(lib, doc.data.source)
+        submitOp(documentId, op).then(()=> {
+          res.status(200).send();
+        }).catch((err)=> {
+          res.status(404).send(err);
+        })
+      }
+    });
+
+  });
+
 }
 
 //FUNCTIONS
@@ -446,6 +472,39 @@ function submitOp(docId, op) {
       });
     });
   });
+}
+
+const libraryMap = [
+  {title:"MMLL", id:"mmll", url:"MMLL.js"},
+  {title:"Marked", id:"Marked", url:"marked.js"},
+  {title:"MaxiLib", id:"maxiLib", url:"maxiLib.js"},
+  {title:"MaximJS", id:"MaximJS", url:"maxim.js"},
+  {title:"Nexus", id:"nexusUI", url:"nexusUI.min.js"},
+  {title:"Processing", id:"processing.js", url:"processing.js"},
+  {title:"p5", id:"p5", url:"p5.min.js"},
+  {title:"SoundJS", id:"SoundJS", url:"soundjs.js"}
+];
+
+function libraryURL(id) {
+  let url = ""
+  libraryMap.forEach((lib)=>{
+    if(lib.id == id) {
+      url = lib.url
+    }
+  })
+  console.log("matched lib", url)
+  return url;
+}
+
+function insertLibrary(lib, source) {
+  console.log('inserting library', lib, source)
+  let insertAfter = "<head>"
+  let index = source.indexOf(insertAfter) + insertAfter.length;
+  let insert = "\n <script src = \"" +
+  siteURL + "/libs/" + libraryURL(lib) +
+  "\"></script>"
+  const op = {p: ["source", index], si:insert};
+  return op;
 }
 
 function getNewDocumentId(callback)
