@@ -1304,10 +1304,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
   margin-top: 10px;
   margin-right: 10px;
   margin-left: 10px;
-  padding-left:20px;
-  padding-right:20px;
-  padding-top: 0px;
-  padding-bottom: 0px;
 }
 
 #logo-container {
@@ -1399,7 +1395,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #sussex-logo {
-  width:80px;
+  width:60px;
 }
 
 #ahrc-logo {
