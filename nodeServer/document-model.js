@@ -118,7 +118,7 @@ function startAssetAPI(app)
        readstream.pipe(res);
       });
 
-      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
+      app.delete('/asset/:id', function(req, res) {
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
@@ -580,6 +580,24 @@ const dropDocs = (callback) => {
 	mongo.collection(contentCollectionName).remove({}, callback());
 }
 
+const dropAssets = () => {
+  return new Promise((resolve, reject) => {
+    mongo.MongoClient.connect(mongoUri, function(err, client) {
+      if(err)
+      {
+        console.log("DOCUMENT MODEL - error connecting to database", err);
+      }
+      else
+      {
+        console.log("Connected successfully to mongo");
+        docDB = client.db(contentDBName);
+        docDB.collection('fs.chunks').drop();
+        docDB.collection('fs.files').drop();
+      }
+    });
+  });
+}
+
 const removeDocs = (ids) =>
 {
   console.log("removing docs",ids);
@@ -608,7 +626,11 @@ const removeDocs = (ids) =>
 }
 
 module.exports = {
-  initDocAPI:initDocAPI,
-  createDoc:createDoc,
-  removeDocs:removeDocs
+  initDocAPI:initDocAPI
+}
+
+if(process.env.NODE_ENV == "test") {
+  module.exports.createDoc = createDoc,
+  module.exports.removeDocs = removeDocs,
+  module.exports.dropAssets = dropAssets
 }

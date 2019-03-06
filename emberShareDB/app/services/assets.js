@@ -15,7 +15,8 @@ export default Service.extend({
       $.ajax({
           type: "DELETE",
           url: config.serverHost + "/asset/"+fileId,
-          data: data
+          data: data,
+          headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
           this.get('cs').log("success deleting asset");
           resolve();

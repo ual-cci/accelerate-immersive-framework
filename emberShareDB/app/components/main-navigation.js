@@ -12,8 +12,10 @@ export default Component.extend({
     return this.get('sessionAccount').ownedDocuments;
   }),
   guides:[
-    {id:"mmll", name:"Musical Machine Listening with MMLL.js"},
-    {id:"maximJS", name:"Making Music in the Browser with maximJS"}
+    {id:"mmll", name:"Musical Machine Listening with MMLL.js", url:config.localOrigin + "/guides/mmll"},
+    {id:"maximJS", name:"Making Music in the Browser with maximJS", url:config.localOrigin + "/guides/maximJS"},
+    {id:"rapidLib", name:"Building Interactive Machine Learning Tools with RapidLib", url:config.localOrigin + "/guides/rapidlib"},
+    {id:"kadenze", name:"Machine Learning as a Design Tool", url:config.localOrigin + "/guides/kadenze"}
   ],
   actions: {
     login() {
