@@ -34,6 +34,9 @@ export default Component.extend({
     examples() {
       this.sendAction('onExamples')
     },
+    guides() {
+      this.sendAction('onGuides')
+    },
     openDoc(doc){
       console.log(doc);
       this.get('openDoc')(doc);

@@ -1307,7 +1307,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #logo-container {
-  width:900px;
+  width:auto;
   margin:auto;
 }
 
@@ -1322,8 +1322,8 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #about-overlay-title {
   background-color: rgba(237,61,5,0.95);
-  width:50%;
-  left:25vw;
+  width:60%;
+  left:20vw;
   height:auto;
   position: absolute;
   top:250px;
@@ -1332,17 +1332,19 @@ input[id="searchTerm"]:-ms-input-placeholder {
 #about-overlay-title-text {
   height:100%;
   font-family: 'Overpass Mono';
-  padding-top: 30px;
+  padding-top: 20px;
   color: white;
-  font-size: 22pt;
+  font-size: 20pt;
   font-weight: 500;
   text-align: center;
+  text-overflow: clip;
+  overflow: hidden;
 }
 
 #about-overlay-desc {
   background-color: rgba(255,206,0,0.95);
-  width:50%;
-  left:25vw;
+  width:60%;
+  left:20vw;
   height:270px;
   padding-left: 50px;
   padding-right: 50px;
@@ -1374,7 +1376,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #about-text-container {
-  width:60%;
+  width:70%;
   margin-top:70px;
   margin-left: auto;
   margin-right: auto;

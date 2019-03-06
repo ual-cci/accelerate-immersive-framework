@@ -17,6 +17,9 @@
     {{#ddm.item}}
     <a {{action 'examples'}} class = "nav-button dropdown-item">examples</a>
     {{/ddm.item}}
+    {{#ddm.item}}
+    <a {{action 'guides'}} class = "nav-button dropdown-item">guides</a>
+    {{/ddm.item}}
   {{/dd.menu}}
 {{/nav.dropdown}}
 {{else}}
@@ -24,10 +27,6 @@
 <a {{action 'docs'}} class = "nav-button">projects</a>
 <a {{action 'gettingStarted'}} class = "nav-button">getting started</a>
 <a {{action 'examples'}} class = "nav-button">examples</a>
-{{/if}}
-{{#if mediaQueries.isXs}}
-<div></div>
-{{else}}
 {{#nav.dropdown class="dropdown-item" as |dd|}}
   {{#dd.toggle class = "nav-dropdown" }}guides <span  class="caret"></span>{{/dd.toggle}}
   {{#dd.menu as |ddm|}}
@@ -38,6 +37,11 @@
     {{/each}}
   {{/dd.menu}}
 {{/nav.dropdown}}
+{{/if}}
+{{#if mediaQueries.isXs}}
+<div></div>
+{{else}}
+
  {{/if}}
    {{#if session.isAuthenticated}}
       <div id = "login-container">
