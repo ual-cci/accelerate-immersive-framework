@@ -405,4 +405,38 @@ describe('documents searching', () => {
       done();
     })
   });
+
+  describe('/POST asset from URL then delete', () => {
+    before((done)=> {
+      getToken().then(done);
+    });
+
+    it('it should return an asset ID and 200', (done)=> {
+      chai.request(server)
+      .post("/assetWithURL")
+      .set('Authorization', 'Bearer ' + token)
+      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+      .end((err, res) => {
+        console.log(err, res.status, res.body);
+        res.should.have.status(200);
+        assert.equal(res.body.name, "bear")
+        let assetID = res.body.fileId;
+        chai.request(server)
+        .delete("/asset/"+assetID)
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          console.log(err, res.status, res.body);
+          res.should.have.status(200);
+          done();
+        });
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    })
+  });
 });
