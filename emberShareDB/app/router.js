@@ -14,6 +14,7 @@ Router.map(function() {
   this.route('about');
   this.route('terms');
   this.route('getting-started');
+  this.route('guides')
   this.route('guides', { path: '/guides/:topic' });
   this.route('examples');
 });

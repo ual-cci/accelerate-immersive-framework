@@ -1,0 +1,7 @@
+{{#if isGuide}}
+<h1> Guide to {{model.name}} </h1>
+{{else}}
+{{#each model as |guide|}}
+  <a href = {{guide.url}}>{{guide.name}}</a><br>
+{{/each}}
+{{/if}}

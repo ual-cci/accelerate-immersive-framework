@@ -13,6 +13,9 @@ export default Controller.extend({
     transitionToExamplesRoute() {
       this.transitionToRoute('examples');
     },
+    transitionToGuidesRoute() {
+      this.transitionToRoute('guides', "root");
+    },
     transitionToGSRoute() {
       this.transitionToRoute('getting-started');
     },
