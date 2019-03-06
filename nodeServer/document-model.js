@@ -118,7 +118,7 @@ function startAssetAPI(app)
        readstream.pipe(res);
       });
 
-      app.delete('/asset/:id', function(req, res) {
+      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
         gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
           if (err) return handleError(err);
           console.log('success deleting asset');
