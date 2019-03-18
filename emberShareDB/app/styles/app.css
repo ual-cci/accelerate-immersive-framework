@@ -940,7 +940,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .uncharted-token-container {
   background-color: #e6e6e6;
-  height:35px;
+  height:auto;
 }
 
 #add-tag.add-file-button
