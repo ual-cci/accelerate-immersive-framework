@@ -3,10 +3,12 @@ import { isEmpty } from '@ember/utils';
 import acorn from 'npm:acorn'
 import walk from 'npm:acorn/dist/walk'
 import config from  '../config/environment';
+import RSVP from 'rsvp';
 
 export default Service.extend({
   store:inject('store'),
   cs:inject('console'),
+  assetService:inject('assets'),
   library:inject(),
   script:"",
   savedVals:null,
@@ -353,21 +355,39 @@ export default Service.extend({
     }
     return scripts;
   },
-  replaceAssets(source, assets) {
-    for(let i = 0; i < assets.length; i++)
-    {
-      const fileId = assets[i].fileId;
-      const toFind = assets[i].name;
-      const fileType = assets[i].fileType;
-      const asset = this.get('store').peekRecord('asset',fileId);
-      console.log("replaceAssets",fileType)
-      if(!isEmpty(asset) && fileType != "text/javascript")
-      {
-        const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-        source = source.replace(new RegExp(toFind,"gm"),b64);
+  replaceAssets(source, assets){
+    return new RSVP.Promise((resolve, reject)=> {
+      const replaceAll = async ()=> {
+        for(let i = 0; i < assets.length; i++)
+        {
+          const fileId = assets[i].fileId;
+          const toFind = assets[i].name;
+          const fileType = assets[i].fileType;
+          let asset = this.get('store').peekRecord('asset',fileId);
+          console.log("replaceAssets",fileType)
+          if(fileType != "text/javascript")
+          {
+            if(!isEmpty(asset))
+            {
+              const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+              source = source.replace(new RegExp(toFind,"gm"),b64);
+            }
+            else
+            {
+              console.log("converting to b64");
+              await this.get('assetService').fetchAsset(assets[i]);
+              console.log("finding record");
+              asset = this.get('store').peekRecord('asset',fileId);
+              console.log("found record");
+              const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+              source = source.replace(new RegExp(toFind,"gm"),b64);
+            }
+          }
+        }
+        resolve(source);
       }
-    }
-    return source;
+      replaceAll();
+    })
   },
   opTransform(ops, editor) {
     function opToDelta(op) {

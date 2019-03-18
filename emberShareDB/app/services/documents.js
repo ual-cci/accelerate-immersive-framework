@@ -209,12 +209,18 @@ export default Service.extend({
             mainText = doc.data.source;
           }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
+          combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
           if(replaceAssets)
           {
-            combined = this.get('codeParser').replaceAssets(combined, doc.data.assets);
+            this.get('codeParser').replaceAssets(combined, doc.data.assets)
+            .then((withAssets)=> {
+              resolve(withAssets)
+            })
           }
-          combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
-          resolve(combined);
+          else
+          {
+            resolve(combined);
+          }
         });
       }).catch((err)=>reject(err));
     });
