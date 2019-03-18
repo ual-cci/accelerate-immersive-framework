@@ -17,7 +17,7 @@ export default Controller.extend({
       this.transitionToRoute('guides', "root");
     },
     transitionToGSRoute() {
-      this.transitionToRoute('getting-started');
+      this.transitionToRoute('getting-started', 'beginner');
     },
     transitionToAboutRoute() {
       this.transitionToRoute('about');

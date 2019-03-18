@@ -1,0 +1,182 @@
+<div id = "tutorial-container">
+
+{{#if isAdvanced}}
+<h1>Getting Started - Advanced</h1>
+<p class = "tutorial-text">
+In this advanced example, we'll show you how to
+</p>
+<ul>
+  <li>Import and use the libraries we provide </li>
+  <li>Upload an playback an audio clip </li>
+  <li>Interact with this process live </li>
+  <li>Record your performance using an externally imported js library</li>
+</ul>
+<p class = "tutorial-text">
+Lets start by making a new document
+</p>
+<p class = "tutorial-text">
+Next select the briefcase icon in the control panel and select maxiLib. This should insert a script tag in the &lt;head&gt; that will inlcude the MaxiLib JS Audio DSP library. MIMIC hosts several libraries that are either commonly used or developed specially for the site that are easily insertable this way.
+</p>
+<img class = "tutorial-img" src = {{concat url "add-library.gif"}}/>
+<p class = "tutorial-text">
+Next we are going to upload an audio sample. Find one on your computer, either a full track, or a short loop will work best. Select the file icon and find your file and upload. When finished, you will be able to use your track by simply referring to it its name in the code.
+</p>
+<img class = "tutorial-img" src = {{concat url "upload-file.gif"}}/>
+
+<p class = "tutorial-text">
+Drop in this javascript into the script tag, inserting the name of your file where we have put &lt;YOUR FILENAME&gt;.
+</p>
+<pre>
+  <code>
+let maxiAudio = new maximJs.maxiAudio();
+let sample = new maximJs.maxiSample();
+let rate = 1;
+maxiAudio.init();
+maxiAudio.loadSample(&lt;YOUR FILENAME&gt;,sample);
+maxiAudio.play = function() {
+  this.output = sample.play(rate)
+}
+
+</code>
+</pre>
+<p class = "tutorial-text">
+When you hit run, you will hear your audio looped.
+</p>
+<p class = "tutorial-text">
+In a MIMIC project, you are able to reevaluate new code without rerunning the whole project. So insert this code
+</p>
+
+<pre>
+  <code>
+rate = -1
+</code>
+</pre>
+<p class = "tutorial-text">
+Move your cursor to the line and hit Shift+Enter. Your music should start playing backwards. You can now keep changing the value and rerunning that line in the same way without interuptting the sound.
+</p>
+<img class = "tutorial-img" src = {{concat url "livecode.gif"}}/>
+<p class = "tutorial-text">
+Now you can make sweet music, live, we want to record the performance. To do this we will use the RecorderJS library. First, clone the <a href = "https://github.com/mattdiamond/Recorderjs">repository</a>. In order to use the library, we will upload it in the same way as the audio file. Click the file icon and find the file recorder.js in "Recorderjs-master/dist/" and upload.
+</p>
+<p class = "tutorial-text">
+We include the library by inserting it in script tags in the &lt;head&gt;
+</p>
+<pre>
+<code>
+&lt;script src = "recorder.js"&gt;&lt;/script&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+To record insert the code below in your main script tag and rerun the file
+</p>
+<pre>
+  <code>
+var recorder = new Recorder(maxiAudio.jsProcessor);
+recorder.record();
+
+let download = ()=> {
+  recorder.stop();
+  recorder.exportWAV((blob)=> {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = 'output.wav';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+}
+
+//download()
+</code>
+</pre>
+<p class = "tutorial-text">
+Play round with the rate and all your output will be recorded. When you want to stop and download the file, uncomment the line download() and evaluate using Shift Enter. The full version of this project is available <a href = {{advancedProjectUrl}}>here</a>.
+</p>
+
+<img class = "tutorial-img" src = {{concat url "download.gif"}}/>
+
+{{else}}
+
+
+<h1>Getting Started</h1>
+<p class = "tutorial-text">This guide will walk you through setting up your first project on MIMIC.
+</p>
+<p class = "tutorial-text">You will need to make an account to create your own projects. Select "login" in the top right hand corner to do so.
+</p>
+<p class = "tutorial-text">Once you have an account, make a new project by going to the projects page, entering a name and clicking "create"
+</p>
+<img class = "tutorial-img" src = {{concat url "createdoc.gif"}}/>
+<p class = "tutorial-text">Your projects consists of a code editor (right) and a display window (left).
+</p>
+<p class = "tutorial-text">The code editor shows your root document html which is evaluated into the display window.
+</p>
+<img class = "tutorial-img" src = {{concat url "new-project.png"}}/>
+<p class = "tutorial-text">Type the following html into the body to of the document and click the play button in the control bar. You should see the button appear in the display window </p>
+
+<pre>
+  <code>
+&lt;button onclick="myFunction()"&gt;Click me&lt;/button&gt;
+ </code>
+</pre>
+
+<p class = "tutorial-text">Next, in the script tags type </p>
+<pre>
+  <code>
+let myFunction = ()=> {
+  console.log("hello world")
+}
+</code>
+</pre>
+<p class = "tutorial-text">
+Pause and play the code again and you should see "hello world" print out in the console at the bottom of the page.
+</p>
+<img class = "tutorial-img" src = {{concat url "console.png"}}/>
+<p class = "tutorial-text">
+Now were going to add some CSS to liven this button up abit. Instead of filling out our document with style tags, we're going to create a new tab to hold all out CSS.
+</p>
+<img class = "tutorial-img" src = {{concat url "createtab.gif"}}/>
+<p class = "tutorial-text">
+Make a new tab by clicking the plus next to the tabbar. Select the new tab, and by clicking on the main title, rename it "styles". Now add the following CSS into the new tab.
+</p>
+<pre>
+  <code>
+button {
+  color:red;
+}
+</code>
+</pre>
+<p class = "tutorial-text">
+Run the code. your button doesnt change! This is because we need to add the css into the main page. Select the main html page and add the following code to the &lt;head&gt;
+</p>
+<pre>
+  <code>
+&lt;link rel="stylesheet" href="styles" /&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now when you run the code your button title should be red. Fierce.
+</p>
+<p class = "tutorial-text">
+You can also separate out javascript code so we are going to make a new tab called "printer" and copy across the button handling code. Now delete the script tag and the code within it from the main document and in the following code to the header
+</p>
+
+<pre>
+  <code>
+&lt;script src = "printer"&gt;&lt;/script&gt;
+</code>
+</pre>
+<img class = "tutorial-img" src = {{concat url "finished.png"}}/>
+<p class = "tutorial-text">
+Now your button should greet the world as before when clicked, but its handling code is neatly stored away in a separate tab.
+</p>
+
+<p class = "tutorial-text">
+  The full version of this project is available <a href = {{beginnerProjectUrl}}>here</a>. To learn about more advanced features, either check out a <a href ={{guideurl}}>library guide</a> or our next <a href = {{advancedurl}}>walk through</a>
+</p>
+
+
+{{/if}}
+
+</div>

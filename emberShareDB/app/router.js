@@ -13,8 +13,7 @@ Router.map(function() {
   this.route('password-reset');
   this.route('about');
   this.route('terms');
-  this.route('getting-started');
-  this.route('guides')
+  this.route('getting-started', { path: '/getting-started/:topic' });
   this.route('guides', { path: '/guides/:topic' });
   this.route('examples');
 });
