@@ -7,7 +7,7 @@ In this advanced example, we'll show you how to
 </p>
 <ul>
   <li>Import and use the libraries we provide </li>
-  <li>Upload an playback an audio clip </li>
+  <li>Upload and playback an audio clip </li>
   <li>Interact with this process live </li>
   <li>Record your performance using an externally imported js library</li>
 </ul>
@@ -130,11 +130,11 @@ let myFunction = ()=> {
 </code>
 </pre>
 <p class = "tutorial-text">
-Pause and play the code again and you should see "hello world" print out in the console at the bottom of the page.
+Pause and play the code again and when you click the button, you should see "hello world" print out in the console at the bottom of the page.
 </p>
 <img class = "tutorial-img" src = {{concat url "console.png"}}/>
 <p class = "tutorial-text">
-Now were going to add some CSS to liven this button up abit. Instead of filling out our document with style tags, we're going to create a new tab to hold all out CSS.
+Now were going to add some CSS to liven this button up abit. Instead of filling out our document with style tags, we're going to create a new tab to hold all our CSS.
 </p>
 <img class = "tutorial-img" src = {{concat url "createtab.gif"}}/>
 <p class = "tutorial-text">
@@ -148,7 +148,7 @@ button {
 </code>
 </pre>
 <p class = "tutorial-text">
-Run the code. your button doesnt change! This is because we need to add the css into the main page. Select the main html page and add the following code to the &lt;head&gt;
+Run the code. Your button doesnt change! This is because we need to tell the main page to include the CSS. Go back to root html document and add the following code to the &lt;head&gt;
 </p>
 <pre>
   <code>
@@ -159,7 +159,7 @@ Run the code. your button doesnt change! This is because we need to add the css 
 Now when you run the code your button title should be red. Fierce.
 </p>
 <p class = "tutorial-text">
-You can also separate out javascript code so we are going to make a new tab called "printer" and copy across the button handling code. Now delete the script tag and the code within it from the main document and in the following code to the header
+You can also separate out javascript code. so we are going to make a new tab called "printer" and copy across the button handling code. Now delete the script tag and the code within it from the main document and insert the following code to the header
 </p>
 
 <pre>

@@ -113,6 +113,7 @@ export default Service.extend({
           out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
           out += CHARS.charAt(c3 & 0x3F);
       }
+      console.log("converted to b64e")
       return out;
   },
 });

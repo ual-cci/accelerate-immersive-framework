@@ -940,7 +940,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .uncharted-token-container {
   background-color: #e6e6e6;
-  height:35px;
+  height:auto;
 }
 
 #add-tag.add-file-button
@@ -1445,4 +1445,30 @@ input[id="searchTerm"]:-ms-input-placeholder {
   margin-top: 10px;
   margin-bottom: 10px;
   font-size: 11pt;
+}
+
+.example-tile-hover {
+  width:100%;
+  height:100%;
+  position: absolute;
+  top:0;
+  left:0;
+  background-color: rgba(255,255,255,0);
+}
+
+.example-tile-hover:hover {
+  background-color: rgba(200,200,200,0.2);
+}
+
+.example-tile-image {
+  width:100%;
+  height:100%;
+  padding-bottom: 10px;
+}
+
+.example-tile-title {
+  width:100%;
+  height:100%;
+  font-size: 20pt;
+  text-align: center;
 }

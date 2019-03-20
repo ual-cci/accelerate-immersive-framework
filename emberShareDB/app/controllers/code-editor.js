@@ -498,7 +498,7 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    console.log("did receive op", ops, source)
+    //console.log("did receive op", ops, source)
     const embed = this.get('embed') == "true";
     if(!embed && ops.length > 0)
     {
