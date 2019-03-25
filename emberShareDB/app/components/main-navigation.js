@@ -5,6 +5,7 @@ import config from  '../config/environment';
 export default Component.extend({
 
   session: inject('session'),
+  documentService: inject('documents'),
   mediaQueries:inject(),
   sessionAccount: inject('session-account'),
   store: inject('store'),
@@ -20,6 +21,13 @@ export default Component.extend({
     {id:"kadenze", name:"Machine Learning as a Design Tool", url:config.localOrigin + "/guides/kadenze"}
   ],
   actions: {
+    createDoc() {
+      const src = this.get('documentService').getDefaultSource();
+      const data = {name:"New Project", isPrivate:true, source:src}
+      this.get('documentService').makeNewDoc(data).then(() => {
+          this.sendAction('onCreateDoc');
+      });
+    },
     login() {
       this.sendAction('onLogin');
     },

@@ -535,7 +535,7 @@ input[id="docName"]:-ms-input-placeholder {
   padding-top: 10px;
 }
 
-#read-only-fork-button:hover {
+#read-only-fork-button:hover:focus {
   background-color: inherit;
 }
 
