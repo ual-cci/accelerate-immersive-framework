@@ -218,7 +218,18 @@
         <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
         </div> -->
-
+        {{#if canEditDoc}}
+        <div></div>
+        {{else}}
+        <div id = "read-only-overlay">
+          <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
+          {{#bs-button
+            id = "read-only-fork-button"
+            onClick=(action "forkDocument") }}
+            Fork
+          {{/bs-button}}
+        </div>
+        {{/if}}
           {{ember-ace
             minLines = 40
             maxLines = 10000
