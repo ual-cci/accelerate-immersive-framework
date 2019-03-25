@@ -41,6 +41,7 @@ export default Controller.extend({
   renderedSource:"",
   isNotEdittingDocName:true,
   canEditDoc:false,
+  showReadOnly:false,
   isOwner:false,
   autoRender:false,
   codeTimerRefresh:500,
@@ -897,6 +898,7 @@ export default Controller.extend({
     {
       console.log("NO USER OR MODEL")
       this.set('canEditDoc', false);
+      this.set('showReadOnly', true);
       this.set('isOwner', false);
       return;
     }
@@ -908,6 +910,7 @@ export default Controller.extend({
       {
         console.log("READ ONLY")
         this.set('canEditDoc', false);
+        this.set('showReadOnly', true);
         return;
       }
     }

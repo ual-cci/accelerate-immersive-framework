@@ -218,9 +218,7 @@
         <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
         </div> -->
-        {{#if canEditDoc}}
-        <div></div>
-        {{else}}
+        {{#if showReadOnly}}
         <div id = "read-only-overlay">
           <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
           {{#if session.isAuthenticated}}
