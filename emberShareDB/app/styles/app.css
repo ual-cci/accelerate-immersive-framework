@@ -1071,6 +1071,7 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
   font-size: 14pt;
   float:right;
+  cursor: pointer;
 }
 
 #logout-button {
@@ -1083,6 +1084,7 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 0px;
   top:30px;
   right:0px;
+  cursor: pointer;
 }
 
 #signed-in-label {
@@ -1099,7 +1101,8 @@ input[id="docName"]:-ms-input-placeholder {
   text-overflow: ellipsis;
   width: 200px;
   display: block;
-  overflow: hidden
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .row {
