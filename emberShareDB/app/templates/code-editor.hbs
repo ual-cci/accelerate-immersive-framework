@@ -223,11 +223,14 @@
         {{else}}
         <div id = "read-only-overlay">
           <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
+          {{#if session.isAuthenticated}}
           {{#bs-button
+            class = "clear-text-btn"
             id = "read-only-fork-button"
             onClick=(action "forkDocument") }}
             Fork
           {{/bs-button}}
+          {{/if}}
         </div>
         {{/if}}
           {{ember-ace
