@@ -36,6 +36,7 @@
               {{/if}}
               <span class="tooltiptext">Add Files to Use</span>
             </div>
+            {{#if isRoot}}
             <div class="tooltip">
               <div class="dropdown">
                 {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
@@ -47,6 +48,7 @@
               </div>
               <span class="tooltiptext">Add libraries</span>
             </div>
+            {{/if}}
             {{/if}}
             <div class="tooltip">
               {{#if showShare}}

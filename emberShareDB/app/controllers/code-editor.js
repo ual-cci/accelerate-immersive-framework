@@ -70,6 +70,7 @@ export default Controller.extend({
   doPlay:true,
   isPlayingOps:false,
   scrollPositions:{},
+  isRoot:true,
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
@@ -296,6 +297,7 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject)=> {
       let doc = this.get('currentDoc');
       this.get('cs').log("newDocSelected", docId);
+      this.set('isRoot', docId == this.get('model').id)
       if(!isEmpty(doc))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
