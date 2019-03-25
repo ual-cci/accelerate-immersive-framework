@@ -983,11 +983,13 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 2px;
   margin-left:3px;
   margin-bottom: 2px;
+  height:30px;
 }
 
 .uncharted-token-main-container {
   background-color: #e6e6e6;
   height:auto;
+  min-height: 35px;
 }
 
 .uncharted-token-container {
