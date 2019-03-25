@@ -1252,6 +1252,13 @@ export default Controller.extend({
         }
       }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
     },
+    assetUploadingComplete() {
+      console.log("all uploads complete")
+      document.getElementById("uploaded-assets-container").style['background-color'] = 'yellow';
+      setTimeout(()=> {
+        document.getElementById("uploaded-assets-container").style['background-color'] = 'inherit';
+      }, 500);
+    },
     deleteAsset(asset)
     {
       if(this.get('canEditDoc'))
