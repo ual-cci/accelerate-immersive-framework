@@ -25,7 +25,13 @@ button:active {
   border: none;
 }
 
-.a {
+a {
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  text-decoration: none;
+  color:inherit;
 }
 
 .p {
@@ -62,6 +68,20 @@ blockquote p {
 .dropdown {
  position: relative;
  display: inline-block;
+}
+
+#create-doc-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+#create-doc-dropdown-item {
+  font-size: 20pt;
+  text-align: center;
+  cursor: pointer;
+  width:100%;
+  display: block;
+  color:black;
+  font-weight: bold;
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -435,6 +455,10 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: rgba(0,0,0,0);
 }
 
+.selected-tab {
+  color:white;
+}
+
 .tab-delete-btn {
   float:right;
   display:inline;
@@ -510,6 +534,34 @@ input[id="docName"]:-ms-input-placeholder {
 
 *:fullscreen, *:-webkit-full-screen, *:-moz-full-screen {
     background-color: white;
+}
+
+#read-only-overlay {
+  position: absolute;
+  top:0
+  left:0;
+  width:100%;
+  height: auto;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 100;
+  text-align: center;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+#read-only-fork-button:hover:focus {
+  background-color: inherit;
+}
+
+#read-only-fork-button {
+  margin: 0 auto;
+  width:50px;
+  height:30px
+}
+
+#read-only-text {
+  text-align: center;
+  color:white;
 }
 
 #ace-container {
@@ -931,11 +983,13 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 2px;
   margin-left:3px;
   margin-bottom: 2px;
+  height:30px;
 }
 
 .uncharted-token-main-container {
   background-color: #e6e6e6;
   height:auto;
+  min-height: 35px;
 }
 
 .uncharted-token-container {
@@ -1071,6 +1125,7 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
   font-size: 14pt;
   float:right;
+  cursor: pointer;
 }
 
 #logout-button {
@@ -1083,6 +1138,7 @@ input[id="docName"]:-ms-input-placeholder {
   margin-top: 0px;
   top:30px;
   right:0px;
+  cursor: pointer;
 }
 
 #signed-in-label {
@@ -1099,7 +1155,8 @@ input[id="docName"]:-ms-input-placeholder {
   text-overflow: ellipsis;
   width: 200px;
   display: block;
-  overflow: hidden
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .row {

@@ -47,5 +47,6 @@ export default EmberUploader.FileField.extend({
     {
       await this.uploadFile(files[i])
     }
+    this.get('onAllCompletion')()
   }
 });

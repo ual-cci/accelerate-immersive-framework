@@ -1,8 +1,15 @@
 <div class = "tab-item" id = {{tabID}}>
+  {{#if isSelected}}
+  {{#bs-button class = "tab-btn selected-tab"
+  onClick=(action 'onSelect') }}
+  {{name}}
+  {{/bs-button}}
+  {{else}}
   {{#bs-button class = "tab-btn"
   onClick=(action 'onSelect') }}
   {{name}}
   {{/bs-button}}
+  {{/if}}
   {{#if canDelete}}
     {{#bs-button class = "tab-delete-btn"
     onClick=(action 'onDelete')

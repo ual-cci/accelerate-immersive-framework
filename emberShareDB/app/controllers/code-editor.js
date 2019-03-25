@@ -41,6 +41,7 @@ export default Controller.extend({
   renderedSource:"",
   isNotEdittingDocName:true,
   canEditDoc:false,
+  showReadOnly:false,
   isOwner:false,
   autoRender:false,
   codeTimerRefresh:500,
@@ -70,6 +71,7 @@ export default Controller.extend({
   doPlay:true,
   isPlayingOps:false,
   scrollPositions:{},
+  isRoot:true,
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
@@ -296,6 +298,7 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject)=> {
       let doc = this.get('currentDoc');
       this.get('cs').log("newDocSelected", docId);
+      this.set('isRoot', docId == this.get('model').id)
       if(!isEmpty(doc))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
@@ -445,11 +448,18 @@ export default Controller.extend({
     })
   },
   setParentData: function(data) {
+    const currentDoc = this.get('currentDoc');
+    let isSelected = true;
+    if (!isEmpty(currentDoc))
+    {
+      isSelected = data.documentId==currentDoc.id
+    }
     this.set('parentData', {name:data.name,
       id:data.documentId,
       children:data.children,
       source:data.source,
-      assets:data.assets
+      assets:data.assets,
+      isSelected:isSelected
     });
   },
   clearTabs: function() {
@@ -468,7 +478,7 @@ export default Controller.extend({
       const canDelete = this.get('canEditDoc') && child.id==currentDoc.id;
       return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id, canDelete:canDelete};
     });
-    console.log(tabs);
+    console.log("tabs", tabs);
     this.set('tabs', tabs);
   },
   fetchChildren: function() {
@@ -888,6 +898,7 @@ export default Controller.extend({
     {
       console.log("NO USER OR MODEL")
       this.set('canEditDoc', false);
+      this.set('showReadOnly', true);
       this.set('isOwner', false);
       return;
     }
@@ -899,6 +910,7 @@ export default Controller.extend({
       {
         console.log("READ ONLY")
         this.set('canEditDoc', false);
+        this.set('showReadOnly', true);
         return;
       }
     }
@@ -1242,6 +1254,13 @@ export default Controller.extend({
           this.refreshDoc();
         }
       }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
+    },
+    assetUploadingComplete() {
+      console.log("all uploads complete")
+      document.getElementById("uploaded-assets-container").style['background-color'] = 'yellow';
+      setTimeout(()=> {
+        document.getElementById("uploaded-assets-container").style['background-color'] = 'inherit';
+      }, 500);
     },
     deleteAsset(asset)
     {

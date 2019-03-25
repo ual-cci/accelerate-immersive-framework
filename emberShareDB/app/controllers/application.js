@@ -2,8 +2,9 @@ import Controller from '@ember/controller';
 import { inject } from '@ember/service';
 
 export default Controller.extend({
+  store: inject(),
+  sessionAccount: inject('session-account'),
   actions: {
-    store: inject(),
     transitionToLoginRoute() {
       this.transitionToRoute('login');
     },
@@ -30,6 +31,18 @@ export default Controller.extend({
     },
     transitionToGuide(guide) {
       this.transitionToRoute('guides', guide);
+    },
+    transitionToNewestDoc() {
+      const currentUserId = this.get('sessionAccount').currentUserId;
+      this.get('store').query('document', {
+        filter: {search: "",
+          page: 0,
+          currentUser: currentUserId,
+          sortBy: 'date'}
+      }).then((documents) => {
+        this.get('sessionAccount').updateOwnedDocuments();
+        this.transitionToRoute('code-editor', documents.firstObject.documentId);
+      });
     }
   }
 });

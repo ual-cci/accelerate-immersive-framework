@@ -61,7 +61,6 @@ export default Controller.extend({
   },
   updateSelectedFilter() {
     var newF = []
-    console.log("updating selected filter", this.get('sort'))
     this.get('showingFilters').forEach((f)=> {
       Ember.set(f, "isSelected", f.id == this.get('sort'));
       Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == this.get('searchTerm'));
@@ -97,7 +96,6 @@ export default Controller.extend({
      }
      this.set('showingFilters', this.get('allFilters').slice(0, toShow-1))
      this.updateSelectedFilter();
-     console.log("updating filters", this.get('allFilters').slice(0, toShow))
   },
   updateResults()
   {

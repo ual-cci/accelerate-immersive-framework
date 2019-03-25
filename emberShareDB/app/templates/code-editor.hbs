@@ -36,6 +36,7 @@
               {{/if}}
               <span class="tooltiptext">Add Files to Use</span>
             </div>
+            {{#if isRoot}}
             <div class="tooltip">
               <div class="dropdown">
                 {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
@@ -47,6 +48,7 @@
               </div>
               <span class="tooltiptext">Add libraries</span>
             </div>
+            {{/if}}
             {{/if}}
             <div class="tooltip">
               {{#if showShare}}
@@ -134,6 +136,7 @@
           multiple = true
           onProgress = (action 'assetProgress')
           onCompletion = (action 'assetUploaded')
+          onAllCompletion = (action 'assetUploadingComplete')
           onError = (action 'assetError')
         }}
       </div>
@@ -215,7 +218,19 @@
         <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
         <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
         </div> -->
-
+        {{#if showReadOnly}}
+        <div id = "read-only-overlay">
+          <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
+          {{#if session.isAuthenticated}}
+          {{#bs-button
+            class = "clear-text-btn"
+            id = "read-only-fork-button"
+            onClick=(action "forkDocument") }}
+            Fork
+          {{/bs-button}}
+          {{/if}}
+        </div>
+        {{/if}}
           {{ember-ace
             minLines = 40
             maxLines = 10000

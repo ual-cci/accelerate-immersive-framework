@@ -10,6 +10,40 @@ let should = chai.should();
 chai.use(chaiHttp);
 let accountId;
 
+let getToken = (username = "test-user", password = "somethingsecure")=> {
+  return new Promise((resolve, reject)=> {
+    chai.request(server)
+      .post('/oauth/token')
+      .type('form')
+      .send({
+        client_id:"application",
+        client_secret:"secret",
+        grant_type:"password",
+        username:username,
+        password:password
+      })
+      .end((err, res)=> {
+        console.log("ENDING SIGNING IN", err, res.body)
+        if(err)
+        {
+          reject(err)
+        }
+        else if (res.body.error)
+        {
+          reject(res.body)
+        }
+        else
+        {
+          // assert.equal(res.body.token_type, "Bearer");
+          // assert.exists(res.body.access_token);
+          // res.should.have.status(200);
+          resolve(res.body.access_token);
+        }
+      });
+  })
+}
+
+
 let newUser = ()=> {
   return new Promise((resolve, reject)=> {
     chai.request(server)
@@ -29,7 +63,50 @@ let newUser = ()=> {
   })
 }
 
+module.exports = {
+  getToken:getToken
+}
+
 describe('users', () => {
+
+  describe('/GET token with bad password', () => {
+    it('it should reject a user with bad password and give appropriate feedback', (done)=> {
+      newUser().then(()=> {
+        console.log("signing in")
+        getToken(username = "test-user", password = "somethingincorrect").catch((err)=> {
+          console.log("BAD PASSWORD", err)
+          assert.equal(err.error_description, 'password not correct')
+          done();
+        });
+      });
+    });
+    after((done)=> {
+      userModel.dropUser(accountId).then(()=> {
+        accountId = "";
+        done()
+      });
+    });
+  });
+
+  describe('/GET token with nonexistant user', () => {
+    it('it should reject a user that doesnt exist and give appropriate feedback', (done)=> {
+      newUser().then(()=> {
+        console.log("signing in")
+        getToken(username = "no-test-user").catch((err)=> {
+          console.log("BAD USER", err)
+          assert.equal(err.error_description, 'user not found')
+          done();
+        });
+      });
+    });
+    after((done)=> {
+      userModel.dropUser(accountId).then(()=> {
+        accountId = "";
+        done()
+      });
+    });
+  });
+
   describe('/POST user', () => {
     it('it should create a new user with no errors', (done) => {
       newUser.then(done());

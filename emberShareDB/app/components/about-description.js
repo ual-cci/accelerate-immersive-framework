@@ -1,10 +1,13 @@
 import Component from '@ember/component';
 import { inject } from '@ember/service';
+import config from  '../config/environment';
+
 export default Component.extend({
   mediaQueries:inject(),
   colours:[
     "#ED3D05F2","#FFCE00F2","#0ED779F2","#F79994F2","#4D42EBF2"
   ],
+  docURL:config.localOrigin + "/getting-started/beginner",
   didRender() {
     this._super(...arguments);
     let colour1 = Math.floor(Math.random() * 5);
