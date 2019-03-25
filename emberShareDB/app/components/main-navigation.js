@@ -3,11 +3,13 @@ import Component from '@ember/component';
 import { computed } from '@ember/object';
 import config from  '../config/environment';
 export default Component.extend({
+
   session: inject('session'),
   mediaQueries:inject(),
   sessionAccount: inject('session-account'),
   store: inject('store'),
   logoURL:config.localOrigin + "/images/logo-animation-cropped.gif",
+  url:config.localOrigin,
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
   }),

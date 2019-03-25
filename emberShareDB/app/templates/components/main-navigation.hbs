@@ -6,27 +6,27 @@
   {{#dd.toggle class = "nav-dropdown burger-btn" }} = <span  class="caret"></span>{{/dd.toggle}}
   {{#dd.menu as |ddm|}}
     {{#ddm.item}}
-    <a {{action 'about'}} class = "nav-button dropdown-item">about</a>
+    <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button dropdown-item">about</a>
     {{/ddm.item}}
     {{#ddm.item}}
-    <a {{action 'docs'}} class = "nav-button dropdown-item">projects</a>
+    <a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button dropdown-item">projects</a>
     {{#ddm.item}}
     {{/ddm.item}}
-    <a {{action 'gettingStarted'}} class = "nav-button dropdown-item">getting started</a>
+    <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
     {{/ddm.item}}
     {{#ddm.item}}
-    <a {{action 'examples'}} class = "nav-button dropdown-item">examples</a>
+    <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
     {{/ddm.item}}
     {{#ddm.item}}
-    <a {{action 'guides'}} class = "nav-button dropdown-item">guides</a>
+    <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
     {{/ddm.item}}
   {{/dd.menu}}
 {{/nav.dropdown}}
 {{else}}
-<a {{action 'about'}} class = "nav-button">about</a>
-<a {{action 'docs'}} class = "nav-button">projects</a>
-<a {{action 'gettingStarted'}} class = "nav-button">getting started</a>
-<a {{action 'examples'}} class = "nav-button">examples</a>
+<a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a>
+<a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button">projects</a>
+<a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button">getting started</a>
+<a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button">examples</a>
 {{#nav.dropdown class="dropdown-item" as |dd|}}
   {{#dd.toggle class = "nav-dropdown" }}guides <span  class="caret"></span>{{/dd.toggle}}
   {{#dd.menu as |ddm|}}
