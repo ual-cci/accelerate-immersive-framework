@@ -52,17 +52,14 @@ var OAuthUsersModel = mongoose.model('user');
 
 let model = {};
 model.getAccessToken = function(bearerToken) {
-	//console.log("getAccessToken");
 	return new Promise ((resolve, reject) => {
 	  OAuthTokensModel.findOne({ accessToken: bearerToken },
 		(err, token) => {
 			if(err || !token) {
-        //console.log("error fetching token", token);
 				reject(err);
 			}
 			else
 			{
-				//console.log("got token");
 				resolve(token)
 			}
 		});
@@ -95,28 +92,27 @@ model.getRefreshToken = function(refreshToken) {
 };
 
 model.getUser = function(username, password) {
-	//console.log('getting user')
+	console.log('getting user')
   return new Promise((resolve, reject)=> {
     OAuthUsersModel.findOne({ username: username},
       (err, user) => {
       if(err || !user)
       {
-				console.log('ERROR getting user')
-        reject(err);
+        console.log("user not found", err);
+        reject("user not found");
         return;
       }
       var hash = user.password;
       bcrypt.compare(password, hash).then((res) => {
         if(res)
         {
-					//console.log('got user')
           resolve(user);
 					return;
         }
         else
         {
-					//console.log('ERROR getting user')
-          reject(err);
+          console.log("password not correct", err);
+          reject("password not correct");
 					return;
         }
       });

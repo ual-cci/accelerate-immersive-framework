@@ -6,34 +6,13 @@ let chaiHttp = require('chai-http');
 let server = require('../server');
 let documentModel = require('../document-model');
 let userModel = require('../user-model');
+let userModelTest = require('./user-model');
 let should = chai.should();
 let expect = chai.expect();
 
 chai.use(chaiHttp);
 
 let token = "";
-
-let getToken = ()=> {
-  return new Promise((resolve, reject)=> {
-    chai.request(server)
-      .post('/oauth/token')
-      .type('form')
-      .send({
-        client_id:"application",
-        client_secret:"secret",
-        grant_type:"password",
-        username:"test-user",
-        password:"somethingsecure"
-      })
-      .end((err, res)=> {
-        assert.equal(res.body.token_type, "Bearer");
-        assert.exists(res.body.access_token);
-        token = res.body.access_token;
-        res.should.have.status(200);
-        resolve();
-      });
-  })
-}
 
 describe('doc delete', () => {
   let accountId = ""
@@ -43,7 +22,8 @@ describe('doc delete', () => {
     .then((res) => {
       console.log("made user", res);
       accountId = res.accountId
-      getToken().then(()=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
         const public_attr = {
           isPrivate:false,
           name:"public-me",
@@ -323,7 +303,10 @@ describe('documents searching', () => {
 
   describe('users can flag docs only once', () => {
     before((done)=> {
-      getToken().then(done);
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      })
     });
 
     it('user should be able to flag a doc once, and ONLY once', (done) => {
@@ -352,7 +335,10 @@ describe('documents searching', () => {
 
   describe('/POST library', () => {
     before((done)=> {
-      getToken().then(done);
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      })
     });
 
     it('it should insert script tag linking to library', (done)=> {
@@ -384,7 +370,10 @@ describe('documents searching', () => {
 
   describe('/POST op', () => {
     before((done)=> {
-      getToken().then(done);
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      })
     });
 
     it('it should POST op if authorised', (done)=> {
@@ -408,7 +397,10 @@ describe('documents searching', () => {
 
   describe('/POST asset from URL then delete', () => {
     before((done)=> {
-      getToken().then(done);
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      })
     });
 
     it('it should return an asset ID and 200', (done)=> {
