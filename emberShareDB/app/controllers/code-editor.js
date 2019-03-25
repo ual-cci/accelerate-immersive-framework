@@ -918,10 +918,12 @@ export default Controller.extend({
     {
       this.set('isOwner', true);
       this.set('canEditDoc', true);
+      this.set('showReadOnly', false);
       console.log("IS OWNER")
       return;
     }
     console.log("IS DESKTOP?", this.get('mediaQueries.isDesktop'))
+    this.set('showReadOnly', false);
     this.set('canEditDoc', this.get('mediaQueries.isDesktop'));
   },
   deleteCurrentDocument: function() {
