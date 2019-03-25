@@ -441,6 +441,10 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: rgba(0,0,0,0);
 }
 
+.selected-tab {
+  color:white;
+}
+
 .tab-delete-btn {
   float:right;
   display:inline;

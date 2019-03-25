@@ -445,11 +445,18 @@ export default Controller.extend({
     })
   },
   setParentData: function(data) {
+    const currentDoc = this.get('currentDoc');
+    let isSelected = true;
+    if (!isEmpty(currentDoc))
+    {
+      isSelected = data.documentId==currentDoc.id
+    }
     this.set('parentData', {name:data.name,
       id:data.documentId,
       children:data.children,
       source:data.source,
-      assets:data.assets
+      assets:data.assets,
+      isSelected:isSelected
     });
   },
   clearTabs: function() {
@@ -468,7 +475,7 @@ export default Controller.extend({
       const canDelete = this.get('canEditDoc') && child.id==currentDoc.id;
       return {name:child.data.name, id:child.id, isSelected:child.id==currentDoc.id, canDelete:canDelete};
     });
-    console.log(tabs);
+    console.log("tabs", tabs);
     this.set('tabs', tabs);
   },
   fetchChildren: function() {
