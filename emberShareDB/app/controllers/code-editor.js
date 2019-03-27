@@ -1211,7 +1211,7 @@ export default Controller.extend({
                       this.get('documentService').forkDoc(model.id, this.get('children'))];
         Promise.all(actions).then(()=>{
           this.get('store').query('document', {
-            filter: {search: currentUser, page: 0, currentUser:currentUser, sortBy:'date'}
+            filter: {search: currentUser, page: 0, owner:currentUser, sortBy:'date'}
           }).then((documents) => {
             this.get('cs').log("new doc created", documents);
             this.get('sessionAccount').updateOwnedDocuments();
