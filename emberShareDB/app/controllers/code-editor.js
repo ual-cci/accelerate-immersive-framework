@@ -79,7 +79,7 @@ export default Controller.extend({
     this.updateDragPos();
     const aceW = this.get('aceW');
     const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
-    console.log("updating ace style", aceW, display)
+    //console.log("updating ace style", aceW, display)
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
@@ -935,12 +935,12 @@ export default Controller.extend({
   updateScrollPosition: function() {
     const range = this.getSelectionRange();
     this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
-    console.log("SCROLL POS", this.get('scrollPositions'))
+    //console.log("SCROLL POS", this.get('scrollPositions'))
   },
   scrollToSavedPosition: function() {
     const pos = this.get('scrollPositions')[this.get('currentDoc').id];
     const editor = this.get('editor');
-    console.log("scrolling to ", pos)
+    //console.log("scrolling to ", pos)
     //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
     editor.resize(true);
     editor.gotoLine(pos);
@@ -1433,7 +1433,7 @@ export default Controller.extend({
 
     //MOUSE LISTENERS
     mouseDown(e) {
-      console.log('mouseDown',e.target);
+      //console.log('mouseDown',e.target);
       this.set('isDragging', true);
       const startWidth = document.querySelector('#ace-container').clientWidth;
       const startX = e.clientX;
@@ -1447,7 +1447,7 @@ export default Controller.extend({
       overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
-      console.log('mouseup',e.target);
+      //console.log('mouseup',e.target);
       this.set('isDragging', false);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
@@ -1459,7 +1459,7 @@ export default Controller.extend({
     mouseMove(e) {
       if(this.get('isDragging'))
       {
-        console.log('mouseMove',e.target);
+        //console.log('mouseMove',e.target);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
@@ -1502,7 +1502,7 @@ export default Controller.extend({
     },
     showCode() {
       const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
-      console.log("main-code-container width", max)
+      //console.log("main-code-container width", max)
       var show = ()=> {
         let aceW = this.get('aceW')
         if(aceW < max)
