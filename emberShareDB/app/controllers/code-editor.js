@@ -50,6 +50,7 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showSettings:false,
+  showCodeControls:true,
   showConnectionWarning:false,
   isShowingCode:true,
   isDragging:false,
@@ -75,9 +76,10 @@ export default Controller.extend({
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
-    const aceW = this.get('aceW');
     this.updateDragPos();
-    const display = this.get("mediaQueries.isDesktop") ? "inline":"none"
+    const aceW = this.get('aceW');
+    const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
+    console.log("updating ace style", aceW, display)
     return htmlSafe("width: " + aceW + "px; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
@@ -89,9 +91,6 @@ export default Controller.extend({
   embedLink: computed('editLink', function() {
     return this.get('editLink') + "?embed=true";
   }),
-  displayLink: computed('editLink', function() {
-    return this.get('editLink') + "?hideEditor=true";
-  }),
   libraries: computed('library.libraryMap', function() {
     return this.get("library").libraryMap
   }),
@@ -100,7 +99,7 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = this.get("mediaQueries.isDesktop") && !this.get('isEmbedded') ? "inline":"none"
+      const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -120,14 +119,16 @@ export default Controller.extend({
   initUI: function() {
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
-    this.set('isEmbedded', embed)
-    console.log("OUTOPUY", )
+    const embedWithCode = this.get('showCode') == "true";
+    this.set('isEmbedded', embed);
+    this.set('isEmbeddedWithCode', embedWithCode);
+    this.set('showCodeControls', !(embed && !embedWithCode));
     var iframe = document.getElementById("output-iframe");
     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     iframeDocument.body.style.padding = "0px";
     iframeDocument.body.style.margin = "0px";
-    console.log(iframe,iframeDocument)
-    if(embed) {
+    if(embed)
+    {
       document.getElementById("main-code-container").style.height="97vh"
       document.getElementById("main-code-container").style.width="100vw"
       document.getElementById("output-container").style["border-top-width"]=0;
@@ -137,21 +138,29 @@ export default Controller.extend({
       document.getElementById("main-site-container").style.border="none"
     }
 
+    if(embedWithCode)
+    {
+      this.hideCode();
+    }
+
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    const display = embed || this.get("mediaQueries.isMobile") ? "none":"inline"
+    const display = (embed && !embedWithCode) || this.get("mediaQueries.isMobile") ? "none":"inline"
     $("#ace-container").css("display", display);
     this.updateDragPos();
     this.get('cs').observers.push(this);
   },
   updateDragPos: function() {
     const aceW = this.get('aceW');
-    let drag = document.getElementById('drag-container')
+    const drag = document.getElementById('drag-container')
     if(drag)
     {
       drag.style.right =(aceW - 31) + "px";
-      let tab = document.getElementById('project-tabs');
+    }
+    const tab = document.getElementById('project-tabs');
+    if(tab)
+    {
       tab.style.width = aceW + "px"
     }
   },
@@ -315,29 +324,6 @@ export default Controller.extend({
         this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
     })
-  },
-  resetScrollPositions: function() {
-    var scrollPositions = {}
-    scrollPositions[this.get('model').id] = 0;
-    this.get('children').forEach((child)=> {
-      scrollPositions[child.id] = 0;
-    });
-    this.set('scrollPositions', scrollPositions);
-  },
-  updateScrollPosition: function() {
-    const range = this.getSelectionRange();
-    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
-    console.log("SCROLL POS", this.get('scrollPositions'))
-  },
-  scrollToSavedPosition: function() {
-    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
-    const editor = this.get('editor');
-    console.log("scrolling to ", pos)
-    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
-    editor.resize(true);
-    editor.gotoLine(pos);
-    editor.scrollToLine(pos, true, true, {})
-    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   selectRootDoc: function() {
     console.log("selectRootDoc")
@@ -509,7 +495,7 @@ export default Controller.extend({
   },
   didReceiveOp: function (ops,source) {
     //console.log("did receive op", ops, source)
-    const embed = this.get('embed') == "true";
+    const embed = this.get('isEmbedded');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
@@ -618,7 +604,7 @@ export default Controller.extend({
   },
   doPlayOnLoad: function() {
     let model = this.get('model');
-    const embed = this.get('embed') == "true";
+    const embed = this.get('isEmbedded');
     if(embed) {
       return true;
     }
@@ -867,8 +853,8 @@ export default Controller.extend({
   },
   handleWindowEvent: (e) => {
     const self = e.target.self;
-    const embed = self.get('embed') == "true";
-    if (e.origin === config.localOrigin && !embed && !isEmpty(e.data))
+    const drag = self.get('showCodeControls');
+    if (e.origin === config.localOrigin && drag && !isEmpty(e.data))
     {
       if(e.data[0].substring(0,2)=="p_")
       {
@@ -937,6 +923,29 @@ export default Controller.extend({
         this.get('cs').log("error deleting doc", err);
       });
     }
+  },
+  resetScrollPositions: function() {
+    var scrollPositions = {}
+    scrollPositions[this.get('model').id] = 0;
+    this.get('children').forEach((child)=> {
+      scrollPositions[child.id] = 0;
+    });
+    this.set('scrollPositions', scrollPositions);
+  },
+  updateScrollPosition: function() {
+    const range = this.getSelectionRange();
+    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
+    console.log("SCROLL POS", this.get('scrollPositions'))
+  },
+  scrollToSavedPosition: function() {
+    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
+    const editor = this.get('editor');
+    console.log("scrolling to ", pos)
+    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
+    editor.resize(true);
+    editor.gotoLine(pos);
+    editor.scrollToLine(pos, true, true, {})
+    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   skipOp:function(prev, rewind = false) {
     const fn = ()=> {
@@ -1088,15 +1097,21 @@ export default Controller.extend({
     })();
   },
   updatePlayButton: function() {
-    let button = document.getElementById("code-play-btn");
-    if(!this.get('doPlay'))
-    {
-      $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+    let update = (button)=> {
+      if(!isEmpty(button))
+      {
+        if(!this.get('doPlay'))
+        {
+          $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+        }
+        else
+        {
+          $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
+        }
+      }
     }
-    else
-    {
-      $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
-    }
+    update(document.getElementById("code-play-btn"));
+    update(document.getElementById("embedded-run-button"));
   },
   updateTabbarLocation: function() {
     const aceW = this.get('aceW');
@@ -1105,6 +1120,24 @@ export default Controller.extend({
     {
       tab.style.width = aceW + "px"
     }
+  },
+  hideCode: function() {
+    const min = 30;
+    var hide = ()=> {
+      let aceW = this.get('aceW')
+      if(aceW > min)
+      {
+        setTimeout(()=> {
+          this.set('aceW', Math.max(min, aceW - 10));
+          hide();
+        }, 2);
+      }
+      else
+      {
+        this.set('isShowingCode', false);
+      }
+    }
+    hide();
   },
   actions: {
     editorReady(editor) {
@@ -1400,7 +1433,7 @@ export default Controller.extend({
 
     //MOUSE LISTENERS
     mouseDown(e) {
-      //this.get('cs').log('mouseDown',e.target);
+      console.log('mouseDown',e.target);
       this.set('isDragging', true);
       const startWidth = document.querySelector('#ace-container').clientWidth;
       const startX = e.clientX;
@@ -1414,7 +1447,7 @@ export default Controller.extend({
       overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
-      //this.get('cs').log('mouseup',e.target);
+      console.log('mouseup',e.target);
       this.set('isDragging', false);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
@@ -1426,8 +1459,7 @@ export default Controller.extend({
     mouseMove(e) {
       if(this.get('isDragging'))
       {
-        //this.get('cs').log('mouseMove',e.target);
-
+        console.log('mouseMove',e.target);
         this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
       }
     },
@@ -1466,22 +1498,7 @@ export default Controller.extend({
       this.set('renderedSource', "");
     },
     hideCode() {
-      const min = 30;
-      var hide = ()=> {
-        let aceW = this.get('aceW')
-        if(aceW > min)
-        {
-          setTimeout(()=> {
-            this.set('aceW', Math.max(min, aceW - 10));
-            hide();
-          }, 2);
-        }
-        else
-        {
-          this.set('isShowingCode', false);
-        }
-      }
-      hide();
+      this.hideCode();
     },
     showCode() {
       const max = 2 * document.getElementById("main-code-container").clientWidth / 3;

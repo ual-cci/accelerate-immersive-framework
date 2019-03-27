@@ -536,6 +536,31 @@ input[id="docName"]:-ms-input-placeholder {
     background-color: white;
 }
 
+#embedded-run-container {
+  position: absolute;
+  bottom:0;
+  right:0;
+  width:80px;
+  height: auto;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 100;
+  text-align: center;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+#embedded-run-button:hover:focus {
+  background-color: inherit;
+}
+
+#embedded-run-button {
+  margin: 0 auto;
+  width:50px;
+  height:30px
+}
+
 #read-only-overlay {
   position: absolute;
   top:0
