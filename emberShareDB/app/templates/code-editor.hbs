@@ -143,12 +143,6 @@
       {{/if}}
     </div>
   {{/if}}
-  {{#if showConnectionWarning}}
-    <div id = "connection-warning-container">
-         <p id = connection-warning-text> Warning: connection issues mean that the autosave function has ceased working.
-           We recommend you reload the site to avoid loosing work</p>
-    </div>
-  {{/if}}
   {{#if mediaQueries.isDesktop}}
     {{tokenfield-input
       tokens=model.tags
@@ -228,7 +222,7 @@
       <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
 
         {{#if showReadOnly}}
-        <div id = "read-only-overlay">
+        <div class = "code-warning-overlay" id = "read-only-overlay">
           <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
           {{#if session.isAuthenticated}}
           {{#bs-button
@@ -239,6 +233,11 @@
           {{/bs-button}}
           {{/if}}
         </div>
+        {{/if}}
+        {{#if showConnectionWarning}}
+          <div class = "code-warning-overlay" id = "connection-warning-container">
+               <p id = "connection-warning-text"> {{connectionWarning}}</p>
+          </div>
         {{/if}}
 
         {{ember-ace

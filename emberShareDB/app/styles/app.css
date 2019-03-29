@@ -561,17 +561,30 @@ input[id="docName"]:-ms-input-placeholder {
   height:30px
 }
 
-#read-only-overlay {
+.code-warning-overlay {
   position: absolute;
-  top:0
+  top:0;
   left:0;
   width:100%;
   height: auto;
-  background-color: rgba(0,0,0,0.8);
   z-index: 100;
   text-align: center;
   padding-bottom: 10px;
   padding-top: 10px;
+}
+
+#connection-warning-text {
+  color:white;
+  text-align: center;
+  height:40px;
+}
+
+#connection-warning-container {
+  background-color: rgba(255,0,0,0.8)
+}
+
+#read-only-overlay {
+  background-color: rgba(0,0,0,0.8);
 }
 
 #read-only-fork-button:hover:focus {
@@ -1299,17 +1312,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border-radius: 2;
   border-width: 5;
   border-color: black;
-}
-
-#connection-warning-text {
-  color:white;
-  text-align: center;
-}
-
-#connection-warning-container {
-  height:100px;
-  width: 100%;
-  background-color: rgba(255,0,0,0.8)
 }
 
 .tooltip {

@@ -494,15 +494,17 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    //console.log("did receive op", ops, source)
+    console.log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
+    const editor = this.get('editor');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
+        console.log("applying remote op")
         const deltas = this.get('codeParser').opTransform(ops, editor);
-        session.getDocument().applyDeltas(deltas);
+        editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
@@ -532,11 +534,10 @@ export default Controller.extend({
   submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-      const MAX_RETRIES = 5;
       let droppedOps = this.get('droppedOps');
       //let droppedOps = [1,2,3]
+      console.log("Submitting op")
       if(droppedOps.length > 0) {
-        this.set('showConnectionWarning', true);
         this.set('droppedOps', droppedOps.push(op));
         reject();
         return;
@@ -545,26 +546,35 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        sharedDBDoc.submitOp(op, (err) => {
-          if(err)
-          {
-            if(retry < MAX_RETRIES)
+        console.log("Submitting op on ws")
+        try
+        {
+          sharedDBDoc.submitOp(op, (err) => {
+            console.log("callback", err)
+            if(err)
             {
-              this.submitOp(op, retry + 1);
+              droppedOps.push(op);
+              this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work")
+              this.set('showConnectionWarning', true);
+              console.log("error submitting op (ws)")
+              reject(err);
+              return;
             }
             else
             {
-              droppedOps.push(op);
+              resolve();
+              return;
             }
-            reject(err);
-            return;
-          }
-          else
-          {
-            resolve();
-            return;
-          }
-        });
+          });
+        }
+        catch (err)
+        {
+          droppedOps.push(op);
+          this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          this.set('showConnectionWarning', true);
+          console.log("error submitting op (ws)",err)
+          reject(err);
+        }
       }
       else
       {
@@ -574,14 +584,9 @@ export default Controller.extend({
           return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
-          if(retry < MAX_RETRIES)
-          {
-            this.submitOp(op, retry + 1);
-          }
-          else
-          {
-            droppedOps.push(op);
-          }
+          droppedOps.push(op);
+          this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work");
+          this.set('showConnectionWarning', true);
           reject(err);
           return;
         });
@@ -787,6 +792,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
+    console.log("session change")
     if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.editor;
@@ -948,10 +954,10 @@ export default Controller.extend({
     Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   skipOp:function(prev, rewind = false) {
-    const fn = ()=> {
+    const update = ()=> {
       const editor = this.get('editor');
       const doc = this.get('currentDoc').id;
-      const fn = (deltas) => {
+      const apply = (deltas) => {
         this.set('surpress', true);
         editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
@@ -959,21 +965,21 @@ export default Controller.extend({
       if(prev)
       {
         this.get('opsPlayer').prevOp(editor, rewind)
-        .then((deltas)=>{fn(deltas)});
+        .then((deltas)=>{apply(deltas)});
       }
       else
       {
         this.get('opsPlayer').nextOp(editor, rewind)
-        .then((deltas)=>{fn(deltas)});
+        .then((deltas)=>{apply(deltas)});
       }
     }
     if(this.get('opsPlayer').atHead())
     {
-      this.updateSourceFromSession().then(fn).catch((err)=>{console.log(err)})
+      this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
     }
     else
     {
-      fn()
+      update();
     }
   },
   updateSavedVals: function()
@@ -1029,6 +1035,7 @@ export default Controller.extend({
     {
       const fn = () => {
         this.get('opsPlayer').reset(doc.id);
+        this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
         this.set('renderedSource',"");
         const sharedDBDoc = this.get('sharedDBDoc');
@@ -1243,12 +1250,9 @@ export default Controller.extend({
         let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
                       this.get('documentService').forkDoc(model.id, this.get('children'))];
         Promise.all(actions).then(()=>{
-          this.get('store').query('document', {
-            filter: {search: currentUser, page: 0, owner:currentUser, sortBy:'date'}
-          }).then((documents) => {
-            this.get('cs').log("new doc created", documents);
-            this.get('sessionAccount').updateOwnedDocuments();
-            this.transitionToRoute('code-editor',documents.firstObject.documentId);
+          this.get('sessionAccount').updateOwnedDocuments().then(()=> {
+            console.log("owneddocs", this.get('sessionAccount').ownedDocuments);
+            this.transitionToRoute('code-editor',this.get('sessionAccount').ownedDocuments.firstObject.id);
           }).catch((err)=>{
             this.set('feedbackMessage',err.errors[0]);
           });

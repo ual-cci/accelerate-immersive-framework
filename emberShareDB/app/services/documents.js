@@ -59,7 +59,9 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
         this.get('cs').log("found record, making copy of parent", doc.data);
-        this.makeNewDoc(doc.data, docId, null).then((newDoc)=> {
+        let newData = doc.data;
+        newData.name = "Fork of " + doc.data.name;
+        this.makeNewDoc(newData, docId, null).then((newDoc)=> {
           const makeChildren = async (c) => {
             for(const child of c) {
               this.get('cs').log("making copy of child", child.data);
