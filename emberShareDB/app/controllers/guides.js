@@ -18,4 +18,8 @@ export default Controller.extend({
     console.log(this.get('model'))
     return this.get('model').id == "evolib"
   }),
+  isMaxim:computed('model', function() {
+    console.log(this.get('model'))
+    return this.get('model').id == "maximJS"
+  }),
 });

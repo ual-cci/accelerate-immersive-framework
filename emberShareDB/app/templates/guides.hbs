@@ -1,6 +1,573 @@
 {{#if isGuide}}
 <div id = "tutorial-container">
 <h1> Guide to {{model.name}} </h1>
+{{#if isMaxim}}
+<p class = "tutorial-text">
+maximJS is an implementation of the Maximilian audio library in javascript using emscripten to compile code from C++ to javascript/asm.js. It allows powerful audio sequencing, synthesis and analysis all in the browser.
+</p>
+<h3 id="maxiaudio">maxiAudio</h3>
+<p class = "tutorial-text">This the audio context. You must always have one to produce sound with maxiLib</p>
+<h4 id="methods">methods</h4>
+<h5 id="-init-">.init()</h5>
+<p class = "tutorial-text">initialise the audio engine</p>
+<h5 id="-outputisarray-isarray-numchannels-">.outputIsArray( isArray,  numChannels)</h5>
+<p class = "tutorial-text">for multi channel  sound</p>
+<ul>
+<li>isArray = true or false</li>
+<li>numChannels = 2, 4, or 8</li>
+</ul>
+<h5 id="-loadsample-sampleurl-maxisample-">.loadSample(sampleUrl, maxiSample)</h5>
+<p class = "tutorial-text">load a sample into a maxiSample object</p>
+<h4 id="properties">properties</h4>
+<h5 id="-play">.play</h5>
+<p class = "tutorial-text">the function which is the play loop</p>
+<h5 id="-output">.output</h5>
+<p class = "tutorial-text">the current value of the audio output</p>
+<h4 id="example">example</h4>
+<pre><code><span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> <span class="hljs-type">maximJs</span>.maxiAudio();
+<span class="hljs-keyword">var</span> sample = <span class="hljs-keyword">new</span> <span class="hljs-type">maximJs</span>.maxiSample();
+
+maxiAudio.init();
+maxiAudio.loadSample(<span class="hljs-string">'cheese.wav'</span>, sample);
+</code></pre><hr>
+<h3 id="maxisample">maxiSample</h3>
+<p class = "tutorial-text">Stores and plays an audio sample</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> sample1= <span class="hljs-keyword">new</span> maximJs.maxiSample();
+    <span class="hljs-keyword">var</span> sample2= <span class="hljs-keyword">new</span> maximJs.maxiSample();
+    <span class="hljs-keyword">var</span> clock = <span class="hljs-keyword">new</span> maximJs.maxiClock();
+    <span class="hljs-keyword">var</span> beatCounter = <span class="hljs-number">0</span>;
+
+    maxiAudio.init();
+    maxiAudio.loadSample(<span class="hljs-string">"bassdrum13.wav"</span>, sample1);
+    maxiAudio.loadSample(<span class="hljs-string">"hihat18.wav"</span>, sample2);
+    clock.setTempo(<span class="hljs-number">87</span>);
+    clock.setTicksPerBeat(<span class="hljs-number">8</span>);
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span> (sample1.isReady()) {
+            clock.ticker();
+            <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+            <span class="hljs-keyword">if</span> (clock.isTick() ) {
+                <span class="hljs-keyword">if</span> (beatCounter <span class="hljs-keyword">in</span> [<span class="hljs-number">0</span>,<span class="hljs-number">2</span>]) {
+                    sample1.trigger();
+                }
+                <span class="hljs-keyword">if</span> (beatCounter <span class="hljs-keyword">in</span> [<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">7</span>]) {
+                    sample2.trigger();
+                }
+                beatCounter = (beatCounter+<span class="hljs-number">1</span>) % <span class="hljs-number">8</span>;
+            }
+            w = sample1.playOnce();
+            w += sample2.playOnce();
+            <span class="hljs-keyword">this</span>.output =  w;
+        }
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h4 id="methods">methods</h4>
+<h5 id="-play-">.play()</h5>
+<p class = "tutorial-text">plays the sample at normal speed</p>
+<h5 id="-play-playrate-">.play(playRate)</h5>
+<p class = "tutorial-text">plays the sample at the specified play rate</p>
+<h5 id="-playonce-">.playOnce()</h5>
+<p class = "tutorial-text">plays the sample once at normal speed</p>
+<h5 id="-playonce-playrate-">.playOnce(playRate)</h5>
+<p class = "tutorial-text">plays the sample once at specified play rate</p>
+<h5 id="-trigger-">.trigger()</h5>
+<p class = "tutorial-text">set the playhead to zero (use in conjunction with playOnce)</p>
+<h5 id="-isready-">.isReady()</h5>
+<p class = "tutorial-text">returns true if sample is loaded</p>
+<hr>
+<h3 id="maxitimestretch">maxiTimestretch</h3>
+<p class = "tutorial-text">plays a sample at different rates leaving pitch unchanged</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> sample = <span class="hljs-keyword">new</span> maximJs.maxiSample();
+    <span class="hljs-keyword">var</span> ts = <span class="hljs-keyword">new</span> maximJs.maxiTimestretch();
+    <span class="hljs-keyword">var</span> ts2 = <span class="hljs-keyword">new</span> maximJs.maxiTimestretch();
+    <span class="hljs-keyword">var</span> delay = <span class="hljs-keyword">new</span> maximJs.maxiDelayline();
+
+    maxiAudio.init();
+
+    <span class="hljs-comment">// you can add files into the document by going to Settings (gear icon) &gt; Files</span>
+    <span class="hljs-comment">// uncomment this and change the file name to your sample</span>
+    maxiAudio.loadSample(<span class="hljs-string">'45379__feedback__mono.wav'</span>, sample);
+    ts.setSample(sample);
+    ts2.setSample(sample);
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span>(sample.isReady()){
+            <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+            w = ts.play(<span class="hljs-number">0.5</span>,<span class="hljs-number">0.1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">0</span>) ;
+            w = w +  ts2.play(<span class="hljs-number">0.1</span>,<span class="hljs-number">0.1</span>,<span class="hljs-number">4</span>,<span class="hljs-number">0.2</span>);
+            w = w  + delay.dl(w, <span class="hljs-number">200</span>, <span class="hljs-number">0.98</span>);
+            <span class="hljs-keyword">this</span>.output =  w;
+        }
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h4 id="methods">methods</h4>
+<h5 id="-setsample-maxisample-">.setSample(maxiSample)</h5>
+<p class = "tutorial-text">sets the sample play for timestretch to use</p>
+<h5 id="-play-rate-grainlength-overlaps-startpos-">.play(rate, grainLength, overlaps, startPos)</h5>
+<ul>
+<li>rate (eg. 0.5 = half speed)</li>
+<li>grainLength (a time in seconds)</li>
+<li>overlaps (normally 2 is good)</li>
+<li>startPos (where to start playing in the sample - in seconds)</li>
+</ul>
+<h5 id="-setposition-startpos-">.setPosition(startPos)</h5>
+<p class = "tutorial-text">useful for resetting a sound</p>
+<h5 id="-getposition-">.getPosition()</h5>
+<p class = "tutorial-text">returns position in ???</p>
+<h5 id="-getnormalisedposition-">.getNormalisedPosition()</h5>
+<p class = "tutorial-text">Useful for ending sample play back</p>
+<p class = "tutorial-text"><br><br></p>
+<h3 id="maxipitchshift">maxiPitchShift</h3>
+<p class = "tutorial-text">plays a sample at different pitches leaving the speed unchanged</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> sample = <span class="hljs-keyword">new</span> maximJs.maxiSample();
+    <span class="hljs-keyword">var</span> ts = <span class="hljs-keyword">new</span> maximJs.maxiPitchShift();
+    <span class="hljs-keyword">var</span> ts2 = <span class="hljs-keyword">new</span> maximJs.maxiPitchShift();
+    <span class="hljs-keyword">var</span> delay = <span class="hljs-keyword">new</span> maximJs.maxiDelayline();
+
+    maxiAudio.init();
+
+    <span class="hljs-comment">// you can add files into the document by going to Settings (gear icon) &gt; Files</span>
+    <span class="hljs-comment">// uncomment this and change the file name to your sample</span>
+    maxiAudio.loadSample(<span class="hljs-string">'45379__feedback__mono.wav'</span>, sample);
+    ts.setSample(sample);
+    ts2.setSample(sample);
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">if</span>(sample.isReady()){
+            <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+            w = ts.play(<span class="hljs-number">0.5</span>,<span class="hljs-number">0.1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">0</span>) ;
+            w = w +  ts2.play(<span class="hljs-number">0.1</span>,<span class="hljs-number">0.1</span>,<span class="hljs-number">4</span>,<span class="hljs-number">0.2</span>);
+            w = w  + delay.dl(w, <span class="hljs-number">200</span>, <span class="hljs-number">0.98</span>);
+            <span class="hljs-keyword">this</span>.output =  w;
+        }
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h4 id="methods">methods</h4>
+<h5 id="-setsample-maxisample-">.setSample(maxiSample)</h5>
+<p class = "tutorial-text">sets the sample play for pitchShift to use</p>
+<h5 id="-play-pitch-grainlength-overlaps-startpos-">.play(pitch, grainLength, overlaps, startPos)</h5>
+<ul>
+<li>pitch (eg. 0.5 = half pitch)</li>
+<li>grainLength (a time in seconds)</li>
+<li>overlaps (normally 2 is good)</li>
+<li>startPos (where to start playing in the sample - in seconds)</li>
+</ul>
+<h5 id="-setposition-startpos-">.setPosition(startPos)</h5>
+<p class = "tutorial-text">useful for resetting a sound</p>
+<h5 id="-getposition-">.getPosition()</h5>
+<p class = "tutorial-text">returns position in ???</p>
+<h5 id="-getnormalisedposition-">.getNormalisedPosition()</h5>
+<p class = "tutorial-text">Useful for ending sample play back</p>
+<hr>
+<h3 id="maxipitchstretch">maxiPitchStretch</h3>
+<p class = "tutorial-text">plays a sample with independent control of pitch and speed</p>
+<h4 id="methods">methods</h4>
+<h5 id="-setsample-maxisample-">.setSample(maxiSample)</h5>
+<p class = "tutorial-text">sets the sample play for timestretch to use</p>
+<h5 id="-play-pitch-rate-grainlength-overlaps-startpos-">.play(pitch, rate, grainLength, overlaps, startPos)</h5>
+<ul>
+<li>pitch (eg. 0.5 = half pitch)</li>
+<li>rate (eg. 0.5 = half speed)</li>
+<li>grainLength (a time in seconds)</li>
+<li>overlaps (normally 2 is good)</li>
+<li>startPos (where to start playing in the sample - in seconds)</li>
+</ul>
+<h5 id="-getposition-">.getPosition()</h5>
+<p class = "tutorial-text">returns position in ???</p>
+<h5 id="-getnormalisedposition-">.getNormalisedPosition()</h5>
+<p class = "tutorial-text">Useful for ending sample play back</p>
+<h5 id="-setposition-startpos-">.setPosition(startPos)</h5>
+<p class = "tutorial-text">useful for resetting a sound</p>
+<hr>
+<h3 id="maxidelayline">maxiDelayline</h3>
+<p class = "tutorial-text">A simple delay line</p>
+<h4 id="methods">methods</h4>
+<h5 id="-dl-inputsignal-delaytime-foldback-">.dl(inputSignal, delayTime, foldback)</h5>
+<p class = "tutorial-text">process a signal with delay</p>
+<ul>
+<li>inputSignal (any signal eg. output from an oscillator)</li>
+<li>delayTime (a value in milliseconds, max 2000)</li>
+<li>foldback (how much of the signal to feedback into the delay buffer - determines how long echoes last), between 0 and 1</li>
+</ul>
+<hr>
+<h3 id="maxiosc">maxiOsc</h3>
+<p class = "tutorial-text">An oscillator with methods for a number of waveforms</p>
+<h4 id="methods">methods</h4>
+<h5 id="-sinewave-frequency-">.sinewave(frequency)</h5>
+<p class = "tutorial-text">outputs a sine wave at the given frequency between -1.0 &amp; 1.0</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.sinewave(<span class="hljs-number">100</span>);
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-coswave-frequency-">.coswave(frequency)</h5>
+<p class = "tutorial-text">outputs a cosine wave at the given frequency between -1.0 &amp; 1.0</p>
+<h5 id="-triangle-frequency-">.triangle(frequency)</h5>
+<p class = "tutorial-text">outputs a triangle wave at the given frequency between -1.0 &amp; 1.0</p>
+<h5 id="-saw-frequency-">.saw(frequency)</h5>
+<p class = "tutorial-text">outputs a sawtooth wave at the given frequency between -1.0 &amp; 1.0</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.saw(<span class="hljs-number">100</span>);
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-sawn-frequency-">.sawn(frequency)</h5>
+<p class = "tutorial-text">outputs a band-limited sawtooth wave at the given frequency between -1.0 &amp; 1.0</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.sawn(<span class="hljs-number">100</span>);
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-square-frequency-">.square(frequency)</h5>
+<p class = "tutorial-text">outputs a square wave at the given frequency between -1.0 &amp; 1.0</p>
+<h5 id="-pulse-frequency-pulsewidth-">.pulse(frequency, pulsewidth)</h5>
+<p class = "tutorial-text">outputs a square wave at the given frequency and pulsewidth between -1.0 &amp; 1.0</p>
+<ul>
+<li>pulsewidth in the range 0 to 1</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.pulse(<span class="hljs-number">100</span>, <span class="hljs-number">0.4</span>);
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-phasor-frequency-">.phasor(frequency)</h5>
+<p class = "tutorial-text">outputs a linear ramp at the given frequency between 0.0 &amp; 1.0</p>
+<h5 id="-phasor-frequency-startphase-endphase-">.phasor(frequency, startPhase, endPhase)</h5>
+<p class = "tutorial-text">outputs a linear ramp at the given frequency between 0.0 &amp; 1.0</p>
+<ul>
+<li>startPhase and endPhase are the start and end values of the ramp, between 0.0 &amp; 1.0</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+    <span class="hljs-comment">//alarm sound</span>
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myWave2 = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.saw(<span class="hljs-number">200</span> + (myWave2.phasor(<span class="hljs-number">2</span>,<span class="hljs-number">0.2</span>,<span class="hljs-number">0.9</span>) * <span class="hljs-number">500</span>));
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-noise-">.noise()</h5>
+<p class = "tutorial-text">white noise</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.noise();
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-phasereset-phase-">.phaseReset(phase)</h5>
+<p class = "tutorial-text">reset the phase to a specific value</p>
+<ul>
+<li>phase (a value between 0 &amp; 1)</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+    <span class="hljs-comment">//this will create silence by combining two out of phase sines</span>
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    maxiAudio.init();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myWave2 = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    myWave2.phaseReset(<span class="hljs-number">0.5</span>);
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.output = myWave.sinewave(<span class="hljs-number">100</span>) + myWave2.sinewave(<span class="hljs-number">100</span>);
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><hr>
+<h3 id="maxienv">maxiEnv</h3>
+<p class = "tutorial-text">An adsr envelope.</p>
+<h4 id="methods">methods</h4>
+<h5 id="-setattack-time-">.setAttack(time)</h5>
+<ul>
+<li>time = milliseconds</li>
+</ul>
+<h5 id="-setdecay-time-">.setDecay(time)</h5>
+<ul>
+<li>time = milliseconds</li>
+</ul>
+<h5 id="-setsustain-level-">.setSustain(level)</h5>
+<ul>
+<li>level = a value between 0.0 and 1.0</li>
+</ul>
+<h5 id="-setrelease-time-">.setRelease(time)</h5>
+<ul>
+<li>time = milliseconds</li>
+</ul>
+<h5 id="-adsr-level-trigger-">.adsr(level, trigger)</h5>
+<ul>
+<li>level (the overall level of the envelope; everything will be scaled by this value)</li>
+<li>trigger (envelope will begin attack when set to 1.0 and release when set to 0.0)</li>
+</ul>
+<hr>
+<h3 id="maxifilter">maxiFilter</h3>
+<p class = "tutorial-text">A bunch of useful filter methods</p>
+<h4 id="methods">methods</h4>
+<h5 id="-lores-input-cutoff-resonance-">.lores(input, cutoff, resonance)</h5>
+<p class = "tutorial-text">A lowpass resonant filter. Returns the filtered frequency.</p>
+<ul>
+<li>input =  input signal</li>
+<li>cutoff = cutoff frequency in Hz</li>
+<li>resonance = a value between 0.0 &amp; 10.0</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myFilter = <span class="hljs-keyword">new</span> maximJs.maxiFilter();
+
+    maxiAudio.init();
+
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+        w = myWave.saw(<span class="hljs-number">100</span>);
+        w = myFilter.lores(w, <span class="hljs-number">1000</span> + (myLFO.sinewave(<span class="hljs-number">1</span>) * <span class="hljs-number">800</span>), <span class="hljs-number">3</span>);
+        <span class="hljs-keyword">this</span>.output =  w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-hires-input-cutoff-resonance-">.hires(input, cutoff, resonance)</h5>
+<p class = "tutorial-text">A highpass resonant filter. Returns the filtered frequency.</p>
+<ul>
+<li>input =  input signal</li>
+<li>cutoff = cutoff frequency in Hz</li>
+<li>resonance = a value between 0.0 &amp; 10.0</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myFilter = <span class="hljs-keyword">new</span> maximJs.maxiFilter();
+
+    maxiAudio.init();
+
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+        w = myWave.saw(<span class="hljs-number">100</span>);
+        w = myFilter.hires(w, <span class="hljs-number">1000</span> + (myLFO.sinewave(<span class="hljs-number">1</span>) * <span class="hljs-number">800</span>), <span class="hljs-number">3</span>);
+        <span class="hljs-keyword">this</span>.output =  w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-lopass-input-cutoff-">.lopass(input, cutoff)</h5>
+<p class = "tutorial-text">A one-pole low-pass filter, cutoff between 0 and 1</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myFilter = <span class="hljs-keyword">new</span> maximJs.maxiFilter();
+
+    maxiAudio.init();
+
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+        w = myWave.saw(<span class="hljs-number">100</span>);
+        w = myFilter.lopass(w, <span class="hljs-number">0.25</span> + (myLFO.sinewave(<span class="hljs-number">1</span>) * <span class="hljs-number">0.25</span>));
+        <span class="hljs-keyword">this</span>.output =  w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h5 id="-hipass-input-cutoff-">.hipass(input, cutoff)</h5>
+<p class = "tutorial-text">A one-pole high-pass filter, cutoff between 0 and 1</p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myFilter = <span class="hljs-keyword">new</span> maximJs.maxiFilter();
+
+    maxiAudio.init();
+
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+        w = myWave.saw(<span class="hljs-number">100</span>);
+        w = myFilter.hipass(w, <span class="hljs-number">0.5</span> + (myLFO.sinewave(<span class="hljs-number">1</span>) * <span class="hljs-number">0.25</span>));
+        <span class="hljs-keyword">this</span>.output =  w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><hr>
+<h3 id="maxisvf">maxiSVF</h3>
+<p class = "tutorial-text">A state variable filter, see <a href="http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised.pdf">http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised.pdf</a></p>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> myWave = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> myLFO2 = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> mySVF = <span class="hljs-keyword">new</span> maximJs.maxiSVF();
+
+    maxiAudio.init();
+
+    mySVF.setCutoff(<span class="hljs-number">200</span>);
+    mySVF.setResonance(<span class="hljs-number">4</span>);
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w=<span class="hljs-number">0</span>;
+        mySVF.setCutoff(<span class="hljs-number">2000</span> + (myLFO.sinewave(<span class="hljs-number">1</span>) * <span class="hljs-number">1800</span>));
+        mySVF.setResonance(<span class="hljs-number">7</span> + (myLFO.coswave(<span class="hljs-number">0.1</span>) * <span class="hljs-number">6</span>));
+        w = myWave.saw(<span class="hljs-number">100</span>);
+        w = mySVF.play(w, <span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>);
+        <span class="hljs-keyword">this</span>.output =  w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><h4 id="methods">methods</h4>
+<h5 id="-play-input-lowpassmix-highpassmix-bandpassmix-notchmix-">.play(input, lowPassMix, highPassMix, bandPassMix, notchMix)</h5>
+<ul>
+<li>input: a signal</li>
+<li>lowPassMix:  the amount of low pass filtering, between 0 and 1</li>
+<li>highPassMix:  the amount of high pass filtering, between 0 and 1</li>
+<li>bandPassMix:  the amount of band pass filtering, between 0 and 1</li>
+<li>notchMix:  the amount of notch filtering, between 0 and 1</li>
+</ul>
+<h5 id="-setcutoff-frequency-">.setCutoff(frequency)</h5>
+<p class = "tutorial-text">frequency between 20 and 20000, although this filter sounds best below 5000</p>
+<h5 id="-setresonance-amount-">.setResonance(amount)</h5>
+<p class = "tutorial-text">from 0 upwards, starts to ring from 2-3ish, cracks a bit around 10</p>
+<hr>
+<h3 id="maxiflanger">maxiFlanger</h3>
+<h4 id="methods">methods</h4>
+<h5 id="-flange-input-delay-feedback-speed-depth-">.flange(input, delay, feedback, speed, depth)</h5>
+<ul>
+<li>input: an input signal</li>
+<li>delay: delay time, in ms, max 2000</li>
+<li>feedback: between 0 and 1</li>
+<li>speed: lfo speed in Hz</li>
+<li>depth: between 0 and 1</li>
+</ul>
+<pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+
+    <span class="hljs-keyword">var</span> maxiAudio = <span class="hljs-keyword">new</span> maximJs.maxiAudio();
+    <span class="hljs-keyword">var</span> osc = <span class="hljs-keyword">new</span> maximJs.maxiOsc();
+    <span class="hljs-keyword">var</span> flanger = <span class="hljs-keyword">new</span> maximJs.maxiFlanger();
+    maxiAudio.init();
+
+    maxiAudio.play = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> w = <span class="hljs-number">0</span>;
+        w = osc.pulse(<span class="hljs-number">40</span>,<span class="hljs-number">0.1</span>);
+        w = flanger.flange(w, <span class="hljs-number">100</span>, <span class="hljs-number">0.8</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">0.8</span>);
+        <span class="hljs-keyword">this</span>.output = w;
+    };
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre><hr>
+<h3 id="maxifft">maxiFFT</h3>
+<h4 id="methods">methods</h4>
+<h5 id="-setup-fftsize-windowsize-hopsize-">.setup(fftSize, windowSize, hopSize)</h5>
+<p class = "tutorial-text">must be called before using the FFT</p>
+<ul>
+<li>fftSize = (A power of two, 1024, 512 .. etc)</li>
+<li>windowSize = half the fftSize</li>
+<li>hopSize = half the windowSize</li>
+</ul>
+<h5 id="-process-sig-">.process(sig)</h5>
+<p class = "tutorial-text">returns true if successful</p>
+<ul>
+<li>sig = signal in</li>
+</ul>
+<h5 id="-getmagnitude-index-">.getMagnitude(index)</h5>
+<p class = "tutorial-text">get the magnitude of a particular bin</p>
+<ul>
+<li>index = A number between 0 and the fftSize/2</li>
+</ul>
+<h5 id="-getmagnitudedb-index-">.getMagnitudeDB(index)</h5>
+<p class = "tutorial-text">get the decibels of a particular bin</p>
+<h5 id="-magstodb-">.magsToDb()</h5>
+<p class = "tutorial-text">perform the conversion on all bins</p>
+<hr>
+<h3 id="convert">convert</h3>
+<p class = "tutorial-text">A collection of conversion functions. Currently numbering one !</p>
+<h4 id="methods">methods</h4>
+<h5 id="-mtof-midi-">.mtof(midi)</h5>
+<p class = "tutorial-text">pass a midi value and its frequency is returned</p>
+<hr>
+<h3 id="maximix">maxiMix</h3>
+<p class = "tutorial-text">A multichannel mixer.</p>
+<h4 id="methods">methods</h4>
+<h5 id="-stereo-sig-outputarray-pan-">.stereo(sig, outputArray, pan)</h5>
+<p class = "tutorial-text">Makes a stereo mix.</p>
+<ul>
+<li>sig = inputsignal</li>
+<li>outputArray = VectorDbl array (see maxiTools)</li>
+<li>pan = a value between 0 &amp; 1</li>
+</ul>
+<hr>
+<h3 id="maxitools">maxiTools</h3>
+<h4 id="methods">methods</h4>
+<h5 id="-getarrayasvectordbl-inputarray-">.getArrayAsVectorDbl(inputArray)</h5>
+<p class = "tutorial-text">Returns the array as a VectorDbl object.  (Needed for maxiMix).</p>
+<h3 id="undocumented-classes">Undocumented classes</h3>
+<ul>
+<li>maxiArray</li>
+<li>maxiChorus</li>
+<li>maxiClock</li>
+<li>maxiDCBlocker</li>
+<li>maxiDistortion</li>
+<li>maxiDyn</li>
+<li>maxiEnvelope</li>
+<li><p class = "tutorial-text">maxiEnvelopeFollower (undefined)</p>
+</li>
+<li><p class = "tutorial-text">maxiFFTOctaveAnalyzer</p>
+</li>
+<li>maxiHats</li>
+<li>maxiIFFT</li>
+<li>maxiKick</li>
+<li>maxiLagExp</li>
+<li>maxiMFCC</li>
+<li><p class = "tutorial-text">maxiMap</p>
+</li>
+<li><p class = "tutorial-text">maxiSettings</p>
+</li>
+<li>maxiSnare</li>
+<li>maxiTools</li>
+</ul>
+
+{{/if}}
 {{#if isMMLL}}
 <p class = "tutorial-text">
 Machine listening is the attempt to make computers hear sound intelligently. We often emulate the human hearing system, though engineering may not mirror human anatomy, and may deviate from physiological function, including purely mathematical algorithms to extract some sort of further information from audio signals. The interest of the MIMIC project is in musical machine listening, that is, the computer understanding of musical audio signals, and the Musical Machine Listening Library introduced here (subsequently MMLL) is a javascript library to do just that, in the web browser.
@@ -22,7 +589,7 @@ The first embeded example here is a feature extractor from live audio. You can c
 The second embeded example is a live spectral view, showing the results of a Fast Fourier Transform of successive snapshots of the input signal. The power spectrum and phase spectrum are both plotted, in linear frequency range. Most of the activity will tend to be on the left of the plot of the power spectrum, for normal audio sources, whose spectral content tends to drop off for higher frequencies. You can choose the gain for the output to hear or not hear the source signal (the default is silence).
 </p>
 
-<p><iframe class = "embedded-tutorial-code" src={{concat url "/code/38c2887a-f8f3-5959-324c-7c0f176c0db7?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height:350px; overflow: hidden;">what?</iframe></p>
+<p class = "tutorial-text"><iframe class = "embedded-tutorial-code" src={{concat url "/code/38c2887a-f8f3-5959-324c-7c0f176c0db7?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height:350px; overflow: hidden;">what?</iframe></p>
 <p class = "tutorial-text">
 <a href = {{concat url "/code/38c2887a-f8f3-5959-324c-7c0f176c0db7"}}>Open Project</a>
 </p>
@@ -30,7 +597,7 @@ The second embeded example is a live spectral view, showing the results of a Fas
 The third embeded example is an onset detector, which reacts to percussive events in the input signal. If you are using live microphone near a speaker you may find headphones work best, to avoid feedback effects. An onset is indicated by a flashing colour change; changing the threshold adjusts the sensitivity of detection.
 </p>
 
-<p><iframe class = "embedded-tutorial-code" src={{concat url "/code/fcdf62d8-a47b-1ddf-f16a-9cd09b328a65?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 350px; overflow: hidden;">what?</iframe></p>
+<p class = "tutorial-text"><iframe class = "embedded-tutorial-code" src={{concat url "/code/fcdf62d8-a47b-1ddf-f16a-9cd09b328a65?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 350px; overflow: hidden;">what?</iframe></p>
 <p class = "tutorial-text">
 <a href = {{concat url "/code/fcdf62d8-a47b-1ddf-f16a-9cd09b328a65"}}>Open Project</a>
 </p>
