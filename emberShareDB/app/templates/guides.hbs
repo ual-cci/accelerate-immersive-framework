@@ -5,6 +5,10 @@
 <p class = "tutorial-text">
 maximJS is an implementation of the Maximilian audio library in javascript using emscripten to compile code from C++ to javascript/asm.js. It allows powerful audio sequencing, synthesis and analysis all in the browser.
 </p>
+<p class = "tutorial-text">
+First of all we're going to look at how to set up the audio context and load and play samples in a number of ways.
+</p>
+<h2 id="maxiaudio">Part 1: Samples</h2>
 <h3 id="maxiaudio">maxiAudio</h3>
 <p class = "tutorial-text">This the audio context. You must always have one to produce sound with maxiLib</p>
 <h4 id="methods">methods</h4>
@@ -17,7 +21,7 @@ maximJS is an implementation of the Maximilian audio library in javascript using
 <li>numChannels = 2, 4, or 8</li>
 </ul>
 <h5 id="-loadsample-sampleurl-maxisample-">.loadSample(sampleUrl, maxiSample)</h5>
-<p class = "tutorial-text">load a sample into a maxiSample object</p>
+<p class = "tutorial-text">load a sample from a maxiSample object</p>
 <h4 id="properties">properties</h4>
 <h5 id="-play">.play</h5>
 <p class = "tutorial-text">the function which is the play loop</p>
@@ -80,6 +84,10 @@ maxiAudio.loadSample(<span class="hljs-string">'cheese.wav'</span>, sample);
 <h5 id="-isready-">.isReady()</h5>
 <p class = "tutorial-text">returns true if sample is loaded</p>
 <hr>
+<h2 id="maxiaudio">Part 2: A Matter of Time and Space</h2>
+<p class = "tutorial-text">
+Now we can play load in samples and play them, we're going to look how to change their length and pitch independently.
+</p>
 <h3 id="maxitimestretch">maxiTimestretch</h3>
 <p class = "tutorial-text">plays a sample at different rates leaving pitch unchanged</p>
 <pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
@@ -203,6 +211,10 @@ maxiAudio.loadSample(<span class="hljs-string">'cheese.wav'</span>, sample);
 <li>foldback (how much of the signal to feedback into the delay buffer - determines how long echoes last), between 0 and 1</li>
 </ul>
 <hr>
+<h2>Part 3: Synthesis</h2>
+<p class = "tutorial-text">
+  As well as augmented samples, maximJS can also be used to create new sounds. Here we cover the essential sound synthesis methods.
+</p>
 <h3 id="maxiosc">maxiOsc</h3>
 <p class = "tutorial-text">An oscillator with methods for a number of waveforms</p>
 <h4 id="methods">methods</h4>
@@ -312,6 +324,10 @@ maxiAudio.loadSample(<span class="hljs-string">'cheese.wav'</span>, sample);
 
 </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 </code></pre><hr>
+<h2>Part 4: Envelopes and Filters</h2>
+<p class = "tutorial-text">
+  Once we've made some generators, we can start to shape the sound using filters and envelopes.
+</p>
 <h3 id="maxienv">maxiEnv</h3>
 <p class = "tutorial-text">An adsr envelope.</p>
 <h4 id="methods">methods</h4>
@@ -496,6 +512,10 @@ maxiAudio.loadSample(<span class="hljs-string">'cheese.wav'</span>, sample);
 
 </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 </code></pre><hr>
+<h2>Part 5: Spectral Analysis</h2>
+<p class = "tutorial-text">
+  maximJS can also be used to analyse and edit sound in the frequency domain
+</p>
 <h3 id="maxifft">maxiFFT</h3>
 <h4 id="methods">methods</h4>
 <h5 id="-setup-fftsize-windowsize-hopsize-">.setup(fftSize, windowSize, hopSize)</h5>
