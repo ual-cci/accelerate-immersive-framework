@@ -13,5 +13,9 @@ export default Controller.extend({
   isMMLL:computed('model', function() {
     console.log(this.get('model'))
     return this.get('model').id == "mmll"
-  })
+  }),
+  isEvolib:computed('model', function() {
+    console.log(this.get('model'))
+    return this.get('model').id == "evolib"
+  }),
 });

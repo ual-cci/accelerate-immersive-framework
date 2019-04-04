@@ -30,7 +30,7 @@
 {{#nav.dropdown class="dropdown-item" as |dd|}}
   {{#dd.toggle class = "nav-dropdown" }}guides <span  class="caret"></span>{{/dd.toggle}}
   {{#dd.menu as |ddm|}}
-    {{#each guides as |guide|}}
+    {{#each guides.guides as |guide|}}
     {{#ddm.item}}
         <a class="dropdown-item" {{action 'openGuide' guide.id}}>{{guide.name}}</a>
     {{/ddm.item}}
@@ -52,7 +52,7 @@
       </div>
     {{#if mediaQueries.isDocs}}
      {{#nav.dropdown as |dd|}}
-       {{#dd.toggle class = "nav-dropdown" }}my docs <span  class="caret"></span>{{/dd.toggle}}
+       {{#dd.toggle class = "nav-dropdown" }}my projects <span  class="caret"></span>{{/dd.toggle}}
        {{#dd.menu as |ddm|}}
          {{#each ownedDocuments as |doc|}}
          {{#ddm.item}}

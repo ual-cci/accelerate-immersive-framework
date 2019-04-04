@@ -177,6 +177,17 @@
           icon="glyphicon glyphicon-play"
           onClick=(action "playOrPause") }}
         {{/bs-button}}
+        {{#if isShowingCode}}
+        {{#bs-button
+          class = "clear-text-btn embedded-menu-button"
+          onClick=(action "hideCode")}}Hide Code
+        {{/bs-button}}
+        {{else}}
+        {{#bs-button
+          class = "clear-text-btn embedded-menu-button"
+          onClick=(action "showCode")}}Show Code
+        {{/bs-button}}
+        {{/if}}
       </div>
       {{/if}}
       {{#if mediaQueries.isDesktop}}

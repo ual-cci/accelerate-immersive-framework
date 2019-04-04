@@ -540,7 +540,7 @@ input[id="docName"]:-ms-input-placeholder {
   position: absolute;
   bottom:0;
   right:0;
-  width:80px;
+  width:210px;
   height: auto;
   background-color: rgba(0,0,0,0.8);
   z-index: 100;
@@ -563,7 +563,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 .embedded-menu-button {
   margin: 0 auto;
-  width:50px;
+  width:80px !important;
   height:30px
 }
 
@@ -1544,6 +1544,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #tutorial-container {
   width:60%;
+  min-width:700px;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 120px;
