@@ -172,7 +172,7 @@
       {{#if isEmbeddedWithCode}}
       <div id = "embedded-run-container">
         {{#bs-button
-          class = "clear-text-btn"
+          class = "clear-text-btn embedded-menu-button"
           id = "embedded-run-button"
           icon="glyphicon glyphicon-play"
           onClick=(action "playOrPause") }}
@@ -220,8 +220,11 @@
         <iframe id = "output-iframe" frameBorder="0" srcdoc={{renderedSource}}></iframe>
       </div>
       <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-
+        {{#if isEmbeddedWithCode}}
+        <div></div>
+        {{else}}
         {{#if showReadOnly}}
+        {{#if isShowingCode}}
         <div class = "code-warning-overlay" id = "read-only-overlay">
           <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
           {{#if session.isAuthenticated}}
@@ -233,6 +236,8 @@
           {{/bs-button}}
           {{/if}}
         </div>
+        {{/if}}
+        {{/if}}
         {{/if}}
         {{#if showConnectionWarning}}
           <div class = "code-warning-overlay" id = "connection-warning-container">

@@ -56,7 +56,7 @@ export default Controller.extend({
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:700,
+  aceW:"700px",
   savedVals:null,
   hideEditor:'false',
   embed:'false',
@@ -79,8 +79,8 @@ export default Controller.extend({
     this.updateDragPos();
     const aceW = this.get('aceW');
     const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
-    //console.log("updating ace style", aceW, display)
-    return htmlSafe("width: " + aceW + "px; display: " + display + ";");
+    console.log("updating ace style", aceW, display)
+    return htmlSafe("width: " + aceW + "; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
     return this.get('titleName').split("by")[0];
@@ -99,7 +99,8 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
+      const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) ||
+      (this.get("mediaQueries.isMobile")) ? "none":"inline"
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -140,7 +141,7 @@ export default Controller.extend({
 
     if(embedWithCode)
     {
-      this.hideCode();
+      this.hideCode(true);
     }
 
     $("#mimic-navbar").css("display", embed ? "none" : "block");
@@ -152,14 +153,16 @@ export default Controller.extend({
     this.get('cs').observers.push(this);
   },
   updateDragPos: function() {
-    const aceW = this.get('aceW');
+    const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
+    //const aceW = document.getElementById('ace-container').clientWidth;
+    console.log("drag")
     const drag = document.getElementById('drag-container')
-    if(drag)
+    if(!isEmpty(drag))
     {
       drag.style.right =(aceW - 31) + "px";
     }
     const tab = document.getElementById('project-tabs');
-    if(tab)
+    if(!isEmpty(tab))
     {
       tab.style.width = aceW + "px"
     }
@@ -1125,26 +1128,23 @@ export default Controller.extend({
     let tab = document.getElementById('project-tabs');
     if(tab)
     {
-      tab.style.width = aceW + "px"
+      tab.style.width = aceW
     }
   },
-  hideCode: function() {
-    const min = 30;
-    var hide = ()=> {
-      let aceW = this.get('aceW')
-      if(aceW > min)
-      {
-        setTimeout(()=> {
-          this.set('aceW', Math.max(min, aceW - 10));
-          hide();
-        }, 2);
-      }
-      else
-      {
-        this.set('isShowingCode', false);
-      }
-    }
-    hide();
+  hideCode: function(doHide) {
+    const container = document.getElementById('ace-container');
+    $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
+    $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
+
+    const tab = document.getElementById("project-tabs");
+    $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
+    $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
+    setTimeout(()=> {
+      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
+      const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
+      this.set('isShowingCode', !doHide);
+      this.set('aceW', doHide ? "30px" : w);
+    },200)
   },
   actions: {
     editorReady(editor) {
@@ -1464,7 +1464,7 @@ export default Controller.extend({
       if(this.get('isDragging'))
       {
         //console.log('mouseMove',e.target);
-        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
+        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')) + "px");
       }
     },
     mouseoverCodeTransport(e)
@@ -1502,26 +1502,10 @@ export default Controller.extend({
       this.set('renderedSource', "");
     },
     hideCode() {
-      this.hideCode();
+      this.hideCode(true);
     },
     showCode() {
-      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
-      //console.log("main-code-container width", max)
-      var show = ()=> {
-        let aceW = this.get('aceW')
-        if(aceW < max)
-        {
-          setTimeout(()=> {
-            this.set('aceW', Math.min(max, aceW + 10));
-            show();
-          }, 2);
-        }
-        else
-        {
-          this.set('isShowingCode',true);
-        }
-      }
-      show();
+      this.hideCode(false);
     },
 
     //OP PLAYBACK
