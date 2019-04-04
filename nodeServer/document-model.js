@@ -357,7 +357,7 @@ function startDocAPI(app)
     });
   });
 
-  app.get('/documents/ops/:id', (req,res) => {
+  app.get('/documents/ops/:id',/ app.oauth.authenticate(),(req,res) => {
     console.log("fetching ops for", contentCollectionName, req.params.id);
     const callback = function (err, results) {
       res.status(200).send({data:results});

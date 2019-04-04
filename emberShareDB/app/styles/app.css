@@ -536,17 +536,61 @@ input[id="docName"]:-ms-input-placeholder {
     background-color: white;
 }
 
-#read-only-overlay {
+#embedded-run-container {
   position: absolute;
-  top:0
-  left:0;
-  width:100%;
+  bottom:0;
+  right:0;
+  width:210px;
   height: auto;
   background-color: rgba(0,0,0,0.8);
   z-index: 100;
   text-align: center;
   padding-bottom: 10px;
   padding-top: 10px;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.embedded-tutorial-code {
+  border-width: 2px;
+  border-style: solid;
+  border-color: lightgray;
+}
+
+.embedded-menu-button:hover:focus {
+  background-color: inherit;
+}
+
+.embedded-menu-button {
+  margin: 0 auto;
+  width:80px !important;
+  height:30px
+}
+
+.code-warning-overlay {
+  position: absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height: auto;
+  z-index: 100;
+  text-align: center;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+#connection-warning-text {
+  color:white;
+  text-align: center;
+  height:40px;
+}
+
+#connection-warning-container {
+  background-color: rgba(255,0,0,0.8)
+}
+
+#read-only-overlay {
+  background-color: rgba(0,0,0,0.8);
 }
 
 #read-only-fork-button:hover:focus {
@@ -562,6 +606,24 @@ input[id="docName"]:-ms-input-placeholder {
 #read-only-text {
   text-align: center;
   color:white;
+}
+
+@keyframes code-hidden {
+  to {width: 30px;}
+}
+
+@keyframes code-showing {
+  to {width: 50vw;}
+}
+
+.hiding-code {
+  animation-name: code-hidden;
+  animation-duration: 0.2s;
+}
+
+.showing-code {
+  animation-name: code-showing;
+  animation-duration: 0.2s;
 }
 
 #ace-container {
@@ -1276,17 +1338,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border-color: black;
 }
 
-#connection-warning-text {
-  color:white;
-  text-align: center;
-}
-
-#connection-warning-container {
-  height:100px;
-  width: 100%;
-  background-color: rgba(255,0,0,0.8)
-}
-
 .tooltip {
   position: relative;
   display: inline-block;
@@ -1493,15 +1544,16 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #tutorial-container {
   width:60%;
+  min-width:700px;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 120px;
 }
 
 .tutorial-text {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 11pt;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 14pt;
 }
 
 .example-tile-hover {

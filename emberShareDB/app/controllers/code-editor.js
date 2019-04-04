@@ -50,12 +50,13 @@ export default Controller.extend({
   showAssets:false,
   showPreview:false,
   showSettings:false,
+  showCodeControls:true,
   showConnectionWarning:false,
   isShowingCode:true,
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:700,
+  aceW:"700px",
   savedVals:null,
   hideEditor:'false',
   embed:'false',
@@ -75,10 +76,11 @@ export default Controller.extend({
 
   //Computed parameters
   aceStyle: computed('aceW', function() {
-    const aceW = this.get('aceW');
     this.updateDragPos();
-    const display = this.get("mediaQueries.isDesktop") ? "inline":"none"
-    return htmlSafe("width: " + aceW + "px; display: " + display + ";");
+    const aceW = this.get('aceW');
+    const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
+    console.log("updating ace style", aceW, display)
+    return htmlSafe("width: " + aceW + "; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
     return this.get('titleName').split("by")[0];
@@ -89,9 +91,6 @@ export default Controller.extend({
   embedLink: computed('editLink', function() {
     return this.get('editLink') + "?embed=true";
   }),
-  displayLink: computed('editLink', function() {
-    return this.get('editLink') + "?hideEditor=true";
-  }),
   libraries: computed('library.libraryMap', function() {
     return this.get("library").libraryMap
   }),
@@ -100,7 +99,8 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = this.get("mediaQueries.isDesktop") && !this.get('isEmbedded') ? "inline":"none"
+      const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) ||
+      (this.get("mediaQueries.isMobile")) ? "none":"inline"
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -120,14 +120,16 @@ export default Controller.extend({
   initUI: function() {
     this.set('collapsed', true);
     const embed = this.get('embed') == "true";
-    this.set('isEmbedded', embed)
-    console.log("OUTOPUY", )
+    const embedWithCode = this.get('showCode') == "true";
+    this.set('isEmbedded', embed);
+    this.set('isEmbeddedWithCode', embedWithCode);
+    this.set('showCodeControls', !(embed && !embedWithCode));
     var iframe = document.getElementById("output-iframe");
     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     iframeDocument.body.style.padding = "0px";
     iframeDocument.body.style.margin = "0px";
-    console.log(iframe,iframeDocument)
-    if(embed) {
+    if(embed)
+    {
       document.getElementById("main-code-container").style.height="97vh"
       document.getElementById("main-code-container").style.width="100vw"
       document.getElementById("output-container").style["border-top-width"]=0;
@@ -137,21 +139,31 @@ export default Controller.extend({
       document.getElementById("main-site-container").style.border="none"
     }
 
+    if(embedWithCode)
+    {
+      this.hideCode(true);
+    }
+
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    const display = embed || this.get("mediaQueries.isMobile") ? "none":"inline"
+    const display = (embed && !embedWithCode) || this.get("mediaQueries.isMobile") ? "none":"inline"
     $("#ace-container").css("display", display);
     this.updateDragPos();
     this.get('cs').observers.push(this);
   },
   updateDragPos: function() {
-    const aceW = this.get('aceW');
-    let drag = document.getElementById('drag-container')
-    if(drag)
+    const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
+    //const aceW = document.getElementById('ace-container').clientWidth;
+    console.log("drag")
+    const drag = document.getElementById('drag-container')
+    if(!isEmpty(drag))
     {
       drag.style.right =(aceW - 31) + "px";
-      let tab = document.getElementById('project-tabs');
+    }
+    const tab = document.getElementById('project-tabs');
+    if(!isEmpty(tab))
+    {
       tab.style.width = aceW + "px"
     }
   },
@@ -315,29 +327,6 @@ export default Controller.extend({
         this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
       }).catch((err)=>reject(err));
     })
-  },
-  resetScrollPositions: function() {
-    var scrollPositions = {}
-    scrollPositions[this.get('model').id] = 0;
-    this.get('children').forEach((child)=> {
-      scrollPositions[child.id] = 0;
-    });
-    this.set('scrollPositions', scrollPositions);
-  },
-  updateScrollPosition: function() {
-    const range = this.getSelectionRange();
-    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
-    console.log("SCROLL POS", this.get('scrollPositions'))
-  },
-  scrollToSavedPosition: function() {
-    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
-    const editor = this.get('editor');
-    console.log("scrolling to ", pos)
-    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
-    editor.resize(true);
-    editor.gotoLine(pos);
-    editor.scrollToLine(pos, true, true, {})
-    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   selectRootDoc: function() {
     console.log("selectRootDoc")
@@ -508,15 +497,17 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    //console.log("did receive op", ops, source)
-    const embed = this.get('embed') == "true";
+    console.log("did receive op", ops, source)
+    const embed = this.get('isEmbedded');
+    const editor = this.get('editor');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
+        console.log("applying remote op")
         const deltas = this.get('codeParser').opTransform(ops, editor);
-        session.getDocument().applyDeltas(deltas);
+        editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
@@ -546,11 +537,10 @@ export default Controller.extend({
   submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-      const MAX_RETRIES = 5;
       let droppedOps = this.get('droppedOps');
       //let droppedOps = [1,2,3]
+      console.log("Submitting op")
       if(droppedOps.length > 0) {
-        this.set('showConnectionWarning', true);
         this.set('droppedOps', droppedOps.push(op));
         reject();
         return;
@@ -559,26 +549,35 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        sharedDBDoc.submitOp(op, (err) => {
-          if(err)
-          {
-            if(retry < MAX_RETRIES)
+        console.log("Submitting op on ws")
+        try
+        {
+          sharedDBDoc.submitOp(op, (err) => {
+            console.log("callback", err)
+            if(err)
             {
-              this.submitOp(op, retry + 1);
+              droppedOps.push(op);
+              this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work")
+              this.set('showConnectionWarning', true);
+              console.log("error submitting op (ws)")
+              reject(err);
+              return;
             }
             else
             {
-              droppedOps.push(op);
+              resolve();
+              return;
             }
-            reject(err);
-            return;
-          }
-          else
-          {
-            resolve();
-            return;
-          }
-        });
+          });
+        }
+        catch (err)
+        {
+          droppedOps.push(op);
+          this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          this.set('showConnectionWarning', true);
+          console.log("error submitting op (ws)",err)
+          reject(err);
+        }
       }
       else
       {
@@ -588,14 +587,9 @@ export default Controller.extend({
           return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
-          if(retry < MAX_RETRIES)
-          {
-            this.submitOp(op, retry + 1);
-          }
-          else
-          {
-            droppedOps.push(op);
-          }
+          droppedOps.push(op);
+          this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work");
+          this.set('showConnectionWarning', true);
           reject(err);
           return;
         });
@@ -618,7 +612,7 @@ export default Controller.extend({
   },
   doPlayOnLoad: function() {
     let model = this.get('model');
-    const embed = this.get('embed') == "true";
+    const embed = this.get('isEmbedded');
     if(embed) {
       return true;
     }
@@ -801,6 +795,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
+    console.log("session change")
     if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.editor;
@@ -867,8 +862,8 @@ export default Controller.extend({
   },
   handleWindowEvent: (e) => {
     const self = e.target.self;
-    const embed = self.get('embed') == "true";
-    if (e.origin === config.localOrigin && !embed && !isEmpty(e.data))
+    const drag = self.get('showCodeControls');
+    if (e.origin === config.localOrigin && drag && !isEmpty(e.data))
     {
       if(e.data[0].substring(0,2)=="p_")
       {
@@ -938,11 +933,34 @@ export default Controller.extend({
       });
     }
   },
+  resetScrollPositions: function() {
+    var scrollPositions = {}
+    scrollPositions[this.get('model').id] = 0;
+    this.get('children').forEach((child)=> {
+      scrollPositions[child.id] = 0;
+    });
+    this.set('scrollPositions', scrollPositions);
+  },
+  updateScrollPosition: function() {
+    const range = this.getSelectionRange();
+    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
+    //console.log("SCROLL POS", this.get('scrollPositions'))
+  },
+  scrollToSavedPosition: function() {
+    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
+    const editor = this.get('editor');
+    //console.log("scrolling to ", pos)
+    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
+    editor.resize(true);
+    editor.gotoLine(pos);
+    editor.scrollToLine(pos, true, true, {})
+    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
+  },
   skipOp:function(prev, rewind = false) {
-    const fn = ()=> {
+    const update = ()=> {
       const editor = this.get('editor');
       const doc = this.get('currentDoc').id;
-      const fn = (deltas) => {
+      const apply = (deltas) => {
         this.set('surpress', true);
         editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
@@ -950,21 +968,21 @@ export default Controller.extend({
       if(prev)
       {
         this.get('opsPlayer').prevOp(editor, rewind)
-        .then((deltas)=>{fn(deltas)});
+        .then((deltas)=>{apply(deltas)});
       }
       else
       {
         this.get('opsPlayer').nextOp(editor, rewind)
-        .then((deltas)=>{fn(deltas)});
+        .then((deltas)=>{apply(deltas)});
       }
     }
     if(this.get('opsPlayer').atHead())
     {
-      this.updateSourceFromSession().then(fn).catch((err)=>{console.log(err)})
+      this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
     }
     else
     {
-      fn()
+      update();
     }
   },
   updateSavedVals: function()
@@ -1020,6 +1038,7 @@ export default Controller.extend({
     {
       const fn = () => {
         this.get('opsPlayer').reset(doc.id);
+        this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
         this.set('renderedSource',"");
         const sharedDBDoc = this.get('sharedDBDoc');
@@ -1088,23 +1107,44 @@ export default Controller.extend({
     })();
   },
   updatePlayButton: function() {
-    let button = document.getElementById("code-play-btn");
-    if(!this.get('doPlay'))
-    {
-      $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+    let update = (button)=> {
+      if(!isEmpty(button))
+      {
+        if(!this.get('doPlay'))
+        {
+          $(button).find(".glyphicon").removeClass("glyphicon-play").addClass("glyphicon-pause");
+        }
+        else
+        {
+          $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
+        }
+      }
     }
-    else
-    {
-      $(button).find(".glyphicon").removeClass("glyphicon-pause").addClass("glyphicon-play");
-    }
+    update(document.getElementById("code-play-btn"));
+    update(document.getElementById("embedded-run-button"));
   },
   updateTabbarLocation: function() {
     const aceW = this.get('aceW');
     let tab = document.getElementById('project-tabs');
     if(tab)
     {
-      tab.style.width = aceW + "px"
+      tab.style.width = aceW
     }
+  },
+  hideCode: function(doHide) {
+    const container = document.getElementById('ace-container');
+    $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
+    $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
+
+    const tab = document.getElementById("project-tabs");
+    $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
+    $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
+    setTimeout(()=> {
+      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
+      const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
+      this.set('isShowingCode', !doHide);
+      this.set('aceW', doHide ? "30px" : w);
+    },200)
   },
   actions: {
     editorReady(editor) {
@@ -1210,12 +1250,9 @@ export default Controller.extend({
         let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
                       this.get('documentService').forkDoc(model.id, this.get('children'))];
         Promise.all(actions).then(()=>{
-          this.get('store').query('document', {
-            filter: {search: currentUser, page: 0, owner:currentUser, sortBy:'date'}
-          }).then((documents) => {
-            this.get('cs').log("new doc created", documents);
-            this.get('sessionAccount').updateOwnedDocuments();
-            this.transitionToRoute('code-editor',documents.firstObject.documentId);
+          this.get('sessionAccount').updateOwnedDocuments().then(()=> {
+            console.log("owneddocs", this.get('sessionAccount').ownedDocuments);
+            this.transitionToRoute('code-editor',this.get('sessionAccount').ownedDocuments.firstObject.id);
           }).catch((err)=>{
             this.set('feedbackMessage',err.errors[0]);
           });
@@ -1400,7 +1437,7 @@ export default Controller.extend({
 
     //MOUSE LISTENERS
     mouseDown(e) {
-      //this.get('cs').log('mouseDown',e.target);
+      //console.log('mouseDown',e.target);
       this.set('isDragging', true);
       const startWidth = document.querySelector('#ace-container').clientWidth;
       const startX = e.clientX;
@@ -1414,7 +1451,7 @@ export default Controller.extend({
       overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
-      //this.get('cs').log('mouseup',e.target);
+      //console.log('mouseup',e.target);
       this.set('isDragging', false);
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
@@ -1426,9 +1463,8 @@ export default Controller.extend({
     mouseMove(e) {
       if(this.get('isDragging'))
       {
-        //this.get('cs').log('mouseMove',e.target);
-
-        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')));
+        //console.log('mouseMove',e.target);
+        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')) + "px");
       }
     },
     mouseoverCodeTransport(e)
@@ -1466,41 +1502,10 @@ export default Controller.extend({
       this.set('renderedSource', "");
     },
     hideCode() {
-      const min = 30;
-      var hide = ()=> {
-        let aceW = this.get('aceW')
-        if(aceW > min)
-        {
-          setTimeout(()=> {
-            this.set('aceW', Math.max(min, aceW - 10));
-            hide();
-          }, 2);
-        }
-        else
-        {
-          this.set('isShowingCode', false);
-        }
-      }
-      hide();
+      this.hideCode(true);
     },
     showCode() {
-      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
-      console.log("main-code-container width", max)
-      var show = ()=> {
-        let aceW = this.get('aceW')
-        if(aceW < max)
-        {
-          setTimeout(()=> {
-            this.set('aceW', Math.min(max, aceW + 10));
-            show();
-          }, 2);
-        }
-        else
-        {
-          this.set('isShowingCode',true);
-        }
-      }
-      show();
+      this.hideCode(false);
     },
 
     //OP PLAYBACK

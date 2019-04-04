@@ -9,7 +9,7 @@ export default Service.extend({
   cs:inject('console'),
   ops: null,
   opsToApply: null,
-  ptr: 0,
+  ptr:0,
   prevDir: null,
   doc:null,
   atHead() {

@@ -143,12 +143,6 @@
       {{/if}}
     </div>
   {{/if}}
-  {{#if showConnectionWarning}}
-    <div id = "connection-warning-container">
-         <p id = connection-warning-text> Warning: connection issues mean that the autosave function has ceased working.
-           We recommend you reload the site to avoid loosing work</p>
-    </div>
-  {{/if}}
   {{#if mediaQueries.isDesktop}}
     {{tokenfield-input
       tokens=model.tags
@@ -175,51 +169,74 @@
     {{/if}}
     {{/if}}
     <div id = "main-code-container">
-      {{#if mediaQueries.isDesktop}}
-      {{#if isEmbedded}}
-      <div></div>
-      {{else}}
-      <div id = "drag-container">
+      {{#if isEmbeddedWithCode}}
+      <div id = "embedded-run-container">
+        {{#bs-button
+          class = "clear-text-btn embedded-menu-button"
+          id = "embedded-run-button"
+          icon="glyphicon glyphicon-play"
+          onClick=(action "playOrPause") }}
+        {{/bs-button}}
         {{#if isShowingCode}}
-          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+        {{#bs-button
+          class = "clear-text-btn embedded-menu-button"
+          onClick=(action "hideCode")}}Hide Code
+        {{/bs-button}}
         {{else}}
-          {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+        {{#bs-button
+          class = "clear-text-btn embedded-menu-button"
+          onClick=(action "showCode")}}Show Code
+        {{/bs-button}}
         {{/if}}
-        <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-          {{#if isShowingCode}}
-          <div id = "playback-container">
-            {{ops-player
-              onSkip = (action 'skipOp')
-              onPlay = (action 'playOps')
-              onRewind = (action 'rewindOps')
-              onPause = (action 'pauseOps')
-              isPlaying = isPlayingOps
-            }}
-            {{#bs-button
-              class = "clear-btn"
-              icon="glyphicon glyphicon-zoom-in"
-              onClick=(action "zoomIn")}}
-            {{/bs-button}}
-            {{#bs-button
-              class = "clear-btn"
-              icon="glyphicon glyphicon-zoom-out"
-              onClick=(action "zoomOut")}}
-            {{/bs-button}}
-          </div>
-          {{/if}}
-        </div>
+      </div>
       {{/if}}
-
+      {{#if mediaQueries.isDesktop}}
+        {{#if showCodeControls}}
+        <div id = "drag-container">
+          {{#if isShowingCode}}
+            {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+          {{else}}
+            {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+          {{/if}}
+          <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
+            {{#if isShowingCode}}
+            {{#if isEmbeddedWithCode}}
+            <div></div>
+            {{else}}
+            <div id = "playback-container">
+              {{ops-player
+                onSkip = (action 'skipOp')
+                onPlay = (action 'playOps')
+                onRewind = (action 'rewindOps')
+                onPause = (action 'pauseOps')
+                isPlaying = isPlayingOps
+              }}
+              {{#bs-button
+                class = "clear-btn"
+                icon="glyphicon glyphicon-zoom-in"
+                onClick=(action "zoomIn")}}
+              {{/bs-button}}
+              {{#bs-button
+                class = "clear-btn"
+                icon="glyphicon glyphicon-zoom-out"
+                onClick=(action "zoomOut")}}
+              {{/bs-button}}
+            </div>
+            {{/if}}
+            {{/if}}
+          </div>
+        {{/if}}
       {{/if}}
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" frameBorder="0" srcdoc={{renderedSource}}></iframe>
       </div>
       <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <!-- <div id = "code-transport-tracking-area" onmouseover={{action "mouseoverCodeTransport"}} ></div>
-        <div id = "code-transport-container" onmouseleave={{action "mouseoutCodeTransport"}}>
-        </div> -->
+        {{#if isEmbeddedWithCode}}
+        <div></div>
+        {{else}}
         {{#if showReadOnly}}
-        <div id = "read-only-overlay">
+        {{#if isShowingCode}}
+        <div class = "code-warning-overlay" id = "read-only-overlay">
           <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
           {{#if session.isAuthenticated}}
           {{#bs-button
@@ -231,18 +248,26 @@
           {{/if}}
         </div>
         {{/if}}
-          {{ember-ace
-            minLines = 40
-            maxLines = 10000
-            value=value
-            higglightActiveLine = true
-            ready=(action 'editorReady')
-            theme='ace/theme/monokai'
-            enableDefaultAutocompletion=true
-            enableLiveAutocompletion=true
-            enableBasicAutocompletion=true
-            suggestCompletions = (action 'suggestCompletions')
-          }}
+        {{/if}}
+        {{/if}}
+        {{#if showConnectionWarning}}
+          <div class = "code-warning-overlay" id = "connection-warning-container">
+               <p id = "connection-warning-text"> {{connectionWarning}}</p>
+          </div>
+        {{/if}}
+
+        {{ember-ace
+          minLines = 40
+          maxLines = 10000
+          value=value
+          higglightActiveLine = true
+          ready=(action 'editorReady')
+          theme='ace/theme/monokai'
+          enableDefaultAutocompletion=true
+          enableLiveAutocompletion=true
+          enableBasicAutocompletion=true
+          suggestCompletions = (action 'suggestCompletions')
+        }}
         </div>
       </div>
       {{#if mediaQueries.isDesktop}}

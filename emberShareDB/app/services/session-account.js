@@ -21,7 +21,7 @@ export default Service.extend({
       }
       let userID = this.get('currentUserId');
       const filter = {
-        filter:{search:currentUser, page:0, currentUser:userID}
+        filter:{search:currentUser, page:0, currentUser:userID, sortBy:"date"}
       }
       this.get('store').query('document', filter).then((results) => {
         var myDocs = results.map(function(doc){
