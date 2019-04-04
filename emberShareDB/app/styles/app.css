@@ -1579,5 +1579,8 @@ input[id="searchTerm"]:-ms-input-placeholder {
   width:100%;
   height:100%;
   font-size: 20pt;
+  overflow:hidden;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

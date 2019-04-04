@@ -78,7 +78,7 @@ export default Controller.extend({
   aceStyle: computed('aceW', function() {
     this.updateDragPos();
     const aceW = this.get('aceW');
-    const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) || this.get("mediaQueries.isMobile") ? "none":"inline"
+    const display = this.get('showCodeControls') ? "inline":"none";
     console.log("updating ace style", aceW, display)
     return htmlSafe("width: " + aceW + "; display: " + display + ";");
   }),
@@ -99,8 +99,7 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = (this.get('isEmbedded') && !this.get('isEmbeddedWithCode')) ||
-      (this.get("mediaQueries.isMobile")) ? "none":"inline"
+      const display = this.get('showCodeControls') ? "inline":"none"
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -123,7 +122,7 @@ export default Controller.extend({
     const embedWithCode = this.get('showCode') == "true";
     this.set('isEmbedded', embed);
     this.set('isEmbeddedWithCode', embedWithCode);
-    this.set('showCodeControls', !(embed && !embedWithCode));
+    this.set('showCodeControls', !(embed && !embedWithCode) || ((this.get('mediaQueries').isDesktop) && !embedWithCode));
     var iframe = document.getElementById("output-iframe");
     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     iframeDocument.body.style.padding = "0px";
@@ -147,7 +146,7 @@ export default Controller.extend({
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    const display = (embed && !embedWithCode) || this.get("mediaQueries.isMobile") ? "none":"inline"
+    const display = this.get('showCodeControls') ? "inline":"none"
     $("#ace-container").css("display", display);
     this.updateDragPos();
     this.get('cs').observers.push(this);
