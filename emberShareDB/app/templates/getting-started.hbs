@@ -14,10 +14,12 @@ In this advanced example, we'll show you how to
 <p class = "tutorial-text">
 Lets start by making a new document
 </p>
+<h2>Part 1: Using MIMIC Libraries</h2>
 <p class = "tutorial-text">
 Next select the briefcase icon in the control panel and select maxiLib. This should insert a script tag in the &lt;head&gt; that will inlcude the MaxiLib JS Audio DSP library. MIMIC hosts several libraries that are either commonly used or developed specially for the site that are easily insertable this way.
 </p>
 <img class = "tutorial-img" src = {{concat url "add-library.gif"}}/>
+<h2>Part 2: Uploading Media</h2>
 <p class = "tutorial-text">
 Next we are going to upload an audio sample. Find one on your computer, either a full track, or a short loop will work best. Select the file icon and find your file and upload. When finished, you will be able to use your track by simply referring to it its name in the code.
 </p>
@@ -42,6 +44,7 @@ maxiAudio.play = function() {
 <p class = "tutorial-text">
 When you hit run, you will hear your audio looped.
 </p>
+<h2>Part 3: Live Coding</h2>
 <p class = "tutorial-text">
 In a MIMIC project, you are able to reevaluate new code without rerunning the whole project. So insert this code
 </p>
@@ -55,6 +58,7 @@ rate = -1
 Move your cursor to the line and hit Shift+Enter. Your music should start playing backwards. You can now keep changing the value and rerunning that line in the same way without interuptting the sound.
 </p>
 <img class = "tutorial-img" src = {{concat url "livecode.gif"}}/>
+<h2>Part 4: Importing External Libraries (and Recording Yourself 😲)</h2>
 <p class = "tutorial-text">
 Now you can make sweet music, live, we want to record the performance. To do this we will use the RecorderJS library. First, clone the <a href = "https://github.com/mattdiamond/Recorderjs">repository</a>. In order to use the library, we will upload it in the same way as the audio file. Click the file icon and find the file recorder.js in "Recorderjs-master/dist/" and upload.
 </p>
@@ -103,18 +107,20 @@ Play round with the rate and all your output will be recorded. When you want to 
 <h1>Getting Started</h1>
 <p class = "tutorial-text">This guide will walk you through setting up your first project on MIMIC.
 </p>
+<h2>Part 1: Make an Account</h2>
 <p class = "tutorial-text">You will need to make an account to create your own projects. Select "login" in the top right hand corner to do so.
 </p>
 <p class = "tutorial-text">Once you have an account, make a new project by going to the projects page, entering a name and clicking "create"
 </p>
 <img class = "tutorial-img" src = {{concat url "createdoc.gif"}}/>
+<h2>Part 2: Use Some HTML</h2>
 <p class = "tutorial-text">Your projects consists of a code editor (right) and a display window (left).
 </p>
 <p class = "tutorial-text">The code editor shows your root document html which is evaluated into the display window.
 </p>
 <img class = "tutorial-img" src = {{concat url "new-project.png"}}/>
 <p class = "tutorial-text">Type the following html into the body to of the document and click the play button in the control bar. You should see the button appear in the display window </p>
-
+<h2>Part 2: Bringin' in Javascript</h2>
 <pre>
   <code>
 &lt;button onclick="myFunction()"&gt;Click me&lt;/button&gt;
@@ -133,6 +139,7 @@ let myFunction = ()=> {
 Pause and play the code again and when you click the button, you should see "hello world" print out in the console at the bottom of the page.
 </p>
 <img class = "tutorial-img" src = {{concat url "console.png"}}/>
+<h2>Part 3: CSS and Tabs</h2>
 <p class = "tutorial-text">
 Now were going to add some CSS to liven this button up abit. Instead of filling out our document with style tags, we're going to create a new tab to hold all our CSS.
 </p>
@@ -158,6 +165,7 @@ Run the code. Your button doesnt change! This is because we need to tell the mai
 <p class = "tutorial-text">
 Now when you run the code your button title should be red. Fierce.
 </p>
+<h2>Part 4: Javascript and Tabs</h2>
 <p class = "tutorial-text">
 You can also separate out javascript code. so we are going to make a new tab called "printer" and copy across the button handling code. Now delete the script tag and the code within it from the main document and insert the following code to the header
 </p>
