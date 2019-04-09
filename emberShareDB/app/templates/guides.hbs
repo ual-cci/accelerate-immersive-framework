@@ -1,6 +1,107 @@
 {{#if isGuide}}
 <div id = "tutorial-container">
 <h1> Guide to {{model.name}} </h1>
+{{#if isKadenze}}
+<p class = "tutorial-text">
+  Rebecca Fiebrink, a key part of the MIMIC team, runs the excellent Kadenze course Machine Learning for Musicians and Artists. It provides a ton of learning resources and is designed to teach machine learning in a way that will be useful to creative pracitioners.
+</p>
+<p class = "tutorial-text">
+Throughout the videos, Rebecca demonstrates machine learning concepts mainly using the Wekinator software, however, in this guide we will provide resources that can allow for follow up work to be completed on the MIMIC platform using the Rapidlib machine learning library. Following each Session (~45 mins of videos, depending on how fast you make Rebecca speak), we will provide a set of tasks to help you explore and cement the concepts covered.
+</p>
+<p class = "tutorial-text">
+  You can sign up for the course <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists/info" >here</a>. The course is free you do not require a certificate to finish or graded projects, and can be started at any time, and completed at any pace.
+</p>
+<h2 id="maxiaudio">Part 1: Introduction</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/introduction">Session 1: Introduction videos</a>
+</p>
+<p class = "tutorial-text">
+  For this first part we are just going to get comfortable with using RapidLib to take an input, in this case the mouse, record alongside some output and then train a model.
+</p>
+<p class = "tutorial-text">
+  <iframe class = "embedded-tutorial-code" src={{concat url "/code/8de3cbbe-b7c6-d79f-65fa-42fd1aa43a26?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 850px; overflow: hidden;">what?</iframe>
+<a href = {{concat url "/code/8de3cbbe-b7c6-d79f-65fa-42fd1aa43a26"}}>Open Project</a>
+</p>
+<p class = "tutorial-text">
+  Use the example below to randomise synth parameters until you find a sound you like. Move the square to somewhere on the screen, then click and hold to record samples. Then find more sounds and place them elsewhere on the screen and record again. When you have a few, hit "t" to train. Now when you move the mouse around you will be able to explore your newly trained sound space!
+</p>
+<p class = "tutorial-text">
+  Try clearing the dataset ("x"), changing the training examples to see how this changes the behaviour of the system after it is re-trained. Spend some time experimenting with the trained models to start to understand how the models are changed.
+</p>
+<p class = "tutorial-text">
+  ASIDE: You can complete this whole project largely using the embedded examples, however, if you want to take a closer look at the code you can check out how to use RapidLib <a href = "https://www.doc.gold.ac.uk/eavi/rapidmixapi.com/index.php/getting-started/">here</a>. It has an incredibly simple API.
+</p>
+<h2> Part 2: Classification, I </h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>/
+</p>
+<p class = "tutorial-text">
+  Having given you a brief feel for how machine learning can allow you to map inputs, such as a mouse, to control an output, such as synthesis parameters, we will now examine how decision boundaries are made in classification tasks.
+</p>
+<p class = "tutorial-text">
+  In the videos Rebecca used a program called the Classification Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, hold down a number key (e.g. 1) and move the mouse. This will input examples of that class as long as you are holding down that number key. The decision boundary will then be displayed.
+</p>
+<p class = "tutorial-text">
+  <iframe class = "embedded-tutorial-code" src={{concat url "/code/7f92bd4e-6d2b-181c-559f-4add766f2095?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
+<a href = {{concat url "/code/7f92bd4e-6d2b-181c-559f-4add766f2095"}}>Open Project</a>
+</p>
+<p class = "tutorial-text">
+  Try to choose a set of training examples that will draw the boundary on screen, with Class 1 on the left in red and Class 2 on the right in blue.
+</p>
+<img src = {{concat url "/images/decision1.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  Keep improving your boundary by changing your training examples, re-training, and re-drawing the decision boundary until you are happy with how it looks. If you need to start again, just pause and play the example.
+</p>
+<p class = "tutorial-text">
+  When actually making classifiers for a specific purpose, how close you need the decision boundary to match will depend on your intentions. We realise that it may not be possible or, or even desirable, for it to be perfect!
+</p>
+<p class = "tutorial-text">
+  Now try to make this decision boundary, with Class 1 in red and Class 2 in blue.
+</p>
+<img src = {{concat url "/images/decision2.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+</p>
+ASIDE: If you want to use a different and output method than the mouse, feel free to fork the project and create your own dataset using RapidLib. Make sure you have two inputs and one output and your dataset has the structure [{input:[x1,x2], output:[y1]}]. Then retrain your model and run explorer.updateOutput() to see your new decision boundary.
+<h2>Part 3: Regression</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/regression">Session 3: Regression videos</a>.
+</p>
+<p class = "tutorial-text">
+  In the videos Rebecca used a program called the Regression Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, click onto screen at any point. The X value denotes the input value, whereas the y value denotes the output value. You will then see the regression line drawn as you add values. Try to get a feel for what types of lines are capable and how they’re influenced by the training data.
+</p>
+<p class = "tutorial-text">
+  <iframe class = "embedded-tutorial-code" src={{concat url "/code/26ab5507-0d25-07eb-cb03-aaa93883765d?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
+<a href = {{concat url "/code/26ab5507-0d25-07eb-cb03-aaa93883765d"}}>Open Project</a>
+</p>
+<p class = "tutorial-text">
+Create a training dataset this way to produce the line below. Keep editing your data and/or algorithm until the regression line drawn by the Regression Explorer matches the one at right as closely as possible.
+</p>
+<img src = {{concat url "/images/decision3.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+Now, think about whether you might be able to create this same line using even fewer training examples. If you think it’s possible to create this line using fewer examples, delete your training dataset and give it a try!
+</p>
+<p class = "tutorial-text">
+Now try to fit this more complicated regression line. Keep editing your training data until you have something that basically matches this shape. Once you have this, try completing with fewer examples.
+</p>
+<img src = {{concat url "/images/decision4.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
+</p>
+<p class = "tutorial-text">
+  Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a webcam as input to control a granular synthesiser controlling position, attack and density.
+</p>
+<p class = "tutorial-text">
+  Set the properties of the synthesiser and record in relation to your webcam. Keep going until you can reliably contorl your output with your input.
+</p>
+<p class = "tutorial-text">
+  Next, train model to reliably access
+  <ul>
+<li>(0.0, 0.0, 0.0) (all models output 0 simultaneously)</li>
+<li>(1.0, 1.0, 1.0) (all models output 1 simultaneously)</li>
+<li>(0.5, 0.0, 1.0) (model 1 outputs 0.5, model 2 outputs 0, and model 3 outputs 1)</li>
+</ul>
+</p>
+{{/if}}
 {{#if isMaxim}}
 <p class = "tutorial-text">
 maximJS is an implementation of the Maximilian audio library in javascript using emscripten to compile code from C++ to javascript/asm.js. It allows powerful audio sequencing, synthesis and analysis all in the browser.

@@ -22,4 +22,8 @@ export default Controller.extend({
     console.log(this.get('model'))
     return this.get('model').id == "maximJS"
   }),
+  isKadenze:computed('model', function() {
+    console.log(this.get('model'))
+    return this.get('model').id == "kadenze"
+  }),
 });
