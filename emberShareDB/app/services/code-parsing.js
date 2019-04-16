@@ -33,7 +33,7 @@ export default Service.extend({
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         if(ptr == 0)
         {
-          this.get('cs').log("found start of <link");
+          console.log("found start of <link");
           searchIndex = index;
           tagStartIndex = searchIndex;
           preamble = source.substring(prevEnd, searchIndex);
@@ -44,7 +44,7 @@ export default Service.extend({
           linkStartIndex = searchIndex;
           tag = source.substring(tagStartIndex, searchIndex);
           found = true;
-          this.get('cs').log(tag);
+          console.log(tag);
           searchIndex = index + searchStrs[ptr].length;
           newSrc = newSrc + preamble;
           let added = false;
@@ -124,33 +124,18 @@ export default Service.extend({
         const attr = parsedTag.documentElement.attributes;
         for(let i = 0; i < attr.length; i++)
         {
-          this.get('cs').log(attr[i].nodeName)
+          //console.log(attr[i].nodeName)
           if(attr[i].nodeName == "src")
           {
             for(let j = 0; j < children.length; j++)
             {
-              this.get('cs').log(children[j].data.name, attr[i].nodeValue)
+              //console.log(children[j].data.name, attr[i].nodeValue)
               if(children[j].data.name == attr[i].nodeValue)
               {
                 newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
                 newSrc = newSrc + children[j].data.source;
                 added = true;
                 break;
-              }
-            }
-            if(!added)
-            {
-              for(let j = 0; j < assets.length; j++)
-              {
-                this.get('cs').log(assets[j].name, attr[i].nodeValue)
-                if(assets[j].name == attr[i].nodeValue)
-                {
-                  newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\"";
-                  newSrc = newSrc + " src=\""+ config.serverHost + "/asset/" + assets[j].fileId +"\"";
-                  newSrc = newSrc +">\n";
-                  added = true;
-                  break;
-                }
               }
             }
             break;
@@ -278,7 +263,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        this.get('cs').log("acorn couldnt parse script, probably src")
+        console.log("acorn couldnt parse script, probably src")
       }
       if(ops.length > 0)
       {
@@ -313,7 +298,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    //this.get('cs').log("SOURCE",newSrc);
+    //console.log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {
@@ -356,6 +341,7 @@ export default Service.extend({
     return scripts;
   },
   replaceAssets(source, assets, docId){
+    console.log("ORIGINAL", source)
     return new RSVP.Promise((resolve, reject)=> {
       const replaceAll = async ()=> {
         for(let i = 0; i < assets.length; i++)
@@ -368,13 +354,12 @@ export default Service.extend({
           console.log("replaceAssets",fileType)
 
           //If file is media replace with base64
-          if(fileType.includes("audio") ||
-          fileType.includes("image") ||
-          fileType.includes("video"))
+          if(this.get('assetService').isMedia(fileType))
           {
             if(!isEmpty(asset))
             {
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+              console.log("replaced base64")
               source = source.replace(new RegExp(toFind,"gm"),b64);
             }
             else
@@ -386,13 +371,16 @@ export default Service.extend({
               console.log("found record");
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
               source = source.replace(new RegExp(toFind,"gm"),b64);
+              console.log("replaced base64")
             }
           }
           else
           {
             //Else just use endpoint
             const url = config.serverHost + "/asset/" + docId + "/" + toFind
-            source = source.replace(new RegExp(toFind,"gm"),url);
+            console.log("replaced url", url)
+            source = source.replace(new RegExp(toFind,"gm"), url);
+            //console.log(source)
           }
         }
         resolve(source);

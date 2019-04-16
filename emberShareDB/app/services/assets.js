@@ -8,7 +8,7 @@ export default Service.extend({
   store:inject('store'),
   cs:inject('console'),
   deleteAsset(fileId) {
-    this.get('cs').log("deleteAsset for " + fileId);
+    console.log("deleteAsset for " + fileId);
     let doc = this.get('sessionAccount').currentDoc;
     let data = {documentId:doc};
     return new RSVP.Promise((resolve, reject) => {
@@ -18,13 +18,19 @@ export default Service.extend({
           data: data,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
-          this.get('cs').log("success deleting asset");
+          console.log("success deleting asset");
           resolve();
         }).catch((err) => {
-          this.get('cs').log("error",err);
+          console.log("error",err);
           reject(err);
         });
     });
+  },
+  isMedia: function(fileType)
+  {
+    return (fileType.includes("audio") ||
+    fileType.includes("image") ||
+    fileType.includes("video"))
   },
   fetchAsset: async function(asset, docId) {
     return new RSVP.Promise((resolve, reject) => {
@@ -35,7 +41,7 @@ export default Service.extend({
       const inStoreAsset = this.get('store').peekRecord('asset',fileId);
       if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
       {
-          this.get('cs').log("asset already preloaded:"+fileId);
+          console.log("asset already preloaded:"+fileId);
           resolve();
           return;
       }
@@ -43,7 +49,7 @@ export default Service.extend({
       var url = config.serverHost + "/asset/"+docId+"/"+fileName;
       xhr.onload = () => {
         if (xhr.readyState == 4 && xhr.status == 200) {
-          this.get('cs').log("fetched asset:"+fileId);
+          console.log("fetched asset:"+fileId);
           this.get('store').push({
             data:[{
               id:fileId,
@@ -60,7 +66,7 @@ export default Service.extend({
         }
       };
       xhr.onerror = () => {
-        this.get('cs').log("error fetching/converting asset:"+fileId);
+        console.log("error fetching/converting asset:"+fileId);
         reject("error fetching/converting asset:"+fileId);
       };
       xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -70,15 +76,18 @@ export default Service.extend({
 
   },
   preloadAssets(assets, docId) {
-    this.get('cs').log("preloadAssets:"+assets);
+    console.log("preloadAssets:"+assets);
     return new RSVP.Promise((resolve, reject) => {
       const getAllASync = async (c) => {
         for(const a of assets) {
-          await this.fetchAsset(a, docId).catch((err)=> {
-            console.log("ERROR IN FETCHING ASSET")
-            reject(err)
-            return
-          });
+          if(this.isMedia(a.fileType))
+          {
+            await this.fetchAsset(a, docId).catch((err)=> {
+              console.log("ERROR IN FETCHING ASSET")
+              reject(err)
+              return
+            });
+          }
         }
         resolve();
       };
@@ -86,7 +95,7 @@ export default Service.extend({
     })
   },
   _b64e(str) {
-    this.get('cs').log("converting to base64");
+    console.log("converting to base64");
     // from this SO question
     // http://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
       let CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
