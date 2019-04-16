@@ -113,7 +113,6 @@ function startAssetAPI(app)
 
       app.get('/asset/:docid/:filename', function(req, res) {
         var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
-        console.log("fetching asset", req.params.docid, req.params.filename);
         doc.fetch(function(err) {
           if (err || !doc.data) {
             res.status(404).send("database error making document");
@@ -121,18 +120,21 @@ function startAssetAPI(app)
           }
           else
           {
-            console.log("matching names", doc.data.assets);
+            let match = false;
             doc.data.assets.forEach((asset)=> {
-              console.log("comparing", asset.name, req.params.filename)
               if(asset.name == req.params.filename)
               {
-                console.log("match", asset.name, req.params.filename)
                 var readstream = gridFS.createReadStream({
                   _id: asset.fileId
                 });
                 readstream.pipe(res);
+                match = true;
               }
             });
+            if(!match)
+            {
+              res.status(404).send("asset not found");
+            }
           }
         });
       });

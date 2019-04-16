@@ -496,7 +496,7 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    console.log("did receive op", ops, source)
+    //console.log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
     const editor = this.get('editor');
     if(!embed && ops.length > 0)
@@ -538,7 +538,7 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       let droppedOps = this.get('droppedOps');
       //let droppedOps = [1,2,3]
-      console.log("Submitting op")
+      //console.log("Submitting op")
       if(droppedOps.length > 0) {
         this.set('droppedOps', droppedOps.push(op));
         reject();
@@ -548,11 +548,11 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        console.log("Submitting op on ws")
+        //console.log("Submitting op on ws")
         try
         {
           sharedDBDoc.submitOp(op, (err) => {
-            console.log("callback", err)
+            //console.log("callback", err)
             if(err)
             {
               droppedOps.push(op);
@@ -794,7 +794,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    console.log("session change")
+    //console.log("session change")
     if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.editor;
