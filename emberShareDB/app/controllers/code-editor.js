@@ -79,7 +79,7 @@ export default Controller.extend({
     this.updateDragPos();
     const aceW = this.get('aceW');
     const display = this.get('showCodeControls') ? "inline":"none";
-    console.log("updating ace style", aceW, display)
+    //console.log("updating ace style", aceW, display)
     return htmlSafe("width: " + aceW + "; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
@@ -109,7 +109,7 @@ export default Controller.extend({
     //this.hijackConsoleOutput()
   },
   initShareDB: function() {
-    this.get('cs').log('initShareDB');
+    console.log('initShareDB');
     this.set('leftCodeEditor', false);
     this.initWebSockets();
     this.initAceEditor();
@@ -154,7 +154,7 @@ export default Controller.extend({
   updateDragPos: function() {
     const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
     //const aceW = document.getElementById('ace-container').clientWidth;
-    console.log("drag")
+    //console.log("drag")
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
@@ -225,7 +225,7 @@ export default Controller.extend({
         socket = new ReconnectingWebSocket(config.wsHost)
         this.set('socket', socket);
         socket.onopen = () => {
-          this.get('cs').log("web socket open");
+          console.log("web socket open");
           if(this.get('leftCodeEditor'))
           {
             console.log("opened connection but had already left code editor")
@@ -240,15 +240,15 @@ export default Controller.extend({
           }
         };
         socket.onerror =  () => {
-          this.get('cs').log("web socket error");
+          console.log("web socket error");
           this.websocketError();
         }
         socket.onclose =  () =>  {
-          this.get('cs').log("websocket closed, calling error");
+          console.log("websocket closed, calling error");
           this.websocketError();
         }
         socket.onmessage = (event) =>  {
-          this.get('cs').log("web socket message", event);
+          console.log("web socket message", event);
           const d = JSON.parse(event.data);
           if(d.a == "init" && d.type == "http://sharejs.org/types/JSONv0")
           {
@@ -259,7 +259,7 @@ export default Controller.extend({
       }
       catch (err)
       {
-        this.get('cs').log("web sockets not available");
+        console.log("web sockets not available");
         this.websocketError();
       }
     }
@@ -308,7 +308,7 @@ export default Controller.extend({
     console.log("newDocSelected")
     return new RSVP.Promise((resolve, reject)=> {
       let doc = this.get('currentDoc');
-      this.get('cs').log("newDocSelected", docId);
+      console.log("newDocSelected", docId);
       this.set('isRoot', docId == this.get('model').id)
       if(!isEmpty(doc))
       {
@@ -331,7 +331,7 @@ export default Controller.extend({
     console.log("selectRootDoc")
     this.newDocSelected(this.get('model').id).then(()=> {
       this.updateTabbarLocation();
-      this.get('cs').log("loaded root doc, preloading assets");
+      console.log("loaded root doc, preloading assets");
       this.fetchChildren().then(()=> {
         this.resetScrollPositions();
         this.preloadAssets().then(()=> {
@@ -355,12 +355,12 @@ export default Controller.extend({
         let con = this.get('connection');
         if(isEmpty(con) && !isEmpty(socket))
         {
-          this.get('cs').log('connecting to ShareDB');
+          console.log('connecting to ShareDB');
           con = new ShareDB.Connection(socket);
         }
         if(isEmpty(con) || con.state == "disconnected" || isEmpty(socket))
         {
-          this.get('cs').log("failed to connect to ShareDB", con);
+          console.log("failed to connect to ShareDB", con);
           this.set('wsAvailable', false);
           this.fetchDoc(docId).then((doc)=>resolve(doc));
           return;
@@ -369,7 +369,7 @@ export default Controller.extend({
         const sharedDBDoc = con.get(config.contentCollectionName, docId);
         sharedDBDoc.subscribe((err) => {
           if (err) throw err;
-          this.get('cs').log("subscribed to doc");
+          console.log("subscribed to doc");
           if(!isEmpty(sharedDBDoc.data))
           {
             this.set('sharedDBDoc', sharedDBDoc);
@@ -387,7 +387,7 @@ export default Controller.extend({
   fetchDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record");
+        console.log("found record");
         resolve(doc);
       });
     })
@@ -398,7 +398,7 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       const session = editor.getSession();
-      this.get('cs').log("didReceiveDoc", doc.data.type);
+      console.log("didReceiveDoc", doc.data.type);
       if(doc.data.type == "js")
       {
         session.setMode("ace/mode/javascript");
@@ -416,7 +416,7 @@ export default Controller.extend({
       stats.views = parseInt(stats.views) + 1;
       this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
       .catch((err)=>{
-        this.get('cs').log('error updating doc', err);
+        console.log('error updating doc', err);
         reject(err);
         return;
       });
@@ -470,7 +470,7 @@ export default Controller.extend({
     this.set('tabs', tabs);
   },
   fetchChildren: function() {
-    this.get('cs').log("fetchChildren");
+    console.log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
       let model = this.get('model').data;
       if(model.children.length == 0)
@@ -483,13 +483,13 @@ export default Controller.extend({
       else
       {
         this.get('documentService').getChildren(model.children).then((data)=> {
-          this.get('cs').log("got children", data.children);
+          console.log("got children", data.children);
           this.set('children', data.children);
           this.setTabs(data.children);
           this.setParentData(data.parent.data);
           resolve();
         }).catch((err)=>{
-          this.get('cs').log(err);
+          console.log(err);
           reject(err);
         });
       }
@@ -514,7 +514,7 @@ export default Controller.extend({
         // this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
         //   toChange.set('assets',ops[0].oi);
         // });
-        // this.get('cs').log("didReceiveOp", "preloadAssets")
+        // console.log("didReceiveOp", "preloadAssets")
         // this.preloadAssets();
       }
       else if (!source && ops[0].p[0] == "newEval")
@@ -523,12 +523,12 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "children")
       {
-        this.get('cs').log(ops[0].oi)
+        console.log(ops[0].oi)
         this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
         .then(()=>{
           this.fetchChildren();
         }).catch((err)=>{
-          this.get('cs').log('error updating doc', err);
+          console.log('error updating doc', err);
         });
       }
     }
@@ -581,11 +581,11 @@ export default Controller.extend({
       else
       {
         this.get('documentService').submitOp(op, doc.id).then(() => {
-          this.get('cs').log("did sumbit op",op);
+          console.log("did sumbit op",op);
           resolve();
           return;
         }).catch((err) => {
-          this.get('cs').log("ERROR Not submitted");
+          console.log("ERROR Not submitted");
           droppedOps.push(op);
           this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work");
           this.set('showConnectionWarning', true);
@@ -618,7 +618,7 @@ export default Controller.extend({
     return model.data.dontPlay === "false" || !model.data.dontPlay;
   },
   preloadAssets: function() {
-    this.get('cs').log('preloadAssets')
+    console.log('preloadAssets')
     return new RSVP.Promise((resolve, reject)=> {
       let model = this.get('model');
       if(!isEmpty(model.data.assets))
@@ -686,7 +686,7 @@ export default Controller.extend({
         this.get('documentService').updateDoc(doc.id, "source", session.getValue())
         .then(()=>resolve())
         .catch((err)=>{
-          this.get('cs').log("error updateSourceFromSession - updateDoc", err);
+          console.log("error updateSourceFromSession - updateDoc", err);
           reject(err);
         });
       }
@@ -714,7 +714,7 @@ export default Controller.extend({
             document.getElementById("output-iframe").contentWindow.eval(combined);
             this.get('documentService').updateDoc(model.id, 'newEval', combined)
             .catch((err)=>{
-              this.get('cs').log('error updating doc', err);
+              console.log('error updating doc', err);
             });
 
           }
@@ -923,12 +923,12 @@ export default Controller.extend({
   deleteCurrentDocument: function() {
     let model = this.get('model');
     if (confirm('Are you sure you want to delete?')) {
-      this.get('cs').log("deleting root doc");
+      console.log("deleting root doc");
       this.get('documentService').deleteDoc(model.id).then(() => {
-        this.get('cs').log("completed deleting root doc and all children + assets");
+        console.log("completed deleting root doc and all children + assets");
         this.transitionToRoute('application');
       }).catch((err) => {
-        this.get('cs').log("error deleting doc", err);
+        console.log("error deleting doc", err);
       });
     }
   },
@@ -1002,7 +1002,7 @@ export default Controller.extend({
           this.get('documentService').updateDoc(this.get('model').id, 'savedVals', savedVals)
           .then(() => resolve()).catch((err) => reject(err))
           .catch((err)=>{
-            this.get('cs').log('error updating doc', err);
+            console.log('error updating doc', err);
             reject(err);
             return;
           });
@@ -1149,7 +1149,7 @@ export default Controller.extend({
     editorReady(editor) {
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
-      this.get('cs').log('editor ready', editor)
+      console.log('editor ready', editor)
       let text = "loading code.";
       this.set('titleName', text);
       this.clearTabs();
@@ -1191,7 +1191,7 @@ export default Controller.extend({
     tagsChanged(tags) {
       this.get('documentService').updateDoc(this.get('model').id, 'tags', tags)
       .catch((err)=>{
-        this.get('cs').log('error updating doc', err);
+        console.log('error updating doc', err);
       });
     },
     doEditDocName() {
@@ -1229,7 +1229,7 @@ export default Controller.extend({
           flags = flags + 1;
           this.get('documentService').updateDoc(model.id, 'flags', flags)
           .catch((err)=>{
-            this.get('cs').log('error updating doc', err);
+            console.log('error updating doc', err);
           });
         }
         else
@@ -1268,7 +1268,7 @@ export default Controller.extend({
       alert("Error"+err);
     },
     assetProgress(e) {
-      this.get('cs').log("assetProgress", e.percent);
+      console.log("assetProgress", e.percent);
       if(parseInt(e.percent) < 100)
       {
         $("#asset-progress").css("display", "block");
@@ -1280,7 +1280,7 @@ export default Controller.extend({
       }
     },
     assetUploaded(e) {
-      this.get('cs').log("assetComplete", e);
+      console.log("assetComplete", e);
       $("#asset-progress").css("display", "none");
       const doc = this.get('model');
       let newAssets = doc.data.assets;
@@ -1291,7 +1291,7 @@ export default Controller.extend({
         {
           this.refreshDoc();
         }
-      }).catch((err)=>{this.get('cs').log('ERROR updating doc with asset', err)});
+      }).catch((err)=>{console.log('ERROR updating doc with asset', err)});
     },
     assetUploadingComplete() {
       console.log("all uploads complete")
@@ -1319,9 +1319,9 @@ export default Controller.extend({
               {
                 this.refreshDoc();
               }
-            }).catch((err)=>{this.get('cs').log(err)});
+            }).catch((err)=>{console.log(err)});
           }).catch((err)=>{
-            this.get('cs').log('ERROR deleting asset', err, asset);
+            console.log('ERROR deleting asset', err, asset);
           });
         }
       }
@@ -1351,7 +1351,7 @@ export default Controller.extend({
         model.data.isPrivate = !model.data.isPrivate;
         this.get('documentService').updateDoc(model.id, 'isPrivate', model.data.isPrivate)
         .catch((err)=>{
-          this.get('cs').log('error updating doc', err);
+          console.log('error updating doc', err);
         });
       }
     },
@@ -1362,7 +1362,7 @@ export default Controller.extend({
         model.data.readOnly = !model.data.readOnly;
         this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly)
         .catch((err)=>{
-          this.get('cs').log('error updating doc', err);
+          console.log('error updating doc', err);
         });
       }
     },
@@ -1533,7 +1533,7 @@ export default Controller.extend({
 
     //TABS
     newTab(docId) {
-      this.get('cs').log('new tab', docId);
+      console.log('new tab', docId);
       this.fetchChildren().then(()=>{
         const children = this.get('model').children;
         const newChild = children[children.length-1]
@@ -1542,7 +1542,7 @@ export default Controller.extend({
       });
     },
     tabSelected(docId) {
-      this.get('cs').log('tab selected', docId);
+      console.log('tab selected', docId);
       this.updateSourceFromSession().then(()=> {
         this.updateScrollPosition();
         const doc = this.get("currentDoc");
@@ -1558,7 +1558,7 @@ export default Controller.extend({
           });
         }
       }).catch((err)=>{
-        this.get('cs').log('ERROR', err)
+        console.log('ERROR', err)
       });
     },
     tabDeleted(docId) {
@@ -1573,15 +1573,15 @@ export default Controller.extend({
               var newChildren = children.filter((c) => {return c != docId})
               this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
               .then(()=> {
-                this.get('cs').log("Did delete child from parent model", this.get('model').data.children);
+                console.log("Did delete child from parent model", this.get('model').data.children);
                 this.fetchChildren().then(()=>{
                   this.resetScrollPositions();
                 });
               }).catch((err)=> {
-                this.get('cs').log(err);
+                console.log(err);
               })
             }).catch((err)=> {
-              this.get('cs').log(err);
+              console.log(err);
             })
           });
         }
