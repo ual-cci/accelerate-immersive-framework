@@ -214,7 +214,7 @@ export default Service.extend({
           combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
           if(replaceAssets)
           {
-            this.get('codeParser').replaceAssets(combined, doc.data.assets)
+            this.get('codeParser').replaceAssets(combined, doc.data.assets, docId)
             .then((withAssets)=> {
               resolve(withAssets)
             })

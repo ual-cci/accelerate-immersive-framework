@@ -33,10 +33,10 @@ Throughout the videos, Rebecca demonstrates machine learning concepts mainly usi
 </p>
 <h2> Part 2: Classification, I </h2>
 <p class = "tutorial-text">
-  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>/
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>
 </p>
 <p class = "tutorial-text">
-  Having given you a brief feel for how machine learning can allow you to map inputs, such as a mouse, to control an output, such as synthesis parameters, we will now examine how decision boundaries are made in classification tasks.
+  Having given you a brief feel for how machine learning can allow you to map inputs, such as a mouse, to control an output, such as synthesis parameters, we will now examine how by incrementally building up our own datasets, we can sculpt the decision boundaries in classification tasks.
 </p>
 <p class = "tutorial-text">
   In the videos Rebecca used a program called the Classification Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, hold down a number key (e.g. 1) and move the mouse. This will input examples of that class as long as you are holding down that number key. The decision boundary will then be displayed.
@@ -60,14 +60,14 @@ Throughout the videos, Rebecca demonstrates machine learning concepts mainly usi
 </p>
 <img src = {{concat url "/images/decision2.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
+  ASIDE: If you want to use a different and output method than the mouse, feel free to fork the project and create your own dataset using RapidLib. Make sure you have two inputs and one output and your dataset has the structure [{input:[x1,x2], output:[y1]}]. Then retrain your model and run explorer.updateOutput() to see your new decision boundary.
 </p>
-ASIDE: If you want to use a different and output method than the mouse, feel free to fork the project and create your own dataset using RapidLib. Make sure you have two inputs and one output and your dataset has the structure [{input:[x1,x2], output:[y1]}]. Then retrain your model and run explorer.updateOutput() to see your new decision boundary.
 <h2>Part 3: Regression</h2>
 <p class = "tutorial-text">
   To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/regression">Session 3: Regression videos</a>.
 </p>
 <p class = "tutorial-text">
-  In the videos Rebecca used a program called the Regression Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, click onto screen at any point. The X value denotes the input value, whereas the y value denotes the output value. You will then see the regression line drawn as you add values. Try to get a feel for what types of lines are capable and how they’re influenced by the training data.
+In the videos Rebecca used a program called the Regression Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, click onto screen at any point. The X value denotes the input value, whereas the y value denotes the output value. You will then see the regression line drawn as you add values. Try to get a feel for what types of lines are capable and how they’re influenced by the training data.
 </p>
 <p class = "tutorial-text">
   <iframe class = "embedded-tutorial-code" src={{concat url "/code/26ab5507-0d25-07eb-cb03-aaa93883765d?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
@@ -85,17 +85,17 @@ Now try to fit this more complicated regression line. Keep editing your training
 </p>
 <img src = {{concat url "/images/decision4.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
-  As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
+As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
 </p>
 <p class = "tutorial-text">
-  Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a webcam as input to control a granular synthesiser controlling position, attack and density.
+Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a webcam face tracking as input to control a granular synthesiser controlling position, attack and density.
 </p>
 <p class = "tutorial-text">
-  Set the properties of the synthesiser and record in relation to your webcam. Keep going until you can reliably contorl your output with your input.
+Set the properties of the synthesiser and record in relation to your face on the webcam. Keep going until you can reliably contorl your output with your input.
 </p>
 <p class = "tutorial-text">
   Next, train model to reliably access
-  <ul>
+<ul>
 <li>(0.0, 0.0, 0.0) (all models output 0 simultaneously)</li>
 <li>(1.0, 1.0, 1.0) (all models output 1 simultaneously)</li>
 <li>(0.5, 0.0, 1.0) (model 1 outputs 0.5, model 2 outputs 0, and model 3 outputs 1)</li>

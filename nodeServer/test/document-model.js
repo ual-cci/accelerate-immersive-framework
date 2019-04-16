@@ -43,6 +43,14 @@ describe('doc delete', () => {
     });
   });
 
+  it('it should reject because no token', (done)=> {
+    chai.request(server)
+    .delete("/documents/"+docId)
+    .then((res) => {
+      res.should.have.status(401);
+      done();
+    });
+
   it('it should delete the document and it should no longer return in searches', (done)=> {
     chai.request(server)
     .delete("/documents/"+docId)
@@ -309,6 +317,15 @@ describe('documents searching', () => {
       })
     });
 
+    it('it should reject because no token', (done) => {
+      chai.request(server)
+      .get("/flagDoc/?documentId=" + docsAdded[0] + "&user=test-user")
+      .then((res) => {
+        res.should.have.status(401);
+        done();
+      });
+    });
+
     it('user should be able to flag a doc once, and ONLY once', (done) => {
       chai.request(server)
       .get("/flagDoc/?documentId=" + docsAdded[0] + "&user=test-user")
@@ -339,6 +356,16 @@ describe('documents searching', () => {
         token = t;
         done()
       })
+    });
+
+    it('it should reject because no token', (done)=> {
+      chai.request(server)
+      .post("/library")
+      .send({data:{lib:"mmll", documentId:docsAdded[0]}})
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
     });
 
     it('it should insert script tag linking to library', (done)=> {
@@ -376,6 +403,17 @@ describe('documents searching', () => {
       })
     });
 
+    it('it should reject because no token', (done)=> {
+      chai.request(server)
+      .post("/submitOp")
+      .send({op:{p: ["source", 0], si: "test"}, documentId:docsAdded[0]})
+      .end((err, res) => {
+        console.log(err, res.status);
+        res.should.have.status(401);
+        done();
+      });
+    });
+
     it('it should POST op if authorised', (done)=> {
       chai.request(server)
       .post("/submitOp")
@@ -395,12 +433,84 @@ describe('documents searching', () => {
     })
   });
 
+  describe('/POST asset then retrieve using docid/filename', () => {
+    before((done)=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        chai.request(server)
+        .post("/assetWithURL")
+        .set('Authorization', 'Bearer ' + token)
+        .send({mimetype:"audio/x-wav",name:"bear.wav", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+        .end((err, res) => {
+          let assetID = res.body.fileId;
+          chai.request(server)
+          .patch("/documents/" + docsAdded[0])
+          .send({data:{attributes:{assets:[{'name':"bear.wav","fileId":assetID,fileType:"audio/x-wav"}]}}})
+          .then((res) => {
+            done();
+          });
+        });
+      })
+    });
+
+    it('it should return 404 with bad docID', (done)=> {
+      chai.request(server)
+      .get("/asset/" + "this-is-not-as-id" + "/bear.wav")
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log("asset", err, res.status, res.body);
+        res.should.have.status(404);
+        done();
+      });
+    });
+
+    it('it should return 404 with bad filename', (done)=> {
+      chai.request(server)
+      .get("/asset/" + docsAdded[0] + "/this-is-not-a-filename.type")
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log("asset", err, res.status, res.body);
+        res.should.have.status(404);
+        done();
+      });
+    });
+
+    it('it should return an asset and 200', (done)=> {
+      chai.request(server)
+      .get("/asset/" + docsAdded[0] + "/bear.wav")
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log("asset", err, res.status, res.body);
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    })
+  });
+
   describe('/POST asset from URL then delete', () => {
     before((done)=> {
       userModelTest.getToken().then((t)=> {
         token = t;
         done()
       })
+    });
+
+    it('it should reject because no token', (done)=> {
+      chai.request(server)
+      .post("/assetWithURL")
+      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+      .end((err, res) => {
+        console.log(err, res.status, res.body);
+        res.should.have.status(401);
+        done();
+      });
     });
 
     it('it should return an asset ID and 200', (done)=> {

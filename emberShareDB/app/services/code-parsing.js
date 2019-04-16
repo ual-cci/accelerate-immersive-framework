@@ -355,7 +355,7 @@ export default Service.extend({
     }
     return scripts;
   },
-  replaceAssets(source, assets){
+  replaceAssets(source, assets, docId){
     return new RSVP.Promise((resolve, reject)=> {
       const replaceAll = async ()=> {
         for(let i = 0; i < assets.length; i++)
@@ -364,8 +364,13 @@ export default Service.extend({
           const toFind = assets[i].name;
           const fileType = assets[i].fileType;
           let asset = this.get('store').peekRecord('asset',fileId);
+
           console.log("replaceAssets",fileType)
-          if(fileType != "text/javascript")
+
+          //If file is media replace with base64
+          if(fileType.includes("audio") ||
+          fileType.includes("image") ||
+          fileType.includes("video"))
           {
             if(!isEmpty(asset))
             {
@@ -382,6 +387,12 @@ export default Service.extend({
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
               source = source.replace(new RegExp(toFind,"gm"),b64);
             }
+          }
+          else
+          {
+            //Else just use endpoint
+            const url = config.serverHost + "/asset/" + docId + "/" + toFind
+            source = source.replace(new RegExp(toFind,"gm"),url);
           }
         }
         resolve(source);
