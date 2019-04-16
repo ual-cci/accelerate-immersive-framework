@@ -355,7 +355,7 @@ export default Service.extend({
     }
     return scripts;
   },
-  replaceAssets(source, assets){
+  replaceAssets(source, assets, docId){
     return new RSVP.Promise((resolve, reject)=> {
       const replaceAll = async ()=> {
         for(let i = 0; i < assets.length; i++)
@@ -365,6 +365,8 @@ export default Service.extend({
           const fileType = assets[i].fileType;
           let asset = this.get('store').peekRecord('asset',fileId);
           console.log("replaceAssets",fileType)
+          const url = config.serverHost + "/asset/" + docId + "/"+toFind
+          source = source.replace(new RegExp(toFind,"gm"),url);
           if(fileType != "text/javascript")
           {
             if(!isEmpty(asset))

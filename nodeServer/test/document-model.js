@@ -395,6 +395,45 @@ describe('documents searching', () => {
     })
   });
 
+  describe('/POST asset then retrieve using docid/filename', () => {
+    before((done)=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        chai.request(server)
+        .post("/assetWithURL")
+        .set('Authorization', 'Bearer ' + token)
+        .send({mimetype:"audio/x-wav",name:"bear.wav", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+        .end((err, res) => {
+          let assetID = res.body.fileId;
+          chai.request(server)
+          .patch("/documents/" + docsAdded[0])
+          .send({data:{attributes:{assets:[{'name':"bear.wav","fileId":assetID,fileType:"audio/x-wav"}]}}})
+          .then((res) => {
+            done();
+          });
+        });
+      })
+    });
+
+    it('it should return an asset and 200', (done)=> {
+      chai.request(server)
+      .get("/asset/" + docsAdded[0] + "/bear.wav")
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log("asset", err, res.status);
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    })
+  });
+
   describe('/POST asset from URL then delete', () => {
     before((done)=> {
       userModelTest.getToken().then((t)=> {

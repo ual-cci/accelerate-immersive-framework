@@ -111,11 +111,30 @@ function startAssetAPI(app)
         });
       });
 
-      app.get('/asset/:id', function(req, res) {
-       var readstream = gridFS.createReadStream({
-          _id: req.params.id
-       });
-       readstream.pipe(res);
+      app.get('/asset/:docid/:filename', function(req, res) {
+        var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
+        console.log("fetching asset", req.params.docid, req.params.filename);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            console.log("matching names", doc.data.assets);
+            doc.data.assets.forEach((asset)=> {
+              console.log("comparing", asset.name, req.params.filename)
+              if(asset.name == req.params.filename)
+              {
+                console.log("match", asset.name, req.params.filename)
+                var readstream = gridFS.createReadStream({
+                  _id: asset.fileId
+                });
+                readstream.pipe(res);
+              }
+            });
+          }
+        });
       });
 
       app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
@@ -357,7 +376,7 @@ function startDocAPI(app)
     });
   });
 
-  app.get('/documents/ops/:id',/ app.oauth.authenticate(),(req,res) => {
+  app.get('/documents/ops/:id', app.oauth.authenticate(),(req,res) => {
     console.log("fetching ops for", contentCollectionName, req.params.id);
     const callback = function (err, results) {
       res.status(200).send({data:results});

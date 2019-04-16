@@ -26,7 +26,7 @@ export default Service.extend({
         });
     });
   },
-  fetchAsset: async function(asset) {
+  fetchAsset: async function(asset, docId) {
     return new RSVP.Promise((resolve, reject) => {
       console.log("fetching asset:"+asset);
       const fileId = asset.fileId;
@@ -40,7 +40,7 @@ export default Service.extend({
           return;
       }
       var xhr = new XMLHttpRequest();
-      var url = config.serverHost + "/asset/"+fileId;
+      var url = config.serverHost + "/asset/"+docId+"/"+fileName;
       xhr.onload = () => {
         if (xhr.readyState == 4 && xhr.status == 200) {
           this.get('cs').log("fetched asset:"+fileId);
@@ -69,12 +69,12 @@ export default Service.extend({
     })
 
   },
-  preloadAssets(assets) {
+  preloadAssets(assets, docId) {
     this.get('cs').log("preloadAssets:"+assets);
     return new RSVP.Promise((resolve, reject) => {
       const getAllASync = async (c) => {
         for(const a of assets) {
-          await this.fetchAsset(a).catch((err)=> {
+          await this.fetchAsset(a, docId).catch((err)=> {
             console.log("ERROR IN FETCHING ASSET")
             reject(err)
             return

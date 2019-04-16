@@ -640,7 +640,7 @@ export default Controller.extend({
           this.showFeedback(text);
         }, 500);
         this.set('preloadingInterval', interval);
-        this.get('assetService').preloadAssets(model.data.assets)
+        this.get('assetService').preloadAssets(model.data.assets, model.id)
         .then(()=>{
           this.showFeedback("");
           clearInterval(interval);
