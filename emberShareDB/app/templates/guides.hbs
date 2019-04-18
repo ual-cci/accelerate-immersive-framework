@@ -39,7 +39,7 @@ Throughout the videos, Rebecca demonstrates machine learning concepts mainly usi
   Having given you a brief feel for how machine learning can allow you to map inputs, such as a mouse, to control an output, such as synthesis parameters, we will now examine how by incrementally building up our own datasets, we can sculpt the decision boundaries in classification tasks.
 </p>
 <p class = "tutorial-text">
-  In the videos Rebecca used a program called the Classification Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, hold down a number key (e.g. 1) and move the mouse. This will input examples of that class as long as you are holding down that number key. The decision boundary will then be displayed.
+  In the videos Rebecca used a program called the Classification Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, hold down a number key (e.g. 1) and move the mouse (you may have to click inside the example first to bring it into focus). This will input examples of that class as long as you are holding down that number key. The decision boundary will then be displayed.
 </p>
 <p class = "tutorial-text">
   <iframe class = "embedded-tutorial-code" src={{concat url "/code/7f92bd4e-6d2b-181c-559f-4add766f2095?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
@@ -88,19 +88,49 @@ Now try to fit this more complicated regression line. Keep editing your training
 As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
 </p>
 <p class = "tutorial-text">
-Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a webcam face tracking as input to control a granular synthesiser controlling position, attack and density.
+Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a slider as input to control a granular synthesiser (borrowed from <a href = "http://www.zya.cc/granular">Zya</a>) where the outputs of the regression model are the position in the soundfile, the release on the envelope of the grains and the density (how frequently a new grain is triggered).
 </p>
 <p class = "tutorial-text">
-Set the properties of the synthesiser and record in relation to your face on the webcam. Keep going until you can reliably contorl your output with your input.
+  <iframe class = "embedded-tutorial-code" src={{concat url "/code/5d67faaa-e4c3-771a-f824-fe5c5b978ab6?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
+<a href = {{concat url "/code/5d67faaa-e4c3-771a-f824-fe5c5b978ab6"}}>Open Project</a>
 </p>
 <p class = "tutorial-text">
-  Next, train model to reliably access
+First, play around with the two parameters and click on different parts of the waveform, find some sounds you like. When you are ready to record, select the "Record" checkbox. From now on, whenever you play the synthesiser, your position in the sample, the release and density will be recorded, along with the input slider value. Record in some sounds you like, remembering to map each one to a different value on the input slider.
+</p>
+<p class = "tutorial-text">
+When you are ready to play, select the "Run" checkbox. This will train your model with the recorded dataset and now all 3 synthesiser parameters will be controlled by just the one value from the input slider. Keep recording examples until you can reliably control the output.
+</p>
+<p class = "tutorial-text">
+Next, train model to reliably access the following values. To clear your dataset, just pause and play the embedded code.
 <ul>
 <li>(0.0, 0.0, 0.0) (all models output 0 simultaneously)</li>
 <li>(1.0, 1.0, 1.0) (all models output 1 simultaneously)</li>
 <li>(0.5, 0.0, 1.0) (model 1 outputs 0.5, model 2 outputs 0, and model 3 outputs 1)</li>
 </ul>
 </p>
+<h2>Part 4: Classification II</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-ii">Session 4: Classification II videos</a>.
+</p>
+<p class = "tutorial-text">
+  For this part we are going to revisit the Classification Explorer but this time we are going to experiment with more than 2 classes, as well as more complication decision boundaries.
+</p>
+<p class = "tutorial-text">
+  <iframe class = "embedded-tutorial-code" src={{concat url "/code/7f92bd4e-6d2b-181c-559f-4add766f2095?embed=true&showCode=true"}} allow="microphone" scrolling="no" style="width: 100%; height: 440px; overflow: hidden;">what?</iframe>
+<a href = {{concat url "/code/7f92bd4e-6d2b-181c-559f-4add766f2095"}}>Open Project</a>
+</p>
+<p class = "tutorial-text">
+  By adding new training data, try to recreate the decision boundary below using the Classification Explorer. As you are doing this, think about
+  <ul>
+  <li>How the model improves (or not) as you add more examples.</li>
+  <li>How well the shape of the decision boundary the algorithm seems to want to make matches the boundary you are trying to make.</li>
+</ul>
+</p>
+<img src = {{concat url "/images/decision5.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  Now restart the explorer and try to enter data that will give the decision boundary below. Think back to the videos, what is significant about this particular boundary, in comparison to others we have tried?
+</p>
+<img src = {{concat url "/images/decision6.png"}} style = "width:500px;height:400px;"/>
 {{/if}}
 {{#if isMaxim}}
 <p class = "tutorial-text">
