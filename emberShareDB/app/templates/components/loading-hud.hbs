@@ -1,1 +1,10 @@
-{{yield}}
+<div id = "loading-container">
+  <div id = "loading-inner-container">
+    {{#if hideWheel}}
+    <div></div>
+    {{else}}
+      <div class="loading-wheel"></div>
+      {{/if}}
+    <p id = "loading-label">{{message}}</p>
+  </div>
+</div>

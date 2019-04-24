@@ -7,6 +7,6 @@ export default Service.extend({
     {id:"maximJS", name:"Making Music in the Browser with maximJS", url:config.localOrigin + "/guides/maximJS"},
     {id:"rapidLib", name:"Building Interactive Machine Learning Tools with RapidLib", url:config.localOrigin + "/guides/rapidlib"},
     {id:"kadenze", name:"Machine Learning for Musicians and Artists", url:config.localOrigin + "/guides/kadenze"},
-    {id:"evolib", name:"Evolutionary sound synthesis with Evolib", url:config.localOrigin + "/guides/evolib"}
+    {id:"evolib", name:"Evolutionary Sound Synthesis with Evolib", url:config.localOrigin + "/guides/evolib"}
   ]
 });

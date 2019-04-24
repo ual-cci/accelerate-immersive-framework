@@ -74,6 +74,9 @@ export default Controller.extend({
   scrollPositions:{},
   isRoot:true,
 
+  showHUD:true,
+  hudMessage:"Loading...",
+
   //Computed parameters
   aceStyle: computed('aceW', function() {
     this.updateDragPos();
@@ -422,11 +425,7 @@ export default Controller.extend({
       });
       console.log("CAN EDIT?", this.get('canEditDoc'))
       editor.setReadOnly(!this.get('canEditDoc'));
-      if(!isEmpty(this.get('loadingInterval')))
-      {
-        clearInterval(this.get('loadingInterval'))
-        this.set('loadingInterval', null);
-      }
+      this.set('showHUD', false);
       this.scrollToSavedPosition();
       this.set('titleName', doc.data.name + " by " + doc.data.owner);
       this.set('titleNoName', doc.data.name);
@@ -623,31 +622,16 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.data.assets))
       {
-        let text = "preloading assets.";
-        let interval = setInterval(()=>{
-          if(text=="preloading assets.")
-          {
-            text = "preloading assets.."
-          }
-          else if (text=="preloading assets..")
-          {
-            text = "preloading assets"
-          }
-          else if (text=="preloading assets")
-          {
-            text = "preloading assets."
-          }
-          this.showFeedback(text);
-        }, 500);
-        this.set('preloadingInterval', interval);
+        this.set("hudMessage", "Loading Assets");
+        this.set("showHUD", true);
         this.get('assetService').preloadAssets(model.data.assets, model.id)
         .then(()=>{
           this.showFeedback("");
-          clearInterval(interval);
+          this.set("showHUD", false);
           resolve();
         }).catch((err)=>{
           this.showFeedback("");
-          clearInterval(interval);
+          this.set("showHUD", false);
           reject(err)
         });
       }
@@ -705,6 +689,7 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
+        console.log("updateiframe", model.id)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
         .then((combined) => {
           this.get('cs').clear();
@@ -1134,7 +1119,7 @@ export default Controller.extend({
     const container = document.getElementById('ace-container');
     $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
-
+    this.set("isDragging", false);
     const tab = document.getElementById("project-tabs");
     $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
@@ -1143,32 +1128,16 @@ export default Controller.extend({
       const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
       this.set('isShowingCode', !doHide);
       this.set('aceW', doHide ? "30px" : w);
-    },200)
+    }, 200)
   },
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
       console.log('editor ready', editor)
-      let text = "loading code.";
-      this.set('titleName', text);
+      this.set("hudMessage", "Loading Code");
+      this.set("showHUD", true);
       this.clearTabs();
-
-      this.set('loadingInterval', setInterval(()=>{
-        if(text=="loading code.")
-        {
-          text = "loading code.."
-        }
-        else if (text=="loading code..")
-        {
-          text = "loading code"
-        }
-        else if (text=="loading code")
-        {
-          text = "loading code."
-        }
-        this.set('titleName', text);
-      }, 500));
       editor.setReadOnly(true);
       this.initShareDB();
     },
@@ -1411,8 +1380,7 @@ export default Controller.extend({
       const fn = () => {
         console.log("clean up")
         this.set('fetchingDoc', false);
-        clearInterval(this.get('preloadingInterval'))
-        clearInterval(this.get('loadingInterval'))
+        this.set('showHUD', false);
         this.showFeedback("");
         this.set('renderedSource',"");
         this.set('droppedOps', []);
