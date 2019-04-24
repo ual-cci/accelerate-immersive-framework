@@ -1607,7 +1607,8 @@ input[id="searchTerm"]:-ms-input-placeholder {
   border-top: 16px solid white;
   border-radius: 50%;
   max-width: 120px;
-  height: 120px;
+  max-height: 120px;
+  height: 50%;
   animation: spin 2s linear infinite;
   position:relative;
   margin: auto;

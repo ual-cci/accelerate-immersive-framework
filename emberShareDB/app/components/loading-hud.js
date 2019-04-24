@@ -1,5 +1,6 @@
 import Component from '@ember/component';
 
 export default Component.extend({
-  message:"Loading.."
+  message:"Loading..",
+  hideWheel:false
 });

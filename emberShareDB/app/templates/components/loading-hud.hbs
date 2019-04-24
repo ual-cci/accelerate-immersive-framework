@@ -1,4 +1,8 @@
 <div id = "loading-container">
-  <div class="loading-wheel"></div>
+  {{#if hideWheel}}
+  <div></div>
+  {{else}}
+    <div class="loading-wheel"></div>
+    {{/if}}
   <p id = "loading-label">{{message}}</p>
 </div>

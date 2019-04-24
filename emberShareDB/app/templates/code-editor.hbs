@@ -170,7 +170,7 @@
     {{/if}}
     <div id = "main-code-container">
       {{#if showHUD}}
-        {{loading-hud message = hudMessage}}
+        {{loading-hud message = hudMessage hideWheel = isEmbedded}}
       {{/if}}
       {{#if isEmbeddedWithCode}}
       <div id = "embedded-run-container">
