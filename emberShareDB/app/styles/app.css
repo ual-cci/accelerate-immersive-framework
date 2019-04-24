@@ -396,22 +396,27 @@ input[id="docName"]:-ms-input-placeholder {
 .filter-text-tag-item {
 }
 
+/* orange */
 #tab0.tab-item {
   background-color: #ED3D05;
 }
 
+/* yellow */
 #tab1.tab-item {
   background-color: #FFCE00;
 }
 
+/* green rgb(14, 251, 121)*/
 #tab2.tab-item {
   background-color: #0ED779;
 }
 
+/* pink */
 #tab3.tab-item {
   background-color: #F79994;
 }
 
+/* blue */
 #tab4.tab-item {
   background-color: #4D42EB;
 }
@@ -1583,4 +1588,43 @@ input[id="searchTerm"]:-ms-input-placeholder {
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.loading-wheel {
+  border: 16px solid rgba(14, 251, 121, 1.0);
+  border-top: 16px solid white;
+  border-radius: 50%;
+  max-width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  position:relative;
+  margin: auto;
+  width: 50%;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loading-label {
+  text-align:center;
+  color:white;
+  font-size: 25pt;
+  width:100%;
+  padding:10px;
+}
+
+#loading-container {
+  padding:10%;
+  display:block;
+  width: 50%;
+  height: 50%;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color:rgba(14, 251, 121, 0.8);
+  z-index: 12;
 }
