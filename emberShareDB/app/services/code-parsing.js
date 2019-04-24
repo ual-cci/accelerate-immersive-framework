@@ -364,8 +364,8 @@ export default Service.extend({
             }
             else
             {
-              console.log("converting to b64");
-              await this.get('assetService').fetchAsset(assets[i]);
+              console.log("need to fetch asset for conversion");
+              await this.get('assetService').fetchAsset(assets[i], docId);
               console.log("finding record");
               asset = this.get('store').peekRecord('asset',fileId);
               console.log("found record");

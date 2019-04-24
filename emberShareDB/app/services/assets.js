@@ -34,7 +34,6 @@ export default Service.extend({
   },
   fetchAsset: async function(asset, docId) {
     return new RSVP.Promise((resolve, reject) => {
-      console.log("fetching asset:"+asset);
       const fileId = asset.fileId;
       const fileName = asset.name;
       const fileType = asset.fileType;
@@ -47,7 +46,9 @@ export default Service.extend({
       }
       var xhr = new XMLHttpRequest();
       var url = config.serverHost + "/asset/"+docId+"/"+fileName;
+      console.log("fetching asset: "+asset+" from " + url);
       xhr.onload = () => {
+        console.log(xhr.readyState, xhr.status == 200);
         if (xhr.readyState == 4 && xhr.status == 200) {
           console.log("fetched asset:"+fileId);
           this.get('store').push({

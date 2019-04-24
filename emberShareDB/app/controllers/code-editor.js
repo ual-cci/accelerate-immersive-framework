@@ -705,6 +705,7 @@ export default Controller.extend({
         const editor = this.get('editor');
         const mainText = model.data.source;
         let toRender = selection ? this.getSelectedText() : mainText;
+        console.log("updateiframe", model.id)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
         .then((combined) => {
           this.get('cs').clear();
@@ -1134,7 +1135,7 @@ export default Controller.extend({
     const container = document.getElementById('ace-container');
     $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
-
+    this.set("isDragging", false);
     const tab = document.getElementById("project-tabs");
     $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
@@ -1143,7 +1144,7 @@ export default Controller.extend({
       const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
       this.set('isShowingCode', !doHide);
       this.set('aceW', doHide ? "30px" : w);
-    },200)
+    }, 200)
   },
   actions: {
     editorReady(editor) {
