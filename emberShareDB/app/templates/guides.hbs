@@ -987,8 +987,16 @@ In the next part, we'll look at how to add a record button, how to gain more con
 {{/if}}
 </div>
 {{else}}
-
+<div id = "tutorial-container">
+<h2>Guides</h2>
+<h3>Simple code examples of MIMIC libraries and ML concepts</h3>
+<p class = "tutorial-text">
+Each guide below uses a MIMIC library to demonstrate how to use machine intelligence to make music in the browser
+</p>
+<div id = "guide-container">
 {{#each model as |guide|}}
-  <a href = {{guide.url}}>{{guide.name}}</a><br>
+  <a class = "guide-link" href = {{guide.url}}>{{guide.name}}</a><br>
 {{/each}}
+</div>
+</div>
 {{/if}}

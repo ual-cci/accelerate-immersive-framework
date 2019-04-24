@@ -1543,6 +1543,18 @@ input[id="searchTerm"]:-ms-input-placeholder {
   background-size: cover;
 }
 
+#guide-container {
+  margin-top:30px;
+}
+
+.guide-link {
+  margin-left: 10px;
+  font-size: 14pt;
+  display:block;
+  width: 80%;
+  color:#4D42EB;
+}
+
 .tutorial-img {
   margin: 20px;
 }
