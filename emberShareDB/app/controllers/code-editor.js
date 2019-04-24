@@ -622,7 +622,7 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.data.assets))
       {
-        this.set("hudMessage", "Preloading Assets");
+        this.set("hudMessage", "Loading Assets");
         this.set("showHUD", true);
         this.get('assetService').preloadAssets(model.data.assets, model.id)
         .then(()=>{
