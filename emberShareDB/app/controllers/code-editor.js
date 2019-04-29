@@ -522,13 +522,13 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "children")
       {
-        console.log(ops[0].oi)
-        this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
-        .then(()=>{
-          this.fetchChildren();
-        }).catch((err)=>{
-          console.log('error updating doc', err);
-        });
+        // console.log(ops[0].oi)
+        // this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
+        // .then(()=>{
+        //   this.fetchChildren();
+        // }).catch((err)=>{
+        //   console.log('error updating doc', err);
+        // });
       }
     }
   },
