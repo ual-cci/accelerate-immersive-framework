@@ -380,6 +380,7 @@ export default Service.extend({
             const url = config.serverHost + "/asset/" + docId + "/" + toFind
             console.log("replaced url", url)
             source = source.replace(new RegExp("\"" + toFind + "\"","gm"), "\"" + url + "\"");
+            source = source.replace(new RegExp("\'" + toFind + "\'","gm"), "\"" + url + "\"");
             //console.log(source)
           }
         }
