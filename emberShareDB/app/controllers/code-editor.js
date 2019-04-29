@@ -1021,6 +1021,7 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       const fn = () => {
+        this.set('titleName', "");
         this.get('opsPlayer').reset(doc.id);
         this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
@@ -1385,6 +1386,7 @@ export default Controller.extend({
         this.set('renderedSource',"");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");
+        this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))

@@ -2,7 +2,19 @@ import Controller from '@ember/controller';
 
 export default Controller.extend({
   examples:[
-    //audio tirggers
+    //Shelly 1
+    {docid:"585ecea5-4841-6ae5-a8c1-4a0ddb8975fd",
+    thumbnailId:"beatbox.png"},
+    //Shelly 2
+    {docid:"585ecea5-4841-6ae5-a8c1-4a0ddb8975fd",
+    thumbnailId:"beatbox.png"},
+    //FaceAPI
+    {docid:"9dc4eaf4-93db-26e8-9357-155eb152ea44",
+    thumbnailId:"beatbox.png"},
+    //LSTM
+    {docid:"b530ba9e-dfd9-0440-8358-86b6420b210d",
+    thumbnailId:"beatbox.png"},
+    //audio triggers
     {docid:"585ecea5-4841-6ae5-a8c1-4a0ddb8975fd",
     thumbnailId:"beatbox.png"},
     //merk
