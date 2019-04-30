@@ -522,13 +522,13 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "children")
       {
-        console.log(ops[0].oi)
-        this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
-        .then(()=>{
-          this.fetchChildren();
-        }).catch((err)=>{
-          console.log('error updating doc', err);
-        });
+        // console.log(ops[0].oi)
+        // this.get('documentService').updateDoc(this.get('model').id, "children", ops[0].oi)
+        // .then(()=>{
+        //   this.fetchChildren();
+        // }).catch((err)=>{
+        //   console.log('error updating doc', err);
+        // });
       }
     }
   },
@@ -1021,6 +1021,7 @@ export default Controller.extend({
     if(!isEmpty(doc))
     {
       const fn = () => {
+        this.set('titleName', "");
         this.get('opsPlayer').reset(doc.id);
         this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
@@ -1385,6 +1386,7 @@ export default Controller.extend({
         this.set('renderedSource',"");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");
+        this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
         if(this.get('wsAvailable'))

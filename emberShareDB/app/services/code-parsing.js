@@ -379,7 +379,8 @@ export default Service.extend({
             //Else just use endpoint
             const url = config.serverHost + "/asset/" + docId + "/" + toFind
             console.log("replaced url", url)
-            source = source.replace(new RegExp(toFind,"gm"), url);
+            source = source.replace(new RegExp("\"" + toFind + "\"","gm"), "\"" + url + "\"");
+            source = source.replace(new RegExp("\'" + toFind + "\'","gm"), "\"" + url + "\"");
             //console.log(source)
           }
         }

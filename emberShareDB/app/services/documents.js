@@ -35,9 +35,10 @@ export default Service.extend({
         {
           console.log("NOT A PARENT, updating parent with myself as a child");
           this.get('store').findRecord('document', parent, { reload: true }).then((parentDoc) => {
-            console.log(parentDoc.data);
+
             let children = parentDoc.data.children;
             children.push(response.id);
+            console.log("updating", parent, children)
             this.updateDoc(parent, "children", children)
             .then(resolve(response)).catch((err)=>{console.log(err)});
           }).catch((err)=>{console.log(err)});
@@ -97,13 +98,16 @@ export default Service.extend({
     });
   },
   updateDoc(docId, field, value) {
+    console.log("updateDoc",docId, field, value)
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         if(!isEmpty(doc) &&  !(doc.get('isDestroyed') || doc.get('isDestroying')))
         {
+          console.log("got doc, setting field", field, value)
           doc.set(field, value);
           doc.save().then((newDoc)=> {
+            console.log("updated successfully")
             resolve(newDoc);
           }).catch((err)=>{
             console.log("documentservice, updateDoc1", err);
@@ -112,6 +116,7 @@ export default Service.extend({
         }
         else
         {
+          console.log("failed to find doc")
           reject();
         }
       }).catch((err)=>{
