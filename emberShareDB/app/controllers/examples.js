@@ -37,7 +37,7 @@ export default Controller.extend({
     thumbnailId:"front-page.png"},
     //evolib
     {docid:"6f17f8c6-3147-44e1-3855-d189b7f5007c",
-    thumbnailId:"hybrid.jpeg"},
+    thumbnailId:"hybrid.jpeg"}
   ],
   actions: {
     onClick(example) {

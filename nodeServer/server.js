@@ -41,10 +41,11 @@ function startServer()
   });
 
   var server = http.createServer(app);
-  server.listen(config.serverPort);
+  const PORT = process.env.PORT || 8080;
+  server.listen(PORT);
   userAPI.initUserAPI(app, config);
   docAPI.initDocAPI(server, app, config);
-  console.log('Listening on http://'+ config.serverIP + ':'+ config.serverPort);
+  console.log('Listening on http://'+ config.serverIP + ':'+ PORT);
 }
 
 module.exports = app; // for testing
