@@ -1,4 +1,4 @@
-# MIMIC Code Editor 
+# MIMIC Code Editor
 
 ## To run locally:
 
@@ -16,7 +16,7 @@ The project contains two folders, one for the ember frontend and one for the nod
 
 * The ports and IP addresses are pulled in from an external config file, this is not committed as it may contain sensitive info (e.g. mongo logins etc...)
 
-* You should create a file called config.js in this directory with the following structure (and your own details). Do not commit this to the repository. 
+* You should create a file called config.js in this directory with the following structure (and your own details). Do not commit this to the repository.
 
 ```javascript
 
@@ -32,11 +32,11 @@ module.exports = {
 
 ```
 
-Then run 
+Then run
 ```
-npm install 
+npm install
 ```
-and 
+and
 ```
 node server
 ```
@@ -49,21 +49,21 @@ node server
 
 ```javascript
 
+ENV.localOrigin = "http://localhost:4200";
 ENV.contentCollectionName = 'docs';
 ENV.oauthHost = "http://localhost:8080/oauth";
 ENV.serverHost = "http://localhost:8080";
 ENV.wsHost = "ws://localhost:8080";
 ```
 
-Then run 
+Then run
 ```
 npm install
 ```
 
-and 
+and
 ```
 ember s
 ```
 
 Go to localhost:4200 to view site
-
