@@ -11,7 +11,7 @@ var mongoPort = "";
 var oauthDBName = "";
 var replicaSet = "";
 var siteURL = "";
-var configMongoUri = "";
+var useMongoCluster = false;
 const saltRounds = 10;
 
 //AUTH
@@ -165,7 +165,7 @@ var initUserAPI = function(app, config)
   //console.log("USER DB", oauthDBName);
   replicaSet = config.replicaSet;
   siteURL = config.siteURL;
-  configMongoUri = config.oauthMongoUri;
+  useMongoCluster = config.useMongoCluster;
 	startAuthAPI(app);
 }
 
@@ -180,7 +180,7 @@ function startAuthAPI(app)
   {
     mongoUri = mongoUri + '?replicaSet='+replicaSet;
   }
-  if(config.useMongoCluster)
+  if(useMongoCluster)
   {
     mongoUri = "mongodb://"+mongoUser+":"+mongoPassword+"@mimicmini-shard-00-00-ytfc5.gcp.mongodb.net:"+mongoPort+",mimicmini-shard-00-01-ytfc5.gcp.mongodb.net:"+mongoPort+",mimicmini-shard-00-02-ytfc5.gcp.mongodb.net:"+mongoPort+"/"+contentDBName+"?ssl=true&replicaSet="+replicaSet+"&authSource=admin&retryWrites=true";
   }
