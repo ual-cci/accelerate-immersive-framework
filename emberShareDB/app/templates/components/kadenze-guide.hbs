@@ -1,0 +1,148 @@
+<p class = "tutorial-text">
+  Rebecca Fiebrink, a key part of the MIMIC team, runs the excellent Kadenze course Machine Learning for Musicians and Artists. It provides a ton of learning resources and is designed to teach machine learning in a way that will be useful to creative pracitioners.
+</p>
+<p class = "tutorial-text">
+Throughout the videos, Rebecca demonstrates machine learning concepts mainly using the Wekinator software, however, in this guide we will provide resources that can allow for follow up work to be completed on the MIMIC platform using the Rapidlib machine learning library. Following each Session (~45 mins of videos, depending on how fast you make Rebecca speak), we will provide a set of tasks to help you explore and cement the concepts covered.
+</p>
+<p class = "tutorial-text">
+  You can sign up for the course <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists/info" >here</a>. The course is free you do not require a certificate to finish or graded projects, and can be started at any time, and completed at any pace.
+</p>
+<h2 id="maxiaudio">Part 1: Introduction</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/introduction">Session 1: Introduction videos</a>. After watching these videos you should be familair wit the concepts that
+  <ul>
+    <li> Supervised learning uses examples to train models </li>
+    <li> The supervised learning algorithms that will be covered in the course can be broadly grouped into three classes: Classification, Regression and Temporal Analysis</li>
+    <li> She introduces Wekinator as a tool to do machine learning, an OSC as a way to transfer data in and out. In this guide we will be using RapidLib to do the machine learning and using various javascript libraries and funcationality to get control data from sliders, the mouse and keyboard and other places, and then also generating sound using the Web Audio API and the maximillian.js library</li>
+  </ul>
+</p>
+<p class = "tutorial-text">
+  For this first part we are just going to get comfortable with using RapidLib to take an input, in this case the mouse, record alongside some output and then train a model.
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "8de3cbbe-b7c6-d79f-65fa-42fd1aa43a26" height = "880px"}}
+</p>
+<p class = "tutorial-text">
+  Use the example below to randomise synth parameters until you find a sound you like. Move the square to somewhere on the screen, then click and hold to record samples. Then find more sounds and place them elsewhere on the screen and record again. When you have a few, hit "t" to train. Now when you move the mouse around you will be able to explore your newly trained sound space!
+</p>
+<p class = "tutorial-text">
+  Try clearing the dataset ("x"), changing the training examples to see how this changes the behaviour of the system after it is re-trained. Spend some time experimenting with the trained models to start to understand how the models are changed.
+</p>
+<p class = "tutorial-text">
+  ASIDE: You can complete this whole project largely using the embedded examples, however, if you want to take a closer look at the code you can check out how to use RapidLib <a href = "https://www.doc.gold.ac.uk/eavi/rapidmixapi.com/index.php/getting-started/">here</a>. It has an incredibly simple API.
+</p>
+<h2> Part 2: Classification, I </h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>. After watching these videos, you shoud be familiar with the following concepts which we will build on with some explorative tasks.
+  <ul>
+    <li>When you have lots of features, or the relationship between your inputs and your outputs is complex, classification algorithms can allow you to build things that would be challenging or impossible to program yourself by hand.</li>
+    <li>Two approaches to classification problems shown were decision stumps and nearest neighbour. Although Wekinator provides a choice of algorithms for classification, RapidLib hides this functionality away. </li>
+    <li>When deciding on an approach to take, we compared algorithms sensitivity to noise and their capacity to learn complexity. Often this choice can be a payoff between the two.</li>
+    <li>To evaluate a model, we can test it on new inputs ourselves, or we can investigate its decision boundary. The tasks below will explore this further, allowing you to provide data and see the decision boundaries that are made.</li>
+    <li>To improve a model, we can try and provide more data, or better data, or we can change the features that we use. We should aim to pick features that are relavant to phenomena we are trying to model.</li>
+  </ul>
+</p>
+<p class = "tutorial-text">
+  Having given you a brief feel for how machine learning can allow you to map inputs, such as a mouse, to control an output, such as synthesis parameters, we will now examine how by incrementally building up our own datasets, we can sculpt the decision boundaries in classification tasks.
+</p>
+<p class = "tutorial-text">
+  In the videos Rebecca used a program called the Classification Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, hold down a number key (e.g. 1) and move the mouse (you may have to click inside the example first to bring it into focus). This will input examples of that class as long as you are holding down that number key. The decision boundary will then be displayed.
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "7f92bd4e-6d2b-181c-559f-4add766f2095"}}
+</p>
+<p class = "tutorial-text">
+  Try to choose a set of training examples that will draw the boundary on screen, with Class 1 on the left in red and Class 2 on the right in blue.
+</p>
+<img src = {{concat url "/images/decision1.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  Keep improving your boundary by changing your training examples, re-training, and re-drawing the decision boundary until you are happy with how it looks. If you need to start again, just pause and play the example.
+</p>
+<p class = "tutorial-text">
+  When actually making classifiers for a specific purpose, how close you need the decision boundary to match will depend on your intentions. We realise that it may not be possible or, or even desirable, for it to be perfect!
+</p>
+<p class = "tutorial-text">
+  Now try to make this decision boundary, with Class 1 in red and Class 2 in blue.
+</p>
+<img src = {{concat url "/images/decision2.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  ASIDE: If you want to use a different and output method than the mouse, feel free to fork the project and create your own dataset using RapidLib. Make sure you have two inputs and one output and your dataset has the structure [{input:[x1,x2], output:[y1]}]. Then retrain your model and run explorer.updateOutput() to see your new decision boundary.
+</p>
+<h2>Part 3: Regression</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/regression">Session 3: Regression videos</a>. After watching these videos, you shoud be familiar with the following concepts.
+  <ul>
+    <li>Regression models can be used to map continuous inputs.</li>
+    <li>As with Classification, different algorithms produce different types of lines or curves given the same data.</li>
+    <li>As such, its important to pick an alogrithm that can model the appropriate complexity.</li>
+    <li>Many to many mappings can allow to quickly build an expressive musical instrument. With this, you can design instruments that react to performer's movements or actions without directly having to consider the exact mathematical relationship between input and output.</li>
+    <li>Below, we will see how you can use regression to control 3 parameters of a granular synth with just 1 slider.</li>
+  </ul>
+</p>
+<p class = "tutorial-text">
+In the videos Rebecca used a program called the Regression Explorer. Below is a version of this to use on the MIMIC platform. In order to input training examples, click onto screen at any point. The X value denotes the input value, whereas the y value denotes the output value. You will then see the regression line drawn as you add values. Try to get a feel for what types of lines are capable and how they’re influenced by the training data.
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "26ab5507-0d25-07eb-cb03-aaa93883765d"}}
+</p>
+<p class = "tutorial-text">
+Create a training dataset this way to produce the line below. Keep editing your data and/or algorithm until the regression line drawn by the Regression Explorer matches the one at right as closely as possible.
+</p>
+<img src = {{concat url "/images/decision3.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+Now, think about whether you might be able to create this same line using even fewer training examples. If you think it’s possible to create this line using fewer examples, delete your training dataset and give it a try!
+</p>
+<p class = "tutorial-text">
+Now try to fit this more complicated regression line. Keep editing your training data until you have something that basically matches this shape. Once you have this, try completing with fewer examples.
+</p>
+<img src = {{concat url "/images/decision4.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
+</p>
+<p class = "tutorial-text">
+Now we are going to try and see if we can train a model with 3 outputs to behave consistently. Select an input (at least 1) from the examples below, and choose an output with EXACTLY 3 parameters. Below we have an example of using a slider as input to control a granular synthesiser (borrowed from <a href = "http://www.zya.cc/granular">Zya</a>) where the outputs of the regression model are the position in the soundfile, the release on the envelope of the grains and the density (how frequently a new grain is triggered).
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "5d67faaa-e4c3-771a-f824-fe5c5b978ab6"}}
+</p>
+<p class = "tutorial-text">
+First, play around with the two parameters and click on different parts of the waveform, find some sounds you like. When you are ready to record, select the "Record" checkbox. From now on, whenever you play the synthesiser, your position in the sample, the release and density will be recorded, along with the input slider value. Record in some sounds you like, remembering to map each one to a different value on the input slider.
+</p>
+<p class = "tutorial-text">
+When you are ready to play, select the "Run" checkbox. This will train your model with the recorded dataset and now all 3 synthesiser parameters will be controlled by just the one value from the input slider. Keep recording examples until you can reliably control the output.
+</p>
+<p class = "tutorial-text">
+Next, train model to reliably access the following values. To clear your dataset, just pause and play the embedded code.
+<ul>
+<li>(0.0, 0.0, 0.0) (all models output 0 simultaneously)</li>
+<li>(1.0, 1.0, 1.0) (all models output 1 simultaneously)</li>
+<li>(0.5, 0.0, 1.0) (model 1 outputs 0.5, model 2 outputs 0, and model 3 outputs 1)</li>
+</ul>
+</p>
+<h2>Part 4: Classification II</h2>
+<p class = "tutorial-text">
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-ii">Session 4: Classification II videos</a>. In these videos, Rebecca demonstrates how classification algorithms can be useful in creative contexts, how to evaluate your algorithms performance and make the appropriate corrective steps to improve this.
+  <ul>
+    <li>Sometimes if your data is noisy, or the feature representation is not sufficient, you will not be able to create the right decision boundary. In this situation, you should consider providing more, or better, data.</li>
+    <li>Alternatively, if you are sure your data is correct, you may have to spend more time picking the alogrithm that will be able to capture the complexity of the phenomena you are trying to model.</li>
+    <li>However, picking an overly complex model can lead to overfitting of data, meaning your model will not generalise well to new data not present in the training set.</li>
+  </ul>
+</p>
+<p class = "tutorial-text">
+  For this part we are going to revisit the Classification Explorer but this time we are going to experiment with more than 2 classes, as well as more complication decision boundaries.
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "7f92bd4e-6d2b-181c-559f-4add766f2095"}}
+</p>
+<p class = "tutorial-text">
+  By adding new training data, try to recreate the decision boundary below using the Classification Explorer. As you are doing this, think about
+  <ul>
+  <li>How the model improves (or not) as you add more examples.</li>
+  <li>How well the shape of the decision boundary the algorithm seems to want to make matches the boundary you are trying to make.</li>
+</ul>
+</p>
+<img src = {{concat url "/images/decision5.png"}} style = "width:400px;height:400px;"/>
+<p class = "tutorial-text">
+  Now restart the explorer and try to enter data that will give the decision boundary below. Think back to the videos, what is significant about this particular boundary, in comparison to others we have tried?
+</p>
+<img src = {{concat url "/images/decision6.png"}} style = "width:500px;height:400px;"/>

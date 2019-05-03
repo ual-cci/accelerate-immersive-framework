@@ -26,4 +26,8 @@ export default Controller.extend({
     console.log(this.get('model'))
     return this.get('model').id == "kadenze"
   }),
+  isRapid:computed('model', function() {
+    console.log(this.get('model'))
+    return this.get('model').id == "rapidLib"
+  }),
 });
