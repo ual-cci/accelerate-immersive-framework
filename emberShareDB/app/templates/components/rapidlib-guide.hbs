@@ -1,7 +1,15 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/default.min.css">
+<script>
+  hljs.initHighlightingOnLoad();
+</script>
 <p class = "tutorial-text">
-  This page provides a minimal guide on how to use the RapidLib. It shows how to build and use simple machine
-  learning objects, in just a few steps.
+  This page provides a minimal guide on how to use the RapidLib.
 </p>
+
+<p class = "tutorial-text">The guide shows how to use simple machine learning objects in five steps.</p>
+
+<p class = "tutorial-text">The guide also shows two simple examples of applied Machine Learning tasks.</p>
 
 <h2>1. Add RapidLib to your HTML page </h2>
 
@@ -11,6 +19,7 @@
   <pre>
     <code class="javascript">
         // Just include this script tag in your HTML page
+
         &lt;script src="RapidLib.js"&gt;&lt;&#47;script&gt;
     </code>
   </pre>
@@ -38,7 +47,7 @@
 
 <p class = "tutorial-text">RapidLib provides constructors to three main objects: <span style="font-family: 'Courier New', Courier, monospace;">Regression</span>, <span style="font-family: 'Courier New', Courier, monospace;">Classification</span> and <span style="font-family: 'Courier New', Courier, monospace;">SeriesClassification</span>.</p>
 
-<p class = "tutorial-text">You can use each one of these objects to apply a specific Machine Learning task.</p>
+<p class = "tutorial-text">You can apply each one of these objects to a specific Machine Learning task.</p>
 
 <h2>3. Create a data set </h2>
 
@@ -54,23 +63,23 @@
       <code class="javascript">
         var myData = [
           {
-            input: [48],
+            input:  [48],
             output: [130.81]
           },
           {
-            input: [54],
+            input:  [54],
             output: [185.00]
           },
           {
-            input: [60],
+            input:  [60],
             output: [261.63]
           },
           {
-            input: [66],
+            input:  [66],
             output: [369.994]
           },
           {
-            input: [72],
+            input:  [72],
             output: [523.25]
           }
         ];
@@ -121,18 +130,20 @@ objects is an <strong>example</strong> that contains a list of <strong>inputs</s
       <code class="javascript">
         var newInput = [64];
 
-        var freqHz = myRegression.run(newInput);
+        var output = myRegression.run(newInput);
       </code>
     </pre>
 </div>
 
-<p class = "tutorial-text">You can either re-train your <strong>regression</strong> object to refine it or terminate the process.</p>
+<p class = "tutorial-text">You can either decide to re-train your <strong>regression</strong> object to improve how it works, or to terminate the process.</p>
 
 <hr>
 
 <h2>Hello World!</h2>
 
-<p class = "tutorial-text">The next code snippet shows a simple but complete example of applying the RapidLib for a machine learning task.</p>
+<p class = "tutorial-text">The next code snippet puts everything together in a simple but complete example.</p>
+
+<p class = "tutorial-text">Here we apply the RapidLib to a real machine learning task, training a regression model that converts MIDI values to frequency values.</p>
 
 <div class='snippet'>
    <pre>
@@ -144,6 +155,7 @@ objects is an <strong>example</strong> that contains a list of <strong>inputs</s
       &lt;script src="RapidLib.js"&gt; &lt;&#47;script&gt;
 
       &lt;script&gt;
+
         var rapidLib = RapidLib();
 
         //Create a machine learning object for regression
@@ -152,23 +164,23 @@ objects is an <strong>example</strong> that contains a list of <strong>inputs</s
         //Create a Javascript object to hold your training data
         var myData = [
           {
-            input: [48],
+            input:  [48],
             output: [130.81]
           },
           {
-            input: [54],
+            input:  [54],
             output: [185.00]
           },
           {
-            input: [60],
+            input:  [60],
             output: [261.63]
           },
           {
-            input: [66],
+            input:  [66],
             output: [369.994]
           },
           {
-            input: [72],
+            input:  [72],
             output: [523.25]
           }
         ];
@@ -177,11 +189,13 @@ objects is an <strong>example</strong> that contains a list of <strong>inputs</s
         //Train a machine learning model with the data
         midiToFrequencyRegression.train(myData);
 
-        //Run the trained model with a new input
+        //Create a new input to test the model
         var newInput = [64];
+
+        //Run the trained model on the new input
         var freqHz = midiToFrequencyRegression.run(newInput);
 
-        console.log(freqHz); // 333.713
+        console.log(freqHz); // outputs 333.713, the value of the frequency in Hz
 
       &lt;&#47;script&gt;
       &lt;/html&gt;
@@ -189,12 +203,36 @@ objects is an <strong>example</strong> that contains a list of <strong>inputs</s
     </pre>
  </div>
 
+<p class = "tutorial-text">Note that in this example, the variable keeping the <strong>regression</strong> object here is named <span style="font-family: 'Courier New', Courier, monospace;">midiToFrequencyRegression</span>.</p>
 
-<p class = "tutorial-text">Note that, in this example, the variable keeping the <strong>regression</strong> object here is named <span style="font-family: 'Courier New', Courier, monospace;">midiToFrequencyRegression</span>.</p>
+<p class = "tutorial-text">The model trained with four examples in the <span style="font-family: 'Courier New', Courier, monospace;">myData</span> data set converts MIDI values
+  to Frequency values, within the specified range.</p>
 
-<p class = "tutorial-text">The model trained with the <span style="font-family: 'Courier New', Courier, monospace;">myData</span> data set converts MIDI values
-  to Frequency values.</p>
+
+
+<hr>
+
+<h2>Let's go interactive now!</h2>
+
+<p class = "tutorial-text">This example is interactive and just a little bit more elaborate.</p>
+
+
+<p class = "tutorial-text">
+{{embedded-project docId = "a01f1f63-ddbc-3c77-ba73-d58606a7649e" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">If you look more closely, there are a few things going on here:</p>
+
+<ul>
+  <li><p class = "tutorial-text">Your mouse pointer location as a source of real-time data! Mouse coordinates X and Y are normalised to relative values between <strong>0</strong> and <strong>1</strong> (i.e. a percentage of the canvas dimensions).</p></li>
+
+  <li><p class = "tutorial-text">The training data set maps this range of mouse coordinates values as <strong>inputs</strong> to values of <strong>XOR function</strong> truth table as outputs! Pretty neat, huh!</p></li>
+
+  <li><p class = "tutorial-text">The same data set is training two different models! The first one is a <strong>classification</strong> model that outputs discrete values (integers). The second model does <strong>regression</strong> and outputs <strong>continuous</strong> values (floating point).</p></li>
+</ul>
+
+<p class = "tutorial-text">You may be wondering now how these simple objects and learning can build really interesting things!</p>
 
 <h2>If you want MOAR...</h2>
-<p class = "tutorial-text">If you'd like to have a deeper exploration and get your hands on more applied examples of RapidLib, check out the
- ``Machine Learning for Musicians and Artists`` guide.</p>
+<p class = "tutorial-text">If you'd like to have a deeper exploration of Machine Learning concepts, check out the ``Machine Learning for Musicians and Artists`` guide.</p>
+<p class = "tutorial-text">There you can get your hands on more examples of RapidLib that apply an Interactive Machine Learning workflow!</p>
