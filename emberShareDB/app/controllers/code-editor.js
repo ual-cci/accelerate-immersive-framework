@@ -1,8 +1,8 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
-import ShareDB from 'npm:sharedb/lib/client';
-import ReconnectingWebSocket from 'npm:reconnecting-websocket';
-import HTMLHint from 'npm:htmlhint';
+import ShareDB from 'sharedb/lib/client';
+import ReconnectingWebSocket from 'reconnecting-websocket';
+import HTMLHint from 'htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';

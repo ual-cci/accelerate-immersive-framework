@@ -1,10 +1,10 @@
 <div id = "main-site-container">
-  {{main-navigation onLogin='transitionToLoginRoute'
-  onAbout='transitionToAboutRoute'
-  onDocs='transitionToDocsRoute'
-  onExamples='transitionToExamplesRoute'
-  onGuides='transitionToGuidesRoute'
-  onGettingStarted='transitionToGSRoute'
+  {{main-navigation onLogin=(action 'transitionToLoginRoute')
+  onAbout=(action 'transitionToAboutRoute')
+  onDocs=(action 'transitionToDocsRoute')
+  onExamples=(action 'transitionToExamplesRoute')
+  onGuides=(action 'transitionToGuidesRoute')
+  onGettingStarted=(action 'transitionToGSRoute')
   openDoc=(action 'transitionToDoc')
   openGuide=(action 'transitionToGuide')
   onCreateDoc=(action 'transitionToNewestDoc')}}

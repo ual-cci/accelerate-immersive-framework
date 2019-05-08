@@ -1,7 +1,7 @@
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
-import acorn from 'npm:acorn'
-import walk from 'npm:acorn/dist/walk'
+import { acorn } from 'acorn'
+import { walk } from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 
