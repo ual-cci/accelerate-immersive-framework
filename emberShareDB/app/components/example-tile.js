@@ -18,8 +18,8 @@ export default Component.extend({
     this._super(...arguments);
     this.get('store').findRecord('document', this.get('example').docid)
     .then((doc) => {
-      console.log(doc.data.name)
-      this.set('name',doc.data.name);
+      console.log(doc.get('data.name'))
+      this.set('name',doc.get('data.name'));
     });
   },
   actions:{
