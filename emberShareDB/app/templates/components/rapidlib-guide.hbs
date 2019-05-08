@@ -1,1 +1,40 @@
-{{yield}}
+<h2>Getting started with using RapidLib for Machine Learning</h2>
+<p class = "tutorial-text">
+  This page provides a minimal guide on how to use the RapidLib. It shows how to build and use simple machine
+  learning objects, in just a few steps.
+</p>
+
+<h2>1. Add RapidLib to your HTML page </h2>
+
+<p>First, to install RapidLib you need to include it in your HTML page using the HTML <span
+    class='highlight'>&lt;script&gt;</span> tag.</p>
+
+<div class='snippet'>
+  <pre>
+    <code class="javascript">
+        // Just include this script tag inside your HTML page
+        &lt;script src="RapidLib.js"&gt;&lt;&#47;script&gt;
+    </code>
+  </pre>
+</div>
+
+<p>Now you have the RapidLib module available on the Javascript global scope.</p>
+
+<h2>2. Load RapidLib to create a Machine Learning object</h2>
+
+<p>To load RapidLib into a variable, you use <span class='highlight'>RapidLib()</span>. That variable will give you
+  access to the Machine Learning objects that RapidLib provides.</p>
+
+<div class='snippet'>
+  <pre>
+      <code class="javascript">
+        var rapidLib = RapidLib();
+
+        var myRegression            = new rapidLib.Regression();
+
+        var myClassification        = new rapidLib.Classification();
+
+        var mySeriesClassification  = new rapidLib.SeriesClassification();
+      </code>
+    </pre>
+</div>
