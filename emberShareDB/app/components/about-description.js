@@ -1,6 +1,7 @@
 import Component from '@ember/component';
 import { inject } from '@ember/service';
 import config from  '../config/environment';
+import { isEmpty } from '@ember/utils';
 
 export default Component.extend({
   mediaQueries:inject(),
@@ -16,7 +17,11 @@ export default Component.extend({
       colour2 = Math.floor(Math.random() * 5);
     }
     document.getElementById('about-overlay-title').style['background-color'] = this.get('colours')[colour1];
-    document.getElementById('about-overlay-desc').style['background-color'] = this.get('colours')[colour2];
+    const desc = document.getElementById("about-overlay-desc");
+    if(!isEmpty(desc))
+    {
+      desc.style['background-color'] = this.get('colours')[colour2];
+    }
     console.log("REFRESH", colour1, colour2)
   }
 });

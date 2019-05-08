@@ -3,7 +3,7 @@
 {{#bs-nav type="pills" as |nav|}}
 {{#if mediaQueries.isBurger}}
 {{#nav.dropdown as |dd|}}
-  {{#dd.toggle class = "nav-dropdown burger-btn" }} = <span  class="caret"></span>{{/dd.toggle}}
+  {{#dd.toggle class = "nav-dropdown burger-btn" }} = <span class="caret"></span>{{/dd.toggle}}
   {{#dd.menu as |ddm|}}
     {{#ddm.item}}
     <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button dropdown-item">about</a>
