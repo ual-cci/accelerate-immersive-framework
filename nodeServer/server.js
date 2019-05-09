@@ -40,43 +40,58 @@ function startServer()
     res.send(200);
   });
 
-  let mongoIP = config.mongoIP;
-  const mongoPort = config.mongoPort;
-  const contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.contentDBName;
+
+  let contentDBName = "";
   const contentCollectionName = config.contentCollectionName;
   const replicaSet = config.replicaSet;
   const mongoUser = config.mongoUser;
   const mongoPassword = config.mongoPassword;
 
   let mongoUri = "";
-  if(config.mongoLocation === "local")
+  if(process.env.NODE_ENV === "local" || process.env.NODE_ENV == "test")
   {
+    contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.local_contentDBName;
+    const mongoIP = config.local_mongoIP;
+    const mongoPort = config.local_mongoPort;
     mongoUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +contentDBName;
   }
-  else if (config.mongoLocation === "goldsmiths")
+  else if (process.env.NODE_ENV === "development")
   {
+    contentDBName = config.development_contentDBName;
+    const mongoIP = config.development_mongoIP;
+    const mongoPort = config.development_mongoPort;
+    const replicaSet = config.development_replicaSet;
+    const mongoUser = config.development_mongoUser;
+    const mongoPassword = config.development_mongoPassword;
     mongoUri = 'mongodb://' + mongoUser + ":" + mongoPassword + "@" +mongoIP + ':' + mongoPort + '/' +contentDBName;
     if(replicaSet)
     {
       mongoUri = mongoUri + '?replicaSet='+replicaSet;
     }
   }
-  else if(config.mongoLocation === "google")
+  else if(process.env.NODE_ENV === "production")
   {
-    const ip1 = mongoIP1;
-    const ip2 = mongoIP2;
+    contentDBName = config.production_contentDBName;
+    const mongoIP = config.production_mongoIP;
+    const mongoPort = config.production_mongoPort;
+    const replicaSet = config.production_replicaSet;
+    const mongoUser = config.production_mongoUser;
+    const mongoPassword = config.production_mongoPassword;
+    const ip1 = config.production_mongoIP1;
+    const ip2 = config.production_mongoIP2;
     mongoUri = "mongodb://"+mongoUser+":"+mongoPassword+"@:"+ip1+"0"+ip2+mongoPort;
     mongoUri = mongoUri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
-    mongoUri = mongoUri + "/"+contentDBName+"?ssl=true&replicaSet="+replicaSet+"&authSource=admin&retryWrites=true";
+    mongoUri = mongoUri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
   }
 
   config.mongoUri = mongoUri;
+  config.mongoUri = "mongodb://MimicTestDBUser:w4tersmelly@mimicmini-shard-00-00-ytfc5.gcp.mongodb.net:27017,mimicmini-shard-00-01-ytfc5.gcp.mongodb.net:27017,mimicmini-shard-00-02-ytfc5.gcp.mongodb.net:27017/test?ssl=true&replicaSet=MimicMini-shard-0&authSource=admin&retryWrites=true";
 
   var server = http.createServer(app);
   const PORT = process.env.PORT || config.serverPort;
   server.listen(PORT);
-  userAPI.initUserAPI(app, config);
-  docAPI.initDocAPI(server, app, config);
+  userAPI.initUserAPI(app, mongoUri);
+  docAPI.initDocAPI(server, app, contentDBName, contentCollectionName, mongoUri);
   console.log('server set up');
 }
 
