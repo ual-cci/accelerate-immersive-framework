@@ -9,7 +9,7 @@
   "author": "Louis McCallum",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^3.0.2",
+    "bcrypt": "^3.0.6",
     "body-parser": "^1.15.2",
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
@@ -25,6 +25,7 @@
     "oauth2-server": "^2.4.1",
     "sharedb": "^1.0.0-beta.15",
     "sharedb-mongo": "^1.0.0-beta.8",
+    "sib-api-v3-sdk": "^7.1.3",
     "websocket-json-stream": "0.0.3",
     "ws": "^5.1.1"
   }

@@ -11,7 +11,7 @@ export default Service.extend({
       $.ajax({
           type: "POST",
           url: config.serverHost + "/resetPassword",
-          data: { username: username }
+          data: { username: username, hostURL:config.localOrigin }
         }).then((res) => {
           this.get('cs').log("success",res);
           resolve();

@@ -7,12 +7,9 @@ const fs = require('fs');
 const Gridfs = require('gridfs-stream');
 const guid = require('./uuid.js');
 const userAPI = require('./user-model.js');
-var mongoIP = "";
-var mongoPort = "";
-var contentDBName = "";
-var contentCollectionName = "";
+let contentDBName = "";
+let contentCollectionName = "";
 let mongoUri = "";
-var replicaSet = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -22,21 +19,10 @@ var siteURL;
 
 var initDocAPI = function(server, app, config)
 {
-  mongoIP = config.mongoIP;
-  mongoPort = config.mongoPort;
   contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.contentDBName;
   contentCollectionName = config.contentCollectionName;
-  replicaSet = config.replicaSet;
-  console.log("ENVIRONMENT", process.env.NODE_ENV);
-  mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
-  if(replicaSet)
-  {
-    mongoUri = mongoUri + '?replicaSet='+replicaSet;
-  }
-  if(config.useMongoCluster)
-  {
-    mongoUri = "mongodb://"+mongoUser+":"+mongoPassword+"@mimicmini-shard-00-00-ytfc5.gcp.mongodb.net:"+mongoPort+",mimicmini-shard-00-01-ytfc5.gcp.mongodb.net:"+mongoPort+",mimicmini-shard-00-02-ytfc5.gcp.mongodb.net:"+mongoPort+"/"+contentDBName+"?ssl=true&replicaSet="+replicaSet+"&authSource=admin&retryWrites=true";
-  }
+  console.log("DB:" + contentDBName + "/" + contentCollectionName);
+  mongoUri = config.mongoUri;
   startAssetAPI(app);
   siteURL = config.siteURL;
   shareDBMongo = require('sharedb-mongo')(mongoUri);
@@ -63,7 +49,7 @@ function startAssetAPI(app)
     }
     else
     {
-      console.log("Connected successfully to server");
+      console.log("Connected successfully to asset database");
       const db = client.db(contentDBName);
 
       gridFS = Gridfs(db, mongo);

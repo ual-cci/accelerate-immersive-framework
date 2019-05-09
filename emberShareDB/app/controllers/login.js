@@ -64,7 +64,7 @@ export default Controller.extend({
       let username = this.get('resetUsername');
       this.get('passwordReset').requestReset(username).then(() => {
         this.get('cs').log("password reset");
-        this.set('resetMessage', 'password reset link generated');
+        this.set('resetMessage', 'Password reset request accepted, please check you email to confirm');
       }).catch((err) => {
         this.get('cs').log(err);
         this.set('resetMessage', 'Error:' + err);
