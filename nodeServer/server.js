@@ -41,37 +41,42 @@ function startServer()
   });
 
 
-  let contentDBName = "";
+  let contentDBName = config.contentDBName;
+  let oauthDBName = config.oauthDBName;
   const contentCollectionName = config.contentCollectionName;
   const replicaSet = config.replicaSet;
   const mongoUser = config.mongoUser;
   const mongoPassword = config.mongoPassword;
 
-  let mongoUri = "";
+  let mongoContentUri = "";
+  let mongoUserUri = "";
   if(process.env.NODE_ENV === "local" || process.env.NODE_ENV == "test")
   {
-    contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.local_contentDBName;
+    contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:contentDBName;
+    oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName:oauthDBName;
     const mongoIP = config.local_mongoIP;
     const mongoPort = config.local_mongoPort;
-    mongoUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +contentDBName;
+    mongoContentUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +contentDBName;
+    mongoUserUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +oauthDBName;
   }
   else if (process.env.NODE_ENV === "development")
   {
-    contentDBName = config.development_contentDBName;
     const mongoIP = config.development_mongoIP;
     const mongoPort = config.development_mongoPort;
     const replicaSet = config.development_replicaSet;
     const mongoUser = config.development_mongoUser;
     const mongoPassword = config.development_mongoPassword;
-    mongoUri = 'mongodb://' + mongoUser + ":" + mongoPassword + "@" +mongoIP + ':' + mongoPort + '/' +contentDBName;
+    let uri = 'mongodb://' + mongoUser + ":" + mongoPassword + "@" +mongoIP + ':' + mongoPort + "/";
+    mongoContentUri = uri + contentDBName;
+    mongoUserUri = uri + oauthDBName;
     if(replicaSet)
     {
-      mongoUri = mongoUri + '?replicaSet='+replicaSet;
+      mongoContentUri = mongoContentUri + '?replicaSet='+replicaSet;
+      mongoUserUri = mongoUserUri + '?replicaSet='+replicaSet;
     }
   }
   else if(process.env.NODE_ENV === "production")
   {
-    contentDBName = config.production_contentDBName;
     const mongoIP = config.production_mongoIP;
     const mongoPort = config.production_mongoPort;
     const replicaSet = config.production_replicaSet;
@@ -79,19 +84,17 @@ function startServer()
     const mongoPassword = config.production_mongoPassword;
     const ip1 = config.production_mongoIP1;
     const ip2 = config.production_mongoIP2;
-    mongoUri = "mongodb://"+mongoUser+":"+mongoPassword+"@:"+ip1+"0"+ip2+mongoPort;
-    mongoUri = mongoUri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
-    mongoUri = mongoUri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
+    let uri = "mongodb://"+mongoUser+":"+mongoPassword+"@"+ip1+"0"+ip2+mongoPort;
+    uri = uri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
+    mongoContentUri = uri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
+    mongoUserUri = uri + "/" + oauthDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
   }
-
-  config.mongoUri = mongoUri;
-  config.mongoUri = "mongodb://MimicTestDBUser:w4tersmelly@mimicmini-shard-00-00-ytfc5.gcp.mongodb.net:27017,mimicmini-shard-00-01-ytfc5.gcp.mongodb.net:27017,mimicmini-shard-00-02-ytfc5.gcp.mongodb.net:27017/test?ssl=true&replicaSet=MimicMini-shard-0&authSource=admin&retryWrites=true";
 
   var server = http.createServer(app);
   const PORT = process.env.PORT || config.serverPort;
   server.listen(PORT);
-  userAPI.initUserAPI(app, mongoUri);
-  docAPI.initDocAPI(server, app, contentDBName, contentCollectionName, mongoUri);
+  userAPI.initUserAPI(app, mongoUserUri);
+  docAPI.initDocAPI(server, app, contentDBName, contentCollectionName, mongoContentUri);
   console.log('server set up');
 }
 
