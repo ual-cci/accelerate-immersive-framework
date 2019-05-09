@@ -15,16 +15,14 @@ var shareDB;
 var shareDBConnection;
 var gridFS;
 const http = require("http")
-var siteURL;
 
-var initDocAPI = function(server, app, config)
+var initDocAPI = function(server, app, db, collection, uri)
 {
-  contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.contentDBName;
-  contentCollectionName = config.contentCollectionName;
+  contentDBName = db;
+  contentCollectionName = collection;
   console.log("DB:" + contentDBName + "/" + contentCollectionName);
-  mongoUri = config.mongoUri;
+  mongoUri = uri;
   startAssetAPI(app);
-  siteURL = config.siteURL;
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
@@ -513,8 +511,7 @@ function insertLibrary(lib, source) {
   console.log('inserting library', lib, source)
   let insertAfter = "<head>"
   let index = source.indexOf(insertAfter) + insertAfter.length;
-  let insert = "\n <script src = \"" +
-  siteURL + "/libs/" + libraryURL(lib) +
+  let insert = "\n <script src = \"" + "https://mimicproject.com/libs/" + libraryURL(lib) +
   "\"></script>"
   const op = {p: ["source", index], si:insert};
   return op;

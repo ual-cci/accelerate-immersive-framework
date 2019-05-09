@@ -151,9 +151,9 @@ model.saveToken = function(token, client, user) {
 
 //API
 
-var initUserAPI = function(app, config)
+var initUserAPI = function(app, uri)
 {
-  mongoUri = config.mongoUri;
+  mongoUri = uri;
 	startAuthAPI(app);
 }
 
