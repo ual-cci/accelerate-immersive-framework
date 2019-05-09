@@ -6,11 +6,6 @@ var bodyParser = require('body-parser');
 const guid = require('./uuid.js');
 var bcrypt = require('bcrypt');
 var nodemailer = require('nodemailer')
-var mongoIP = "";
-var mongoPort = "";
-var oauthDBName = "";
-var replicaSet = "";
-var siteURL = "";
 const saltRounds = 10;
 
 //AUTH
@@ -158,12 +153,7 @@ model.saveToken = function(token, client, user) {
 
 var initUserAPI = function(app, config)
 {
-	mongoIP = config.mongoIP;
-  mongoPort = config.mongoPort;
-	oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName : config.oauthDBName;
-  //console.log("USER DB", oauthDBName);
-  replicaSet = config.replicaSet;
-  siteURL = config.siteURL;
+  mongoUri = config.mongoUri;
 	startAuthAPI(app);
 }
 
@@ -173,16 +163,8 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  var mongoUri = 'mongodb://' + mongoIP + ":" + mongoPort +'/' + oauthDBName;
-  if(replicaSet)
-  {
-    mongoUri = mongoUri + '?replicaSet='+replicaSet;
-  }
-  console.log(mongoUri);
   mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
     if (err) {
-
-
       return console.error('USER MODEL - Error connecting to "%s":', mongoUri, err);
     }
     console.log('Connected successfully to "%s"', mongoUri);
@@ -233,10 +215,10 @@ function startAuthAPI(app)
   app.post('/resetPassword', function(req,res) {
     requestPasswordReset(req.body.username)
     .then( (user) => {
-      console.log('success reset', siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
+      console.log('success reset', "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
       if(!req.body.test)
       {
-        sendResetEmail(user.email, siteURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
+        sendResetEmail(user.email, req.body.hostURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
       }
       res.status(200).send()
     })

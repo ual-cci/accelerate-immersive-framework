@@ -27,17 +27,17 @@ export default Controller.extend({
     {docid:"a9e1808c-8c5e-2634-9f6f-d0197b123b34",
     thumbnailId:"breakcore.jpg"},
     //spectral delay
-    {docid:"6f9951c9-88c3-dd1d-f348-69a31ba77a97",
+    {docid:"23a98909-eb83-e718-0765-eec49b66d3c1",
     thumbnailId:"spectrogram.jpeg"},
     //markov
     {docid:"01925a11-daee-a454-f2ca-3f729a707781",
     thumbnailId:"808.png"},
     //vec
-    {docid:"52196ad0-ff26-da74-90f6-64bf8af6f5b2",
+    {docid:"66a88951-a7d6-cc9f-0d8b-b043e4b952b0",
     thumbnailId:"front-page.png"},
     //evolib
-    {docid:"6f17f8c6-3147-44e1-3855-d189b7f5007c",
-    thumbnailId:"hybrid.jpeg"},
+    {docid:"3e67cfd2-c171-5bf1-db4c-a5b0cde68e7e",
+    thumbnailId:"hybrid.jpeg"}
   ],
   actions: {
     onClick(example) {

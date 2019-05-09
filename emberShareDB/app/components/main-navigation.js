@@ -20,29 +20,29 @@ export default Component.extend({
       const src = this.get('documentService').getDefaultSource();
       const data = {name:"New Project", isPrivate:true, source:src}
       this.get('documentService').makeNewDoc(data).then(() => {
-          this.sendAction('onCreateDoc');
+          this.get('onCreateDoc')();
       });
     },
     login() {
-      this.sendAction('onLogin');
+      this.get('onLogin')();
     },
     logout() {
       this.get('session').invalidate();
     },
     docs() {
-      this.sendAction('onDocs')
+      this.get('onDocs')();
     },
     about() {
-      this.sendAction('onAbout')
+      this.get('onAbout')();
     },
     gettingStarted() {
-      this.sendAction('onGettingStarted')
+      this.get('onGettingStarted')();
     },
     examples() {
-      this.sendAction('onExamples')
+      this.get('onExamples')();
     },
     guides() {
-      this.sendAction('onGuides')
+      this.get('onGuides')();
     },
     openDoc(doc){
       console.log(doc);

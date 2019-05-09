@@ -1,8 +1,8 @@
 import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
-import ShareDB from 'npm:sharedb/lib/client';
-import ReconnectingWebSocket from 'npm:reconnecting-websocket';
-import HTMLHint from 'npm:htmlhint';
+import ShareDB from 'sharedb/lib/client';
+import ReconnectingWebSocket from 'reconnecting-websocket';
+import HTMLHint from 'htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
@@ -401,8 +401,8 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       const session = editor.getSession();
-      console.log("didReceiveDoc", doc.data.type);
-      if(doc.data.type == "js")
+      console.log("didReceiveDoc", doc.get('data').type);
+      if(doc.get('data').type == "js")
       {
         session.setMode("ace/mode/javascript");
       }
@@ -411,11 +411,11 @@ export default Controller.extend({
         session.setMode("ace/mode/html");
       }
       this.set('surpress', true);
-      session.setValue(doc.data.source);
+      session.setValue(doc.get('data').source);
       this.set('surpress', false);
-      this.set('savedVals', doc.data.savedVals);
+      this.set('savedVals', doc.get('data').savedVals);
       this.setCanEditDoc();
-      let stats = doc.data.stats;
+      let stats = doc.get('data').stats;
       stats.views = parseInt(stats.views) + 1;
       this.get('documentService').updateDoc(this.get('model').id, 'stats', stats)
       .catch((err)=>{
@@ -427,8 +427,8 @@ export default Controller.extend({
       editor.setReadOnly(!this.get('canEditDoc'));
       this.set('showHUD', false);
       this.scrollToSavedPosition();
-      this.set('titleName', doc.data.name + " by " + doc.data.owner);
-      this.set('titleNoName', doc.data.name);
+      this.set('titleName', doc.get('data').name + " by " + doc.get('data').owner);
+      this.set('titleNoName', doc.get('data').name);
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
       resolve();
@@ -614,17 +614,17 @@ export default Controller.extend({
     if(embed) {
       return true;
     }
-    return model.data.dontPlay === "false" || !model.data.dontPlay;
+    return model.get('data').dontPlay === "false" || !model.get('data').dontPlay;
   },
   preloadAssets: function() {
     console.log('preloadAssets')
     return new RSVP.Promise((resolve, reject)=> {
       let model = this.get('model');
-      if(!isEmpty(model.data.assets))
+      if(!isEmpty(model.get('data').assets))
       {
         this.set("hudMessage", "Loading Assets");
         this.set("showHUD", true);
-        this.get('assetService').preloadAssets(model.data.assets, model.id)
+        this.get('assetService').preloadAssets(model.get('data').assets, model.id)
         .then(()=>{
           this.showFeedback("");
           this.set("showHUD", false);
@@ -687,7 +687,7 @@ export default Controller.extend({
         const savedVals = this.get('savedVals');
         let model = this.get('model');
         const editor = this.get('editor');
-        const mainText = model.data.source;
+        const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
         console.log("updateiframe", model.id)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
@@ -751,9 +751,9 @@ export default Controller.extend({
   },
   updateLinting: function() {
     const doc = this.get('currentDoc');
-    const ruleSets = this.get('autocomplete').ruleSets(doc.data.type);
+    const ruleSets = this.get('autocomplete').ruleSets(doc.get('data').type);
     const editor = this.get('editor');
-    const mainText = doc.data.source;
+    const mainText = doc.get('data').source;
     const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
     const errors = this.get('autocomplete').lintingErrors(messages);
     editor.getSession().setAnnotations(errors);
@@ -789,8 +789,8 @@ export default Controller.extend({
 
       if(!this.get('opsPlayer').atHead())
       {
-        console.log("not at head", doc.data.source, session.getValue());
-        this.submitOp({p: ["source", 0], sd: doc.data.source});
+        console.log("not at head", doc.get('data').source, session.getValue());
+        this.submitOp({p: ["source", 0], sd: doc.get('data').source});
         this.submitOp({p: ["source", 0], si: session.getValue()});
       }
       else
@@ -873,7 +873,7 @@ export default Controller.extend({
     const currentUser = this.get('sessionAccount').currentUserId;
     let model = this.get('model');
     console.log("setCanEditDoc")
-    if(isEmpty(currentUser) || isEmpty(model.data))
+    if(isEmpty(currentUser) || isEmpty(model.get('data')))
     {
       console.log("NO USER OR MODEL")
       this.set('canEditDoc', false);
@@ -881,11 +881,11 @@ export default Controller.extend({
       this.set('isOwner', false);
       return;
     }
-    if(currentUser != model.data.ownerId)
+    if(currentUser != model.get('data').ownerId)
     {
       console.log("NOT OWNER")
       this.set('isOwner', false);
-      if(model.data.readOnly)
+      if(model.get('data').readOnly)
       {
         console.log("READ ONLY")
         this.set('canEditDoc', false);
@@ -1002,7 +1002,7 @@ export default Controller.extend({
   updateEditStats: function() {
     return new RSVP.Promise((resolve, reject) => {
       let model = this.get('model');
-      let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
+      let stats = model.get('data').stats ? model.get('data').stats : {views:0,forks:0,edits:0};
       stats.edits = parseInt(stats.edits) + this.get('editCtr');
       const actions = [
         this.get('documentService').updateDoc(model.id, 'stats', stats),
@@ -1193,7 +1193,7 @@ export default Controller.extend({
     flagDocument() {
       this.get('documentService').flagDoc().then(()=> {
         let model = this.get('model');
-        let flags = parseInt(model.data.flags);
+        let flags = parseInt(model.get('data').flags);
         if(flags < 2)
         {
           flags = flags + 1;
@@ -1214,7 +1214,7 @@ export default Controller.extend({
       this.fetchChildren().then(()=> {
         const currentUser = this.get('sessionAccount').currentUserName;
         let model = this.get('model');
-        let stats = model.data.stats ? model.data.stats : {views:0,forks:0,edits:0};
+        let stats = model.get('data').stats ? model.get('data').stats : {views:0,forks:0,edits:0};
         stats.forks = parseInt(stats.forks) + 1;
         let actions = [this.get('documentService').updateDoc(model.id, 'stats', stats),
                       this.get('documentService').forkDoc(model.id, this.get('children'))];
@@ -1253,7 +1253,7 @@ export default Controller.extend({
       console.log("assetComplete", e);
       $("#asset-progress").css("display", "none");
       const doc = this.get('model');
-      let newAssets = doc.data.assets;
+      let newAssets = doc.get('data').assets;
       newAssets.push(e);
       this.get('documentService').updateDoc(doc.id, "assets", newAssets)
       .then(()=>{
@@ -1277,7 +1277,7 @@ export default Controller.extend({
         if (confirm('Are you sure you want to delete?')) {
           this.get('assetService').deleteAsset(asset).then(()=> {
             const doc = this.get('model');
-            let newAssets = doc.data.assets;
+            let newAssets = doc.get('data').assets;
             newAssets = newAssets.filter((oldAsset) => {
                 console.log(oldAsset.fileId,asset)
                 return oldAsset.fileId !== asset
@@ -1318,8 +1318,8 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         let model = this.get('model');
-        model.data.isPrivate = !model.data.isPrivate;
-        this.get('documentService').updateDoc(model.id, 'isPrivate', model.data.isPrivate)
+        model.get('data').isPrivate = !model.get('data').isPrivate;
+        this.get('documentService').updateDoc(model.id, 'isPrivate', model.get('data').isPrivate)
         .catch((err)=>{
           console.log('error updating doc', err);
         });
@@ -1329,8 +1329,8 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         let model = this.get('model');
-        model.data.readOnly = !model.data.readOnly;
-        this.get('documentService').updateDoc(model.id, 'readOnly', model.data.readOnly)
+        model.get('data').readOnly = !model.get('data').readOnly;
+        this.get('documentService').updateDoc(model.id, 'readOnly', model.get('data').readOnly)
         .catch((err)=>{
           console.log('error updating doc', err);
         });
@@ -1519,7 +1519,7 @@ export default Controller.extend({
         var currentDocId = "";
         if(!isEmpty(doc))
         {
-          currentDocId = doc.data.documentId
+          currentDocId = doc.get('data').documentId
         }
         if(docId != currentDocId)
         {

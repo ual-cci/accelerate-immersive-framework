@@ -1,0 +1,202 @@
+
+<p class = "tutorial-text">
+How about using a machine intelligence technique to help us to program a modular synthesizer? In this guide, we'll show you how.
+</p>
+<h2>
+Introduction
+</h2>
+<p class = "tutorial-text">
+A lot of recent machine learning systems that you may have read about use things called deep neural networks to do creative things like writing music, generating images and so on. But there are many other techniques used to allow computers to do seemingly smart things. One of these is called a genetic algorithm. With genetic algorithms, we can actually breed things inside a computer, just like we might breed new varieties of crops or animals. The idea is to work with a small population of things (in this case, sounds) which we are going breed and mutate until we are satisfied with the results.
+</p>
+<p class = "tutorial-text">
+In this example, we are going to use a genetic algorithm to breed virtual modular synthesizer patches. We have created a simple Javascript library for you called Evolib that makes this possible.
+</p>
+<h2>
+Part 1: getting started - make a sound
+</h2>
+<p class = "tutorial-text">
+Let's get started by creating a random synthesizer patch, then we'll find out how to improve it through selective breeding.
+</p>
+<p class = "tutorial-text">
+Here is some starter code which just pulls in the evolib library. You'll need to upload evolib.js as a file asset:
+</p>
+<pre>
+<code>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;script src="evolib.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now we are ready to tell evolib to make some sounds. Put this code in the body tag somewhere - this creates a new population of 5 sounds, each sound has 30 modules. The modules might be oscillators or filters, and can be wired to eachother in different ways. The modules and wiring starts off totally random.
+</p>
+<pre>
+  <code>
+&lt;script language="javascript" type="text/javascript"&gt;
+Evolib.newPopulation(5, 30); // 5 sounds, 30 modules each
+&lt;/script&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now we want to listen to our sounds.
+</p>
+<p class = "tutorial-text">
+Web browsers don't let us play any sound unless the user has clicked on something first. To listen to one of the sounds then, we need to add a button and tell it what to do when they click it.
+</p>
+<p class = "tutorial-text">
+Add this to the body tag:
+
+<pre>
+  <code>
+&lt;button onclick="Evolib.play(0)"&gt;Listen to sound 0&lt;/button&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now how about another button to stop the sound?
+</p>
+
+<pre>
+  <code>
+&lt;button onclick="Evolib.stop(0)"&gt;Stop the sound&lt;/button&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Sometimes, the sounds are silent. Imagine if you randomly wired up 30 randomly selected oscillators and filters - would it always make a sound? Let's add another button that let's us generate a new random sound easily so we can keep pressing it until we get a decent sound.
+</p>
+<pre>
+  <code>
+&lt;button onclick="Evolib.newPopulation(5, 30);  Evolib.play(0)"&gt;new sound&lt;/button&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Note that this button generates a new population, then plays the first sound.
+</p>
+<p class = "tutorial-text">
+Here is the complete code so far
+</p>
+{{embedded-project docId = "a990f234-5769-c556-b49a-0154204a016a" height = "350px"}}
+</p>
+<h2>
+Part 2: mutate the sound
+</h2>
+<p class = "tutorial-text">
+Now we have some neat sounds, we are going to start using evolutionary computation to mutate them. Let's get straight to mutating sounds, then we'll think about what is going on.
+</p>
+<p class = "tutorial-text">
+Add this to your set of buttons:
+</p>
+<pre>
+  <code>
+  &lt;button
+   onclick="Evolib.evolve([0], 0.1);Evolib.play(0)"&gt;
+     mutate
+  &lt;/button&gt;
+</code>
+</pre>
+Try clicking the new sound button until you get a decent sound. Then click on mutate repeatedly, and you should hear the sound changing slightly. This is the sound being mutated.
+
+The important code here is the call to Evolib.evolve:
+<pre>
+  <code>
+Evolib.evolve([0], 0.1);
+</code>
+</pre>
+<p class = "tutorial-text">
+It takes two arguments - the first is a list of numbers (in this case, just 0) which are the sounds we want to 'evolve'. The second is the mutation rate. The higher the mutation rate, the more the sound will change each time you mutate it.
+</p>
+<p class = "tutorial-text">
+The power of genetic algorithms lies in the fact that they represent the things you are evolving in a form that can be mutated, and even crossed with other things. This is very similar to how plants and animals are described in their DNA and changing the DNA changes the plant or the animal.
+</p>
+<p class = "tutorial-text">
+The DNA of an evolib sound is a list of numbers, like this: 0.5, 0.125, 0.255 etc. One number might say what kind of module it is (&lt; 0.5? its a filter. &gt;= 0.5? its an oscillator). Another number might set up the initial state of the module, e.g. the filter cutoff frequency (0-5000Hz). Other numbers describe how that module should be wired to other modules, by specifying a connection range.
+</p>
+<p class = "tutorial-text">
+Here is the complete code:
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "afdc780-e5f8-3ff1-0e31-eb76859c6703" height = "350px"}}
+</p>
+<h2>
+Part 3: selecting sounds for breeding
+</h2>
+<p class = "tutorial-text">
+So far, we have only been working with a single sound and mutating it. Now we are going to get access to a population of sounds, so we can choose which mutant we want to breed from.
+</p>
+<p class = "tutorial-text">
+Try adding some more play buttons to the program, so your play buttons look like this:
+</p>
+<pre>
+  <code>
+  &lt;button onclick="Evolib.play(0)"br&gt;play 1&lt;/buttonbr&gt;
+&lt;br&gt;
+  &lt;button onclick="Evolib.play(1)"br&gt;play 1&lt;/buttonbr&gt;
+&lt;brbr&gt;
+  &lt;button onclick="Evolib.play(2)"br&gt;play 1&lt;/buttonbr&gt;
+&lt;brbr&gt;
+  &lt;button onclick="Evolib.play(3)"br&gt;play 2&lt;/buttonbr&gt;
+&lt;brbr&gt;
+  &lt;button onclick="Evolib.play(4)"br&gt;play 3&lt;/buttonbr&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now you can listen to all 5 sounds in the population. Try clicking the buttons. You will hear that they all sound different. That is because they are all random sounds.
+</p>
+<p class = "tutorial-text">
+Now let's add buttons which allow us to choose which sound we want to create the next population from, for example this one selects sound 1 for mutation:
+</p>
+<pre>
+  <code>
+  &lt;button onclick="Evolib.play(1)"br&gt;play 1&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.evolve([1], 0.1);Evolib.play(0)"br&gt;mutate&lt;/buttonbr&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+You'll end up with something like this, which shows the full set of buttons:
+</p>
+<pre>
+  <code>
+  &lt;button onclick="Evolib.play(0)"br&gt;play 0&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.evolve([0], 0.1);Evolib.play(0)"&gt;mutate&lt;/buttonbr&gt;
+  &lt;brbr&gt;
+  &lt;button onclick="Evolib.play(1)"&gt;play 1&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.evolve([1], 0.1);Evolib.play(0)"&gt;mutate&lt;/buttonbr&gt;
+  &lt;brbr&gt;
+  &lt;button onclick="Evolib.play(2)"&gt;play 2&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.evolve([2], 0.1);Evolib.play(0)"&gt;mutate&lt;/buttonbr&gt;
+  &lt;brbr&gt;
+  &lt;button onclick="Evolib.play(3)"&gt;play 3&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.evolve([3], 0.1);Evolib.play(0)"&gt;mutate&lt;/buttonbr&gt;
+  &lt;brbr&gt;
+  &lt;button onclick="Evolib.play(4)"&gt;play 4&lt;/buttonbr&gt;
+    &lt;button onclick="Evolib.evolve([4], 0.1);Evolib.play(0)"&gt;mutate&lt;/buttonbr&gt;
+&lt;brbr&gt;
+  &lt;brbr&gt;
+  &lt;button onclick="Evolib.stop()"&gt;stop&lt;/buttonbr&gt;
+  &lt;button onclick="Evolib.newPopulation(5, 30);  Evolib.play(0)"&gt;new sounds&lt;/buttonbr&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+Now you can click on the mutate button to select which of the sounds you want. After clicking mutate, click on the play buttons to hear mutations of the sound you selected for mutation. Keep going and you'll gradually breed a set of sounds. If they change too little, increase the mutation rate:
+</p>
+<pre>
+  <code>
+Evolib.evolve([0], 0.2); // 0.2 is a higher mutation rate
+</code>
+</pre>
+<p class = "tutorial-text">
+Here is the complete code:
+</p>
+<p class = "tutorial-text">
+  {{embedded-project docId = "723f4078-b9c2-de8d-4970-fb41609213e2" height = "350px"}}
+</p>
+<h2>
+Next part:
+</h2>
+<p class = "tutorial-text">
+In the next part, we'll look at how to add a record button, how to gain more control of the evolutionary process and how to change the characteristics of the available modules.
+</p>

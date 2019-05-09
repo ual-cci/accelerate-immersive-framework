@@ -1,0 +1,68 @@
+<h2>Part 1: Musical Machine Listening</h2>
+<p class = "tutorial-text">
+Machine listening is the attempt to make computers hear sound intelligently. We often emulate the human hearing system, though engineering may not mirror human anatomy, and may deviate from physiological function, including purely mathematical algorithms to extract some sort of further information from audio signals. The interest of the MIMIC project is in musical machine listening, that is, the computer understanding of musical audio signals, and the Musical Machine Listening Library introduced here (subsequently MMLL) is a javascript library to do just that, in the web browser.
+</p>
+
+<p class = "tutorial-text">
+The library provides a variety of higher level musical listening facilities for computer music, such as onset detection, chord detection, beat tracking and auditory modelling. All the listening objects can run live, to benefit the creation of interative music systems and live electronic music compositions. They can also render audio faster than realtime if called outside of a live processing callback, suitable for the analysis of audio files for machine learning purposes. The library also includes analysis and resynthesis capability from the inverse Fourier transform and via the tracking phase vocoder (which identifies sinusoidal partial trails within audio signals).
+</p>
+
+<h2>Part 2: Feature Extracting</h2>
+<p class = "tutorial-text">
+The first embeded example here is a feature extractor from live audio. You can choose as input either a sound file from your hard drive, or an attached microphone. Note that you will need to give permission for the microphone to run within a web browser, for security reasons. A single feature is extracted, the Sensory Dissonance (how rough sounding tha audio is, according to a perceptual model). If you selected an audio file, it will play back, but if you selected microphone the output audio will be silent to avoid feedback.
+</p>
+{{embedded-project docId = "f6a258e2-35c4-6b08-0bbf-07f334de613a" height = "300px"}}
+<p class = "tutorial-text">
+The second embeded example is a live spectral view, showing the results of a Fast Fourier Transform of successive snapshots of the input signal. The power spectrum and phase spectrum are both plotted, in linear frequency range. Most of the activity will tend to be on the left of the plot of the power spectrum, for normal audio sources, whose spectral content tends to drop off for higher frequencies. You can choose the gain for the output to hear or not hear the source signal (the default is silence).
+</p>
+{{embedded-project docId = "38c2887a-f8f3-5959-324c-7c0f176c0db7" height = "350px"}}
+<p class = "tutorial-text">
+The third embeded example is an onset detector, which reacts to percussive events in the input signal. If you are using live microphone near a speaker you may find headphones work best, to avoid feedback effects. An onset is indicated by a flashing colour change; changing the threshold adjusts the sensitivity of detection.
+</p>
+{{embedded-project docId = "fcdf62d8-a47b-1ddf-f16a-9cd09b328a65" height = "350px"}}
+<h2>Part 3: Making Music</h2>
+<p class = "tutorial-text">
+Once an input sound is analysed, you can synthesize output based on the features, work with machine learning to further classify or process inputs based on the features,and make generally responsive and interactive music systems for concerts, installations, websites, etc
+</p>
+
+<p class = "tutorial-text">Some more developed examples available on codecircle are linked now.</p>
+
+<p class = "tutorial-text">Spectral delay based on spectral resynthesis. The input is analysed by FFT, then particular spectral bins can be independently delayed and fed back on themselves to make a diffuse delayed filterbank.</p>
+{{embedded-project docId = "d5499af6-f4f3-2683-0c05-b700f1a9f1b1" height = "650px"}}
+<p class = "tutorial-text">bbcut, based on beat tracking. The input is cut up live into stuttering buffers, with the cut points determined by tracking of the primary metrical level in the music.</p>
+{{embedded-project docId = "a9e1808c-8c5e-2634-9f6f-d0197b123b34" height = "550px"}}
+<h2>Part 4: Getting Started With Code</h2>
+<p class = "tutorial-text">The library can be used just for the machine listening objects, used within your own audio callback (e.g., as part of a ScriptProcessorNode), or via a quick set-up frontend that hides Web Audio API details and  has you write setup and audio callback functions analogous to Processing's setup and draw.</p>
+
+<p class = "tutorial-text">The latter method is the one explained here, but expert Web Audio API people should find it easy enough to just take the analyzers for their own work. Only including the precompiled MMLL.js file is needed to deploy the library, though from the home directory of the library you can compile it afresh via the shell script provided (it is just a concatenation of the js source files).</p>
+
+<p class = "tutorial-text">The typical expectation of a machine listening object is that we are working at 44.1KHz sampling rate and that a mono (single channel) input block of samples will be provided for analysis. The objects deal with accumulating samples ready for processing (often via an FFT) themselves and the user doesn't have to worry about that part. However, objects should cope at other standard sampling rates such as 48KHz, 88.2KHz and 96 KHz, even if performance is sub-optimal (for example, the onset detector was developed based on evaluation over a corpus of 44.1KHz samples, so works best at this home rate).</p>
+
+<p class = "tutorial-text">
+  A minimal code example is reproduced below. Note how the machine listener object is prefixed with MMLL, and the SetUp function is passed the sampling rate, needed for initialising the listener. The CallBack is where the main action happens, as each new block of input samples is passed in. The input and output arguments hold MMLLInput and MMLLOutpu objects, which make the channels of input and output audio accessible, as well as a special input.monoinput which is a single channel ready for the listener. If a stereo sound file is loaded or two channel live input requested, the monoinput will be the average of the left and right channels. The output object assumes a stereo output for now, exposing the left and right channel data arrays.</p>
+<pre>
+  <code>
+var audioblocksize = 256; //lowest latency possible
+
+var setup = function SetUp(sampleRate) {
+  sensorydissonance = new MMLLSensoryDissonance(sampleRate);
+};
+
+var callback = function CallBack(input,output,n) {
+
+  var dissonance = sensorydissonance.next(input.monoinput);
+
+  console.log(dissonance);
+
+  for (i = 0; i &lt; n; ++i) {
+      output.outputL[i] = input.inputL[i];
+      output.outputR[i] = input.inputR[i];
+  }
+
+};
+
+var gui = new MMLLBasicGUISetup(callback,setup,audioblocksize,true,true);
+</code>
+</pre>
+<p class = "tutorial-text">
+  MMLL was developed by <a href="http://composerprogrammer.com/index.html">Nick Collins</a> as part of the AHRC funded MIMIC project (Musically Intelligent Machines Interacting Creatively). MMLL is released under an MIT license, see the included COPYING.txt file. The source code is available at <a href="https://github.com/sicklincoln/MMLL">github</a> though you can use it straight away from a web page just by linking to the <a href="https://raw.githubusercontent.com/sicklincoln/MMLL/master/MMLL.js">MMLL.js</a> source code file. The Examples folder provides a test example for each listener currently available in the library.</p>

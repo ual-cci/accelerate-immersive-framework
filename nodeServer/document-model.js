@@ -7,12 +7,9 @@ const fs = require('fs');
 const Gridfs = require('gridfs-stream');
 const guid = require('./uuid.js');
 const userAPI = require('./user-model.js');
-var mongoIP = "";
-var mongoPort = "";
-var contentDBName = "";
-var contentCollectionName = "";
+let contentDBName = "";
+let contentCollectionName = "";
 let mongoUri = "";
-var replicaSet = "";
 var shareDBMongo;
 var shareDB;
 var shareDBConnection;
@@ -22,17 +19,10 @@ var siteURL;
 
 var initDocAPI = function(server, app, config)
 {
-  mongoIP = config.mongoIP;
-  mongoPort = config.mongoPort;
   contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:config.contentDBName;
   contentCollectionName = config.contentCollectionName;
-  replicaSet = config.replicaSet;
-  console.log("ENVIRONMENT", process.env.NODE_ENV);
-  mongoUri = 'mongodb://'+mongoIP+':'+mongoPort+'/'+contentDBName;
-  if(replicaSet)
-  {
-    mongoUri = mongoUri + '?replicaSet='+replicaSet;
-  }
+  console.log("DB:" + contentDBName + "/" + contentCollectionName);
+  mongoUri = config.mongoUri;
   startAssetAPI(app);
   siteURL = config.siteURL;
   shareDBMongo = require('sharedb-mongo')(mongoUri);
@@ -59,7 +49,7 @@ function startAssetAPI(app)
     }
     else
     {
-      console.log("Connected successfully to server");
+      console.log("Connected successfully to asset database");
       const db = client.db(contentDBName);
 
       gridFS = Gridfs(db, mongo);
@@ -122,8 +112,10 @@ function startAssetAPI(app)
           {
             let match = false;
             doc.data.assets.forEach((asset)=> {
-              if(asset.name == req.params.filename)
+
+              if(asset.name === req.params.filename)
               {
+                console.log(asset.name, asset.fileId)
                 var readstream = gridFS.createReadStream({
                   _id: asset.fileId
                 });
@@ -318,7 +310,7 @@ function startDocAPI(app)
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
-        console.log(err);
+        console.log("database error making document", doc);
         res.status(404).send("database error making document" + err);
         return;
       }
