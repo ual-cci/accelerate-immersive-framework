@@ -138,7 +138,7 @@ gcloud app deploy --no-promote
 
 This deploys a version but doesn’t direct any traffic to it, use the target url to test with local ember first.
 
-When you have tested and want to send traffic to the new version, use the GCP Console to migrate traffic 
+When you have tested and want to send traffic to the new version, use the GCP Console to migrate traffic. To do this, use the traffic splitting tool (set 100% to the new one, then stop the old one)
 
 https://console.cloud.google.com/appengine/versions
 
