@@ -1,0 +1,90 @@
+<p class = "tutorial-text">
+  Maximilian.js is a javascript library for sound analysis and synthesis. This document is a reference to the maxmilian.js API, illustrated with examples.
+</p>
+
+<h2>Quick Start</h2>
+
+Fork the seed project below to get started with maximilian.js
+
+<p class = "tutorial-text">
+{{embedded-project docId = "0a5dd670-06e0-8414-7967-ee732b7eee0f" width="250px" height="320px"}}
+</p>
+
+
+
+<h3>The maximilian() object</h3>
+
+<p class = "tutorial-text">To start maximilian.js, create an instance of the maximilian object, and then use this to create an audio engine.</p>
+
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        var maxi = maximilian();
+        var maxiEngine = new maxi.maxiAudio();
+      </code>
+    </pre>
+</div>
+
+
+<h3>The audio processing loop</h3>
+
+The maximilian audio engine collects audio through a callback function, which is called once per audio sample.  Browsers usually require that this function is initiated by the user (e.g. from a button press)
+
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        let playAudio = () => {
+          //start the audio engine
+          maxiEngine.init();
+
+          //audio code goes here!
+          maxiEngine.play = function() {
+            return osc1.saw(200);
+          }
+
+        }
+      </code>
+    </pre>
+</div>
+
+<h1>Reference</h1>
+
+<h2>maxiAudio</h2>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">init()</span>
+  initialise the audio engine
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">outputIsArray( isArray,  numChannels)</span>
+  <br>Call this is you need multichannel sound.
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">isArray</span>: true if multichannel audio is required
+  <br><span style="font-family:monospace">numChannels</span>: 2, 4, or 8
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "e722d5e6-131b-3e46-675e-48ab0a27bb77" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">loadSample(sampleUrl, maxiSample)</span>
+  <br>Load a sample from a url, into a maxiSample object.
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">sampleUrl</span>: the url of a sample
+  <br><span style="font-family:monospace">maxiSample</span>: a maxiSample object
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "29b924f0-7a1f-310a-7a7d-fc815f969f87" width="250px" height="320px"}}
+</p>
+
+
+
+<h2>Further information</h2>
+
+maximilian.js is transpiled from C++ code, so it runs with very high efficiency. You can find the source code on github at <a href="https://github.com/mimic-sussex/Maximilian/tree/Maximilian2">https://github.com/mimic-sussex/Maximilian/tree/Maximilian2</a>
