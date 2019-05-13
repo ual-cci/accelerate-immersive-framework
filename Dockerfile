@@ -1,4 +1,4 @@
-FROM node:9
+FROM node:10
 
 COPY nodeServer /home/mimic/nodeServer/
 COPY config.js /home/mimic/nodeServer/
