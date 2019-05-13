@@ -22,11 +22,12 @@ function startServer()
   app.use(express.json({limit: '50mb'}));
   app.use(express.urlencoded({extended: true, limit: '50mb'}));
   app.use(function(req, res, next) {
-  	res.header('Access-Control-Allow-Origin', req.get('Origin') || '*');
+    console.log("ACCESS CONTROL TEST", req.body, req.method);
+  	res.header('Access-Control-Allow-Origin', '*');
   	res.header('Access-Control-Allow-Credentials', 'true');
   	res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
   	res.header('Access-Control-Expose-Headers', 'Content-Length');
-  	res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
+  	res.header('Access-Control-Allow-Headers', 'Origin, Accept, Authorization, Content-Type, X-Requested-With, Range');
   	if (req.method === 'OPTIONS') {
   	    return res.sendStatus(200);
     } else {
@@ -76,6 +77,7 @@ function startServer()
       mongoContentUri = mongoContentUri + '?replicaSet='+replicaSet;
       mongoUserUri = mongoUserUri + '?replicaSet='+replicaSet;
     }
+    console.log(mongoContentUri, mongoUserUri)
   }
   else if(process.env.NODE_ENV === "production")
   {
