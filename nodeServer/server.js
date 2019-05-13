@@ -40,7 +40,6 @@ function startServer()
     res.send(200);
   });
 
-
   let contentDBName = config.contentDBName;
   let oauthDBName = config.oauthDBName;
   const contentCollectionName = config.contentCollectionName;
@@ -50,8 +49,10 @@ function startServer()
 
   let mongoContentUri = "";
   let mongoUserUri = "";
+  console.log("NODE_ENV", process.env.NODE_ENV)
   if(process.env.NODE_ENV === "local" || process.env.NODE_ENV == "test")
   {
+    console.log("setting local/test env");
     contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:contentDBName;
     oauthDBName = process.env.NODE_ENV == "test" ? config.test_oauthDBName:oauthDBName;
     const mongoIP = config.local_mongoIP;
@@ -61,6 +62,7 @@ function startServer()
   }
   else if (process.env.NODE_ENV === "development")
   {
+    console.log("setting development env");
     const mongoIP = config.development_mongoIP;
     const mongoPort = config.development_mongoPort;
     const replicaSet = config.development_replicaSet;
@@ -77,6 +79,7 @@ function startServer()
   }
   else if(process.env.NODE_ENV === "production")
   {
+    console.log("setting production env");
     const mongoIP = config.production_mongoIP;
     const mongoPort = config.production_mongoPort;
     const replicaSet = config.production_replicaSet;
