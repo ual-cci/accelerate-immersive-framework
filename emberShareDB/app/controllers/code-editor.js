@@ -56,7 +56,7 @@ export default Controller.extend({
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:"700px",
+  aceW:"",
   savedVals:null,
   hideEditor:'false',
   embed:'false',
@@ -73,11 +73,13 @@ export default Controller.extend({
   isPlayingOps:false,
   scrollPositions:{},
   isRoot:true,
+  isMobile:false,
 
   showHUD:true,
   hudMessage:"Loading...",
 
   //Computed parameters
+
   aceStyle: computed('aceW', function() {
     this.updateDragPos();
     const aceW = this.get('aceW');
@@ -103,6 +105,8 @@ export default Controller.extend({
     this._super();
     this.get('resizeService').on('didResize', event => {
       const display = this.get('showCodeControls') ? "inline":"none"
+      this.set('isMobile', !(this.get('mediaQueries').isDesktop) && !this.get('isEmbeddedWithCode'));
+      console.log("isMobile", this.get('isMobile'));
       if(this.get("mediaQueries.isDesktop"))
       {
         this.updateDragPos()
@@ -125,11 +129,14 @@ export default Controller.extend({
     const embedWithCode = this.get('showCode') == "true";
     this.set('isEmbedded', embed);
     this.set('isEmbeddedWithCode', embedWithCode);
-    this.set('showCodeControls', !(embed && !embedWithCode) || ((this.get('mediaQueries').isDesktop) && !embedWithCode));
+    this.set('isMobile', !(this.get('mediaQueries').isDesktop) && !this.get('isEmbeddedWithCode'));
+    console.log("isMobile", this.get('isMobile'));
+    this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
     var iframe = document.getElementById("output-iframe");
     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     iframeDocument.body.style.padding = "0px";
     iframeDocument.body.style.margin = "0px";
+    this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
     if(embed)
     {
       document.getElementById("main-code-container").style.height="97vh"
@@ -157,11 +164,11 @@ export default Controller.extend({
   updateDragPos: function() {
     const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
     //const aceW = document.getElementById('ace-container').clientWidth;
-    //console.log("drag")
+    console.log("drag", (aceW - 31) + "px")
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
-      drag.style.right =(aceW - 31) + "px";
+      drag.style.right = (aceW - 31) + "px";
     }
     const tab = document.getElementById('project-tabs');
     if(!isEmpty(tab))
@@ -1117,7 +1124,7 @@ export default Controller.extend({
     }
   },
   hideCode: function(doHide) {
-    const container = document.getElementById('ace-container');
+    let container = document.getElementById('ace-container');
     $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
     this.set("isDragging", false);
@@ -1125,9 +1132,9 @@ export default Controller.extend({
     $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
     setTimeout(()=> {
-      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
-      const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
+      const w = ($(window).width() / 2)  + "px";
       this.set('isShowingCode', !doHide);
+      console.log("setting aceW to ", doHide ? "30px" : w);
       this.set('aceW', doHide ? "30px" : w);
     }, 200)
   },

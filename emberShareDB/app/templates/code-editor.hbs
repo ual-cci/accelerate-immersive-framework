@@ -169,7 +169,9 @@
     {{/if}}
     {{/if}}
     <div id = "main-code-container">
-      {{#if mediaQueries.isDesktop}}
+      {{#if isMobile}}
+      <div></div>
+      {{else}}
       {{#if showHUD}}
         {{loading-hud message = hudMessage hideWheel = isEmbedded}}
       {{/if}}
@@ -195,7 +197,9 @@
         {{/if}}
       </div>
       {{/if}}
-        {{#if mediaQueries.isDesktop}}
+        {{#if isMobile}}
+          <div></div>
+        {{else}}
         {{#if showCodeControls}}
         <div id = "drag-container">
           {{#if isShowingCode}}
@@ -235,51 +239,57 @@
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" frameBorder="0" srcdoc={{renderedSource}}></iframe>
       </div>
-      <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        {{#if isEmbeddedWithCode}}
+      {{#if isMobile}}
         <div></div>
-        {{else}}
-        {{#if showReadOnly}}
-        {{#if isShowingCode}}
-        <div class = "code-warning-overlay" id = "read-only-overlay">
-          <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
-          {{#if session.isAuthenticated}}
-          {{#bs-button
-            class = "clear-text-btn"
-            id = "read-only-fork-button"
-            onClick=(action "forkDocument") }}
-            Fork
-          {{/bs-button}}
+      {{else}}
+        <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+          {{#if isEmbeddedWithCode}}
+            <div></div>
+          {{else}}
+            {{#if showReadOnly}}
+            {{#if isShowingCode}}
+              <div class = "code-warning-overlay" id = "read-only-overlay">
+                <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
+                {{#if session.isAuthenticated}}
+                  {{#bs-button
+                    class = "clear-text-btn"
+                    id = "read-only-fork-button"
+                    onClick=(action "forkDocument") }}
+                    Fork
+                  {{/bs-button}}
+                {{/if}}
+              </div>
+            {{/if}}
+            {{/if}}
           {{/if}}
-        </div>
-        {{/if}}
-        {{/if}}
-        {{/if}}
-        {{#if showConnectionWarning}}
-          <div class = "code-warning-overlay" id = "connection-warning-container">
-               <p id = "connection-warning-text"> {{connectionWarning}}</p>
+          {{#if showConnectionWarning}}
+            <div class = "code-warning-overlay" id = "connection-warning-container">
+                 <p id = "connection-warning-text"> {{connectionWarning}}</p>
+            </div>
+          {{/if}}
+
+          {{ember-ace
+            minLines = 40
+            maxLines = 10000
+            value=value
+            higglightActiveLine = true
+            ready=(action 'editorReady')
+            theme='ace/theme/monokai'
+            enableDefaultAutocompletion=true
+            enableLiveAutocompletion=true
+            enableBasicAutocompletion=true
+            suggestCompletions = (action 'suggestCompletions')
+          }}
           </div>
         {{/if}}
-
-        {{ember-ace
-          minLines = 40
-          maxLines = 10000
-          value=value
-          higglightActiveLine = true
-          ready=(action 'editorReady')
-          theme='ace/theme/monokai'
-          enableDefaultAutocompletion=true
-          enableLiveAutocompletion=true
-          enableBasicAutocompletion=true
-          suggestCompletions = (action 'suggestCompletions')
-        }}
-        </div>
       </div>
-      {{#if mediaQueries.isDesktop}}
-      {{#if isEmbedded}}
-      <div></div>
+      {{#if isMobile}}
+        <div></div>
       {{else}}
-      <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
-      {{/if}}
+        {{#if isEmbedded}}
+          <div></div>
+        {{else}}
+          <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+        {{/if}}
       {{/if}}
 </div>
