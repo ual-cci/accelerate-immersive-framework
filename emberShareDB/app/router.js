@@ -1,7 +1,8 @@
 import EmberRouter from '@ember/routing/router';
 import config from './config/environment';
+import GoogleAnalyticsRoute from 'ember-tracker/mixins/google-analytics-route';
 
-const Router = EmberRouter.extend({
+const Router = EmberRouter.extend(GoogleAnalyticsRoute, {
   location: config.locationType,
   rootURL: config.rootURL
 });
