@@ -38,8 +38,9 @@ export default Service.extend({
             let children = parentDoc.data.children;
             children.push(response.id);
             console.log("updating", parent, children)
-            this.updateDoc(parent, "children", children)
-            .then(resolve(response)).catch((err)=>{console.log(err)});
+            this.updateDoc(parent, "children", children).then(()=> {
+              resolve(response);
+            }).catch((err)=>{console.log(err)});
           }).catch((err)=>{console.log(err)});
         }
         else
