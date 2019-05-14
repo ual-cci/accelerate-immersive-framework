@@ -41,13 +41,12 @@
 {{#if mediaQueries.isXs}}
 <div></div>
 {{else}}
-
  {{/if}}
    {{#if session.isAuthenticated}}
       <div id = "login-container">
         <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
         {{#if sessionAccount.currentUserName}}
-          <p id = "signed-in-label" class="navbar-text pull-right">logged in as {{sessionAccount.currentUserName}}</p>
+          <a {{action 'login'}} id = "signed-in-label" class="navbar-text pull-right">logged in as {{sessionAccount.currentUserName}}</a>
         {{/if}}
       </div>
     {{#if mediaQueries.isDocs}}

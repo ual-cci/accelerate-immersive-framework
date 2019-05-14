@@ -37,6 +37,9 @@ export default Controller.extend({
     thumbnailId:"front-page.png"},
     //evolib
     {docid:"3e67cfd2-c171-5bf1-db4c-a5b0cde68e7e",
+    thumbnailId:"hybrid.jpeg"},
+    //conceptualr synth
+    {docid:"83b58e5e-487f-fd88-158e-239d85202bce",
     thumbnailId:"hybrid.jpeg"}
   ],
   actions: {
