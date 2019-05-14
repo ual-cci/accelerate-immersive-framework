@@ -74,6 +74,12 @@ h2 {
   text-decoration: underline;
 }
 
+$mimic-orange:#ED3D05;
+$mimic-yellow:#FFCE00;
+$mimic-green:#0ED779;
+$mimic-pink:#F79994;
+$mimic-blue:#4D42EB;
+
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
@@ -377,22 +383,11 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-item {
   padding:12px 10px 10px 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
   margin:5px 5px 5px 5px;
   cursor:pointer;
   font-size: 14pt;
   font-weight: bold;
   overflow: hidden;
-}
-
-.filter-item:hover {
-  border-style: solid;
-  border-color: white;
-  border-width: 1px;
 }
 
 .filter-text {
@@ -425,29 +420,22 @@ input[id="docName"]:-ms-input-placeholder {
 .filter-text-tag-item {
 }
 
-/* orange */
+
+
 #tab0.tab-item {
-  background-color: #ED3D05;
+  background-color: $mimic-orange;
 }
-
-/* yellow */
 #tab1.tab-item {
-  background-color: #FFCE00;
+  background-color: $mimic-yellow;
 }
-
-/* green rgb(14, 251, 121)*/
 #tab2.tab-item {
-  background-color: #0ED779;
+  background-color: $mimic-green;
 }
-
-/* pink */
 #tab3.tab-item {
-  background-color: #F79994;
+  background-color: $mimic-pink;
 }
-
-/* blue */
 #tab4.tab-item {
-  background-color: #4D42EB;
+  background-color: $mimic-blue
 }
 
 .tab-btn:hover {
@@ -1633,10 +1621,65 @@ input[id="searchTerm"]:-ms-input-placeholder {
   font-size: 14pt;
 }
 
+#tile0.example-tile-title{
+  color: $mimic-orange;
+}
+#tile1.example-tile-title  {
+  color: $mimic-yellow;
+}
+#tile2.example-tile-title  {
+  color: $mimic-green;
+}
+#tile3.example-tile-title {
+  color: $mimic-pink;
+}
+#tile4.example-tile-title {
+  color: $mimic-blue
+}
+//
+// #tile0.example-tile-container {
+//   border-color: $mimic-orange;
+// }
+// #tile1.example-tile-container   {
+//   border-color: $mimic-yellow;
+// }
+// #tile2.example-tile-container   {
+//   border-color: $mimic-green;
+// }
+// #tile3.example-tile-container  {
+//   border-color: $mimic-pink;
+// }
+// #tile4.example-tile-container  {
+//   border-color: $mimic-blue
+// }
+
+#tile0.example-color {
+  background-color: $mimic-orange;
+}
+#tile1.example-color  {
+  background-color: $mimic-yellow;
+}
+#tile2.example-color  {
+  background-color: $mimic-green;
+}
+#tile3.example-color  {
+  background-color: $mimic-pink;
+}
+#tile4.example-color  {
+  background-color: $mimic-blue
+}
+
 #example-container {
   max-width: 950px;
   margin:auto!important;
   padding-top:70px;
+}
+
+.example-tile-container {
+  height:300px;
+  padding: 5px;
+  cursor: pointer;
+  max-width: 300px;
 }
 
 .example-tile-hover {
@@ -1646,6 +1689,16 @@ input[id="searchTerm"]:-ms-input-placeholder {
   top:0;
   left:0;
   background-color: rgba(255,255,255,0);
+}
+
+.example-desc-container {
+  height:50%;
+  overflow: hidden;
+}
+
+.example-color {
+  height:50%;
+  background-color: blue;
 }
 
 .example-tile-hover:hover {
@@ -1660,12 +1713,29 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 .example-tile-title {
   width:100%;
-  height:100%;
+  height:50px;
   font-size: 20pt;
+  overflow:hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.example-tile-tag {
+  width:auto;
+  height:50px;
+  font-size: 13pt;
+  display: inline;
   overflow:hidden;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background-color: lightgray;
+  border-radius: 10px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .loading-wheel {
