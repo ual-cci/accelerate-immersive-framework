@@ -1,5 +1,5 @@
 <div id = "example-container" class = "row">
-{{#each examples as |example|}}
-{{example-tile onClick = (action 'onClick' example) example = example}}
-{{/each}}
+  {{#each examples as |example index|}}
+    {{example-tile onClick = (action 'onClick' example) example = example index = index}}
+  {{/each}}
 </div>
