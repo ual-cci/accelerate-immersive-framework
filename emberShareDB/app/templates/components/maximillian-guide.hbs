@@ -255,6 +255,64 @@ Play and manipulate sound samples.  Load sample data from a url, using loadSampl
 
 
 
+<h2>maxiFilter</h2>
+
+<p class = "tutorial-text">
+Various filters
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">lores(input, cutoff, resonance) </span>
+  <br>A lowpass resonant filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: the cutoff frequency (Hz)
+    <br><span style="font-family:monospace">resonance</span>: from 0 (low resonance) upwards
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "42c8411a-f380-1a62-6ee5-ffe010548a03" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">hires(input, cutoff, resonance) </span>
+  <br>A highpass resonant filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: the cutoff frequency (Hz)
+    <br><span style="font-family:monospace">resonance</span>: from 0 (low resonance) upwards
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "97c4239d-0a15-9304-0988-96f5c1f1748f" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">lopass(input, cutoff) </span>
+  <br>A onepole lowpass filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">hipass(input, cutoff) </span>
+  <br>A onepole highpass filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: between 0 and 1
+  </div>
+</p>
+
+
+
+
+
+
+
+
+
+
 <h2>Further information</h2>
 
 maximilian.js is transpiled from C++ code, so it runs with very high efficiency. You can find the source code on github at <a href="https://github.com/mimic-sussex/Maximilian/tree/Maximilian2">https://github.com/mimic-sussex/Maximilian/tree/Maximilian2</a>
