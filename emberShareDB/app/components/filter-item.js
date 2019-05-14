@@ -12,7 +12,7 @@ export default Component.extend({
   },
   updateAnimationState() {
     this.killAnimation();
-    if(this.get('filter').isSelected && !this.get('filter').id.includes('tag'))
+    if(this.get('isSelected'))
     {
       this.set('animationInterval', setInterval(()=> {
         var sh = this.get('shapes')
@@ -53,7 +53,7 @@ export default Component.extend({
     }
   },
   initShapes() {
-    if(isEmpty(this.get('shapes')) && !this.get('filter').id.includes('tag'))
+    if(isEmpty(this.get('shapes')))
     {
       var sh = [];
       var r;
@@ -67,7 +67,7 @@ export default Component.extend({
       var yStart = 0;
 
       //CIRCLE
-      if(this.get('filter').id == "date" || this.get('filter').id == "edits")
+      if(this.get('colourId') == "tile0" || this.get('colourId') == "tile3")
       {
         r = 8;
         xStart = 20;
@@ -78,7 +78,7 @@ export default Component.extend({
         isCircle = true;
       }
       //RECT
-      else if (this.get('filter').id == "views" || this.get('filter').id == "updated")
+      if(this.get('colourId') == "tile1" || this.get('colourId') == "tile4")
       {
         r = 15;
         xShift = 2 * r;
@@ -91,7 +91,7 @@ export default Component.extend({
       //TRIANGLE
       else
       {
-        r = 20;
+        r = 10;
         xShift = 2 * r;
         yShift = r * 0.75;
         xIndent = r;
@@ -134,21 +134,17 @@ export default Component.extend({
   },
   willDestroyElement(){
     this._super(...arguments);
-    //this.killAnimation();
+    this.killAnimation();
   },
   didUpdateAttrs() {
     this._super(...arguments);
-    //this.initShapes();
-    //this.updateAnimationState();
+    this.initShapes();
+    this.updateAnimationState();
   },
   didReceiveAttrs() {
     this._super(...arguments);
-    //this.initShapes();
+    this.initShapes();
   },
   actions: {
-    onFilter() {
-      console.log("FILTER", this.get('filter').id)
-      this.get('onFilter')(this.get('filter'));
-    },
   }
 });
