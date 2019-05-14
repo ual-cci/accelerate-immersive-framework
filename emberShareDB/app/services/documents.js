@@ -35,7 +35,6 @@ export default Service.extend({
         {
           console.log("NOT A PARENT, updating parent with myself as a child");
           this.get('store').findRecord('document', parent, { reload: true }).then((parentDoc) => {
-
             let children = parentDoc.data.children;
             children.push(response.id);
             console.log("updating", parent, children)
@@ -107,7 +106,7 @@ export default Service.extend({
           console.log("got doc, setting field", field, value)
           doc.set(field, value);
           doc.save().then((newDoc)=> {
-            console.log("updated successfully")
+            console.log("updated", field, "successfully to", value);
             resolve(newDoc);
           }).catch((err)=>{
             console.log("documentservice, updateDoc1", err);

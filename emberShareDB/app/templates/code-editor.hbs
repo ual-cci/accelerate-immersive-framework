@@ -39,7 +39,7 @@
             {{#if isRoot}}
             <div class="tooltip">
               <div class="dropdown">
-                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+                {{#bs-button style = "font-size:19pt;" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
                <div id="myDropdown" class="dropdown-content">
                 {{#each libraries as |lib|}}
                   {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
@@ -67,7 +67,7 @@
               <span class="tooltiptext">Download Project as Zip</span>
             </div>
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
+              {{#bs-button style = "font-size:16pt;" icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
               <span class="tooltiptext">Enter Fullscreen</span>
             </div>
           </div>
