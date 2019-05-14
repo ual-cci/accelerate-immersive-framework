@@ -346,6 +346,58 @@ A state variable filter
 
 
 
+<h2>maxiEnv</h2>
+
+<p class = "tutorial-text">
+An ADSR envelope
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setAttack(time)</span>
+  <br>The envelope's attack time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setDecay(time)</span>
+  <br>The envelope's decay time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setSustain(level)</span>
+  <br>The envelope's sustain level
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">level</span>: between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setRelease(time)</span>
+  <br>The envelope's release time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">adsr(level, trigger)</span>
+  <br>Get the next value from the envelope
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">level</span>: the overall level of the envelope; everything will be scaled by this value
+    <br><span style="font-family:monospace">trigger</span>: the envelope will begin attack when set to 1.0 and release when set to 0.0
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="320px"}}
+</p>
+
+
+
+
+
 
 
 <h2>Further information</h2>
