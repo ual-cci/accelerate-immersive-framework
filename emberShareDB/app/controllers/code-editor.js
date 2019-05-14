@@ -164,7 +164,7 @@ export default Controller.extend({
   updateDragPos: function() {
     const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
     //const aceW = document.getElementById('ace-container').clientWidth;
-    console.log("drag", (aceW - 31) + "px")
+    //console.log("drag", (aceW - 31) + "px")
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
@@ -629,7 +629,7 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.get('data').assets))
       {
-        this.set("hudMessage", "Loading Assets");
+        this.set("hudMessage", "");
         this.set("showHUD", true);
         this.get('assetService').preloadAssets(model.get('data').assets, model.id)
         .then(()=>{
@@ -1143,7 +1143,7 @@ export default Controller.extend({
       this.set('editor', editor);
       editor.setOption("enableBasicAutocompletion", true)
       console.log('editor ready', editor)
-      this.set("hudMessage", "Loading Code");
+      this.set("hudMessage", "");
       this.set("showHUD", true);
       this.clearTabs();
       editor.setReadOnly(true);

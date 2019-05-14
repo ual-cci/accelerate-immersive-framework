@@ -3,10 +3,11 @@
   {{input id='searchTerm' class = "limited-width-container" placeholder='search' value=searchTerm key-press=(action "search")}}
 </form>
 <div class = "row" id = "doc-create-container">
-{{#if session.isAuthenticated}}
+<!-- {{#if session.isAuthenticated}}
+  <p id = "create-doc-title">Start new project</p>
   <div id = "create-doc-form-container">
     <form id = "create-doc-form" {{action 'createNewDocument' on='submit'}}>
-      {{input id='create-doc-name' placeholder='document name' value=docName}}
+      {{input id='create-doc-name' placeholder='project title' value=docName}}
     </form>
   </div>
   <div id = "create-doc-btn-container">
@@ -15,7 +16,7 @@
   </div>
 {{else}}
   <div id = "create-doc-placeholder"></div>
-{{/if}}
+{{/if}} -->
 </div>
 {{#if feedbackMessage}}
   <label>{{feedbackMessage}}</label>
@@ -123,10 +124,10 @@
   </div>
   <div id = "page-nav-container">
   {{#if canGoBack}}
-    <button id = "prev-page-btn" {{action "prevPage"}}>Previous Projects</button>
+    <button class = "pagination-button" id = "prev-page-btn" {{action "prevPage"}}>Previous</button>
   {{/if}}
   {{#if canGoForwards}}
-    <button id = "next-page-btn"  {{action "nextPage"}}>More Projects</button>
+    <button class = "pagination-button" id = "next-page-btn"  {{action "nextPage"}}>Next</button>
   {{/if}}
   </div>
 </div>
