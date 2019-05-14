@@ -139,7 +139,6 @@ export default Component.extend({
   didUpdateAttrs() {
     this._super(...arguments);
     this.initShapes();
-    console.log("updateArrs")
     this.updateAnimationState();
   },
   didReceiveAttrs() {

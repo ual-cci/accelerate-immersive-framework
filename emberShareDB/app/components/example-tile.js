@@ -34,11 +34,9 @@ export default Component.extend({
       this.get('onClick')(this.get("example"))
     },
     onover() {
-      console.log("onover")
       this.set('isSelected', true);
     },
     onout() {
-      console.log("onout")
       this.set('isSelected', false);
     }
   }
