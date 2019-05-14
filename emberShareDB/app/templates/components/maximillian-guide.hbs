@@ -129,6 +129,12 @@ An oscillator with methods for a number of waveforms
   <span style="font-family:monospace">sinewave(frequency)</span>
   <br>outputs a sine wave at the given frequency between -1.0 & 1.0
 </p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "e31c952b-97ba-4fe0-5649-61c96bfeb812" width="250px" height="320px"}}
+</p>
+
+
 <p class = "tutorial-text">
   <span style="font-family:monospace">coswave(frequency)</span>
   <br>outputs a cosine wave at the given frequency between -1.0 & 1.0
@@ -178,6 +184,69 @@ An oscillator with methods for a number of waveforms
 
 <p class = "tutorial-text">
 {{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="320px"}}
+</p>
+
+
+
+
+<h2>maxiSample</h2>
+
+<p class = "tutorial-text">
+Play and manipulate sound samples.  Load sample data from a url, using loadSample (see above)
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play()</span>
+  <br>plays and loop the sample at normal speed
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(playSpeed)</span>
+  <br>plays and loop the sample at a multiple of the normal speed
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(playSpeed, start, end)</span>
+  <br>plays and loop the sample at a multiple of the normal speed
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+    <br><span style="font-family:monospace">start</span>: start point (in samples)
+    <br><span style="font-family:monospace">end</span>: end point (in samples)
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "5db11ec4-bd90-a94d-5a6b-5d9bc01fe851" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">playOnce()</span>
+  <br>plays the sample a single time at normal speed (use trigger() to play again - this is useful for sequencing)
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">playOnce(playRate)</span>
+  <br>plays the sample a single time at a multiple of the normal speed (use trigger() to play again - this is useful for sequencing)
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">trigger()</span>
+  <br>set the playhead to zero (use in conjunction with playOnce)
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "42f49124-90cb-4852-6572-f7a7d7d697cd" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">isReady()</span>
+  <br>returns true if sample is loaded
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">getLength()</span>
+  <br>returns the length of the sample in samples
 </p>
 
 
