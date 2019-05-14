@@ -381,6 +381,26 @@ input[id="docName"]:-ms-input-placeholder {
   height:60px;
 }
 
+.shape-cell {
+  padding:12px 10px 10px 10px;
+  margin:5px 5px 5px 5px;
+  cursor:pointer;
+  font-size: 14pt;
+  font-weight: bold;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.shape-cell:hover {
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+}
+
 .filter-item {
   padding:12px 10px 10px 10px;
   margin:5px 5px 5px 5px;
@@ -388,7 +408,20 @@ input[id="docName"]:-ms-input-placeholder {
   font-size: 14pt;
   font-weight: bold;
   overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
+
+.filter-item:hover {
+  border-style: solid;
+  border-color: white;
+  border-width: 1px;
+}
+
+
 
 .filter-text {
   position: relative;
