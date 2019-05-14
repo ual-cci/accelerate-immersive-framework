@@ -54,20 +54,34 @@ The maximilian audio engine collects audio through a callback function, which is
 <h3>methods</h3>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">init()</span>
-  initialise the audio engine
+  <span style="font-family:monospace">init(audioInput=maxi.INPUT_TYPE.NONE)</span>
+
+  <br>Initialise the audio engine.
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">audioInput</span>: this is an optional argument. You can specify the following:
+  <br>maxi.INPUT_TYPE.NONE: no audio input (default)
+  <br>maxi.INPUT_TYPE.DEFAULT: the system's default audio input
+  <br>an index of the audio input you wish to connect (obtained by looking at the output from listInputDevices())
+  </div>
 </p>
 <p class = "tutorial-text">
   <span style="font-family:monospace">outputIsArray( isArray,  numChannels)</span>
-  <br>Call this is you need multichannel sound.
+  <br>Call this for multichannel sound output.
   <div style="margin-left:100px">
   <br><span style="font-family:monospace">isArray</span>: true if multichannel audio is required
   <br><span style="font-family:monospace">numChannels</span>: 2, 4, or 8
   </div>
 </p>
-
 <p class = "tutorial-text">
 {{embedded-project docId = "e722d5e6-131b-3e46-675e-48ab0a27bb77" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">listInputDevices()</span>
+  <br>Print a list of audio input devices to the console.  You can open an input device by using its index as the first argument to maxiAudio.init
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "799ece18-7d46-be38-2b33-05be69888c09" width="250px" height="320px"}}
 </p>
 
 <p class = "tutorial-text">
@@ -87,7 +101,8 @@ The maximilian audio engine collects audio through a callback function, which is
 
 <p class = "tutorial-text">
   <span style="font-family:monospace">play</span>
-  <br>The function called within the maximilian.js audio processing loop.  This is called once for each sample.  It should return a single value for mono configurations or an array of values for multi-channel configurations.
+  <br>play is a javascript function that does audio processing in maximilian.js.  This is called once for each sample.  It should return a single value for mono configurations or an array of values for multi-channel configurations.
+  <br>The play function has an optional input parameter that is an array of audio input values (see the microphone example above).
 </p>
 <p class = "tutorial-text">
   <span style="font-family:monospace">context</span>
@@ -97,6 +112,77 @@ The maximilian audio engine collects audio through a callback function, which is
   <span style="font-family:monospace">maxiAudioProcessor</span>
   <br>This is the webaudio node that carries out audio processing in maximilian.js.  You can connect this to other webaudio nodes (for a example a spectral analyser)
 </p>
+
+
+
+
+
+<h2>maxiOsc</h2>
+
+<p class = "tutorial-text">
+An oscillator with methods for a number of waveforms
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">sinewave(frequency)</span>
+  <br>outputs a sine wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">coswave(frequency)</span>
+  <br>outputs a cosine wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">triangle(frequency)</span>
+  <br>outputs a triangle wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">saw(frequency)</span>
+  <br>outputs a saw wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">sawn(frequency)</span>
+  <br>outputs a bandlimited saw wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">square(frequency, pulsewidth)</span>
+  <br>outputs a square wave at the given frequency and pulsewidth between -1.0 & 1.0
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">pulsewidth</span>: in the range 0 to 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phasor(frequency)</span>
+  <br>outputs a linear ramp at the given frequency between 0.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phasor(frequency, startPhase, endPhase)</span>
+  <br>outputs a linear ramp at the given frequency between 0.0 & 1.0
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">startPhase</span>: the start value of the ramp, in the range 0 to 1
+    <br><span style="font-family:monospace">endPhase</span>: the end value of the ramp, in the range 0 to 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">noise()</span>
+  <br>outputs white noise between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phaseReset(phase)</span>
+  <br>reset the phase to a specific value
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">phase</span>: between 0 and 1
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="320px"}}
+</p>
+
+
+
+
 
 
 
