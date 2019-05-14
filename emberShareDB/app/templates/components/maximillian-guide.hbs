@@ -306,7 +306,42 @@ Various filters
 
 
 
+<h2>maxiSVF</h2>
 
+<p class = "tutorial-text">
+A state variable filter
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(input, lowPassMix, highPassMix, bandPassMix, notchMix)</span>
+  <br>Process a signal with the filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">lowPassMix</span>: the amount of low pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">highPassMix</span>: the amount of high pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">bandPassMix</span>: the amount of band pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">notchMix</span>: the amount of notch filtering, between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setCutoff(frequency)</span>
+  <br>The cutoff frequence
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">frequency</span>: frequency between 20 and 20000, although this filter sounds best below 5000
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setResonance(amount)</span>
+  <br>The amount of resonance
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">amount</span>: from 0 upwards, starts to ring from 2-3ish, cracks a bit around 10
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "a06b6415-aceb-3ff3-00f7-094fc0e53c3c" width="250px" height="320px"}}
+</p>
 
 
 
