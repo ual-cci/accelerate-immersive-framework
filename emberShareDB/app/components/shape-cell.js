@@ -67,7 +67,7 @@ export default Component.extend({
       var yStart = 0;
 
       //CIRCLE
-      if(this.get('colourId') == "tile0" || this.get('colourId') == "tile3")
+      if(this.get('colourId') === "tile0" || this.get('colourId') === "tile3")
       {
         r = 8;
         xStart = 20;
@@ -78,7 +78,7 @@ export default Component.extend({
         isCircle = true;
       }
       //RECT
-      if(this.get('colourId') == "tile1" || this.get('colourId') == "tile4")
+      else if(this.get('colourId') === "tile1" || this.get('colourId') === "tile4")
       {
         r = 15;
         xShift = 2 * r;
@@ -117,6 +117,10 @@ export default Component.extend({
             dx: Math.random() < 0.5 ? Math.random() : -1 * Math.random(),
             dy: Math.random() < 0.5 ? Math.random() : -1 * Math.random()
           })
+          if(isCircle)
+          {
+            console.log(this.get('colourId'), r, x, w, xShift)
+          }
           x += xShift
         }
         x = indent ? 0 : xIndent;
@@ -128,6 +132,7 @@ export default Component.extend({
         i.xr = i.x + i.r
         i.x2r = i.x + i.r / 2
       })
+      console.log("shapes", sh);
       this.set('shapes', sh);
       this.updateAnimationState();
     }
