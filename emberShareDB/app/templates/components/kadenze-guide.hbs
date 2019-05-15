@@ -1,43 +1,43 @@
 <p class = "tutorial-text">
-  Rebecca Fiebrink, a key part of the MIMIC team, runs the excellent Kadenze course Machine Learning for Musicians and Artists. It provides a ton of learning resources and is designed to teach machine learning in a way that will be useful to creative pracitioners.
+Rebecca Fiebrink, a key part of the MIMIC team, runs the excellent Kadenze course Machine Learning for Musicians and Artists. It provides a ton of learning resources and is designed to teach machine learning in a way that will be useful to creative pracitioners.
 </p>
 <p class = "tutorial-text">
-Throughout the videos, Rebecca demonstrates machine learning concepts mainly using the Wekinator software, however, in this guide we will provide resources that can allow for follow up work to be completed on the MIMIC platform using the Rapidlib machine learning library. Following each Session (~45 mins of videos, depending on how fast you make Rebecca speak), we will provide a set of tasks to help you explore and cement the concepts covered.
+Throughout the videos, Rebecca demonstrates machine learning concepts mainly using the Wekinator software, however, in this guide we will provide resources that can allow for follow up work to be completed on the MIMIC platform using the RapidLib machine learning library. Following each Session (~45 mins of videos, depending on how fast you make Rebecca speak), we will provide a set of tasks to help you explore and cement the concepts covered.
 </p>
 <p class = "tutorial-text">
-  You can sign up for the course <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists/info" >here</a>. The course is free you do not require a certificate to finish or graded projects, and can be started at any time, and completed at any pace.
+You can sign up for the course <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists/info" >here</a>. The course is free if you do not require a certificate to finish or graded projects, and can be started at any time, and completed at any pace.
 </p>
 <h2 id="maxiaudio">Part 1: Introduction</h2>
 <p class = "tutorial-text">
-  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/introduction">Session 1: Introduction videos</a>. After watching these videos you should be familiar with these concepts:
+To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/introduction">Session 1: Introduction videos</a>. After watching these videos you should be familiar with these concepts:
   <ul>
     <li> Supervised learning uses examples to train models </li>
     <li> The supervised learning algorithms that will be covered in the course can be broadly grouped into three classes: Classification, Regression and Temporal Analysis</li>
-    <li> Rebecca introduces Wekinator as a tool to do machine learning, an OSC as a way to transfer data in and out. In this guide we will be using RapidLib to do the machine learning and using various javascript libraries and funcationality to get control data from sliders, the mouse and keyboard and other places, and then also generating sound using the Web Audio API and the maximillian.js library</li>
+    <li> Rebecca introduces Wekinator as a tool to do machine learning, and OSC as a way to transfer data in and out. In this guide we will be using RapidLib to do the machine learning and using various javascript libraries and funcationality to get control data from sliders, the mouse and keyboard and other places, and then also generating sound using the Web Audio API and the maximilian.js library</li>
   </ul>
 </p>
 <p class = "tutorial-text">
-  For this first part we are just going to get comfortable with using RapidLib to take an input, in this case the mouse, record alongside some output and then train a model.
+  For this first part we are just going to get comfortable with using RapidLib to take an input, in this case the mouse, and record alongside some output. We will then train a model and use this to map 2 dimensional mouse input to control 4 synthesis parameters.
 </p>
 <p class = "tutorial-text">
   {{embedded-project docId = "8de3cbbe-b7c6-d79f-65fa-42fd1aa43a26" height = "880px"}}
 </p>
 <p class = "tutorial-text">
-  Use the example below to randomise synth parameters until you find a sound you like. Move the square to somewhere on the screen, then click and hold to record samples. Then find more sounds and place them elsewhere on the screen and record again. When you have a few, hit "t" to train. Now when you move the mouse around you will be able to explore your newly trained sound space!
+  Use the example below to randomise synth parameters until you find a sound you like. Move the mouse to somewhere on the screen, then click and hold to record samples. Then find more sounds and place them elsewhere on the screen and record again. When you have a few, hit "t" to train. Now when you move the mouse around you will be able to explore your newly trained sound space!
 </p>
 <p class = "tutorial-text">
   Try clearing the dataset ("x"), changing the training examples to see how this changes the behaviour of the system after it is re-trained. Spend some time experimenting with the trained models to start to understand how the models are changed.
 </p>
 <p class = "tutorial-text">
-  ASIDE: You can complete this whole project largely using the embedded examples, however, if you want to take a closer look at the code you can check out how to use RapidLib <a href = "">here</a>. It has an incredibly simple API.
+  ASIDE: You can complete this whole project largely using the embedded examples, however, if you want to take a closer look at the code you can check out how to use RapidLib <a href = {{concat url "/guides/rapidLib"}}>here</a>. It has an incredibly simple API.
 </p>
 <h2> Part 2: Classification, I </h2>
 <p class = "tutorial-text">
-  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>. After watching these videos, you shoud be familiar with the following concepts which we will build on with some explorative tasks.
+  To follow through with this we recommend first watching the <a href = "https://www.kadenze.com/courses/machine-learning-for-musicians-and-artists-v/sessions/classification-part-i">Session 2: Classification, Part I videos </a>. After watching these videos, you shoud be familiar with the following concepts. We will then build on  these with some explorative tasks.
   <ul>
     <li>When you have lots of features, or the relationship between your inputs and your outputs is complex, classification algorithms can allow you to build things that would be challenging or impossible to program yourself by hand.</li>
-    <li>Two approaches to classification problems shown were decision stumps and nearest neighbour. Although Wekinator provides a choice of algorithms for classification, RapidLib hides this functionality away. </li>
-    <li>When deciding on an approach to take, we compared algorithms sensitivity to noise and their capacity to learn complexity. Often this choice can be a payoff between the two.</li>
+    <li>Two approaches to classification problems shown were decision stumps and nearest neighbour. Although Wekinator provides a choice of algorithms for classification, RapidLib currently only implements K-Nearest Neighbour. </li>
+    <li>When deciding on an approach to take, we compared algorithm's sensitivity to noise and their capacity to learn complexity. Often this choice can be a payoff between the two.</li>
     <li>To evaluate a model, we can test it on new inputs ourselves, or we can investigate its decision boundary. The tasks below will explore this further, allowing you to provide data and see the decision boundaries that are made.</li>
     <li>To improve a model, we can try and provide more data, or better data, or we can change the features that we use. We should aim to pick features that are relavant to phenomena we are trying to model.</li>
   </ul>
@@ -52,17 +52,17 @@ Throughout the videos, Rebecca demonstrates machine learning concepts mainly usi
   {{embedded-project docId = "7f92bd4e-6d2b-181c-559f-4add766f2095"}}
 </p>
 <p class = "tutorial-text">
-  Try to choose a set of training examples that will draw the boundary on screen, with Class 1 on the left in red and Class 2 on the right in blue.
+  Try to choose a set of training examples that will draw the boundary on screen, with Class 1 on the left in green and Class 2 on the right in purple.
 </p>
 <img src = {{concat url "/images/decision1.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
   Keep improving your boundary by changing your training examples, re-training, and re-drawing the decision boundary until you are happy with how it looks. If you need to start again, just pause and play the example.
 </p>
 <p class = "tutorial-text">
-  When actually making classifiers for a specific purpose, how close you need the decision boundary to match will depend on your intentions. We realise that it may not be possible or, or even desirable, for it to be perfect!
+  When actually making classifiers for a specific purpose, how close you need the decision boundary to match will depend on your intentions. We realise that it may not be possible, or even desirable, for it to be perfect!
 </p>
 <p class = "tutorial-text">
-  Now try to make this decision boundary, with Class 1 in red and Class 2 in blue.
+  Now try to make this decision boundary, with Class 1 in green and Class 2 in purple. This one is harder and you will not be able to make it perfectly using the K-Nearest Neighbour algorithm implemented in RapidLib. Thinking back to the videos, what do you think it is about the KNN algorithm that makes this decision boundary hard to implement? Which other algorithms do think would work better? Have you had to manufacture examples close to the decision boundary to make it fit the shape? Reflect on how this might effect the make up of your datasets when working on an actual project, will it just consist of representative examples of thing you are modelling?
 </p>
 <img src = {{concat url "/images/decision2.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
@@ -74,7 +74,7 @@ Throughout the videos, Rebecca demonstrates machine learning concepts mainly usi
   <ul>
     <li>Regression models can be used to map continuous inputs.</li>
     <li>As with Classification, different algorithms produce different types of lines or curves given the same data.</li>
-    <li>As such, its important to pick an alogrithm that can model the appropriate complexity.</li>
+    <li>As such, its important to pick an alogrithm that can model the appropriate complexity. As with Classification, there is currently no chocie of regression algorithm in Rapidlib. </li>
     <li>Many to many mappings can allow to quickly build an expressive musical instrument. With this, you can design instruments that react to performer's movements or actions without directly having to consider the exact mathematical relationship between input and output.</li>
     <li>Below, we will see how you can use regression to control 3 parameters of a granular synth with just 1 slider.</li>
   </ul>
@@ -92,10 +92,6 @@ Create a training dataset this way to produce the line below. Keep editing your 
 <p class = "tutorial-text">
 Now, think about whether you might be able to create this same line using even fewer training examples. If you think it’s possible to create this line using fewer examples, delete your training dataset and give it a try!
 </p>
-<p class = "tutorial-text">
-Now try to fit this more complicated regression line. Keep editing your training data until you have something that basically matches this shape. Once you have this, try completing with fewer examples.
-</p>
-<img src = {{concat url "/images/decision4.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
 As with the Classification Explorer, feel free to fork the code use RapidLib yourself to use your own inputs and outputs. In this case you will need to have a dataset including one input and one output only.
 </p>
@@ -129,7 +125,7 @@ Next, train model to reliably access the following values. To clear your dataset
   </ul>
 </p>
 <p class = "tutorial-text">
-  For this part we are going to revisit the Classification Explorer but this time we are going to experiment with more than 2 classes, as well as more complication decision boundaries.
+  For this part we are going to revisit the Classification Explorer but this time we are going to experiment with more than 2 classes, as well as more complicated decision boundaries.
 </p>
 <p class = "tutorial-text">
 {{embedded-project docId = "7f92bd4e-6d2b-181c-559f-4add766f2095"}}
@@ -143,6 +139,6 @@ Next, train model to reliably access the following values. To clear your dataset
 </p>
 <img src = {{concat url "/images/decision5.png"}} style = "width:400px;height:400px;"/>
 <p class = "tutorial-text">
-  Now restart the explorer and try to enter data that will give the decision boundary below. Think back to the videos, what is significant about this particular boundary, in comparison to others we have tried?
+  Now restart the explorer and try to enter data that will give the decision boundary below. Think back to the videos, what is significant about this particular boundary, in comparison to others we have tried? Again, you will not be able to make this boundary perfectly with the K-Nearest Neighbour algorithm, see how close you can get.
 </p>
 <img src = {{concat url "/images/decision6.png"}} style = "width:500px;height:400px;"/>
