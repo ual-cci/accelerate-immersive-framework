@@ -1486,27 +1486,6 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 $footer-grey:#303030;
 
-#logo-footer {
-  background-color:$footer-grey;
-  height:auto;
-  min-height: 100px;
-  padding:20px;
-  margin-bottom: 50px;
-  margin-top: 50px;
-}
-
-.footer-logo-img {
-  margin-bottom: 10px;
-  margin-top: 10px;
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-#logo-container {
-  width:auto;
-  margin:auto;
-}
-
 #about-header-image {
   position: absolute;
   left:250px;
@@ -1597,28 +1576,51 @@ $footer-grey:#303030;
   font-size: 14pt;
 }
 
+#logo-footer {
+  background-color:$footer-grey;
+  height:auto;
+  min-height: 100px;
+  padding:20px;
+  margin-top: 50px;
+}
+
+#logo-container {
+  width:auto;
+  margin:auto;
+}
+
+.footer-logo-img {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+  height: 50px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
 #gs-logo {
-  width:100px;
+  width:135px;
 }
 
 #durham-logo {
-  width:100px;
+  width:132px;
 }
 
 #sussex-logo {
-  width:60px;
+  width:97px;
 }
 
 #ahrc-logo {
-  width:150px;
+  width:181px;
 }
 
 #google-logo {
-  width:100px;
+  width:124px;
 }
 
 #ual-logo {
-  width:200px;
+  width:161px;
 }
 
 .center-cropped {
@@ -1851,8 +1853,6 @@ $footer-grey:#303030;
 }
 
 #footer-table {
-  height:20px;
-  margin-top: 20px;
   width:100%;
 }
 
