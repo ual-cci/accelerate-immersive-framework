@@ -15,6 +15,33 @@
       <div id = {{concat "render-doc-" isOwner}}>
         </div>
           <div id = "transport-container">
+            <div class="tooltip col-2">
+              {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
+              <span class="tooltiptext">Render Code</span>
+            </div>
+            {{#if isOwner}}
+              <div class="tooltip">
+                {{#if showAssets}}
+                  {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                {{else}}
+                  {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                {{/if}}
+                <span class="tooltiptext">Add Files to Use</span>
+              </div>
+              {{#if isRoot}}
+              <div class="tooltip">
+                <div class="dropdown">
+                  {{#bs-button id = "add-library-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+                 <div id="myDropdown" class="dropdown-content">
+                  {{#each libraries as |lib|}}
+                    {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
+                  {{/each}}
+                 </div>
+                </div>
+                <span class="tooltiptext">Add libraries</span>
+              </div>
+              {{/if}}
+            {{/if}}
             <div class="tooltip">
               {{#if showSettings}}
                 {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
@@ -23,33 +50,6 @@
               {{/if}}
               <span class="tooltiptext">Show Document Settings</span>
             </div>
-            {{#if isOwner}}
-            <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
-              <span class="tooltiptext">Delete Document</span>
-            </div>
-            <div class="tooltip">
-              {{#if showAssets}}
-                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
-              {{else}}
-                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
-              {{/if}}
-              <span class="tooltiptext">Add Files to Use</span>
-            </div>
-            {{#if isRoot}}
-            <div class="tooltip">
-              <div class="dropdown">
-                {{#bs-button style = "font-size:19pt;" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
-               <div id="myDropdown" class="dropdown-content">
-                {{#each libraries as |lib|}}
-                  {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
-                {{/each}}
-               </div>
-              </div>
-              <span class="tooltiptext">Add libraries</span>
-            </div>
-            {{/if}}
-            {{/if}}
             <div class="tooltip">
               {{#if showShare}}
                 {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowShare")}}{{/bs-button}}
@@ -59,10 +59,6 @@
               <span class="tooltiptext">Share links</span>
             </div>
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
-              <span class="tooltiptext">Render Code</span>
-            </div>
-            <div class="tooltip col-2">
               {{download-button doc = parentData}}
               <span class="tooltiptext">Download Project as Zip</span>
             </div>
@@ -70,6 +66,12 @@
               {{#bs-button style = "font-size:16pt;" icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
               <span class="tooltiptext">Enter Fullscreen</span>
             </div>
+            {{#if isOwner}}
+              <div class="tooltip col-2">
+                {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
+                <span class="tooltiptext">Delete Document</span>
+              </div>
+            {{/if}}
           </div>
     </div>
     {{else}}
