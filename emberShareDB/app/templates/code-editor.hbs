@@ -169,12 +169,8 @@
     {{/if}}
     {{/if}}
     <div id = "main-code-container">
-      {{#if isMobile}}
-      <div></div>
-      {{else}}
       {{#if showHUD}}
         {{loading-hud message = hudMessage hideWheel = isEmbedded}}
-      {{/if}}
       {{/if}}
       {{#if isEmbeddedWithCode}}
       <div id = "embedded-run-container">
@@ -239,9 +235,6 @@
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe id = "output-iframe" frameBorder="0" srcdoc={{renderedSource}}></iframe>
       </div>
-      {{#if isMobile}}
-        <div></div>
-      {{else}}
         <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
           {{#if isEmbeddedWithCode}}
             <div></div>
@@ -281,7 +274,6 @@
             suggestCompletions = (action 'suggestCompletions')
           }}
           </div>
-        {{/if}}
       </div>
       {{#if isMobile}}
         <div></div>

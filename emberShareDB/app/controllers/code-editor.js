@@ -104,14 +104,13 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = this.get('showCodeControls') ? "inline":"none"
-      this.set('isMobile', !(this.get('mediaQueries').isDesktop) && !this.get('isEmbeddedWithCode'));
+      this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
       console.log("isMobile", this.get('isMobile'));
+      document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
       if(this.get("mediaQueries.isDesktop"))
       {
-        this.updateDragPos()
+        this.updateDragPos();
       }
-      $("#ace-container").css("display", display);
     })
     //this.hijackConsoleOutput()
   },
@@ -129,7 +128,7 @@ export default Controller.extend({
     const embedWithCode = this.get('showCode') == "true";
     this.set('isEmbedded', embed);
     this.set('isEmbeddedWithCode', embedWithCode);
-    this.set('isMobile', !(this.get('mediaQueries').isDesktop) && !this.get('isEmbeddedWithCode'));
+    this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
     console.log("isMobile", this.get('isMobile'));
     this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
     var iframe = document.getElementById("output-iframe");
@@ -156,8 +155,6 @@ export default Controller.extend({
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    const display = this.get('showCodeControls') ? "inline":"none"
-    $("#ace-container").css("display", display);
     this.updateDragPos();
     this.get('cs').observers.push(this);
   },
@@ -403,6 +400,8 @@ export default Controller.extend({
     })
   },
   didReceiveDoc: function() {
+    console.log("isMobile", this.get('isMobile'));
+    document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       this.get('opsPlayer').reset(doc.id);

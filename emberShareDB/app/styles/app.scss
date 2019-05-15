@@ -1774,12 +1774,14 @@ input[id="searchTerm"]:-ms-input-placeholder {
 .loading-wheel {
   border: 16px solid rgba(14, 251, 121, 1.0);
   border-top: 16px solid white;
-  border-radius: 120px;
-  width: 120px;
-  height: 120px;
+  border-radius: 60px;
+  width: 60px;
+  height: 60px;
   animation: spin 2s linear infinite;
   position:relative;
-  margin:auto;
+  margin-left:auto;
+  margin-right:auto;
+  margin-top:10px;
 }
 
 @keyframes spin {
@@ -1788,12 +1790,11 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #loading-label {
-  margin-top: 5px;
+  margin-top: 2px;
   text-align:center;
   color:white;
-  font-size: 15pt;
+  font-size: 12pt;
   width:100%;
-  padding:10px;
 }
 
 #loading-inner-container {
@@ -1806,11 +1807,11 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #loading-container {
   padding:10%;
-  border-radius: 175px;
+  border-radius: 67.5px;
   border: solid white 5px;
   display:block;
-  width: 350px;
-  height: 350px;
+  width: 175px;
+  height: 175px;
   margin: 0;
   position: absolute;
   top: 50%;
