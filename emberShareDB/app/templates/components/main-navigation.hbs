@@ -2,70 +2,70 @@
 <img src={{logoURL}} class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
 {{#if mediaQueries.isBurger}}
-{{#nav.dropdown as |dd|}}
-  {{#dd.toggle class = "nav-dropdown burger-btn" }} ≡ <span class="caret"></span>{{/dd.toggle}}
-  {{#dd.menu as |ddm|}}
-    {{#ddm.item}}
-    <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button dropdown-item">about</a>
-    {{/ddm.item}}
-    {{#ddm.item}}
-    <a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button dropdown-item">projects</a>
-    {{#ddm.item}}
-    {{/ddm.item}}
-    <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
-    {{/ddm.item}}
-    {{#ddm.item}}
-    <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
-    {{/ddm.item}}
-    {{#ddm.item}}
-    <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
-    {{/ddm.item}}
-  {{/dd.menu}}
-{{/nav.dropdown}}
+  {{#nav.dropdown as |dd|}}
+    {{#dd.toggle class = "nav-dropdown burger-btn" }} ≡ <span class="caret"></span>{{/dd.toggle}}
+    {{#dd.menu as |ddm|}}
+      {{#ddm.item}}
+      <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button dropdown-item">about</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button dropdown-item">projects</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'docs'}} href = {{concat url "/d/" sessionAccount.currentUserName "/views/0"}}  class = "nav-button dropdown-item">my projects</a>
+      {{/ddm.item}}
+    {{/dd.menu}}
+  {{/nav.dropdown}}
 {{else}}
-<a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a>
-<a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button">projects</a>
-<a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button">getting started</a>
-<a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button">examples</a>
-{{#nav.dropdown class="dropdown-item" as |dd|}}
-  {{#dd.toggle class = "nav-dropdown" }}guides <span  class="caret"></span>{{/dd.toggle}}
-  {{#dd.menu as |ddm|}}
-    {{#each guides.guides as |guide|}}
-    {{#ddm.item}}
-        <a class="dropdown-item" {{action 'openGuide' guide.id}}>{{guide.name}}</a>
-    {{/ddm.item}}
-    {{/each}}
-  {{/dd.menu}}
-{{/nav.dropdown}}
+  <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a>
+  {{#nav.dropdown as |dd|}}
+    {{#dd.toggle class = "nav-dropdown" }} learn <span class="caret"></span>{{/dd.toggle}}
+    {{#dd.menu as |ddm|}}
+      {{#ddm.item}}
+      <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
+      {{/ddm.item}}
+    {{/dd.menu}}
+  {{/nav.dropdown}}
+  {{#if session.isAuthenticated}}
+    {{#nav.dropdown as |dd|}}
+      {{#dd.toggle class = "nav-dropdown" }}my projects <span  class="caret"></span>{{/dd.toggle}}
+      {{#dd.menu as |ddm|}}
+        {{#each ownedDocuments as |doc|}}
+        {{#ddm.item}}
+            <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
+        {{/ddm.item}}
+        {{/each}}
+        <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'createDoc'}}>+</a>
+      {{/dd.menu}}
+    {{/nav.dropdown}}
+  {{/if}}
 {{/if}}
-{{#if mediaQueries.isXs}}
-<div></div>
+{{#if session.isAuthenticated}}
+  <div id = "login-container">
+    <div style = "float:right;" class="tooltip">
+      <a {{action 'logout'}} id = "login-button" class="navbar-btn navbar-right pull-right">log out</a>
+      <span class="tooltiptext">logged in as {{sessionAccount.currentUserName}}</span>
+    </div>
+  </div>
 {{else}}
- {{/if}}
-   {{#if session.isAuthenticated}}
-      <div id = "login-container">
-        <a {{action 'logout'}} id = "logout-button" class="navbar-btn navbar-right pull-right">log out</a>
-        {{#if sessionAccount.currentUserName}}
-          <a {{action 'login'}} id = "signed-in-label" class="navbar-text pull-right">logged in as {{sessionAccount.currentUserName}}</a>
-        {{/if}}
-      </div>
-    {{#if mediaQueries.isDocs}}
-     {{#nav.dropdown as |dd|}}
-       {{#dd.toggle class = "nav-dropdown" }}my projects <span  class="caret"></span>{{/dd.toggle}}
-       {{#dd.menu as |ddm|}}
-         {{#each ownedDocuments as |doc|}}
-         {{#ddm.item}}
-             <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
-         {{/ddm.item}}
-         {{/each}}
-         <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'createDoc'}}>+</a>
-       {{/dd.menu}}
-     {{/nav.dropdown}}
-    {{/if}}
-   {{else}}
-    <div id = "login-container">
-     <a {{action 'login'}} id = "login-button" class="navbar-right">log in</a>
-   </div>
-   {{/if}}
+<div id = "login-container">
+ <a {{action 'login'}} id = "login-button" class="navbar-right">log in</a>
+</div>
+{{/if}}
 {{/bs-nav}}
 </div>
