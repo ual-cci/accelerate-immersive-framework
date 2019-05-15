@@ -104,14 +104,17 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
-      console.log("isMobile", this.get('isMobile'));
-      document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
-      if(this.get("mediaQueries.isDesktop"))
+      if(!this.get('leftCodeEditor'))
       {
-        this.updateDragPos();
+        this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
+        console.log("isMobile", this.get('isMobile'));
+        document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
+        if(this.get("mediaQueries.isDesktop"))
+        {
+          this.updateDragPos();
+        }
       }
-    })
+    });
     //this.hijackConsoleOutput()
   },
   initShareDB: function() {

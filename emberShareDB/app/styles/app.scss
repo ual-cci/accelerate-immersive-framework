@@ -1,5 +1,11 @@
 @import 'bootstrap';
 
+$mimic-orange:#ED3D05;
+$mimic-yellow:#FFCE00;
+$mimic-green:#0ED779;
+$mimic-pink:#F79994;
+$mimic-blue:#4D42EB;
+
 .main-delete-button {
   background-color: rgba(0,0,0,0);
   border-color: rgba(0,0,0,0);
@@ -27,11 +33,16 @@ button:active {
 }
 
 a {
+  color:$mimic-green;
   text-decoration: none;
 }
 
 a:hover, a:focus {
   text-decoration: none;
+  color:$mimic-orange;
+}
+
+a.nav-dropdown:hover, a.nav-dropdown:focus {
   color:inherit;
 }
 
@@ -73,13 +84,6 @@ h1 {
 h2 {
   text-decoration: underline;
 }
-
-$mimic-orange:#ED3D05;
-$mimic-yellow:#FFCE00;
-$mimic-green:#0ED779;
-$mimic-pink:#F79994;
-$mimic-blue:#4D42EB;
-
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
@@ -1480,8 +1484,10 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 }
 
+$footer-grey:#303030;
+
 #logo-footer {
-  background-color: #303030;
+  background-color:$footer-grey;
   height:auto;
   min-height: 100px;
   padding:20px;
@@ -1645,6 +1651,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 #tutorial-container {
   width:90%;
+  padding-top:70px;
   /* min-width:700px; */
   margin-left: auto;
   margin-right: auto;
@@ -1834,4 +1841,30 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 .terms-text {
   margin-bottom: 10px;
+}
+
+#mimic-footer {
+  width:100%;
+  height:50px;
+  background-color: $footer-grey;
+  color:white;
+}
+
+#footer-table {
+  height:20px;
+  margin-top: 20px;
+  width:100%;
+}
+
+#footer-table td {
+  text-align: center;
+  width:33%;
+}
+
+.footer-link {
+  color:white;
+}
+
+#footer-copyright {
+  padding-top: 5px;
 }
