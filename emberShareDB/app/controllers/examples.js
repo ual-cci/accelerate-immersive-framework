@@ -10,7 +10,7 @@ export default Controller.extend({
     // thumbnailId:"beatbox.png"},
 
     //LSTM
-    {docid:"b530ba9e-dfd9-0440-8358-86b6420b210d",
+    {docid:"84bf177b-af84-85c3-4933-32076561aca0",
     thumbnailId:"beatbox.png"},
     //merk
     {docid:"305ac2de-3362-6c8d-e04c-d5a1072cc1c5",
