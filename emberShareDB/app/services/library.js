@@ -5,7 +5,7 @@ export default Service.extend({
     {title:"MMLL", id:"mmll", url:"MMLL.js"},
     {title:"Marked", id:"Marked", url:"marked.js"},
     {title:"maximilian.js", id:"maximilian", url:"maximilian.js"},
-    {title:"Nexus", id:"nexusUI", url:"nexusUI.min.js"},
+    {title:"Nexus", id:"nexusUI", url:"nexusUI.js"},
     {title:"Processing", id:"processing.js", url:"processing.js"},
     {title:"p5", id:"p5", url:"p5.min.js"},
     {title:"SoundJS", id:"SoundJS", url:"soundjs.js"},
