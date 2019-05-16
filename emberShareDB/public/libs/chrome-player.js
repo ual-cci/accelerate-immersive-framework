@@ -38,6 +38,7 @@ var ChromePlayer = function(context) {
     lbl.style.bottom= 0
     lbl.style.left= 0
     lbl.style.right= 0
+    lbl.style["text-align"] = "center";
     btn.onclick = ()=> {
       container.style.display = "none"
       this.context.forEach((c)=> {
