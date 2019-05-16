@@ -3,7 +3,7 @@ var ChromePlayer = function(context) {
   console.log(context.state)
   const states = context.map((c)=>{return c.state})
   var isChrome = !!window.chrome;
-  console.log(states.includes("suspended"), isChrome, states.includes("suspended") && isChrome)
+  console.log("IS SUSPENDED",states.includes("suspended"), "IS CHROME", isChrome, "WILL LAUNCH POPUP",states.includes("suspended") && isChrome)
   if(states.includes("suspended") && isChrome)
   {
     console.log("showing play button")
