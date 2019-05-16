@@ -9,7 +9,8 @@ export default Service.extend({
     {title:"Processing", id:"processing.js", url:"processing.js"},
     {title:"p5", id:"p5", url:"p5.min.js"},
     {title:"SoundJS", id:"SoundJS", url:"soundjs.js"},
-    {title:"EvolLib", id:"evolib", url:"evolib.js"},
+    {title:"EvoLib", id:"evolib", url:"evolib.js"},
+    {title:"Chrome Auto Player", id:"chromeplayer", url:"chrome-player.js"},
   ],
   url(id) {
     let url = ""
