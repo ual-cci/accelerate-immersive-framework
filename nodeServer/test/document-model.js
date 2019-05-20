@@ -15,6 +15,7 @@ chai.use(chaiHttp);
 let token = "";
 
 describe('doc delete', () => {
+  documentModel.dropDocs();
   let accountId = ""
   let docId = "";
   before((done)=> {
@@ -63,7 +64,7 @@ describe('doc delete', () => {
           .query({filter:{search:"deleting-user", currentUser:"456", sortBy:"views", page: 0}})
           .end((err, res) => {
             res.should.have.status(200);
-            console.log(res.body.data)
+            console.log("search returned", res.body.data)
             assert.equal(res.body.data.length, 0);
             done();
           });
@@ -80,6 +81,7 @@ describe('doc delete', () => {
 })
 
 describe('documents searching', () => {
+  documentModel.dropDocs();
   let docsAdded = [];
   let accountId = ""
   before((done) => {
@@ -382,8 +384,8 @@ describe('documents searching', () => {
           .then((res) => {
             const newSource = res.body.data.attributes.source;
             res.should.have.status(200);
-            assert.equal(newSource, '<html><head>\n <script src = "http://localhost:4200/libs/MMLL.js"></script></head><body><script>console.log("hello world")</script></body></html>')
-            done()
+            assert.equal(newSource, '<html><head>\n <script src = "https://mimicproject.com/libs/MMLL.js"></script></head><body><script>console.log("hello world")</script></body></html>')
+            done();
           }).catch((err)=>{
             console.log("ERROR", err)
           });
@@ -460,7 +462,7 @@ describe('documents searching', () => {
       .get("/asset/" + "this-is-not-as-id" + "/bear.wav")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(404);
         done();
       });
@@ -471,7 +473,7 @@ describe('documents searching', () => {
       .get("/asset/" + docsAdded[0] + "/this-is-not-a-filename.type")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(404);
         done();
       });
@@ -482,7 +484,7 @@ describe('documents searching', () => {
       .get("/asset/" + docsAdded[0] + "/bear.wav")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(200);
         done();
       });
@@ -509,28 +511,29 @@ describe('documents searching', () => {
       .post("/assetWithURL")
       .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
         res.should.have.status(401);
         done();
       });
     });
 
+    let assetURL = "";
     it('it should return an asset ID and 200', (done)=> {
       chai.request(server)
       .post("/assetWithURL")
       .set('Authorization', 'Bearer ' + token)
       .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
         res.should.have.status(200);
         assert.equal(res.body.name, "bear")
         let assetID = res.body.fileId;
+        const assets = [{name:"bear", fileId:assetID, fileType:"audio/x-wav"}];
         chai.request(server)
-        .delete("/asset/"+assetID)
-        .set('Authorization', 'Bearer ' + token)
+        .patch("/documents/" + docsAdded[0])
+        .send({data:{attributes:{assets:assets}}})
         .end((err, res) => {
-          console.log(err, res.status, res.body);
-          res.should.have.status(200);
+          assetURL = "/asset/"+docsAdded[0]+"/"+ "bear";
           done();
         });
       });
@@ -538,9 +541,20 @@ describe('documents searching', () => {
 
     it('it should return an asset read stream', (done)=> {
       chai.request(server)
-      .get("/asset/5d9933c7-5c98-217b-b640-64bd9438799f/ohmygoodnice.mp3")
+      .get(assetURL)
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    it('it should delete asset', (done)=> {
+      chai.request(server)
+      .delete(assetURL)
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log(err, res.status);
         res.should.have.status(200);
         done();
       });
@@ -576,12 +590,12 @@ describe('documents searching', () => {
         .patch("/documents/" + docsAdded[0])
         .send({data:{attributes:{assets:assets}}})
         .end((err, res) => {
-          console.log(err, res.status, res.body);
+          console.log(err, res.status);
           res.should.have.status(200);
           const forker = {
             isPrivate:false,
             name:"public-me",
-            owner:"deleting-user",
+            owner:"asset-user",
             ownerId:"456",
             tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
             forkedFrom:docsAdded[0],
@@ -597,7 +611,7 @@ describe('documents searching', () => {
             chai.request(server)
             .get("/asset/" + newDoc.id + "/bear")
             .end((err, res) => {
-              console.log(err, res.status, res.body);
+              console.log(err, res.status);
               res.should.have.status(200);
               done();
             });
@@ -606,14 +620,14 @@ describe('documents searching', () => {
       });
     });
 
-    it('it should not delete asset from gridFS, but should from document record', (done)=> {
-      chai.request(server)
-      .delete("/asset")
-      .set('Authorization', 'Bearer ' + token)
-      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
-      .end((err, res) => {
-      });
-    });
+    // it('it should not delete asset from gridFS, but should from document record', (done)=> {
+    //   chai.request(server)
+    //   .delete("/asset")
+    //   .set('Authorization', 'Bearer ' + token)
+    //   .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+    //   .end((err, res) => {
+    //   });
+    // });
 
     after((done)=> {
       token = "";

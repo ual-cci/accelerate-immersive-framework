@@ -25,7 +25,7 @@ export default Controller.extend({
     //lyrics
     {docid:"66a88951-a7d6-cc9f-0d8b-b043e4b952b0"},
     // //conceptualr synth
-    // {docid:"83b58e5e-487f-fd88-158e-239d85202bce"}
+    {docid:"83b58e5e-487f-fd88-158e-239d85202bce"}
   ],
   actions: {
     onClick(example) {

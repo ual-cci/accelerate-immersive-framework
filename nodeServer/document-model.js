@@ -142,12 +142,11 @@ function startAssetAPI(app)
             doc.data.assets.forEach((asset)=> {
               if(asset.name === req.params.filename)
               {
-                console.log(asset.name, asset.fileId)
-                gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
+                match = true;
+                console.log("MATCHED deleting asset", asset.name, asset.fileId)
+                gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
                   if (err) return handleError(err);
-                  console.log('success deleting asset');
-                  res.status(200);
-                  res.json(req.params.id);
+                  res.status(200).send(asset.fileId);
                 });
               }
             });
@@ -322,6 +321,7 @@ function startDocAPI(app)
 
   app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log("delete doc called",  req.params.id)
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -602,9 +602,21 @@ function createDoc(attr) {
 
 /////helpers
 
-const dropDocs = (callback) => {
-  console.log(shareDBMongo)
-	mongo.collection(contentCollectionName).remove({}, callback());
+const dropDocs = () => {
+  return new Promise((resolve, reject) => {
+    mongo.MongoClient.connect(mongoUri, function(err, client) {
+      if(err)
+      {
+        console.log("DOCUMENT MODEL - error connecting to database", err);
+      }
+      else
+      {
+        console.log("Connected successfully to mongo");
+        docDB = client.db(contentDBName);
+        docDB.collection(contentCollectionName).drop();
+      }
+    });
+  });
 }
 
 const dropAssets = () => {
@@ -657,6 +669,7 @@ module.exports = {
 }
 
 if(process.env.NODE_ENV == "test") {
+  module.exports.dropDocs = dropDocs,
   module.exports.createDoc = createDoc,
   module.exports.removeDocs = removeDocs,
   module.exports.dropAssets = dropAssets
