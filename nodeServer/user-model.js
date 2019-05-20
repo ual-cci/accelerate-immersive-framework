@@ -196,6 +196,10 @@ function startAuthAPI(app)
 				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
 				return;
 			}
+      else
+      {
+        res.status(400).send("server error fetching user");
+      }
     });
   });
 

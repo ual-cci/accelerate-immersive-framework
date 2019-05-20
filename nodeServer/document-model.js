@@ -15,6 +15,7 @@ var shareDB;
 var shareDBConnection;
 var gridFS;
 const http = require("http")
+let documentMongo;
 
 var initDocAPI = function(server, app, db, collection, uri)
 {
@@ -40,7 +41,7 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  mongo.MongoClient.connect(mongoUri, function(err, client) {
+  documentMongo = mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
     {
       console.log("DOCUMENT MODEL - error connecting to database", err);
@@ -110,7 +111,6 @@ function startAssetAPI(app)
           {
             let match = false;
             doc.data.assets.forEach((asset)=> {
-
               if(asset.name === req.params.filename)
               {
                 console.log(asset.name, asset.fileId)
@@ -129,17 +129,46 @@ function startAssetAPI(app)
         });
       });
 
-      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
-        gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
-          if (err) return handleError(err);
-          console.log('success deleting asset');
-          res.status(200);
-          res.json(req.params.id);
+      app.delete('/asset/:docid/:filename', app.oauth.authenticate(), function(req, res) {
+        var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            let match = false;
+            doc.data.assets.forEach((asset)=> {
+              if(asset.name === req.params.filename)
+              {
+                console.log(asset.name, asset.fileId)
+                gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
+                  if (err) return handleError(err);
+                  console.log('success deleting asset');
+                  res.status(200);
+                  res.json(req.params.id);
+                });
+              }
+            });
+            if(!match)
+            {
+              res.status(404).send("asset not found");
+            }
+          }
         });
       });
     }
   });
 }
+
+function canDeleteAsset(db, asset) {
+  db.collection(contentCollectionName).find({assets:{$elemMatch:{fileId:asset.fileId}}}).toArray(function(err, result) {
+    if (err) throw err;
+    console.log(result);
+    db.close();
+  });
+};
 
 function copyAssets(assets)
 {
@@ -161,6 +190,9 @@ function copyAssets(assets)
     });
   };
   return Promise.all(assets.map(copyAsset));
+  // return new Promise((resolve, reject)=> {
+  //   resolve(assets);
+  // })
 }
 
 function startWebSockets(server)
@@ -308,7 +340,7 @@ function startDocAPI(app)
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
-        console.log("database error making document", doc);
+        console.log("database error making document", doc.id);
         res.status(404).send("database error making document" + err);
         return;
       }
@@ -388,22 +420,7 @@ function startDocAPI(app)
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      if(doc.data.forkedFrom)
-      {
-        copyAssets(attr.assets).then((newAssets)=>{
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-          json.data.attr.assets = newAssets;
-          res.json(json);
-        }).catch((err)=>{
-          res.type('application/vnd.api+json');
-          res.status(400);
-          res.json({errors:[err]});
-        });
-      }
-      else
-      {
-        res.json(json);
-      }
+      res.json(json);
     },
      function(err) {
        res.type('application/vnd.api+json');
@@ -553,7 +570,7 @@ function createDoc(attr) {
             documentId:uuid,
             created:new Date(),
             lastEdited:new Date(),
-            assets:[],
+            assets:attr.assets ? attr.assets:[],
             tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},

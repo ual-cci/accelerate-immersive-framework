@@ -7,14 +7,14 @@ export default Service.extend({
   sessionAccount:inject('session-account'),
   store:inject('store'),
   cs:inject('console'),
-  deleteAsset(fileId) {
+  deleteAsset(fileName) {
     console.log("deleteAsset for " + fileId);
     let doc = this.get('sessionAccount').currentDoc;
     let data = {documentId:doc};
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "DELETE",
-          url: config.serverHost + "/asset/"+fileId,
+          url: config.serverHost + "/asset/"+doc+"/"+fileName,
           data: data,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
