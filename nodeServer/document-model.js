@@ -139,14 +139,20 @@ function startAssetAPI(app)
           else
           {
             let match = false;
+            console.log("searching ",doc.data.assets,"for", req.params.filename)
             doc.data.assets.forEach((asset)=> {
               if(asset.name === req.params.filename)
               {
                 match = true;
                 console.log("MATCHED deleting asset", asset.name, asset.fileId)
-                gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
-                  if (err) return handleError(err);
-                  res.status(200).send(asset.fileId);
+                canDeleteAsset(db, req.params.docid, asset).then(()=>
+                {
+                  gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
+                    if (err) return handleError(err);
+                    res.status(200).json({id:asset.fileId, action:"deleted"});
+                  });
+                }).catch((err)=> {
+                  res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
                 });
               }
             });
@@ -161,37 +167,43 @@ function startAssetAPI(app)
   });
 }
 
-function canDeleteAsset(db, asset) {
-  db.collection(contentCollectionName).find({assets:{$elemMatch:{fileId:asset.fileId}}}).toArray(function(err, result) {
-    if (err) throw err;
-    console.log(result);
-    db.close();
+function canDeleteAsset(db, docId, asset) {
+  return new Promise((resolve, reject)=> {
+    const query = {assets:{$elemMatch:{fileId:asset.fileId}}};
+    db.collection(contentCollectionName).find(query).toArray(function(err, result) {
+      console.log("assets found in ", result.length, "docs");
+      if(err || result.length > 1)
+      {
+        console.log("asset used by other docs");
+        reject();
+      }
+      else if (result.length == 1)
+      {
+        if(result[0].documentId == docId)
+        {
+          console.log("asset only used by target doc");
+          resolve();
+        }
+        else
+        {
+          console.log("asset used by other docs");
+          reject();
+        }
+      }
+      else
+      {
+        console.log("asset used by no docs");
+        resolve();
+      }
+    });
   });
 };
 
 function copyAssets(assets)
 {
-  var copyAsset = function(asset) {
-    return new Promise((resolve, reject) => {
-      var writestream = gridFS.createWriteStream({
-        filename: asset.name,
-        mode: 'w',
-        content_type: asset.fileType
-      });
-      var readstream = gridFS.createReadStream({
-         _id: asset.fileId
-      });
-      readstream.pipe(writestream);
-      writestream.on('close', function(file) {
-        var newAsset = {'name':asset.name,"fileId":file._id,fileType:asset.fileType};
-        resolve(newAsset);
-      });
-    });
-  };
-  return Promise.all(assets.map(copyAsset));
-  // return new Promise((resolve, reject)=> {
-  //   resolve(assets);
-  // })
+  return new Promise((resolve, reject)=> {
+    resolve(assets);
+  })
 }
 
 function startWebSockets(server)
@@ -258,7 +270,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    //console.log("fetching docs",req.query.filter);
+    console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -303,6 +315,7 @@ function startDocAPI(app)
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
     }
+
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, results, extra) {
       if(err)
       {
@@ -310,7 +323,7 @@ function startDocAPI(app)
       }
       else
       {
-        //console.log("found " + results.length + " docs");
+        console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -413,8 +426,8 @@ function startDocAPI(app)
   });
 
   app.post('/documents', app.oauth.authenticate(), (req,res) => {
+    console.log("POST document", req.body.data.attributes)
     let attr = req.body.data.attributes;
-    console.log("POST document", req.route, req.body)
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');
@@ -560,6 +573,7 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
+          console.log("CREATING DOC WITH ASSETS", attr.assets)
           doc.create({
             source:"",
             ownerId:attr.ownerId,
@@ -570,7 +584,7 @@ function createDoc(attr) {
             documentId:uuid,
             created:new Date(),
             lastEdited:new Date(),
-            assets:attr.assets ? attr.assets:[],
+            assets:attr.assets ? attr.assets : [],
             tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
@@ -585,8 +599,8 @@ function createDoc(attr) {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
+            console.log("document created",op);
             doc.submitOp(op);
-            //console.log("document created", doc);
             resolve(doc);
             return;
           });
