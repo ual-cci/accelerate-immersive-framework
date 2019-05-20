@@ -16,6 +16,7 @@ var shareDBConnection;
 var gridFS;
 const http = require("http")
 let documentMongo;
+const MAX_FILES_PER_DOC = 100000000;
 
 var initDocAPI = function(server, app, db, collection, uri)
 {
@@ -63,8 +64,13 @@ function startAssetAPI(app)
           }
           else
           {
-            console.log("doc.data.assetQuota", doc.data.assetQuota, doc.data.assetQuota + size);
-            if(doc.data.assetQuota + size > 100000000)
+            let quota = doc.data.assetQuota;
+            if(!quota)
+            {
+              quota = 0;
+            }
+            console.log("doc.data.assetQuota", quota, quota + size);
+            if(quota) + size > MAX_FILES_PER_DOC)
             {
               res.status(400)
               res.json({error:"toooooo much sizes"});
@@ -87,7 +93,12 @@ function startAssetAPI(app)
                   fileType:content_type,
                   size:file.length
                 };
-                const op = {p:["assetQuota"], oi:doc.data.assetQuota + size};
+                let quota = doc.data.assetQuota;
+                if(!quota)
+                {
+                  quota = 0;
+                }
+                const op = {p:["assetQuota"], oi:quota + size};
                 submitOp(docId, op).then(()=> {
                   console.log('success uploading asset', file.length);
                   res.status(200);
@@ -179,7 +190,12 @@ function startAssetAPI(app)
               {
                 match = true;
                 console.log("MATCHED deleting asset", asset.name, asset.fileId)
-                const op = {p:["assetQuota"], oi:doc.data.assetQuota - asset.size};
+                let quota = doc.data.assetQuota;
+                if(!quota)
+                {
+                  quota = 0;
+                }
+                const op = {p:["assetQuota"], oi:quota - asset.size};
                 submitOp(req.params.docid, op).then(()=> {
                   canDeleteAsset(db, req.params.docid, asset).then(()=>
                   {
