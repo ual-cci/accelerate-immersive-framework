@@ -53,23 +53,52 @@ function startAssetAPI(app)
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
-        var writestream = gridFS.createWriteStream({
-          filename: req.files.file.name,
-          mode: 'w',
-          content_type: req.files.file.mimetype,
-          metadata: req.body
-        });
+        const size = req.files.file.size;
+        const docId = req.body.documentId;
+        var doc = shareDBConnection.get(contentCollectionName, docId);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            console.log("doc.data.assetQuota", doc.data.assetQuota, doc.data.assetQuota + size);
+            if(doc.data.assetQuota + size > 100000000)
+            {
+              res.status(400)
+              res.json({error:"toooooo much sizes"});
+            }
+            else
+            {
+              var writestream = gridFS.createWriteStream({
+                filename: req.files.file.name,
+                mode: 'w',
+                content_type: req.files.file.mimetype,
+                metadata: req.body
+              });
 
-        fs.createReadStream(req.files.file.path).pipe(writestream);
-        writestream.on('close', function(file) {
-          const content_type = req.files.file.headers["content-type"];
-          const newAsset = {'name':req.files.file.name,"fileId":file._id,fileType:content_type};
-          console.log('success uploading asset');
-          res.status(200);
-          res.json(newAsset);
-          fs.unlink(req.files.file.path, function(err) {
-             console.log('success!')
-           });
+              fs.createReadStream(req.files.file.path).pipe(writestream);
+              writestream.on('close', function(file) {
+                const content_type = req.files.file.headers["content-type"];
+                const newAsset = {
+                  name:req.files.file.name,
+                  fileId:file._id,
+                  fileType:content_type,
+                  size:file.length
+                };
+                const op = {p:["assetQuota"], oi:doc.data.assetQuota + size};
+                submitOp(docId, op).then(()=> {
+                  console.log('success uploading asset', file.length);
+                  res.status(200);
+                  res.json(newAsset);
+                  fs.unlink(req.files.file.path, function(err) {
+                     console.log('success!')
+                   });
+                });
+              });
+            }
+          }
         });
       });
 
@@ -85,12 +114,17 @@ function startAssetAPI(app)
         });
 
         http.get(url, response => {
-          console.log('got resource')
+          console.log('got resource', response.body)
           var stream = response.pipe(writestream);
           writestream.on('close', function(file) {
             const content_type = mimetype;
-            const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
-            console.log('success uploading asset');
+            const newAsset = {
+              name:name,
+              fileId:file._id,
+              fileType:content_type,
+              size:file.length
+            };
+            console.log('success uploading asset', file.length);
             res.status(200);
             res.json(newAsset);
             fs.unlink(url, function(err) {
@@ -573,7 +607,6 @@ function createDoc(attr) {
           return;
         }
         if (doc.type === null) {
-          console.log("CREATING DOC WITH ASSETS", attr.assets)
           doc.create({
             source:"",
             ownerId:attr.ownerId,
@@ -594,12 +627,12 @@ function createDoc(attr) {
             dontPlay:false,
             children:[],
             parent:attr.parent,
-            type:attr.parent ? "js" : "html"
+            type:attr.parent ? "js" : "html",
+            assetQuota:attr.assetQuota ? attr.assetQuota : 0
           },()=> {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
-            console.log("document created",op);
             doc.submitOp(op);
             resolve(doc);
             return;

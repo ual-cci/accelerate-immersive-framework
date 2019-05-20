@@ -1284,12 +1284,13 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         if (confirm('Are you sure you want to delete?')) {
+          console.log("deleting asset", asset)
           this.get('assetService').deleteAsset(asset).then(()=> {
             const doc = this.get('model');
             let newAssets = doc.get('data').assets;
             newAssets = newAssets.filter((oldAsset) => {
-                console.log(oldAsset.fileId,asset)
-                return oldAsset.fileId !== asset
+                console.log(oldAsset.name,asset)
+                return oldAsset.name !== asset
             });
 
             this.get('documentService').updateDoc(doc.id, "assets", newAssets)
@@ -1307,7 +1308,7 @@ export default Controller.extend({
     },
     previewAsset(asset)
     {
-      var url = config.serverHost + "/asset/"+asset.fileId;
+      var url = config.serverHost + "/asset/"+this.get('model').id + "/" + asset.name;
       const isImage = asset.fileType.includes("image");
       const isAudio = asset.fileType.includes("audio");
       const isVideo = asset.fileType.includes("video");

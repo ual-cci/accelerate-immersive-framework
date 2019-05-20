@@ -590,16 +590,45 @@ describe('documents', () => {
     })
   });
 
+  describe('Asset quota limits', () => {
+
+    before((done)=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      });
+    });
+
+    it('it should copy the fileIDS from the original document', (done)=> {
+      chai.request(server)
+      .post("/assetWithURL")
+      .set('Authorization', 'Bearer ' + token)
+      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    });
+  });
+
   describe('Fork a document that has assets and appropriate non-duplication management', () => {
+
+    let assetURL = "";
+    let newDocID;
+
     before((done)=> {
       userModelTest.getToken().then((t)=> {
         token = t;
         done()
       })
     });
-
-    let assetURL = "";
-    let newDocID;
 
     it('it should copy the fileIDS from the original document', (done)=> {
       chai.request(server)
@@ -686,13 +715,13 @@ describe('documents', () => {
       userModel.dropTokens()
       documentModel.dropAssets()
       done();
-    })
+    });
   });
 
   after((done)=> {
     documentModel.removeDocs(docsAdded).then(()=> {
       console.log("did remove ", docsAdded)
       userModel.dropUser(accountId).then(()=>{done()});
-    }).catch((err)=> {console.log(err)})
+    }).catch((err)=> {console.log(err)});
   });
 });
