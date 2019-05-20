@@ -179,14 +179,17 @@ function startAssetAPI(app)
               {
                 match = true;
                 console.log("MATCHED deleting asset", asset.name, asset.fileId)
-                canDeleteAsset(db, req.params.docid, asset).then(()=>
-                {
-                  gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
-                    if (err) return handleError(err);
-                    res.status(200).json({id:asset.fileId, action:"deleted"});
+                const op = {p:["assetQuota"], oi:doc.data.assetQuota - asset.size};
+                submitOp(req.params.docid, op).then(()=> {
+                  canDeleteAsset(db, req.params.docid, asset).then(()=>
+                  {
+                    gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
+                      if (err) return handleError(err);
+                      res.status(200).json({id:asset.fileId, action:"deleted"});
+                    });
+                  }).catch((err)=> {
+                    res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
                   });
-                }).catch((err)=> {
-                  res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
                 });
               }
             });
