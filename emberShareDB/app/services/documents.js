@@ -28,6 +28,7 @@ export default Service.extend({
         parent:parent,
         tags:data.tags,
         assets:data.assets,
+        assetQuota:data.assetQuota
       });
       doc.save().then((response)=>{
         console.log("saved new doc");
