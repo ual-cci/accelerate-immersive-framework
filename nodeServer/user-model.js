@@ -537,7 +537,11 @@ var dump = function() {
 
 module.exports = {
   newUser:newUser,
-  dropUser:dropUser,
-  dropTokens:dropTokens,
 	initUserAPI:initUserAPI,
 };
+
+if(process.env.NODE_ENV == "test") {
+  module.exports.dropTokens = dropTokens;
+  module.exports.dropUser = dropUser;
+  module.exports.dropUsers = dropUsers;
+}

@@ -13,6 +13,8 @@ let expect = chai.expect();
 chai.use(chaiHttp);
 
 let token = "";
+userModel.dropUsers();
+documentModel.dropDocs();
 
 describe('doc delete', () => {
 
