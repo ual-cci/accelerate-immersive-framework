@@ -93,20 +93,12 @@ function startAssetAPI(app)
                   fileType:content_type,
                   size:file.length
                 };
-                let quota = doc.data.assetQuota;
-                if(!quota)
-                {
-                  quota = 0;
-                }
-                const op = {p:["assetQuota"], oi:quota + size};
-                submitOp(docId, op).then(()=> {
-                  console.log('success uploading asset', file.length);
-                  res.status(200);
-                  res.json(newAsset);
-                  fs.unlink(req.files.file.path, function(err) {
-                     console.log('success!')
-                   });
-                });
+                console.log('success uploading asset', file.length);
+                res.status(200);
+                res.json(newAsset);
+                fs.unlink(req.files.file.path, function(err) {
+                   console.log('success!')
+                 });
               });
             }
           }
@@ -189,23 +181,14 @@ function startAssetAPI(app)
               if(asset.name === req.params.filename)
               {
                 match = true;
-                console.log("MATCHED deleting asset", asset.name, asset.fileId)
-                let quota = doc.data.assetQuota;
-                if(!quota)
+                canDeleteAsset(db, req.params.docid, asset).then(()=>
                 {
-                  quota = 0;
-                }
-                const op = {p:["assetQuota"], oi:quota - asset.size};
-                submitOp(req.params.docid, op).then(()=> {
-                  canDeleteAsset(db, req.params.docid, asset).then(()=>
-                  {
-                    gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
-                      if (err) return handleError(err);
-                      res.status(200).json({id:asset.fileId, action:"deleted"});
-                    });
-                  }).catch((err)=> {
-                    res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
+                  gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
+                    if (err) return handleError(err);
+                    res.status(200).json({id:asset.fileId, action:"deleted"});
                   });
+                }).catch((err)=> {
+                  res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
                 });
               }
             });
@@ -429,6 +412,7 @@ function startDocAPI(app)
       else
       {
         let patched = req.body.data.attributes;
+        console.log("Patching candidates", patched);
         const current = doc.data;
         let actions = [];
         for (var key in current) {

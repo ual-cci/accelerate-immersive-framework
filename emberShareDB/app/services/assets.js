@@ -7,9 +7,8 @@ export default Service.extend({
   sessionAccount:inject('session-account'),
   store:inject('store'),
   cs:inject('console'),
-  deleteAsset(fileName) {
+  deleteAsset(fileName, doc = this.get('sessionAccount').currentDoc) {
     console.log("deleteAsset for " + fileName);
-    let doc = this.get('sessionAccount').currentDoc;
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "DELETE",

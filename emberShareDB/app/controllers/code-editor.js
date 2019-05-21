@@ -1264,8 +1264,11 @@ export default Controller.extend({
       const doc = this.get('model');
       let newAssets = doc.get('data').assets;
       newAssets.push(e);
-      this.get('documentService').updateDoc(doc.id, "assets", newAssets)
-      .then(()=>{
+      const actions = [
+        this.get('documentService').updateDoc(doc.id, "assets", newAssets),
+        this.get('documentService').updateDoc(doc.id, "assetQuota", e.size + doc.data.assetQuota)
+      ];
+      Promise.all(actions).then(()=>{
         if(!this.get('wsAvailable'))
         {
           this.refreshDoc();
@@ -1292,9 +1295,11 @@ export default Controller.extend({
                 console.log(oldAsset.name,asset)
                 return oldAsset.name !== asset
             });
-
-            this.get('documentService').updateDoc(doc.id, "assets", newAssets)
-            .then(()=>{
+            const actions = [
+              this.get('documentService').updateDoc(doc.id, "assets", newAssets),
+              this.get('documentService').updateDoc(doc.id, "assetQuota", doc.data.assetQuota - oldAsset.size)
+            ];
+            Promise.all(actions).then(()=>{
               if(!this.get('wsAvailable'))
               {
                 this.refreshDoc();

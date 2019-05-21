@@ -144,7 +144,7 @@ export default Service.extend({
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         console.log('deleting doc : ' + doc.data.parent ? "parent" : "child");
-        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name)});
+        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name, docId)});
         actions.concat(doc.data.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;
