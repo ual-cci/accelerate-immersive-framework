@@ -1244,7 +1244,7 @@ export default Controller.extend({
     //ASSETS
     assetError(err) {
       $("#asset-progress").css("display", "none");
-      alert("Error"+err);
+      alert("Error uploading there is a 100MB limit to assets");
     },
     assetProgress(e) {
       console.log("assetProgress", e.percent);

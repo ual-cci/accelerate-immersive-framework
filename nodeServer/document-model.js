@@ -70,7 +70,7 @@ function startAssetAPI(app)
               quota = 0;
             }
             console.log("doc.data.assetQuota", quota, quota + size);
-            if(quota) + size > MAX_FILES_PER_DOC)
+            if(quota + size > MAX_FILES_PER_DOC)
             {
               res.status(400)
               res.json({error:"toooooo much sizes"});

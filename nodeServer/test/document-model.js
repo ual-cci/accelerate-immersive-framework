@@ -682,7 +682,7 @@ describe('documents', () => {
       });
     });
 
-    it('it should not delete asset from gridFS, but should from document record', (done)=> {
+    it('it should not delete asset from gridFS the first time but should the second', (done)=> {
       chai.request(server)
       .delete("/asset/" + newDocID + "/bear")
       .set('Authorization', 'Bearer ' + token)
