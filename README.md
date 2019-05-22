@@ -115,7 +115,7 @@ sudo docker ps
 //probably kill something
 sudo docker kill (id of the thing I want to kill as seen in the list of dockers)
 //run it 
-sudo docker run -d -p 4001:8080  mimic/dev_test
+sudo docker run -d -p 4001:8081  mimic/dev_test
 ```
 
 ## Deploying Production 
