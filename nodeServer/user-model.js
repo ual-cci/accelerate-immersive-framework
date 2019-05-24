@@ -196,6 +196,10 @@ function startAuthAPI(app)
 				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
 				return;
 			}
+      else
+      {
+        res.status(400).send("server error fetching user");
+      }
     });
   });
 
@@ -533,7 +537,11 @@ var dump = function() {
 
 module.exports = {
   newUser:newUser,
-  dropUser:dropUser,
-  dropTokens:dropTokens,
 	initUserAPI:initUserAPI,
 };
+
+if(process.env.NODE_ENV == "test") {
+  module.exports.dropTokens = dropTokens;
+  module.exports.dropUser = dropUser;
+  module.exports.dropUsers = dropUsers;
+}

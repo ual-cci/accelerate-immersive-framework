@@ -13,10 +13,16 @@ let expect = chai.expect();
 chai.use(chaiHttp);
 
 let token = "";
+userModel.dropUsers();
+documentModel.dropDocs();
 
 describe('doc delete', () => {
+
+  documentModel.dropDocs();
+
   let accountId = ""
   let docId = "";
+
   before((done)=> {
     userModel.newUser("test-user","somethingsecure","something@test.com")
     .then((res) => {
@@ -63,7 +69,7 @@ describe('doc delete', () => {
           .query({filter:{search:"deleting-user", currentUser:"456", sortBy:"views", page: 0}})
           .end((err, res) => {
             res.should.have.status(200);
-            console.log(res.body.data)
+            console.log("search returned", res.body.data)
             assert.equal(res.body.data.length, 0);
             done();
           });
@@ -79,97 +85,114 @@ describe('doc delete', () => {
   })
 })
 
-describe('documents searching', () => {
-  let docsAdded = [];
+describe('documents', () => {
+
+  documentModel.dropDocs();
   let accountId = ""
-  before((done) => {
-    const public_attr = {
-      isPrivate:false,
-      name:"public-me",
-      owner:"test-user",
-      ownerId:"456",
-      tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const public_attr_2 = {
-      isPrivate:false,
-      name:"more-tags",
-      owner:"test-user",
-      ownerId:"456",
-      tags:["tag1", "tag2", "tag3"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const private_attr = {
-      isPrivate:true,
-      name:"private-me",
-      owner:"test-user",
-      ownerId:"456",
-      tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const private_not_owned_attr = {
-      isPrivate:true,
-      name:"private-not-me",
-      owner:"test-user-not-me",
-      ownerId:"123",
-      tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const private_not_owned_attr2 = {
-      isPrivate:true,
-      name:"private-not-me",
-      owner:"test-user-not-me",
-      ownerId:"123",
-      tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const public_not_owned_attr = {
-      isPrivate:false,
-      name:"public-not-me",
-      owner:"test-user-not-me",
-      ownerId:"123",
-      tags:["tag1", "tag2","tag3", "tag4", "tag5","tag6", "tag7","tag8", "tag9", "tag10"],
-      forkedFrom:null,
-      parent:null,
-      source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
-    };
-    const actions = [
-      documentModel.createDoc(public_attr),
-      documentModel.createDoc(public_attr_2),
-      documentModel.createDoc(private_attr),
-      documentModel.createDoc(private_not_owned_attr),
-      documentModel.createDoc(public_not_owned_attr),
-      documentModel.createDoc(private_not_owned_attr2)
-    ];
-    Promise.all(actions).then((vals)=> {
-      docsAdded = vals.map((doc)=>{return doc.id})
-      userModel.newUser("test-user","somethingsecure","something@test.com")
-      .then((res) => {
-        accountId = res.accountId
-        console.log("made user", accountId);
-        done();
+  let docId = "";
+  let docsAdded = [];
+
+  const postDoc = (data)=> {
+    return new Promise((resolve, reject)=> {
+      chai.request(server)
+      .post("/documents")
+      .set('Authorization', 'Bearer ' + token)
+      .send({data:{attributes:data}})
+      .end((err, newDoc) => {
+        if(err)
+        {
+          reject(err)
+        }
+        else
+        {
+          resolve(newDoc.body.data);
+        }
+      });
+    });
+  };
+
+  before((done)=> {
+    userModel.newUser("test-user","somethingsecure","something@test.com")
+    .then((res) => {
+      accountId = res.accountId
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        const public_attr = {
+          isPrivate:false,
+          name:"public-me",
+          owner:"test-user",
+          ownerId:"456",
+          tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const public_attr_2 = {
+          isPrivate:false,
+          name:"more-tags",
+          owner:"test-user",
+          ownerId:"456",
+          tags:["tag1", "tag2", "tag3"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const private_attr = {
+          isPrivate:true,
+          name:"private-me",
+          owner:"test-user",
+          ownerId:"456",
+          tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const private_not_owned_attr = {
+          isPrivate:true,
+          name:"private-not-me",
+          owner:"test-user-not-me",
+          ownerId:"123",
+          tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const private_not_owned_attr2 = {
+          isPrivate:true,
+          name:"private-not-me",
+          owner:"test-user-not-me",
+          ownerId:"123",
+          tags:["private_tag1", "private_tag2", "private_tag3",  "private_tag4",  "private_tag5"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const public_not_owned_attr = {
+          isPrivate:false,
+          name:"public-not-me",
+          owner:"test-user-not-me",
+          ownerId:"123",
+          tags:["tag1", "tag2","tag3", "tag4", "tag5","tag6", "tag7","tag8", "tag9", "tag10"],
+          forkedFrom:null,
+          parent:null,
+          source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+        };
+        const actions = [
+          postDoc(public_attr),
+          postDoc(public_attr_2),
+          postDoc(private_attr),
+          postDoc(private_not_owned_attr),
+          postDoc(public_not_owned_attr),
+          postDoc(private_not_owned_attr2)
+        ];
+        Promise.all(actions).then((vals)=> {
+          docsAdded = vals.map((doc)=>{return doc.id})
+          console.log(docsAdded);
+          done();
+        });
       });
     });
   });
-
-  after((done)=> {
-    documentModel.removeDocs(docsAdded).then(()=> {
-      console.log("did remove ", docsAdded)
-      userModel.dropUser(accountId).then(done());
-    }).catch((err)=> {
-      console.log(err);
-    })
-  })
 
   describe('/GET documents for user', () => {
       it('it should GET all the public documents, and documents owned by test-user', (done) => {
@@ -177,16 +200,17 @@ describe('documents searching', () => {
             .get('/documents')
             .query({filter:{search:" ", currentUser:"456", sortBy:"views", page: 0}})
             .end((err, res) => {
-              console.log(err, res);
               //assert.equal(3, res.body.data.length);
               let names = [];
               res.body.data.forEach((doc)=> {
+                console.log(doc.attributes)
                 if(doc.attributes.owner !== 'test-user')
                 {
                   assert.isFalse(doc.attributes.isPrivate);
                 }
                 names.push(doc.attributes.name);
               });
+              console.log("fetching", names);
               assert.isTrue(names.includes("public-me"));
               assert.isTrue(names.includes("more-tags"));
               assert.isTrue(names.includes("private-me"));
@@ -382,8 +406,8 @@ describe('documents searching', () => {
           .then((res) => {
             const newSource = res.body.data.attributes.source;
             res.should.have.status(200);
-            assert.equal(newSource, '<html><head>\n <script src = "http://localhost:4200/libs/MMLL.js"></script></head><body><script>console.log("hello world")</script></body></html>')
-            done()
+            assert.equal(newSource, '<html><head>\n <script src = "https://mimicproject.com/libs/MMLL.js"></script></head><body><script>console.log("hello world")</script></body></html>')
+            done();
           }).catch((err)=>{
             console.log("ERROR", err)
           });
@@ -460,7 +484,7 @@ describe('documents searching', () => {
       .get("/asset/" + "this-is-not-as-id" + "/bear.wav")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(404);
         done();
       });
@@ -471,7 +495,7 @@ describe('documents searching', () => {
       .get("/asset/" + docsAdded[0] + "/this-is-not-a-filename.type")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(404);
         done();
       });
@@ -482,7 +506,7 @@ describe('documents searching', () => {
       .get("/asset/" + docsAdded[0] + "/bear.wav")
       .set('Authorization', 'Bearer ' + token)
       .end((err, res) => {
-        console.log("asset", err, res.status, res.body);
+        console.log("asset", err, res.status);
         res.should.have.status(200);
         done();
       });
@@ -509,28 +533,29 @@ describe('documents searching', () => {
       .post("/assetWithURL")
       .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
         res.should.have.status(401);
         done();
       });
     });
 
+    let assetURL = "";
     it('it should return an asset ID and 200', (done)=> {
       chai.request(server)
       .post("/assetWithURL")
       .set('Authorization', 'Bearer ' + token)
       .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
         res.should.have.status(200);
         assert.equal(res.body.name, "bear")
         let assetID = res.body.fileId;
+        const assets = [{name:"bear", fileId:assetID, fileType:"audio/x-wav"}];
         chai.request(server)
-        .delete("/asset/"+assetID)
-        .set('Authorization', 'Bearer ' + token)
+        .patch("/documents/" + docsAdded[0])
+        .send({data:{attributes:{assets:assets}}})
         .end((err, res) => {
-          console.log(err, res.status, res.body);
-          res.should.have.status(200);
+          assetURL = "/asset/"+docsAdded[0]+"/"+ "bear";
           done();
         });
       });
@@ -538,9 +563,20 @@ describe('documents searching', () => {
 
     it('it should return an asset read stream', (done)=> {
       chai.request(server)
-      .get("/asset/5d9933c7-5c98-217b-b640-64bd9438799f/ohmygoodnice.mp3")
+      .get(assetURL)
       .end((err, res) => {
-        console.log(err, res.status, res.body);
+        console.log(err, res.status);
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    it('it should delete asset', (done)=> {
+      chai.request(server)
+      .delete(assetURL)
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        console.log(err, res.status);
         res.should.have.status(200);
         done();
       });
@@ -552,5 +588,140 @@ describe('documents searching', () => {
       documentModel.dropAssets()
       done();
     })
+  });
+
+  describe('Asset quota limits', () => {
+
+    before((done)=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      });
+    });
+
+    it('it should copy the fileIDS from the original document', (done)=> {
+      chai.request(server)
+      .post("/assetWithURL")
+      .set('Authorization', 'Bearer ' + token)
+      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    });
+  });
+
+  describe('Fork a document that has assets and appropriate non-duplication management', () => {
+
+    let assetURL = "";
+    let newDocID;
+
+    before((done)=> {
+      userModelTest.getToken().then((t)=> {
+        token = t;
+        done()
+      })
+    });
+
+    it('it should copy the fileIDS from the original document', (done)=> {
+      chai.request(server)
+      .post("/assetWithURL")
+      .set('Authorization', 'Bearer ' + token)
+      .send({mimetype:"audio/x-wav",name:"bear", url:"http://www.wavsource.com/snds_2018-06-03_5106726768923853/animals/bear_growl_y.wav"})
+      .end((err, res) => {
+        res.should.have.status(200);
+        let assetID = res.body.fileId;
+        const assets = [{name:"bear", fileId:assetID, fileType:"audio/x-wav"}];
+        //Update assets property
+        chai.request(server)
+        .patch("/documents/" + docsAdded[0])
+        .send({data:{attributes:{assets:assets}}})
+        .end((err, res) => {
+          console.log(err, res.status);
+          res.should.have.status(200);
+          const forker = {data:{attributes:{
+            isPrivate:false,
+            name:"public-me",
+            owner:"asset-user",
+            ownerId:"456",
+            tags:["tag1", "tag2", "tag3", "tag4", "tag5"],
+            forkedFrom:docsAdded[0],
+            parent:null,
+            assets:assets,
+            source:"<html><head></head><body><script>console.log(\"hello world\")</script></body></html>"
+          }}};
+          chai.request(server)
+          .post("/documents")
+          .set('Authorization', 'Bearer ' + token)
+          .send(forker)
+          .end((err, newDoc) => {
+            newDocID = newDoc.body.data.id;
+            const attr = newDoc.body.data.attr;
+            //console.log(attr, err);
+            console.log("assets from new doc", attr.assets);
+            assert.equal(attr.assets[0].fileId, assets[0].fileId);
+            assert.equal(attr.assets[0].name, assets[0].name);
+            assert.equal(attr.assets[0].fileType, assets[0].fileType);
+            assetURL = "/asset/" + newDocID + "/bear";
+            chai.request(server)
+            .get(assetURL)
+            .end((err, res) => {
+              console.log(err, res.status);
+              res.should.have.status(200);
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    it('it should not delete asset from gridFS the first time but should the second', (done)=> {
+      chai.request(server)
+      .delete("/asset/" + newDocID + "/bear")
+      .set('Authorization', 'Bearer ' + token)
+      .end((err, res) => {
+        res.should.have.status(200);
+        assert.equal(res.body.action, "not deleted, in use by others");
+        chai.request(server)
+        .patch("/documents/" + newDocID)
+        .send({data:{attributes:{assets:[]}}})
+        .end((err, res) => {
+          chai.request(server)
+          .delete("/asset/" + docsAdded[0] + "/bear")
+          .set('Authorization', 'Bearer ' + token)
+          .end((err, res) => {
+            res.should.have.status(200);
+            assert.equal(res.body.action, "deleted");
+            chai.request(server)
+            .patch("/documents/" + docsAdded[0])
+            .send({data:{attributes:{assets:[]}}})
+            .end((err, res) => {
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    after((done)=> {
+      token = "";
+      userModel.dropTokens()
+      documentModel.dropAssets()
+      done();
+    });
+  });
+
+  after((done)=> {
+    documentModel.removeDocs(docsAdded).then(()=> {
+      console.log("did remove ", docsAdded)
+      userModel.dropUser(accountId).then(()=>{done()});
+    }).catch((err)=> {console.log(err)});
   });
 });

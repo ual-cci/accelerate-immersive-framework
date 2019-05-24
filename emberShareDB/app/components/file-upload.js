@@ -33,7 +33,7 @@ export default EmberUploader.FileField.extend({
           this.get('onError')(errorThrown);
           reject();
         });
-        uploader.upload(file)
+        uploader.upload(file, data)
       }
       else
       {

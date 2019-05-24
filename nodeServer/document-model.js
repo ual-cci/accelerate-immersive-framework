@@ -15,6 +15,8 @@ var shareDB;
 var shareDBConnection;
 var gridFS;
 const http = require("http")
+let documentMongo;
+const MAX_FILES_PER_DOC = 100000000;
 
 var initDocAPI = function(server, app, db, collection, uri)
 {
@@ -40,7 +42,7 @@ function handleError(err)
 
 function startAssetAPI(app)
 {
-  mongo.MongoClient.connect(mongoUri, function(err, client) {
+  documentMongo = mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
     {
       console.log("DOCUMENT MODEL - error connecting to database", err);
@@ -52,23 +54,54 @@ function startAssetAPI(app)
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
-        var writestream = gridFS.createWriteStream({
-          filename: req.files.file.name,
-          mode: 'w',
-          content_type: req.files.file.mimetype,
-          metadata: req.body
-        });
+        const size = req.files.file.size;
+        const docId = req.body.documentId;
+        var doc = shareDBConnection.get(contentCollectionName, docId);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            let quota = doc.data.assetQuota;
+            if(!quota)
+            {
+              quota = 0;
+            }
+            console.log("doc.data.assetQuota", quota, quota + size);
+            if(quota + size > MAX_FILES_PER_DOC)
+            {
+              res.status(400)
+              res.json({error:"toooooo much sizes"});
+            }
+            else
+            {
+              var writestream = gridFS.createWriteStream({
+                filename: req.files.file.name,
+                mode: 'w',
+                content_type: req.files.file.mimetype,
+                metadata: req.body
+              });
 
-        fs.createReadStream(req.files.file.path).pipe(writestream);
-        writestream.on('close', function(file) {
-          const content_type = req.files.file.headers["content-type"];
-          const newAsset = {'name':req.files.file.name,"fileId":file._id,fileType:content_type};
-          console.log('success uploading asset');
-          res.status(200);
-          res.json(newAsset);
-          fs.unlink(req.files.file.path, function(err) {
-             console.log('success!')
-           });
+              fs.createReadStream(req.files.file.path).pipe(writestream);
+              writestream.on('close', function(file) {
+                const content_type = req.files.file.headers["content-type"];
+                const newAsset = {
+                  name:req.files.file.name,
+                  fileId:file._id,
+                  fileType:content_type,
+                  size:file.length
+                };
+                console.log('success uploading asset', file.length);
+                res.status(200);
+                res.json(newAsset);
+                fs.unlink(req.files.file.path, function(err) {
+                   console.log('success!')
+                 });
+              });
+            }
+          }
         });
       });
 
@@ -84,12 +117,17 @@ function startAssetAPI(app)
         });
 
         http.get(url, response => {
-          console.log('got resource')
+          console.log('got resource', response.body)
           var stream = response.pipe(writestream);
           writestream.on('close', function(file) {
             const content_type = mimetype;
-            const newAsset = {'name':name,"fileId":file._id,fileType:content_type};
-            console.log('success uploading asset');
+            const newAsset = {
+              name:name,
+              fileId:file._id,
+              fileType:content_type,
+              size:file.length
+            };
+            console.log('success uploading asset', file.length);
             res.status(200);
             res.json(newAsset);
             fs.unlink(url, function(err) {
@@ -110,7 +148,6 @@ function startAssetAPI(app)
           {
             let match = false;
             doc.data.assets.forEach((asset)=> {
-
               if(asset.name === req.params.filename)
               {
                 console.log(asset.name, asset.fileId)
@@ -129,38 +166,80 @@ function startAssetAPI(app)
         });
       });
 
-      app.delete('/asset/:id', app.oauth.authenticate(), function(req, res) {
-        gridFS.remove({_id:req.params.id}, function (err, gridFSDB) {
-          if (err) return handleError(err);
-          console.log('success deleting asset');
-          res.status(200);
-          res.json(req.params.id);
+      app.delete('/asset/:docid/:filename', app.oauth.authenticate(), function(req, res) {
+        var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
+        doc.fetch(function(err) {
+          if (err || !doc.data) {
+            res.status(404).send("database error making document");
+            return;
+          }
+          else
+          {
+            let match = false;
+            console.log("searching ",doc.data.assets,"for", req.params.filename)
+            doc.data.assets.forEach((asset)=> {
+              if(asset.name === req.params.filename)
+              {
+                match = true;
+                canDeleteAsset(db, req.params.docid, asset).then(()=>
+                {
+                  gridFS.remove({_id:asset.fileId}, function (err, gridFSDB) {
+                    if (err) return handleError(err);
+                    res.status(200).json({id:asset.fileId, action:"deleted"});
+                  });
+                }).catch((err)=> {
+                  res.status(200).json({id:asset.fileId, action:"not deleted, in use by others"});
+                });
+              }
+            });
+            if(!match)
+            {
+              res.status(404).send("asset not found");
+            }
+          }
         });
       });
     }
   });
 }
 
+function canDeleteAsset(db, docId, asset) {
+  return new Promise((resolve, reject)=> {
+    const query = {assets:{$elemMatch:{fileId:asset.fileId}}};
+    db.collection(contentCollectionName).find(query).toArray(function(err, result) {
+      console.log("assets found in ", result.length, "docs");
+      if(err || result.length > 1)
+      {
+        console.log("asset used by other docs");
+        reject();
+      }
+      else if (result.length == 1)
+      {
+        if(result[0].documentId == docId)
+        {
+          console.log("asset only used by target doc");
+          resolve();
+        }
+        else
+        {
+          console.log("asset used by other docs");
+          reject();
+        }
+      }
+      else
+      {
+        console.log("asset used by no docs");
+        resolve();
+      }
+    });
+  });
+};
+
 function copyAssets(assets)
 {
-  var copyAsset = function(asset) {
-    return new Promise((resolve, reject) => {
-      var writestream = gridFS.createWriteStream({
-        filename: asset.name,
-        mode: 'w',
-        content_type: asset.fileType
-      });
-      var readstream = gridFS.createReadStream({
-         _id: asset.fileId
-      });
-      readstream.pipe(writestream);
-      writestream.on('close', function(file) {
-        var newAsset = {'name':asset.name,"fileId":file._id,fileType:asset.fileType};
-        resolve(newAsset);
-      });
-    });
-  };
-  return Promise.all(assets.map(copyAsset));
+  return new Promise((resolve, reject)=> {
+    resolve(assets);
+  })
 }
 
 function startWebSockets(server)
@@ -227,7 +306,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    //console.log("fetching docs",req.query.filter);
+    console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -272,6 +351,7 @@ function startDocAPI(app)
       $limit: PAGE_SIZE,
       $skip: page * PAGE_SIZE
     }
+
     shareDBMongo.query(contentCollectionName, query, null, null, function (err, results, extra) {
       if(err)
       {
@@ -279,7 +359,7 @@ function startDocAPI(app)
       }
       else
       {
-        //console.log("found " + results.length + " docs");
+        console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -290,6 +370,7 @@ function startDocAPI(app)
 
   app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    console.log("delete doc called",  req.params.id)
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -308,7 +389,7 @@ function startDocAPI(app)
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {
       if (err || !doc.data) {
-        console.log("database error making document", doc);
+        console.log("database error making document", doc.id);
         res.status(404).send("database error making document" + err);
         return;
       }
@@ -331,6 +412,7 @@ function startDocAPI(app)
       else
       {
         let patched = req.body.data.attributes;
+        console.log("Patching candidates", patched);
         const current = doc.data;
         let actions = [];
         for (var key in current) {
@@ -381,29 +463,14 @@ function startDocAPI(app)
   });
 
   app.post('/documents', app.oauth.authenticate(), (req,res) => {
+    console.log("POST document", req.body.data.attributes)
     let attr = req.body.data.attributes;
-    console.log("POST document", req.route, req.body)
     createDoc(attr)
     .then(function(doc) {
       res.type('application/vnd.api+json');
       res.status(200);
       var json = { data: { id: doc.data.documentId, type: 'document', attr: doc.data }};
-      if(doc.data.forkedFrom)
-      {
-        copyAssets(attr.assets).then((newAssets)=>{
-          doc.submitOp({p:['assets'],oi:newAssets},{source:'server'});
-          json.data.attr.assets = newAssets;
-          res.json(json);
-        }).catch((err)=>{
-          res.type('application/vnd.api+json');
-          res.status(400);
-          res.json({errors:[err]});
-        });
-      }
-      else
-      {
-        res.json(json);
-      }
+      res.json(json);
     },
      function(err) {
        res.type('application/vnd.api+json');
@@ -553,7 +620,7 @@ function createDoc(attr) {
             documentId:uuid,
             created:new Date(),
             lastEdited:new Date(),
-            assets:[],
+            assets:attr.assets ? attr.assets : [],
             tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
@@ -563,13 +630,13 @@ function createDoc(attr) {
             dontPlay:false,
             children:[],
             parent:attr.parent,
-            type:attr.parent ? "js" : "html"
+            type:attr.parent ? "js" : "html",
+            assetQuota:attr.assetQuota ? attr.assetQuota : 0
           },()=> {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
             doc.submitOp(op);
-            //console.log("document created", doc);
             resolve(doc);
             return;
           });
@@ -585,9 +652,21 @@ function createDoc(attr) {
 
 /////helpers
 
-const dropDocs = (callback) => {
-  console.log(shareDBMongo)
-	mongo.collection(contentCollectionName).remove({}, callback());
+const dropDocs = () => {
+  return new Promise((resolve, reject) => {
+    mongo.MongoClient.connect(mongoUri, function(err, client) {
+      if(err)
+      {
+        console.log("DOCUMENT MODEL - error connecting to database", err);
+      }
+      else
+      {
+        console.log("Connected successfully to mongo");
+        docDB = client.db(contentDBName);
+        docDB.collection(contentCollectionName).drop();
+      }
+    });
+  });
 }
 
 const dropAssets = () => {
@@ -640,6 +719,7 @@ module.exports = {
 }
 
 if(process.env.NODE_ENV == "test") {
+  module.exports.dropDocs = dropDocs,
   module.exports.createDoc = createDoc,
   module.exports.removeDocs = removeDocs,
   module.exports.dropAssets = dropAssets
