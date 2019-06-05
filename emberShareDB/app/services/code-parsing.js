@@ -426,17 +426,14 @@ export default Service.extend({
     return ops
   },
   applyOps(ops, editor) {
-    console.log("applying ops", ops);
     function opToDelta(op) {
       const start = op.p[op.p.length - 1];
       const from = editor.doc.posFromIndex(start);
       if ('sd' in op) {
         const end = start + op.sd.length;
         const to = editor.doc.posFromIndex(end);
-        console.log("removing", op.sd, "at", from, to);
         editor.doc.replaceRange("", from, to, "playback");
       } else if ('si' in op) {
-        console.log("replacing", op.si, "at", from);
         editor.doc.replaceRange(op.si, from, null, "playback");
       } else {
         throw new Error(`Invalid Operation: ${JSON.stringify(op)}`);
