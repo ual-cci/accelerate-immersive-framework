@@ -5,12 +5,6 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
-    ace: {
-      themes: ['monokai'],
-      modes: ['html', 'javascript'],
-      workers: ['html', 'javascript'],
-      exts: ['language_tools']
-    },
     codemirror: {
       addons: ['mode/simple.js', 'mode/multiplex.js', 'comment/comment.js'],
       modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],

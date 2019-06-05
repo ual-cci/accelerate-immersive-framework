@@ -262,20 +262,11 @@
                  <p id = "connection-warning-text"> {{connectionWarning}}</p>
             </div>
           {{/if}}
-          {{code-mirror}}
 
-          {{ember-ace
-            minLines = 40
-            maxLines = 10000
-            value=value
-            higglightActiveLine = true
-            ready=(action 'editorReady')
-            theme='ace/theme/monokai'
-            enableDefaultAutocompletion=true
-            enableLiveAutocompletion=true
-            enableBasicAutocompletion=true
-            suggestCompletions = (action 'suggestCompletions')
-          }}
+          {{code-mirror
+            onReady=(action 'onEditorReady')
+            onChange = (action 'onSessionChange')}}
+
           </div>
       </div>
       {{#if isMobile}}

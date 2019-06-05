@@ -115,16 +115,14 @@ export default Controller.extend({
         }
       }
     });
+    this.begin();
   },
   begin: function() {
     console.log("beginning");
-    const editor = this.get("editor");
-    editor.setOption("enableBasicAutocompletion", true)
-    console.log('editor ready', editor)
     this.set("hudMessage", "");
     this.set("showHUD", true);
     this.clearTabs();
-    editor.setReadOnly(true);
+    //editor.setReadOnly(true);
     this.initShareDB();
   },
   initShareDB: function() {
@@ -144,10 +142,10 @@ export default Controller.extend({
     this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
     console.log("isMobile", this.get('isMobile'));
     this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
-    var iframe = document.getElementById("output-iframe");
-    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDocument.body.style.padding = "0px";
-    iframeDocument.body.style.margin = "0px";
+    // var iframe = document.getElementById("output-iframe");
+    // var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    // iframeDocument.body.style.padding = "0px";
+    // iframeDocument.body.style.margin = "0px";
     this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
     if(embed)
     {
@@ -187,44 +185,44 @@ export default Controller.extend({
     }
   },
   initAceEditor: function() {
-    const editor = this.get('editor');
-    const session = editor.getSession();
-    console.log("Adding in commands");
-    editor.commands.addCommand({
-      name: "executeLines",
-      exec: ()=>{
-        console.log("executeLines");
-        this.updateIFrame(true)
-      },
-      bindKey: {mac: "shift-enter", win: "shift-enter"}
-    });
-    editor.commands.addCommand({
-      name: "pause",
-      exec: ()=>{
-        this.get('cs').logToScreen("pause")
-        this.set('renderedSource', "");
-      },
-      bindKey: {mac: "cmd-.", win: "ctrl-."}
-    });
-    editor.commands.addCommand({
-      name: "zoom-in",
-      exec: ()=>{
-        this.zoomIn();
-      },
-      bindKey: {mac: "cmd-=", win: "ctrl-="}
-    });
-    editor.commands.addCommand({
-      name: "zoom-out",
-      exec: ()=>{
-        this.zoomOut();
-      },
-      bindKey: {mac: "cmd--", win: "ctrl--"}
-    });
-    session.on('change',(delta)=>{
-      this.onSessionChange( delta);
-    });
-    session.setMode("ace/mode/html");
-    session.setUseWorker(false);
+    // const editor = this.get('editor');
+    // const session = editor.getSession();
+    // console.log("Adding in commands");
+    // editor.commands.addCommand({
+    //   name: "executeLines",
+    //   exec: ()=>{
+    //     console.log("executeLines");
+    //     this.updateIFrame(true)
+    //   },
+    //   bindKey: {mac: "shift-enter", win: "shift-enter"}
+    // });
+    // editor.commands.addCommand({
+    //   name: "pause",
+    //   exec: ()=>{
+    //     this.get('cs').logToScreen("pause")
+    //     this.set('renderedSource', "");
+    //   },
+    //   bindKey: {mac: "cmd-.", win: "ctrl-."}
+    // });
+    // editor.commands.addCommand({
+    //   name: "zoom-in",
+    //   exec: ()=>{
+    //     this.zoomIn();
+    //   },
+    //   bindKey: {mac: "cmd-=", win: "ctrl-="}
+    // });
+    // editor.commands.addCommand({
+    //   name: "zoom-out",
+    //   exec: ()=>{
+    //     this.zoomOut();
+    //   },
+    //   bindKey: {mac: "cmd--", win: "ctrl--"}
+    // });
+    // session.on('change',(delta)=>{
+    //   this.onSessionChange( delta);
+    // });
+    // session.setMode("ace/mode/html");
+    // session.setUseWorker(false);
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -419,18 +417,17 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
-      const session = editor.getSession();
       console.log("didReceiveDoc", doc.get('data').type);
-      if(doc.get('data').type == "js")
-      {
-        session.setMode("ace/mode/javascript");
-      }
-      else
-      {
-        session.setMode("ace/mode/html");
-      }
+      // if(doc.get('data').type == "js")
+      // {
+      //   session.setMode("ace/mode/javascript");
+      // }
+      // else
+      // {
+      //   session.setMode("ace/mode/html");
+      // }
       this.set('surpress', true);
-      session.setValue(doc.get('data').source);
+      editor.setValue(doc.get('data').source);
       this.set('surpress', false);
       this.set('savedVals', doc.get('data').savedVals);
       this.setCanEditDoc();
@@ -443,7 +440,7 @@ export default Controller.extend({
         return;
       });
       console.log("CAN EDIT?", this.get('canEditDoc'))
-      editor.setReadOnly(!this.get('canEditDoc'));
+      editor.options.readOnly = !this.get('canEditDoc');
       this.set('showHUD', false);
       this.scrollToSavedPosition();
       this.set('titleName', doc.get('data').name + " by " + doc.get('data').owner);
@@ -516,15 +513,15 @@ export default Controller.extend({
   didReceiveOp: function (ops,source) {
     //console.log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
-    const editor = this.get('editor');
+    //const editor = this.get('editor');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
-        console.log("applying remote op")
-        const deltas = this.get('codeParser').opTransform(ops, editor);
-        editor.session.getDocument().applyDeltas(deltas);
+        // console.log("applying remote op")
+        // const deltas = this.get('codeParser').opTransform(ops, editor);
+        // editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
@@ -614,18 +611,18 @@ export default Controller.extend({
     });
   },
   zoomIn: function() {
-    const editor = this.get("editor");
-    this.incrementProperty('fontSize');
-    editor.setFontSize(this.get('fontSize'));
+    // const editor = this.get("editor");
+    // this.incrementProperty('fontSize');
+    // editor.setFontSize(this.get('fontSize'));
   },
   zoomOut: function() {
-    const editor = this.get("editor");
-    this.decrementProperty('fontSize');
-    if(this.get('fontSize') < 1)
-    {
-      this.set('fontSize', 1);
-    }
-    editor.setFontSize(this.get('fontSize'));
+    // const editor = this.get("editor");
+    // this.decrementProperty('fontSize');
+    // if(this.get('fontSize') < 1)
+    // {
+    //   this.set('fontSize', 1);
+    // }
+    // editor.setFontSize(this.get('fontSize'));
   },
   doPlayOnLoad: function() {
     let model = this.get('model');
@@ -661,32 +658,33 @@ export default Controller.extend({
     });
   },
   getSelectionRange: function() {
-    const editor = this.get('editor');
-    let selectionRange = editor.getSelectionRange();
-    if(selectionRange.start.row == selectionRange.end.row &&
-      selectionRange.start.column == selectionRange.end.column)
-      {
-        selectionRange.start.column = 0;
-        selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
-      }
-      return selectionRange;
+    // const editor = this.get('editor');
+    // let selectionRange = editor.getSelectionRange();
+    // if(selectionRange.start.row == selectionRange.end.row &&
+    //   selectionRange.start.column == selectionRange.end.column)
+    //   {
+    //     selectionRange.start.column = 0;
+    //     selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
+    //   }
+    //   return selectionRange;
   },
   getSelectedText: function()
   {
-    const editor = this.get('editor');
-    let selectionRange = this.getSelectionRange();
-    const content = editor.session.getTextRange(selectionRange);
-    return content;
+    // const editor = this.get('editor');
+    // let selectionRange = this.getSelectionRange();
+    // const content = editor.session.getTextRange(selectionRange);
+    // return content;
   },
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       if(!isEmpty(doc) && this.get('droppedOps').length == 0)
       {
-        const session = this.get('editor').getSession();
+        const source = this.get('editor').getValue();
+        console.log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        this.get('documentService').updateDoc(doc.id, "source", session.getValue())
+        this.get('documentService').updateDoc(doc.id, "source", source)
         .then(()=>resolve())
         .catch((err)=>{
           console.log("error updateSourceFromSession - updateDoc", err);
@@ -705,7 +703,6 @@ export default Controller.extend({
         this.updateSavedVals();
         const savedVals = this.get('savedVals');
         let model = this.get('model');
-        const editor = this.get('editor');
         const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
         console.log("updateiframe", model.id)
@@ -733,49 +730,49 @@ export default Controller.extend({
   },
   flashAutoRender:function()
   {
-    let autoInput = document.getElementsByClassName('ace_content').item(0)
-    autoInput.style["border-style"] = "solid"
-    autoInput.style["border-width"] = "5px"
-    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
-    setTimeout(()=> {
-        autoInput.style["border-style"] = "none"
-    }, 250);
+    // let autoInput = document.getElementsByClassName('ace_content').item(0)
+    // autoInput.style["border-style"] = "solid"
+    // autoInput.style["border-width"] = "5px"
+    // autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    // setTimeout(()=> {
+    //     autoInput.style["border-style"] = "none"
+    // }, 250);
   },
   flashSelectedText: function() {
-    let selectionMarkers = document.getElementsByClassName('ace_selection');
-    for(let i = 0; i < selectionMarkers.length; i++)
-    {
-      selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
-    }
-    setTimeout(()=> {
-      for(let i = 0; i < selectionMarkers.length; i++)
-      {
-        selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
-      }
-    }, 500);
-    if(selectionMarkers.length < 1)
-    {
-      let activeMarkers = document.getElementsByClassName('ace_active-line');
-      for(let j = 0; j < activeMarkers.length; j++)
-      {
-        activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
-      }
-      setTimeout(()=> {
-        for(let j = 0; j < activeMarkers.length; j++)
-        {
-          activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
-        }
-      }, 500);
-    }
+    // let selectionMarkers = document.getElementsByClassName('ace_selection');
+    // for(let i = 0; i < selectionMarkers.length; i++)
+    // {
+    //   selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
+    // }
+    // setTimeout(()=> {
+    //   for(let i = 0; i < selectionMarkers.length; i++)
+    //   {
+    //     selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
+    //   }
+    // }, 500);
+    // if(selectionMarkers.length < 1)
+    // {
+    //   let activeMarkers = document.getElementsByClassName('ace_active-line');
+    //   for(let j = 0; j < activeMarkers.length; j++)
+    //   {
+    //     activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
+    //   }
+    //   setTimeout(()=> {
+    //     for(let j = 0; j < activeMarkers.length; j++)
+    //     {
+    //       activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
+    //     }
+    //   }, 500);
+    // }
   },
   updateLinting: function() {
-    const doc = this.get('currentDoc');
-    const ruleSets = this.get('autocomplete').ruleSets(doc.get('data').type);
-    const editor = this.get('editor');
-    const mainText = doc.get('data').source;
-    const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    const errors = this.get('autocomplete').lintingErrors(messages);
-    editor.getSession().setAnnotations(errors);
+    // const doc = this.get('currentDoc');
+    // const ruleSets = this.get('autocomplete').ruleSets(doc.get('data').type);
+    // const editor = this.get('editor');
+    // const mainText = doc.get('data').source;
+    // const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
+    // const errors = this.get('autocomplete').lintingErrors(messages);
+    // editor.getSession().setAnnotations(errors);
   },
   onCodingFinished: function() {
     if(this.get('autoRender'))
@@ -798,37 +795,23 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    //console.log("session change")
     if(!surpress && this.get('droppedOps').length == 0)
     {
-      const editor = this.editor;
-      const session = editor.getSession();
-
+      const editor = this.get('editor');
       this.incrementProperty('editCtr');
 
       if(!this.get('opsPlayer').atHead())
       {
-        console.log("not at head", doc.get('data').source, session.getValue());
+        console.log("not at head", doc.get('data').source, editor.getValue());
         this.submitOp({p: ["source", 0], sd: doc.get('data').source});
-        this.submitOp({p: ["source", 0], si: session.getValue()});
+        this.submitOp({p: ["source", 0], si: editor.getValue()});
       }
       else
       {
-        const aceDoc = session.getDocument();
-        const op = {};
-        const start = aceDoc.positionToIndex(delta.start);
-        op.p = ['source', parseInt(start)];
-        let action;
-        if (delta.action === 'insert') {
-          action = 'si';
-        } else if (delta.action === 'remove') {
-          action = 'sd';
-        } else {
-          throw new Error(`action ${action} not supported`);
-        }
-        const str = delta.lines.join('\n');
-        op[action] = str;
-        this.submitOp(op);
+        const ops = this.get('codeParser').getOps(delta, editor.doc);
+        ops.forEach((op)=>{
+          this.submitOp(op);
+        })
       }
 
       this.get('opsPlayer').reset(doc.id);
@@ -950,43 +933,43 @@ export default Controller.extend({
     //console.log("SCROLL POS", this.get('scrollPositions'))
   },
   scrollToSavedPosition: function() {
-    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
-    const editor = this.get('editor');
-    //console.log("scrolling to ", pos)
-    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
-    editor.resize(true);
-    editor.gotoLine(pos);
-    editor.scrollToLine(pos, true, true, {})
-    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
+    // const pos = this.get('scrollPositions')[this.get('currentDoc').id];
+    // const editor = this.get('editor');
+    // //console.log("scrolling to ", pos)
+    // //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
+    // editor.resize(true);
+    // editor.gotoLine(pos);
+    // editor.scrollToLine(pos, true, true, {})
+    // Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   skipOp:function(prev, rewind = false) {
-    const update = ()=> {
-      const editor = this.get('editor');
-      const doc = this.get('currentDoc').id;
-      const apply = (deltas) => {
-        this.set('surpress', true);
-        editor.session.getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-      }
-      if(prev)
-      {
-        this.get('opsPlayer').prevOp(editor, rewind)
-        .then((deltas)=>{apply(deltas)});
-      }
-      else
-      {
-        this.get('opsPlayer').nextOp(editor, rewind)
-        .then((deltas)=>{apply(deltas)});
-      }
-    }
-    if(this.get('opsPlayer').atHead())
-    {
-      this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
-    }
-    else
-    {
-      update();
-    }
+    // const update = ()=> {
+    //   const editor = this.get('editor');
+    //   const doc = this.get('currentDoc').id;
+    //   const apply = (deltas) => {
+    //     this.set('surpress', true);
+    //     editor.session.getDocument().applyDeltas(deltas);
+    //     this.set('surpress', false);
+    //   }
+    //   if(prev)
+    //   {
+    //     this.get('opsPlayer').prevOp(editor, rewind)
+    //     .then((deltas)=>{apply(deltas)});
+    //   }
+    //   else
+    //   {
+    //     this.get('opsPlayer').nextOp(editor, rewind)
+    //     .then((deltas)=>{apply(deltas)});
+    //   }
+    // }
+    // if(this.get('opsPlayer').atHead())
+    // {
+    //   this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
+    // }
+    // else
+    // {
+    //   update();
+    // }
   },
   updateSavedVals: function()
   {
@@ -1151,10 +1134,16 @@ export default Controller.extend({
     }, 200)
   },
   actions: {
-    editorReady(editor) {
+
+    //codemirror
+    onEditorReady(editor) {
       this.set('editor', editor);
-      this.begin();
     },
+    onSessionChange(cm, change) {
+      this.set('editor', cm);
+      this.onSessionChange(change);
+    },
+
     suggestCompletions(editor, session, position, prefix) {
       let suggestions = [];
       const assets = this.get('model').data.assets;
@@ -1365,15 +1354,15 @@ export default Controller.extend({
       document.getElementById("myDropdown").classList.toggle("show");
     },
     insertLibrary(lib) {
-      this.updateSourceFromSession().then(()=>{
-        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
-        this.submitOp(op);
-        this.set('surpress', true);
-        const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
-        this.get('editor.session').getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-        document.getElementById("myDropdown").classList.toggle("show");
-      })
+      // this.updateSourceFromSession().then(()=>{
+      //   const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+      //   this.submitOp(op);
+      //   this.set('surpress', true);
+      //   const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
+      //   this.get('editor.session').getDocument().applyDeltas(deltas);
+      //   this.set('surpress', false);
+      //   document.getElementById("myDropdown").classList.toggle("show");
+      // })
     },
     toggleShowShare() {
       this.toggleProperty('showShare');
@@ -1501,11 +1490,11 @@ export default Controller.extend({
       this.skipOp(prev);
     },
     rewindOps() {
-      this.set('surpress', true);
-      this.get('editor').session.setValue("");
-      this.set('renderedSource', "");
-      this.set('surpress', false);
-      this.skipOp(false, true);
+      // this.set('surpress', true);
+      // this.get('editor').session.setValue("");
+      // this.set('renderedSource', "");
+      // this.set('surpress', false);
+      // this.skipOp(false, true);
     },
     playOps() {
       this.playOps();

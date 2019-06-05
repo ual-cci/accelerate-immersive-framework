@@ -6,14 +6,16 @@ export default Component.extend({
     this._super(...arguments);
     const myTextArea = this.element.querySelector("#code-mirror-container");
     const codemirror = CodeMirror.fromTextArea(myTextArea, {
-      mode:"javascript",
-      value:"const louis = () => {\nreturn great\n}",
-      theme:"monokai"
+      mode:"htmlmixed",
+      theme:"monokai",
+      lineWrapping:true,
+      lineNumbers:true,
+      readOnly:true,
     });
-    codemirror.on('change', ()=> {
-      console.log("change", this.get('codemirror'))
+    codemirror.on('change', (cm, change)=> {
+      this.onChange(cm, change);
     })
-    codemirror.setValue("const louis = () => {\n    return great\n}");
     this.set('codemirror', codemirror);
+    this.onReady(codemirror);
   }
 });

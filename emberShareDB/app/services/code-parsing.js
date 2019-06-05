@@ -389,6 +389,48 @@ export default Service.extend({
       replaceAll();
     })
   },
+  addOp(delta, doc) {
+    const op = {};
+    const start = doc.indexFromPos(delta.from);
+    op.p = ['source', start];
+    const str = delta.text.join('\n');
+    op['si'] =  str;
+    console.log("delta op", op);
+    return op
+  },
+  removeOp(delta, doc) {
+    const op = {};
+    const start = doc.indexFromPos(delta.from);
+    op.p = ['source', start];
+    const str = delta.removed.join('\n');
+    op['sd'] =  str;
+    console.log("delta op", op);
+    return op
+  },
+  getOps(delta, doc) {
+    console.log('delta',delta);
+    let ops = [];
+    if(delta.origin === "+input")
+    {
+      ops.push(this.addOp(delta,doc));
+    }
+    else if (delta.origin === "+delete")
+    {
+      ops.push(this.removeOp(delta,doc));
+    }
+    else if (delta.origin === "paste" || delta.origin === "undo")
+    {
+      if((delta.removed[0].length > 0 && delta.removed.length === 1) || delta.removed.length > 1)
+      {
+        ops.push(this.removeOp(delta,doc));
+      }
+      if((delta.text[0].length > 0 && delta.text.length === 1) || delta.text.length > 1)
+      {
+        ops.push(this.addOp(delta,doc));
+      }
+    }
+    return ops
+  },
   opTransform(ops, editor) {
     function opToDelta(op) {
       const index = op.p[op.p.length - 1];
