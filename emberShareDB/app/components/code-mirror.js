@@ -13,6 +13,7 @@ export default Component.extend({
       readOnly:true,
     });
     codemirror.on('change', (cm, change)=> {
+      console.log("CM CHANGED");
       this.onChange(cm, change);
     })
     this.set('codemirror', codemirror);

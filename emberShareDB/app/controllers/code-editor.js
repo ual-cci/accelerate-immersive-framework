@@ -795,6 +795,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
+    console.log("session change, surpress", surpress);
     if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.get('editor');
@@ -813,9 +814,7 @@ export default Controller.extend({
           this.submitOp(op);
         })
       }
-
       this.get('opsPlayer').reset(doc.id);
-
       this.restartCodeTimer();
     }
   },
@@ -943,33 +942,38 @@ export default Controller.extend({
     // Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
   },
   skipOp:function(prev, rewind = false) {
-    // const update = ()=> {
-    //   const editor = this.get('editor');
-    //   const doc = this.get('currentDoc').id;
-    //   const apply = (deltas) => {
-    //     this.set('surpress', true);
-    //     editor.session.getDocument().applyDeltas(deltas);
-    //     this.set('surpress', false);
-    //   }
-    //   if(prev)
-    //   {
-    //     this.get('opsPlayer').prevOp(editor, rewind)
-    //     .then((deltas)=>{apply(deltas)});
-    //   }
-    //   else
-    //   {
-    //     this.get('opsPlayer').nextOp(editor, rewind)
-    //     .then((deltas)=>{apply(deltas)});
-    //   }
-    // }
-    // if(this.get('opsPlayer').atHead())
-    // {
-    //   this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
-    // }
-    // else
-    // {
-    //   update();
-    // }
+    const update = ()=> {
+      return new RSVP.Promise((resolve, reject)=> {
+        const editor = this.get('editor');
+        this.set('surpress', true);
+        console.log("SURPRESSING");
+        if(prev)
+        {
+          this.get('opsPlayer').prevOp(editor, rewind).then(()=>{resolve()});
+        }
+        else
+        {
+          this.get('opsPlayer').nextOp(editor, rewind).then(()=>{resolve()});
+        }
+      });
+
+    }
+    if(this.get('opsPlayer').atHead())
+    {
+      this.updateSourceFromSession().then(()=> {
+        update().then(()=>{
+          this.set('surpress', false);
+          console.log("UNSURPRESSING");
+        });
+      }).catch((err)=>{console.log(err)})
+    }
+    else
+    {
+      update().then(()=>{
+        this.set('surpress', false);
+        console.log("UNSURPRESSING");
+      });
+    }
   },
   updateSavedVals: function()
   {
@@ -1490,11 +1494,11 @@ export default Controller.extend({
       this.skipOp(prev);
     },
     rewindOps() {
-      // this.set('surpress', true);
-      // this.get('editor').session.setValue("");
-      // this.set('renderedSource', "");
-      // this.set('surpress', false);
-      // this.skipOp(false, true);
+      this.set('surpress', true);
+      this.get('editor').setValue("");
+      this.set('renderedSource', "");
+      this.set('surpress', false);
+      this.skipOp(false, true);
     },
     playOps() {
       this.playOps();
