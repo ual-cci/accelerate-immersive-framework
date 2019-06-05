@@ -115,7 +115,17 @@ export default Controller.extend({
         }
       }
     });
-    //this.hijackConsoleOutput()
+  },
+  begin: function() {
+    console.log("beginning");
+    const editor = this.get("editor");
+    editor.setOption("enableBasicAutocompletion", true)
+    console.log('editor ready', editor)
+    this.set("hudMessage", "");
+    this.set("showHUD", true);
+    this.clearTabs();
+    editor.setReadOnly(true);
+    this.initShareDB();
   },
   initShareDB: function() {
     console.log('initShareDB');
@@ -1143,13 +1153,7 @@ export default Controller.extend({
   actions: {
     editorReady(editor) {
       this.set('editor', editor);
-      editor.setOption("enableBasicAutocompletion", true)
-      console.log('editor ready', editor)
-      this.set("hudMessage", "");
-      this.set("showHUD", true);
-      this.clearTabs();
-      editor.setReadOnly(true);
-      this.initShareDB();
+      this.begin();
     },
     suggestCompletions(editor, session, position, prefix) {
       let suggestions = [];

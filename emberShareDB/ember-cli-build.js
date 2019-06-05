@@ -11,6 +11,12 @@ module.exports = function(defaults) {
       workers: ['html', 'javascript'],
       exts: ['language_tools']
     },
+    codemirror: {
+      addons: ['mode/simple.js', 'mode/multiplex.js', 'comment/comment.js'],
+      modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
+      themes: ['monokai'],
+      keymaps: ['sublime']
+    },
 
     'ember-bootstrap': {
       'bootstrapVersion': 3,
@@ -18,6 +24,20 @@ module.exports = function(defaults) {
       'importBootstrapCSS': false
     }
   });
+
+  // app.import('vendor/code-mirror/lib/codemirror.js', {
+  //   using: [
+  //     { transformation: 'amd', as: 'codemirror' }
+  //   ]
+  // });
+  // app.import('vendor/code-mirror/lib/codemirror.css');
+  // app.import('vendor/code-mirror/theme/monokai.css');
+  // app.import('vendor/code-mirror/mode/javascript/javascript.js', {
+  //   using: [
+  //     { transformation: 'amd', as: 'javascript' }
+  //   ]
+  // });
+
 
   // Use `app.import` to add additional libraries to the generated
   // output files.
