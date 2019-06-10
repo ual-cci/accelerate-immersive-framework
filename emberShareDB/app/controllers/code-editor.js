@@ -121,14 +121,12 @@ export default Controller.extend({
     this.set("hudMessage", "");
     this.set("showHUD", true);
     this.clearTabs();
-    //editor.setReadOnly(true);
     this.initShareDB();
   },
   initShareDB: function() {
     console.log('initShareDB');
     this.set('leftCodeEditor', false);
     this.initWebSockets();
-    this.initAceEditor();
     this.addWindowListener();
     this.initUI();
   },
@@ -141,10 +139,6 @@ export default Controller.extend({
     this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
     console.log("isMobile", this.get('isMobile'));
     this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
-    // var iframe = document.getElementById("output-iframe");
-    // var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-    // iframeDocument.body.style.padding = "0px";
-    // iframeDocument.body.style.margin = "0px";
     this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
     if(embed)
     {
@@ -182,46 +176,6 @@ export default Controller.extend({
     {
       tab.style.width = aceW + "px"
     }
-  },
-  initAceEditor: function() {
-    // const editor = this.get('editor');
-    // const session = editor.getSession();
-    // console.log("Adding in commands");
-    // editor.commands.addCommand({
-    //   name: "executeLines",
-    //   exec: ()=>{
-    //     console.log("executeLines");
-    //     this.updateIFrame(true)
-    //   },
-    //   bindKey: {mac: "shift-enter", win: "shift-enter"}
-    // });
-    // editor.commands.addCommand({
-    //   name: "pause",
-    //   exec: ()=>{
-    //     this.get('cs').logToScreen("pause")
-    //     this.set('renderedSource', "");
-    //   },
-    //   bindKey: {mac: "cmd-.", win: "ctrl-."}
-    // });
-    // editor.commands.addCommand({
-    //   name: "zoom-in",
-    //   exec: ()=>{
-    //     this.zoomIn();
-    //   },
-    //   bindKey: {mac: "cmd-=", win: "ctrl-="}
-    // });
-    // editor.commands.addCommand({
-    //   name: "zoom-out",
-    //   exec: ()=>{
-    //     this.zoomOut();
-    //   },
-    //   bindKey: {mac: "cmd--", win: "ctrl--"}
-    // });
-    // session.on('change',(delta)=>{
-    //   this.onSessionChange( delta);
-    // });
-    // session.setMode("ace/mode/html");
-    // session.setUseWorker(false);
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -610,20 +564,6 @@ export default Controller.extend({
       }
     });
   },
-  // zoomIn: function() {
-  //   const editor = this.get("editor");
-  //   this.incrementProperty('fontSize');
-  //   editor.setFontSize(this.get('fontSize'));
-  // },
-  // zoomOut: function() {
-  //   const editor = this.get("editor");
-  //   this.decrementProperty('fontSize');
-  //   if(this.get('fontSize') < 1)
-  //   {
-  //     this.set('fontSize', 1);
-  //   }
-  //   editor.setFontSize(this.get('fontSize'));
-  // },
   doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('isEmbedded');
@@ -657,23 +597,17 @@ export default Controller.extend({
       }
     });
   },
-  getSelectionRange: function() {
-    // const editor = this.get('editor');
-    // let selectionRange = editor.getSelectionRange();
-    // if(selectionRange.start.row == selectionRange.end.row &&
-    //   selectionRange.start.column == selectionRange.end.column)
-    //   {
-    //     selectionRange.start.column = 0;
-    //     selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
-    //   }
-    //   return selectionRange;
-  },
   getSelectedText: function()
   {
-    // const editor = this.get('editor');
-    // let selectionRange = this.getSelectionRange();
-    // const content = editor.session.getTextRange(selectionRange);
-    // return content;
+    const doc = this.get('editor').getDoc();
+    let selection = doc.getSelection();
+    if(selection.length === 0)
+    {
+      const line = this.get('editor').getCursor(true).line;
+      selection = doc.getLine(line);
+      console.log(this.get('editor').getCursor(true), doc.getLine(line))
+    }
+    return selection;
   },
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
@@ -705,7 +639,7 @@ export default Controller.extend({
         let model = this.get('model');
         const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        console.log("updateiframe", model.id)
+        console.log("updateiframe", toRender)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
         .then((combined) => {
           this.get('cs').clear();

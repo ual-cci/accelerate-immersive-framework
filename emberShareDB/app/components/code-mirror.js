@@ -44,6 +44,9 @@ export default Component.extend({
         this.set("fontSize", newFont);
         let elements = document.getElementsByClassName("CodeMirror");
         elements[0].style.fontSize = this.get("fontSize")+"pt";
+      },
+      "Shift-Enter": (cm)=>  {
+        this.onReevaluate();
       }
     });
     var widgets = [];
@@ -67,13 +70,12 @@ export default Component.extend({
           var icon = msg.appendChild(document.createElement("span"))
           icon.innerHTML = "!!"
           icon.className = "lint-error-icon"
-          //***** HERE *****
           msg.appendChild(document.createTextNode(err.message))
           msg.className = "lint-error"
           widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}))
         }
-      })// end of editor.operation
-    }// end of updateHints
+      })
+    }
 
     setTimeout(updateHints, 100);
 
@@ -83,7 +85,7 @@ export default Component.extend({
         var POS = doc.getCursor();
         var mode = CodeMirror.innerMode(cm.getMode(), cm.getTokenAt(POS).state).mode.name;
 
-        if (mode == 'xml') { //html depends on xml
+        if (mode == 'xml') {
             console.log("AUTOCOMPLETE xml")
             CodeMirror.showHint(cm, CodeMirror.hint.html);
         } else if (mode == 'javascript') {
@@ -98,7 +100,6 @@ export default Component.extend({
 
     editor.on('change', (cm, change)=> {
       console.log("CM CHANGED");
-      //CodeMirror.showHint(cm, CodeMirror.hint.javascript);
       this.onChange(cm, change);
       clearTimeout(waiting);
       waiting = setTimeout(updateHints, 500);
