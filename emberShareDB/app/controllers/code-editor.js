@@ -843,19 +843,11 @@ export default Controller.extend({
     this.set('scrollPositions', scrollPositions);
   },
   updateScrollPosition: function() {
-    //const range = this.getSelectionRange();
-    //this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
-    //console.log("SCROLL POS", this.get('scrollPositions'))
+    this.get('scrollPositions')[this.get('currentDoc').id] = this.get('editor').getCursor(true);
   },
   scrollToSavedPosition: function() {
-    // const pos = this.get('scrollPositions')[this.get('currentDoc').id];
-    // const editor = this.get('editor');
-    // //console.log("scrolling to ", pos)
-    // //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
-    // editor.resize(true);
-    // editor.gotoLine(pos);
-    // editor.scrollToLine(pos, true, true, {})
-    // Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
+    const pos = this.get('scrollPositions')[this.get('currentDoc').id];
+    this.get('editor').scrollIntoView(pos);
   },
   skipOp:function(prev, rewind = false) {
     const update = ()=> {
