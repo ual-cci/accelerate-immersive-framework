@@ -2,7 +2,6 @@ import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'sharedb/lib/client';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import HTMLHint from 'htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
@@ -418,16 +417,17 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       console.log("didReceiveDoc", doc.get('data').type);
-      // if(doc.get('data').type == "js")
-      // {
-      //   session.setMode("ace/mode/javascript");
-      // }
-      // else
-      // {
-      //   session.setMode("ace/mode/html");
-      // }
+      if(doc.get('data').type == "js")
+      {
+        editor.setOption("mode","javascript");
+      }
+      else
+      {
+        editor.setOption("mode","htmlmixed");
+      }
       this.set('surpress', true);
       editor.setValue(doc.get('data').source);
+      editor.refresh();
       this.set('surpress', false);
       this.set('savedVals', doc.get('data').savedVals);
       this.setCanEditDoc();
@@ -765,22 +765,12 @@ export default Controller.extend({
     //   }, 500);
     // }
   },
-  updateLinting: function() {
-    // const doc = this.get('currentDoc');
-    // const ruleSets = this.get('autocomplete').ruleSets(doc.get('data').type);
-    // const editor = this.get('editor');
-    // const mainText = doc.get('data').source;
-    // const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    // const errors = this.get('autocomplete').lintingErrors(messages);
-    // editor.getSession().setAnnotations(errors);
-  },
   onCodingFinished: function() {
     if(this.get('autoRender'))
     {
       this.flashAutoRender();
       this.updateIFrame();
     }
-    this.updateLinting();
     this.set('codeTimer', null);
   },
   restartCodeTimer: function() {
@@ -927,8 +917,8 @@ export default Controller.extend({
     this.set('scrollPositions', scrollPositions);
   },
   updateScrollPosition: function() {
-    const range = this.getSelectionRange();
-    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
+    //const range = this.getSelectionRange();
+    //this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
     //console.log("SCROLL POS", this.get('scrollPositions'))
   },
   scrollToSavedPosition: function() {

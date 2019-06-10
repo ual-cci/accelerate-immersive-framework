@@ -61,9 +61,7 @@ export default Service.extend({
       }
       if(isEmpty(this.get('ops')))
       {
-        this.loadOps()
-        .then(() => {fetch()})
-        .catch((err) => {reject(err)});
+        this.loadOps().then(() => {fetch()}).catch((err) => {reject(err)});
       }
       else
       {

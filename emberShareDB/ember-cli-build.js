@@ -6,7 +6,7 @@ module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
     codemirror: {
-      addons: ['mode/simple.js', 'mode/multiplex.js', 'comment/comment.js', 'hint/javascript-hint.js','hint/show-hint.js'],
+      addons: ['mode/simple.js', 'mode/multiplex.js', 'comment/comment.js', 'hint/javascript-hint.js','hint/show-hint.js','hint/css-hint.js','hint/html-hint.js', "lint/lint.js", "lint/css-lint.js", "lint/html-lint.js","hint/show-hint.css"],
       modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
       themes: ['monokai'],
       keymaps: ['sublime']
@@ -19,18 +19,6 @@ module.exports = function(defaults) {
     }
   });
 
-  // app.import('vendor/code-mirror/lib/codemirror.js', {
-  //   using: [
-  //     { transformation: 'amd', as: 'codemirror' }
-  //   ]
-  // });
-  // app.import('vendor/code-mirror/lib/codemirror.css');
-  // app.import('vendor/code-mirror/theme/monokai.css');
-  // app.import('vendor/code-mirror/mode/javascript/javascript.js', {
-  //   using: [
-  //     { transformation: 'amd', as: 'javascript' }
-  //   ]
-  // });
 
 
   // Use `app.import` to add additional libraries to the generated
