@@ -389,11 +389,16 @@ export default Service.extend({
       replaceAll();
     })
   },
+  /*
+  We have rolled our own because the code mirror implementation
+  (doc.indexFromPos) return incorrect values when {} when auto indented
+  */
   indexFromPos(pos, editor) {
     let index = 0
-    for(let i = 0; i++; i < pos.line)
+    for(let i = 0; i < pos.line; i++)
     {
-      index += editor.getLine().length;
+      //+ 1 for \n
+      index += editor.getDoc().getLine(i).length + 1;
     }
     return index + pos.ch;
   },
