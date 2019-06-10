@@ -610,20 +610,20 @@ export default Controller.extend({
       }
     });
   },
-  zoomIn: function() {
-    // const editor = this.get("editor");
-    // this.incrementProperty('fontSize');
-    // editor.setFontSize(this.get('fontSize'));
-  },
-  zoomOut: function() {
-    // const editor = this.get("editor");
-    // this.decrementProperty('fontSize');
-    // if(this.get('fontSize') < 1)
-    // {
-    //   this.set('fontSize', 1);
-    // }
-    // editor.setFontSize(this.get('fontSize'));
-  },
+  // zoomIn: function() {
+  //   const editor = this.get("editor");
+  //   this.incrementProperty('fontSize');
+  //   editor.setFontSize(this.get('fontSize'));
+  // },
+  // zoomOut: function() {
+  //   const editor = this.get("editor");
+  //   this.decrementProperty('fontSize');
+  //   if(this.get('fontSize') < 1)
+  //   {
+  //     this.set('fontSize', 1);
+  //   }
+  //   editor.setFontSize(this.get('fontSize'));
+  // },
   doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('isEmbedded');
@@ -723,7 +723,6 @@ export default Controller.extend({
           {
             this.set('renderedSource', combined);
           }
-          this.updateLinting();
         });
       }).catch((err)=>{console.log(err)});
     }).catch((err)=>{console.log(err)});
@@ -1136,6 +1135,9 @@ export default Controller.extend({
     onSessionChange(cm, change) {
       this.set('editor', cm);
       this.onSessionChange(change);
+    },
+    onReevaluate() {
+      this.updateIFrame(true);
     },
 
     suggestCompletions(editor, session, position, prefix) {

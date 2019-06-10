@@ -265,8 +265,9 @@
 
           {{code-mirror
             onReady=(action 'onEditorReady')
-            onChange = (action 'onSessionChange')}}
-
+            onChange = (action 'onSessionChange')
+            onReevaluate = (action 'onReevaluate')
+          }}
           </div>
       </div>
       {{#if isMobile}}

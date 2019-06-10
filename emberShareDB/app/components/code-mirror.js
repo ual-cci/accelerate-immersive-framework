@@ -5,6 +5,7 @@ import { inject }  from '@ember/service';
 
 export default Component.extend({
   autocomplete: inject('autocomplete'),
+  fontSize:14,
   didInsertElement() {
     this._super(...arguments);
     const myTextArea = this.element.querySelector("#code-mirror-container");
@@ -17,7 +18,6 @@ export default Component.extend({
       lineNumbers: true,
       matchBrackets: true,
       autoCloseTags: true,
-      extraKeys: {"Ctrl-Space": "autocomplete"},
       lint: true,
       gutters: ["CodeMirror-lint-markers"]
     });
@@ -27,6 +27,25 @@ export default Component.extend({
       var inner = orig(cm) || {from: cm.getCursor(), to: cm.getCursor(), list: []};
       return inner;
     };
+    editor.setOption("extraKeys", {
+      "Ctrl-Space": "autocomplete",
+      "Cmd-\=": (cm)=> {
+        this.incrementProperty("fontSize");
+        let elements = document.getElementsByClassName("CodeMirror");
+        console.log("ZOOMIN", elements[0], this.get("fontSize"))
+        elements[0].style.fontSize = this.get("fontSize")+"pt";
+      },
+      "Cmd--": (cm)=>  {
+        let newFont = this.get('fontSize') - 1;
+        if(newFont < 1)
+        {
+          newFont = 1;
+        }
+        this.set("fontSize", newFont);
+        let elements = document.getElementsByClassName("CodeMirror");
+        elements[0].style.fontSize = this.get("fontSize")+"pt";
+      }
+    });
     var widgets = [];
     var waiting;
 
