@@ -31,7 +31,6 @@ export default Component.extend({
       "Cmd-\=": (cm)=> {
         this.incrementProperty("fontSize");
         let elements = document.getElementsByClassName("CodeMirror");
-        console.log("ZOOMIN", elements[0], this.get("fontSize"))
         elements[0].style.fontSize = this.get("fontSize")+"pt";
       },
       "Cmd--": (cm)=>  {
@@ -56,12 +55,12 @@ export default Component.extend({
         for (var i = 0; i < widgets.length; ++i){
           editor.removeLineWidget(widgets[i])
         }
-
+        var doc = editor.getDoc();
+        var pos = doc.getCursor();
+        var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
         widgets.length = 0
-        console.log("HTMLHint", HTMLHint.HTMLHint, HTMLHint.HTMLHint.verify);
-        const ruleSets = this.get('autocomplete').ruleSets("js");
+        const ruleSets = this.get('autocomplete').ruleSets(mode);
         var messages = HTMLHint.HTMLHint.verify(editor.getValue(), ruleSets);
-        console.log("ruleSets", ruleSets, "messages", messages);
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
           if (!err) continue
@@ -79,26 +78,19 @@ export default Component.extend({
     setTimeout(updateHints, 100);
 
     CodeMirror.commands.autocomplete = function(cm) {
-        console.log("AUTOCOMPLETE")
         var doc = cm.getDoc();
         var POS = doc.getCursor();
         var mode = CodeMirror.innerMode(cm.getMode(), cm.getTokenAt(POS).state).mode.name;
 
         if (mode == 'xml') {
-            console.log("AUTOCOMPLETE xml")
             CodeMirror.showHint(cm, CodeMirror.hint.html);
         } else if (mode == 'javascript') {
-            console.log("AUTOCOMPLETE javascript")
             CodeMirror.showHint(cm, CodeMirror.hint.javascript);
         } else if (mode == 'css') {
-            console.log("AUTOCOMPLETE css")
             CodeMirror.showHint(cm, CodeMirror.hint.css);
         }
     };
-    var WORD = /[\w$]+/g, RANGE = 500;
-
-    editor.on('change', (cm, change)=> {
-      console.log("CM CHANGED");
+    editor.on('changes', (cm, change)=> {
       this.onChange(cm, change);
       clearTimeout(waiting);
       waiting = setTimeout(updateHints, 500);

@@ -389,40 +389,51 @@ export default Service.extend({
       replaceAll();
     })
   },
-  addOp(delta, doc) {
+  indexFromPos(pos, editor) {
+    let index = 0
+    for(let i = 0; i++; i < pos.line)
+    {
+      index += editor.getLine().length;
+    }
+    return index + pos.ch;
+  },
+  addOp(delta, editor) {
     const op = {};
-    const start = doc.indexFromPos(delta.from);
+    const start = this.indexFromPos(delta.from, editor);
     op.p = ['source', start];
     const str = delta.text.join('\n');
     op['si'] =  str;
     console.log("delta op", op);
     return op
   },
-  removeOp(delta, doc) {
+  removeOp(delta, editor) {
     const op = {};
-    const start = doc.indexFromPos(delta.from);
+    const start = this.indexFromPos(delta.from, editor);
     op.p = ['source', start];
     const str = delta.removed.join('\n');
     op['sd'] =  str;
     console.log("delta op", op);
     return op
   },
-  getOps(delta, doc) {
+  getOps(delta, editor) {
     console.log('delta',delta);
     let ops = [];
-    if(delta.origin === "playback")
-    {
-      console.log("ignoring change")
-      return ops;
-    }
-    if((delta.removed[0].length > 0 && delta.removed.length === 1) || delta.removed.length > 1)
-    {
-      ops.push(this.removeOp(delta,doc));
-    }
-    if((delta.text[0].length > 0 && delta.text.length === 1) || delta.text.length > 1)
-    {
-      ops.push(this.addOp(delta,doc));
-    }
+    delta.forEach((change)=> {
+      if(change.origin === "playback")
+      {
+        console.log("ignoring change")
+        return ops;
+      }
+      if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)
+      {
+        ops.push(this.removeOp(change,editor));
+      }
+      if((change.text[0].length > 0 && change.text.length === 1) || change.text.length > 1)
+      {
+        ops.push(this.addOp(change,editor));
+      }
+    });
+
     return ops
   },
   applyOps(ops, editor) {

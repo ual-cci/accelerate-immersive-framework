@@ -8,6 +8,7 @@ import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
+import HTMLHint from 'htmlhint';
 
 export default Controller.extend({
   //Query Params
@@ -725,7 +726,7 @@ export default Controller.extend({
       }
       else
       {
-        const ops = this.get('codeParser').getOps(delta, editor.doc);
+        const ops = this.get('codeParser').getOps(delta, editor);
         ops.forEach((op)=>{
           this.submitOp(op);
         })
