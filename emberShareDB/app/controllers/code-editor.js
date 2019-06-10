@@ -164,8 +164,6 @@ export default Controller.extend({
   },
   updateDragPos: function() {
     const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
-    //const aceW = document.getElementById('ace-container').clientWidth;
-    //console.log("drag", (aceW - 31) + "px")
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
@@ -175,6 +173,11 @@ export default Controller.extend({
     if(!isEmpty(tab))
     {
       tab.style.width = aceW + "px"
+    }
+    const editor = this.get('editor');
+    if(!isEmpty(editor))
+    {
+      editor.refresh();
     }
   },
   initWebSockets: function() {

@@ -13,7 +13,6 @@ export default Component.extend({
       mode:"htmlmixed",
       theme:"monokai",
       lineWrapping:true,
-      lineNumbers:true,
       readOnly:true,
       lineNumbers: true,
       matchBrackets: true,
