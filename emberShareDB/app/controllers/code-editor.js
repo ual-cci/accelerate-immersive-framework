@@ -663,40 +663,30 @@ export default Controller.extend({
   },
   flashAutoRender:function()
   {
-    // let autoInput = document.getElementsByClassName('ace_content').item(0)
-    // autoInput.style["border-style"] = "solid"
-    // autoInput.style["border-width"] = "5px"
-    // autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
-    // setTimeout(()=> {
-    //     autoInput.style["border-style"] = "none"
-    // }, 250);
+    let autoInput = document.getElementsByClassName('ace_content').item(0)
+    autoInput.style["border-style"] = "solid"
+    autoInput.style["border-width"] = "5px"
+    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    setTimeout(()=> {
+        autoInput.style["border-style"] = "none"
+    }, 250);
   },
   flashSelectedText: function() {
-    // let selectionMarkers = document.getElementsByClassName('ace_selection');
-    // for(let i = 0; i < selectionMarkers.length; i++)
-    // {
-    //   selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
-    // }
-    // setTimeout(()=> {
-    //   for(let i = 0; i < selectionMarkers.length; i++)
-    //   {
-    //     selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
-    //   }
-    // }, 500);
-    // if(selectionMarkers.length < 1)
-    // {
-    //   let activeMarkers = document.getElementsByClassName('ace_active-line');
-    //   for(let j = 0; j < activeMarkers.length; j++)
-    //   {
-    //     activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
-    //   }
-    //   setTimeout(()=> {
-    //     for(let j = 0; j < activeMarkers.length; j++)
-    //     {
-    //       activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
-    //     }
-    //   }, 500);
-    // }
+    const editor = this.get('editor');
+    let start = editor.getCursor(true);
+    let end = editor.getCursor(false);
+    if(start.line == end.line && start.ch == end.ch)
+    {
+      console.log("flash, single line");
+      start = {line:start.line, ch:0};
+      end = {line:end.line, ch:editor.getLine(end.line).length};
+      console.log("flash", start, end);
+    }
+    console.log("flash", start, end);
+    const marker = editor.getDoc().markText(start, end, {"className":"codeMirrorMarked"});
+    setTimeout(()=> {
+      marker.clear();
+    }, 500);
   },
   onCodingFinished: function() {
     if(this.get('autoRender'))
