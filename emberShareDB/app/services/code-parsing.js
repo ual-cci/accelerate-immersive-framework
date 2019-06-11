@@ -391,7 +391,7 @@ export default Service.extend({
   },
   /*
   We have rolled our own because the code mirror implementation
-  (doc.indexFromPos) return incorrect values when {} when auto indented
+  (doc.indexFromPos) return incorrect values for {} when auto indented
   */
   indexFromPos(pos, editor) {
     let index = 0

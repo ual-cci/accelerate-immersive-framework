@@ -545,7 +545,15 @@ export default Controller.extend({
         catch (err)
         {
           droppedOps.push(op);
-          this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          if(isEmpty(this.get('model').data.parent))
+          {
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          }
+          else
+          {
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. We recommend you create a new tab, copy acorss your code and delete this one.")
+          }
+
           this.set('showConnectionWarning', true);
           console.log("error submitting op (ws)",err)
           reject(err);
