@@ -341,7 +341,7 @@ export default Service.extend({
     return scripts;
   },
   replaceAssets(source, assets, docId){
-    console.log("ORIGINAL", source)
+    //console.log("ORIGINAL", source)
     return new RSVP.Promise((resolve, reject)=> {
       const replaceAll = async ()=> {
         for(let i = 0; i < assets.length; i++)
