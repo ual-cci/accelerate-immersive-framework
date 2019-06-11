@@ -18,14 +18,10 @@ export default Component.extend({
       matchBrackets: true,
       autoCloseTags: true,
       lint: true,
-      gutters: ["CodeMirror-lint-markers"]
+      gutters: ["CodeMirror-lint-markers"],
+      hintOptions:{hint:this.get("suggestCompletions")}
     });
-    editor.showHints = true;
-    var orig = CodeMirror.hint.javascript;
-    CodeMirror.hint.javascript = function(cm) {
-      var inner = orig(cm) || {from: cm.getCursor(), to: cm.getCursor(), list: []};
-      return inner;
-    };
+
     editor.setOption("extraKeys", {
       "Ctrl-Space": "autocomplete",
       "Cmd-\=": (cm)=> {
@@ -77,19 +73,6 @@ export default Component.extend({
 
     setTimeout(updateHints, 100);
 
-    CodeMirror.commands.autocomplete = function(cm) {
-        var doc = cm.getDoc();
-        var POS = doc.getCursor();
-        var mode = CodeMirror.innerMode(cm.getMode(), cm.getTokenAt(POS).state).mode.name;
-
-        if (mode == 'xml') {
-            CodeMirror.showHint(cm, CodeMirror.hint.html);
-        } else if (mode == 'javascript') {
-            CodeMirror.showHint(cm, CodeMirror.hint.javascript);
-        } else if (mode == 'css') {
-            CodeMirror.showHint(cm, CodeMirror.hint.css);
-        }
-    };
     editor.on('changes', (cm, change)=> {
       this.onChange(cm, change);
       clearTimeout(waiting);
