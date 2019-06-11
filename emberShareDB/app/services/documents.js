@@ -99,16 +99,16 @@ export default Service.extend({
     });
   },
   updateDoc(docId, field, value) {
-    console.log("updateDoc",docId, field, value)
+    //console.log("updateDoc",docId, field, value)
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         if(!isEmpty(doc) &&  !(doc.get('isDestroyed') || doc.get('isDestroying')))
         {
-          console.log("got doc, setting field", field, value)
+          //console.log("got doc, setting field", field, value)
           doc.set(field, value);
           doc.save().then((newDoc)=> {
-            console.log("updated", field, "successfully to", value);
+            //console.log("updated", field, "successfully to", value);
             resolve(newDoc);
           }).catch((err)=>{
             console.log("documentservice, updateDoc1", err);

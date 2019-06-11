@@ -12,7 +12,7 @@ import HTMLHint from 'htmlhint';
 
 export default Controller.extend({
   //Query Params
-  queryParams:["hideEditor","embed"],
+  queryParams:["showCode","embed"],
 
   //Services
   websockets: inject('websockets'),
@@ -133,53 +133,38 @@ export default Controller.extend({
   },
   initUI: function() {
     this.set('collapsed', true);
-    const embed = this.get('embed') == "true";
-    const embedWithCode = this.get('showCode') == "true";
-    this.set('isEmbedded', embed);
-    this.set('isEmbeddedWithCode', embedWithCode);
-    this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
-    console.log("isMobile", this.get('isMobile'));
-    this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
-    this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
-    if(embed)
-    {
-      document.getElementById("main-code-container").style.height="97vh"
-      document.getElementById("main-code-container").style.width="100vw"
-      document.getElementById("output-container").style["border-top-width"]=0;
-      document.getElementById("output-container").style["border-bottom-width"]=0;
-      document.getElementById("output-container").style["border"]="none";
-      document.getElementById("main-site-container").style.padding="0px"
-      document.getElementById("main-site-container").style.border="none"
-    }
+    setTimeout(()=> {
+      const embed = this.get('embed') == "true";
+      const embedWithCode = this.get('showCode') == "true";
+      console.log("embed",embed,"embedWithCode",embedWithCode)
+      this.set('isEmbedded', embed);
+      this.set('isEmbeddedWithCode', embedWithCode);
+      this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
+      console.log("isMobile", this.get('isMobile'));
+      this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
+      this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
+      if(embed)
+      {
+        document.getElementById("main-code-container").style.height="97vh"
+        document.getElementById("main-code-container").style.width="100vw"
+        document.getElementById("output-container").style["border-top-width"]=0;
+        document.getElementById("output-container").style["border-bottom-width"]=0;
+        document.getElementById("output-container").style["border"]="none";
+        document.getElementById("main-site-container").style.padding="0px"
+        document.getElementById("main-site-container").style.border="none"
+      }
 
-    if(embedWithCode)
-    {
-      this.hideCode(true);
-    }
+      if(embedWithCode)
+      {
+        this.hideCode(true);
+      }
 
-    $("#mimic-navbar").css("display", embed ? "none" : "block");
-    $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
-    $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    this.updateDragPos();
-    this.get('cs').observers.push(this);
-  },
-  updateDragPos: function() {
-    const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
-    const drag = document.getElementById('drag-container')
-    if(!isEmpty(drag))
-    {
-      drag.style.right = (aceW - 31) + "px";
-    }
-    const tab = document.getElementById('project-tabs');
-    if(!isEmpty(tab))
-    {
-      tab.style.width = aceW + "px"
-    }
-    const editor = this.get('editor');
-    if(!isEmpty(editor))
-    {
-      editor.refresh();
-    }
+      $("#mimic-navbar").css("display", embed ? "none" : "block");
+      $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
+      $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
+      this.updateDragPos();
+      this.get('cs').observers.push(this);
+    },100)
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -651,7 +636,7 @@ export default Controller.extend({
         let model = this.get('model');
         const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        console.log("updateiframe", toRender)
+        //console.log("updateiframe", toRender)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
         .then((combined) => {
           this.get('cs').clear();
@@ -857,6 +842,24 @@ export default Controller.extend({
   scrollToSavedPosition: function() {
     const pos = this.get('scrollPositions')[this.get('currentDoc').id];
     this.get('editor').scrollIntoView(pos);
+  },
+  updateDragPos: function() {
+    const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
+    const drag = document.getElementById('drag-container')
+    if(!isEmpty(drag))
+    {
+      drag.style.right = (aceW - 31) + "px";
+    }
+    const tab = document.getElementById('project-tabs');
+    if(!isEmpty(tab))
+    {
+      tab.style.width = aceW + "px"
+    }
+    const editor = this.get('editor');
+    if(!isEmpty(editor))
+    {
+      editor.refresh();
+    }
   },
   skipOp:function(prev, rewind = false) {
     const update = ()=> {
