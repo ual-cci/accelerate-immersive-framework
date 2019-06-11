@@ -115,7 +115,7 @@ export default Controller.extend({
         }
       }
     });
-    this.begin();
+
   },
   begin: function() {
     console.log("beginning");
@@ -164,7 +164,7 @@ export default Controller.extend({
       $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
       this.updateDragPos();
       this.get('cs').observers.push(this);
-    },100)
+    },50)
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -1062,6 +1062,7 @@ export default Controller.extend({
     //codemirror
     onEditorReady(editor) {
       this.set('editor', editor);
+      this.begin();
     },
     onSessionChange(cm, change) {
       this.set('editor', cm);
