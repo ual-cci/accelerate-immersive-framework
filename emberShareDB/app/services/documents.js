@@ -28,6 +28,7 @@ export default Service.extend({
         parent:parent,
         tags:data.tags,
         assets:data.assets,
+        assetQuota:data.assetQuota
       });
       doc.save().then((response)=>{
         console.log("saved new doc");
@@ -35,12 +36,12 @@ export default Service.extend({
         {
           console.log("NOT A PARENT, updating parent with myself as a child");
           this.get('store').findRecord('document', parent, { reload: true }).then((parentDoc) => {
-
             let children = parentDoc.data.children;
             children.push(response.id);
             console.log("updating", parent, children)
-            this.updateDoc(parent, "children", children)
-            .then(resolve(response)).catch((err)=>{console.log(err)});
+            this.updateDoc(parent, "children", children).then(()=> {
+              resolve(response);
+            }).catch((err)=>{console.log(err)});
           }).catch((err)=>{console.log(err)});
         }
         else
@@ -107,7 +108,7 @@ export default Service.extend({
           console.log("got doc, setting field", field, value)
           doc.set(field, value);
           doc.save().then((newDoc)=> {
-            console.log("updated successfully")
+            console.log("updated", field, "successfully to", value);
             resolve(newDoc);
           }).catch((err)=>{
             console.log("documentservice, updateDoc1", err);
@@ -143,7 +144,7 @@ export default Service.extend({
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         console.log('deleting doc : ' + doc.data.parent ? "parent" : "child");
-        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.fileId)});
+        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name, docId)});
         actions.concat(doc.data.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;

@@ -88,6 +88,7 @@ model.getRefreshToken = function(refreshToken) {
 
 model.getUser = function(username, password) {
 	console.log('getting user')
+  username = username.toLowerCase();
   return new Promise((resolve, reject)=> {
     OAuthUsersModel.findOne({ username: username},
       (err, user) => {
@@ -181,8 +182,9 @@ function startAuthAPI(app)
   app.all('/oauth/token', app.oauth.token());
 
   app.get('/accounts', function (req, res) {
-    console.log("find user", req.query.username);
-    OAuthUsersModel.find({username:req.query.username}, function(err,users) {
+    const username = req.query.username.toLowerCase();
+    console.log("find user", username);
+    OAuthUsersModel.find({username:username}, function(err,users) {
       console.log("returned user", users.length, err);
 			if(users.length > 0 && !err)
 			{
@@ -196,13 +198,18 @@ function startAuthAPI(app)
 				res.status(200).send({data:{id:user.accountId,type:'account',attr:user}})
 				return;
 			}
+      else
+      {
+        res.status(400).send("server error fetching user");
+      }
     });
   });
 
   app.post('/accounts', function (req, res) {
     console.log("new user", req.body.data.attributes);
     let attr = req.body.data.attributes;
-    newUser(attr.username,attr.password,attr.email)
+    const username = attr.username.toLowerCase();
+    newUser(username,attr.password,attr.email)
     .then( (user) => {
       res.type('application/vnd.api+json');
       res.status(200);
@@ -213,12 +220,14 @@ function startAuthAPI(app)
   });
 
   app.post('/resetPassword', function(req,res) {
-    requestPasswordReset(req.body.username)
+    let username = req.body.username.toLowerCase();
+    requestPasswordReset(username)
     .then( (user) => {
-      console.log('success reset', "/password-reset?username="+user.username+"&token="+user.passwordResetToken);
+      username = user.username.toLowerCase();
+      console.log('success reset', "/password-reset?username="+username+"&token="+user.passwordResetToken);
       if(!req.body.test)
       {
-        sendResetEmail(user.email, req.body.hostURL + "/password-reset?username="+user.username+"&token="+user.passwordResetToken)
+        sendResetEmail(user.email, req.body.hostURL + "/password-reset?username="+username+"&token="+user.passwordResetToken)
       }
       res.status(200).send()
     })
@@ -229,7 +238,8 @@ function startAuthAPI(app)
 
   app.post('/checkPasswordToken', function(req,res) {
     console.log("checking password token")
-    checkPasswordToken(req.body.username, req.body.token)
+    let username = req.body.username.toLowerCase();
+    checkPasswordToken(username, req.body.token)
     .then( () => {
       console.log("token GOOD")
       res.sendStatus(200);
@@ -241,7 +251,8 @@ function startAuthAPI(app)
   });
 
   app.post('/updatePassword', (req,res)=> {
-    updatePassword(req.body.username, req.body.token, req.body.password)
+    let username = req.body.username.toLowerCase();
+    updatePassword(username, req.body.token, req.body.password)
     .then( () => {
       res.sendStatus(200);
     })
@@ -251,7 +262,7 @@ function startAuthAPI(app)
   });
 
 	app.get('/flagDoc', app.oauth.authenticate(), (req, res) => {
-		const username = req.query.user;
+		const username = req.query.user.toLowerCase();
 		const doc = req.query.documentId;
     console.log("flag doc", req.query)
 		OAuthUsersModel.findOne({
@@ -533,7 +544,11 @@ var dump = function() {
 
 module.exports = {
   newUser:newUser,
-  dropUser:dropUser,
-  dropTokens:dropTokens,
 	initUserAPI:initUserAPI,
 };
+
+if(process.env.NODE_ENV == "test") {
+  module.exports.dropTokens = dropTokens;
+  module.exports.dropUser = dropUser;
+  module.exports.dropUsers = dropUsers;
+}

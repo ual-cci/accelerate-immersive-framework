@@ -54,20 +54,34 @@ The maximilian audio engine collects audio through a callback function, which is
 <h3>methods</h3>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">init()</span>
-  initialise the audio engine
+  <span style="font-family:monospace">init(audioInput=maxi.INPUT_TYPE.NONE)</span>
+
+  <br>Initialise the audio engine.
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">audioInput</span>: this is an optional argument. You can specify the following:
+  <br>maxi.INPUT_TYPE.NONE: no audio input (default)
+  <br>maxi.INPUT_TYPE.DEFAULT: the system's default audio input
+  <br>an index of the audio input you wish to connect (obtained by looking at the output from listInputDevices())
+  </div>
 </p>
 <p class = "tutorial-text">
   <span style="font-family:monospace">outputIsArray( isArray,  numChannels)</span>
-  <br>Call this is you need multichannel sound.
+  <br>Call this for multichannel sound output.
   <div style="margin-left:100px">
   <br><span style="font-family:monospace">isArray</span>: true if multichannel audio is required
   <br><span style="font-family:monospace">numChannels</span>: 2, 4, or 8
   </div>
 </p>
-
 <p class = "tutorial-text">
 {{embedded-project docId = "e722d5e6-131b-3e46-675e-48ab0a27bb77" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">listInputDevices()</span>
+  <br>Print a list of audio input devices to the console.  You can open an input device by using its index as the first argument to maxiAudio.init
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "799ece18-7d46-be38-2b33-05be69888c09" width="250px" height="320px"}}
 </p>
 
 <p class = "tutorial-text">
@@ -82,6 +96,307 @@ The maximilian audio engine collects audio through a callback function, which is
 <p class = "tutorial-text">
 {{embedded-project docId = "29b924f0-7a1f-310a-7a7d-fc815f969f87" width="250px" height="320px"}}
 </p>
+
+<h3>properties</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play</span>
+  <br>play is a javascript function that does audio processing in maximilian.js.  This is called once for each sample.  It should return a single value for mono configurations or an array of values for multi-channel configurations.
+  <br>The play function has an optional input parameter that is an array of audio input values (see the microphone example above).
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">context</span>
+  <br>This is the webaudio context used by the maximilian.js audio engine
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">maxiAudioProcessor</span>
+  <br>This is the webaudio node that carries out audio processing in maximilian.js.  You can connect this to other webaudio nodes (for a example a spectral analyser)
+</p>
+
+
+
+
+
+<h2>maxiOsc</h2>
+
+<p class = "tutorial-text">
+An oscillator with methods for a number of waveforms
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">sinewave(frequency)</span>
+  <br>outputs a sine wave at the given frequency between -1.0 & 1.0
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "e31c952b-97ba-4fe0-5649-61c96bfeb812" width="250px" height="320px"}}
+</p>
+
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">coswave(frequency)</span>
+  <br>outputs a cosine wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">triangle(frequency)</span>
+  <br>outputs a triangle wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">saw(frequency)</span>
+  <br>outputs a saw wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">sawn(frequency)</span>
+  <br>outputs a bandlimited saw wave at the given frequency between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">square(frequency, pulsewidth)</span>
+  <br>outputs a square wave at the given frequency and pulsewidth between -1.0 & 1.0
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">pulsewidth</span>: in the range 0 to 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phasor(frequency)</span>
+  <br>outputs a linear ramp at the given frequency between 0.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phasor(frequency, startPhase, endPhase)</span>
+  <br>outputs a linear ramp at the given frequency between 0.0 & 1.0
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">startPhase</span>: the start value of the ramp, in the range 0 to 1
+    <br><span style="font-family:monospace">endPhase</span>: the end value of the ramp, in the range 0 to 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">noise()</span>
+  <br>outputs white noise between -1.0 & 1.0
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">phaseReset(phase)</span>
+  <br>reset the phase to a specific value
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">phase</span>: between 0 and 1
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="320px"}}
+</p>
+
+
+
+
+<h2>maxiSample</h2>
+
+<p class = "tutorial-text">
+Play and manipulate sound samples.  Load sample data from a url, using loadSample (see above)
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play()</span>
+  <br>plays and loop the sample at normal speed
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(playSpeed)</span>
+  <br>plays and loop the sample at a multiple of the normal speed
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(playSpeed, start, end)</span>
+  <br>plays and loop the sample at a multiple of the normal speed
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+    <br><span style="font-family:monospace">start</span>: start point (in samples)
+    <br><span style="font-family:monospace">end</span>: end point (in samples)
+  </div>
+</p>
+
+<p class = "tutorial-text">
+{{embedded-project docId = "5db11ec4-bd90-a94d-5a6b-5d9bc01fe851" width="250px" height="320px"}}
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">playOnce()</span>
+  <br>plays the sample a single time at normal speed (use trigger() to play again - this is useful for sequencing)
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">playOnce(playRate)</span>
+  <br>plays the sample a single time at a multiple of the normal speed (use trigger() to play again - this is useful for sequencing)
+  <div style="margin-left:100px">
+  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">trigger()</span>
+  <br>set the playhead to zero (use in conjunction with playOnce)
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "42f49124-90cb-4852-6572-f7a7d7d697cd" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">isReady()</span>
+  <br>returns true if sample is loaded
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">getLength()</span>
+  <br>returns the length of the sample in samples
+</p>
+
+
+
+
+
+
+
+<h2>maxiFilter</h2>
+
+<p class = "tutorial-text">
+Various filters
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">lores(input, cutoff, resonance) </span>
+  <br>A lowpass resonant filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: the cutoff frequency (Hz)
+    <br><span style="font-family:monospace">resonance</span>: from 0 (low resonance) upwards
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "42c8411a-f380-1a62-6ee5-ffe010548a03" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">hires(input, cutoff, resonance) </span>
+  <br>A highpass resonant filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: the cutoff frequency (Hz)
+    <br><span style="font-family:monospace">resonance</span>: from 0 (low resonance) upwards
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "97c4239d-0a15-9304-0988-96f5c1f1748f" width="250px" height="320px"}}
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">lopass(input, cutoff) </span>
+  <br>A onepole lowpass filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">hipass(input, cutoff) </span>
+  <br>A onepole highpass filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">cutoff</span>: between 0 and 1
+  </div>
+</p>
+
+
+
+<h2>maxiSVF</h2>
+
+<p class = "tutorial-text">
+A state variable filter
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">play(input, lowPassMix, highPassMix, bandPassMix, notchMix)</span>
+  <br>Process a signal with the filter
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">input</span>: a signal
+    <br><span style="font-family:monospace">lowPassMix</span>: the amount of low pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">highPassMix</span>: the amount of high pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">bandPassMix</span>: the amount of band pass filtering, between 0 and 1
+    <br><span style="font-family:monospace">notchMix</span>: the amount of notch filtering, between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setCutoff(frequency)</span>
+  <br>The cutoff frequence
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">frequency</span>: frequency between 20 and 20000, although this filter sounds best below 5000
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setResonance(amount)</span>
+  <br>The amount of resonance
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">amount</span>: from 0 upwards, starts to ring from 2-3ish, cracks a bit around 10
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "a06b6415-aceb-3ff3-00f7-094fc0e53c3c" width="250px" height="320px"}}
+</p>
+
+
+
+
+<h2>maxiEnv</h2>
+
+<p class = "tutorial-text">
+An ADSR envelope
+</p>
+
+<h3>methods</h3>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setAttack(time)</span>
+  <br>The envelope's attack time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setDecay(time)</span>
+  <br>The envelope's decay time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setSustain(level)</span>
+  <br>The envelope's sustain level
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">level</span>: between 0 and 1
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">setRelease(time)</span>
+  <br>The envelope's release time
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">time</span>: in milliseconds
+  </div>
+</p>
+<p class = "tutorial-text">
+  <span style="font-family:monospace">adsr(level, trigger)</span>
+  <br>Get the next value from the envelope
+  <div style="margin-left:100px">
+    <br><span style="font-family:monospace">level</span>: the overall level of the envelope; everything will be scaled by this value
+    <br><span style="font-family:monospace">trigger</span>: the envelope will begin attack when set to 1.0 and release when set to 0.0
+  </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="320px"}}
+</p>
+
+
+
+
 
 
 

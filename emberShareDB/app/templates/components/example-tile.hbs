@@ -1,5 +1,13 @@
-<div class = "example-tile-container col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick={{action 'onClick'}}>
-  <div class = "example-tile-hover"></div>
-  <p class = "example-tile-title">{{name}}</p>
-  <img class = "example-tile-image" src = {{thumbnailUrl}} />
+<div class = "example-tile-container-outer col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick = {{action 'onClick'}} onmouseover={{action "onover"}} onmouseout={{action "onout"}}>
+  <div class = "example-tile-container" id = {{colourId}}>
+    <div class = "example-desc-container">
+      <p class = "example-tile-title" id = {{colourId}}>{{name}}</p>
+      {{#each tags as |tag|}}
+        <p class = "example-tile-tag">{{tag}}</p>
+      {{/each}}
+    </div>
+    <div class = "example-color" id = {{colourId}}>
+      {{shape-cell isSelected = isSelected colourId = colourId}}
+    </div>
+  </div>
 </div>

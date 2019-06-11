@@ -1,5 +1,11 @@
 @import 'bootstrap';
 
+$mimic-orange:#ED3D05;
+$mimic-yellow:#FFCE00;
+$mimic-green:#0ED779;
+$mimic-pink:#F79994;
+$mimic-blue:#4D42EB;
+
 .main-delete-button {
   background-color: rgba(0,0,0,0);
   border-color: rgba(0,0,0,0);
@@ -27,11 +33,16 @@ button:active {
 }
 
 a {
+  color:$mimic-green;
   text-decoration: none;
 }
 
 a:hover, a:focus {
   text-decoration: none;
+  color:$mimic-orange;
+}
+
+a.nav-dropdown:hover, a.nav-dropdown:focus {
   color:inherit;
 }
 
@@ -64,6 +75,15 @@ blockquote p {
     padding: 15px;
 }
 
+h1 {
+  margin-top: 70px;
+  font-weight: bold;
+  font-size: 24pt;
+}
+
+h2 {
+  text-decoration: underline;
+}
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
@@ -138,6 +158,13 @@ blockquote p {
   white-space: nowrap;
 }
 
+.private-doc-icon {
+}
+
+.readonly-doc-icon {
+  margin-right: 8px;
+}
+
 .doc-item-icon
 {
   padding-right: 5px;
@@ -187,6 +214,10 @@ blockquote p {
   margin:10px 10px 10px 10px;
 }
 
+.dropdow-menu {
+  //KILL SHADOW
+}
+
 #mimic-navbar {
  padding-top:15px;
  padding-bottom:10px;
@@ -200,6 +231,13 @@ blockquote p {
 
 #doc-create-container {
   width:100%;
+}
+
+#create-doc-title {
+  font-size: 18pt;
+  font-weight: bold;
+  padding-left: 5pt;
+  text-align: center;
 }
 
 #create-doc-name {
@@ -247,6 +285,10 @@ input[id="docName"]::-moz-placeholder {  /* Firefox 19+ */
 input[id="docName"]:-ms-input-placeholder {
    color:black;
    padding-left:10px;
+}
+
+#add-library-btn {
+  font-size: 19pt;
 }
 
 #private-btn:hover {
@@ -349,16 +391,16 @@ input[id="docName"]:-ms-input-placeholder {
 
 .filter-item {
   padding:12px 10px 10px 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
   margin:5px 5px 5px 5px;
   cursor:pointer;
   font-size: 14pt;
   font-weight: bold;
   overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 .filter-item:hover {
@@ -366,6 +408,8 @@ input[id="docName"]:-ms-input-placeholder {
   border-color: white;
   border-width: 1px;
 }
+
+
 
 .filter-text {
   position: relative;
@@ -397,29 +441,22 @@ input[id="docName"]:-ms-input-placeholder {
 .filter-text-tag-item {
 }
 
-/* orange */
+
+
 #tab0.tab-item {
-  background-color: #ED3D05;
+  background-color: $mimic-orange;
 }
-
-/* yellow */
 #tab1.tab-item {
-  background-color: #FFCE00;
+  background-color: $mimic-yellow;
 }
-
-/* green rgb(14, 251, 121)*/
 #tab2.tab-item {
-  background-color: #0ED779;
+  background-color: $mimic-green;
 }
-
-/* pink */
 #tab3.tab-item {
-  background-color: #F79994;
+  background-color: $mimic-pink;
 }
-
-/* blue */
 #tab4.tab-item {
-  background-color: #4D42EB;
+  background-color: $mimic-blue
 }
 
 .tab-btn:hover {
@@ -497,10 +534,10 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y:visible;
 }
 
-#main-site-container {
-  padding-left: 8%;
-  padding-right: 8%;
-}
+// #main-site-container {
+//   padding-left: 8%;
+//   padding-right: 8%;
+// }
 
 #main-code-container {
   left:0px;
@@ -576,7 +613,7 @@ input[id="docName"]:-ms-input-placeholder {
 .code-warning-overlay {
   position: absolute;
   top:0;
-  left:0;
+  left:31px;
   width:100%;
   height: auto;
   z-index: 100;
@@ -745,6 +782,7 @@ input[id="docName"]:-ms-input-placeholder {
 {
   width:40px;
   border:none;
+  border-radius: 0px;
   background-color:transparent;
   color:white;
   height:30px;
@@ -958,6 +996,13 @@ input[id="docName"]:-ms-input-placeholder {
   float: left;
 }
 
+.pagination-button {
+  background-color: white;
+  border:solid 1px black;
+  width:150px;
+  height:30px;
+}
+
 #console {
   width:100%;
   background-color: #e6e6e6;
@@ -1094,7 +1139,9 @@ input[id="docName"]:-ms-input-placeholder {
   background-position: center center;
   overflow: hidden;
   display:block;
-  margin:auto;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom: 15px;
   padding-bottom:5px;
 }
 
@@ -1177,10 +1224,12 @@ input[id="docName"]:-ms-input-placeholder {
 
 .burger-btn {
   font-size: 20pt;
+  font-weight: bold;
+  margin-left: 20px;
 }
 
 #login-container {
-  width:200px;
+  width:100px;
   height:50px;
   margin-right: 5px;
   float:right ! important;
@@ -1398,6 +1447,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .login-btn {
+  margin-bottom: 40px;
   margin-top: 10px;
   background-color: #E6E6E6;
   color:black;
@@ -1414,26 +1464,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 
 }
 
-#logo-footer {
-  background-color: #303030;
-  height:auto;
-  min-height: 100px;
-  padding:20px;
-  margin-bottom: 50px;
-  margin-top: 50px;
-}
-
-.footer-logo-img {
-  margin-bottom: 10px;
-  margin-top: 10px;
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-#logo-container {
-  width:auto;
-  margin:auto;
-}
+$footer-grey:#303030;
 
 #about-header-image {
   position: absolute;
@@ -1447,6 +1478,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 #about-overlay-title {
   background-color: rgba(237,61,5,0.95);
   width:60%;
+  max-width: 950px;
   left:20vw;
   height:auto;
   position: absolute;
@@ -1457,6 +1489,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
   height:100%;
   font-family: 'Overpass Mono';
   padding-top: 20px;
+  padding-bottom: 10px;
   color: white;
   font-size: 20pt;
   font-weight: 500;
@@ -1468,8 +1501,9 @@ input[id="searchTerm"]:-ms-input-placeholder {
 #about-overlay-desc {
   background-color: rgba(255,206,0,0.95);
   width:60%;
-  left:20vw;
-  height:270px;
+  max-width: 950px;
+  left: 20vw;
+  height: 270px;
   padding-left: 50px;
   padding-right: 50px;
   position: absolute;
@@ -1489,51 +1523,84 @@ input[id="searchTerm"]:-ms-input-placeholder {
   text-align: left;
 }
 
-#getting-started-link {
-  background-color: #303030;
-  color:white;
-  padding:10px;
-  height:30px;
+#getting-started-container {
+  padding-top:10px;
+  padding-bottom:20px;
+  padding-right:10px;
+  padding-left:10px;
+  height:40px;
   margin-left: auto;
   margin-right: auto;
-  width: 8em
+  margin-bottom: 10px;
+  width: 140px;
+  background-color: #303030;
+}
+
+#getting-started-link {
+  text-align: center;
+  background-color: #303030;
+  color: white;
 }
 
 #about-text-container {
-  width:70%;
+  width:90%;
+  max-width: 950px;
   margin-top:70px;
   margin-left: auto;
   margin-right: auto;
 }
 
-#about-text {
+.about-text {
   text-align: left;
   font-weight: 500;
   font-size: 14pt;
 }
 
+#logo-footer {
+  background-color:$footer-grey;
+  height:auto;
+  min-height: 100px;
+  padding:20px;
+  margin-top: 50px;
+}
+
+#logo-container {
+  width:auto;
+  margin:auto;
+}
+
+.footer-logo-img {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+  height: 50px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
 #gs-logo {
-  width:100px;
+  width:135px;
 }
 
 #durham-logo {
-  width:100px;
+  width:132px;
 }
 
 #sussex-logo {
-  width:60px;
+  width:97px;
 }
 
 #ahrc-logo {
-  width:150px;
+  width:181px;
 }
 
 #google-logo {
-  width:100px;
+  width:124px;
 }
 
 #ual-logo {
-  width:200px;
+  width:161px;
 }
 
 .center-cropped {
@@ -1557,21 +1624,95 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .tutorial-img {
-  margin: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width:100%;
 }
 
 #tutorial-container {
-  width:60%;
+  width:90%;
+  padding-top:70px;
   /* min-width:700px; */
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 120px;
+  max-width: 750px;
 }
 
 .tutorial-text {
   margin-top: 15px;
   margin-bottom: 15px;
   font-size: 14pt;
+}
+
+// #tile0.example-tile-title{
+//   color: $mimic-orange;
+// }
+// #tile1.example-tile-title  {
+//   color: $mimic-yellow;
+// }
+// #tile2.example-tile-title  {
+//   color: $mimic-green;
+// }
+// #tile3.example-tile-title {
+//   color: $mimic-pink;
+// }
+// #tile4.example-tile-title {
+//   color: $mimic-blue
+// }
+
+#tile0.example-tile-container {
+  border-color: $mimic-orange;
+}
+#tile1.example-tile-container   {
+  border-color: $mimic-yellow;
+}
+#tile2.example-tile-container   {
+  border-color: $mimic-green;
+}
+#tile3.example-tile-container  {
+  border-color: $mimic-pink;
+}
+#tile4.example-tile-container  {
+  border-color: $mimic-blue
+}
+
+#tile0.example-color {
+  background-color: $mimic-orange;
+}
+#tile1.example-color  {
+  background-color: $mimic-yellow;
+}
+#tile2.example-color  {
+  background-color: $mimic-green;
+}
+#tile3.example-color  {
+  background-color: $mimic-pink;
+}
+#tile4.example-color  {
+  background-color: $mimic-blue
+}
+
+#example-container {
+  max-width: 950px;
+  margin:auto!important;
+  padding-top:70px;
+}
+
+.example-tile-container-outer {
+  height: 235px;
+  cursor: pointer;
+  max-width: 250px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.example-tile-container {
+  height: 90%;
+  margin: 10px;
+  border: solid 2px;
 }
 
 .example-tile-hover {
@@ -1583,35 +1724,79 @@ input[id="searchTerm"]:-ms-input-placeholder {
   background-color: rgba(255,255,255,0);
 }
 
+.example-desc-container {
+  height:50%;
+  padding: 5px;
+  overflow: hidden;
+}
+
+.example-color:hover {
+  border:none;
+}
+
+.example-color {
+  height:50%;
+  background-color: blue;
+}
+
+.shape-cell {
+  cursor: pointer;
+  font-size: 14pt;
+  font-weight: bold;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
 .example-tile-hover:hover {
   background-color: rgba(200,200,200,0.2);
 }
 
-.example-tile-image {
-  width:100%;
-  height:100%;
-  padding-bottom: 10px;
-}
-
 .example-tile-title {
   width:100%;
-  height:100%;
-  font-size: 20pt;
+  z-index: 15;
+  height:35px;
+  padding-left: 9px;
+  margin-bottom: 4px;
+  font-size: 16pt;
+  overflow:hidden;
+  font-weight: bold;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.example-tile-tag {
+  width:auto;
+  height:50px;
+  font-size: 11pt;
+  display: inline;
   overflow:hidden;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+  //background-color: lightgray;
+  border-radius: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .loading-wheel {
   border: 16px solid rgba(14, 251, 121, 1.0);
   border-top: 16px solid white;
-  border-radius: 120px;
-  width: 120px;
-  height: 120px;
+  border-radius: 60px;
+  width: 60px;
+  height: 60px;
   animation: spin 2s linear infinite;
   position:relative;
-  margin:auto;
+  margin-left:auto;
+  margin-right:auto;
+  //margin-top:10px;
 }
 
 @keyframes spin {
@@ -1620,12 +1805,11 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 #loading-label {
-  margin-top: 5px;
+  margin-top: 2px;
   text-align:center;
   color:white;
-  font-size: 25pt;
+  font-size: 12pt;
   width:100%;
-  padding:10px;
 }
 
 #loading-inner-container {
@@ -1633,16 +1817,16 @@ input[id="searchTerm"]:-ms-input-placeholder {
   margin-right:auto;
   margin-left:auto;
   width: 100%;
-  height: 50%;
+  height: 100%;
 }
 
 #loading-container {
-  padding:10%;
-  border-radius: 175px;
+  padding-top:40px;
+  border-radius: 67.5px;
   border: solid white 5px;
   display:block;
-  width: 350px;
-  height: 350px;
+  width: 175px;
+  height: 175px;
   margin: 0;
   position: absolute;
   top: 50%;
@@ -1650,4 +1834,70 @@ input[id="searchTerm"]:-ms-input-placeholder {
   transform: translate(-50%, -50%);
   background-color:rgba(14, 251, 121, 0.75);
   z-index: 12;
+}
+
+#terms-container {
+  max-width: 950px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 70px;
+}
+
+.terms-text {
+  margin-bottom: 10px;
+}
+
+#mimic-footer {
+  width:100%;
+  height:50px;
+  background-color: $footer-grey;
+  color:white;
+}
+
+#footer-table {
+  width:100%;
+}
+
+#footer-table td {
+  text-align: center;
+  width:33%;
+}
+
+.footer-link {
+  color:white;
+}
+
+#footer-copyright {
+  padding-top: 5px;
+}
+
+#code-mirror-container {
+  width:100%;
+  height:100px;
+  background-color: red;
+}
+
+.CodeMirror {
+  height:100%!important;
+}
+
+.lint-error {
+  font-family: arial;
+  font-size: 70%;
+  background: #ffa;
+  color: #a00;
+  padding: 2px 5px 3px;
+}
+
+.lint-error-icon {
+  color: white;
+  background-color: red;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 0 3px;
+  margin-right: 7px;
+}
+
+.codeMirrorMarked {
+  background-color: red;
 }

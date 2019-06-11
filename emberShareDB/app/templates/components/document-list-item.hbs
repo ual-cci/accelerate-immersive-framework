@@ -7,13 +7,13 @@
   <div class = "doc-list-icon-container">
     {{#if document.readOnly}}
     <div class="tooltip">
-      <span class="glyphicon glyphicon-lock doc-item-icon" aria-hidden="true"></span>
+      <span class="glyphicon glyphicon-lock doc-item-icon readonly-doc-icon" aria-hidden="true"></span>
       <span class="tooltiptext">Read Only</span>
     </div>
     {{/if}}
     {{#if document.isPrivate}}
     <div class="tooltip">
-      <span class="glyphicon glyphicon-eye-close doc-item-icon" aria-hidden="true"></span>
+      <span class="glyphicon glyphicon-eye-close doc-item-icon private-doc-icon" aria-hidden="true"></span>
       <span class="tooltiptext">Private</span>
     </div>
     {{/if}}

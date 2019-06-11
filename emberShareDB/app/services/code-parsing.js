@@ -389,46 +389,74 @@ export default Service.extend({
       replaceAll();
     })
   },
-  opTransform(ops, editor) {
+  /*
+  We have rolled our own because the code mirror implementation
+  (doc.indexFromPos) return incorrect values for {} when auto indented
+  */
+  indexFromPos(pos, editor) {
+    let index = 0
+    for(let i = 0; i < pos.line; i++)
+    {
+      //+ 1 for \n
+      index += editor.getDoc().getLine(i).length + 1;
+    }
+    return index + pos.ch;
+  },
+  addOp(delta, editor) {
+    const op = {};
+    const start = this.indexFromPos(delta.from, editor);
+    op.p = ['source', start];
+    const str = delta.text.join('\n');
+    op['si'] =  str;
+    console.log("delta op", op);
+    return op
+  },
+  removeOp(delta, editor) {
+    const op = {};
+    const start = this.indexFromPos(delta.from, editor);
+    op.p = ['source', start];
+    const str = delta.removed.join('\n');
+    op['sd'] =  str;
+    console.log("delta op", op);
+    return op
+  },
+  getOps(delta, editor) {
+    console.log('delta',delta);
+    let ops = [];
+    delta.forEach((change)=> {
+      if(change.origin === "playback")
+      {
+        console.log("ignoring change")
+        return ops;
+      }
+      if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)
+      {
+        ops.push(this.removeOp(change,editor));
+      }
+      if((change.text[0].length > 0 && change.text.length === 1) || change.text.length > 1)
+      {
+        ops.push(this.addOp(change,editor));
+      }
+    });
+
+    return ops
+  },
+  applyOps(ops, editor) {
     function opToDelta(op) {
-      const index = op.p[op.p.length - 1];
-      const session = editor.getSession();
-      const pos = session.doc.indexToPosition(index, 0);
-      const start = pos;
-      let action;
-      let lines;
-      let end;
+      const start = op.p[op.p.length - 1];
+      const from = editor.doc.posFromIndex(start);
       if ('sd' in op) {
-        action = 'remove';
-        lines = op.sd.split('\n');
-        const count = lines.reduce((total, line) => total + line.length, lines.length - 1);
-        end = session.doc.indexToPosition(index + count, 0);
+        const end = start + op.sd.length;
+        const to = editor.doc.posFromIndex(end);
+        editor.doc.replaceRange("", from, to, "playback");
       } else if ('si' in op) {
-        action = 'insert';
-        lines = op.si.split('\n');
-        if (lines.length === 1) {
-          end = {
-            row: start.row,
-            column: start.column + op.si.length,
-          };
-        } else {
-          end = {
-            row: start.row + (lines.length - 1),
-            column: lines[lines.length - 1].length,
-          };
-        }
+        editor.doc.replaceRange(op.si, from, null, "playback");
       } else {
         throw new Error(`Invalid Operation: ${JSON.stringify(op)}`);
       }
-      const delta = {
-        start,
-        end,
-        action,
-        lines,
-      };
-      return delta;
     }
-    const deltas = ops.map(opToDelta);
-    return deltas;
+    ops.forEach((op)=> {
+      opToDelta(op);
+    });
   },
 });

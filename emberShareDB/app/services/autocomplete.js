@@ -27,6 +27,7 @@ export default Service.extend({
     return children.map(fn);
   },
   ruleSets(docType) {
+    console.log("getting rule set for" ,docType);
     let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
@@ -42,7 +43,7 @@ export default Service.extend({
       },
       "jshint": {"esversion": 6, "asi" : true}
     }
-    if(docType == "js")
+    if(docType == "javascript")
     {
       ruleSets = {
         "tagname-lowercase": false,
@@ -75,6 +76,6 @@ export default Service.extend({
             raw: message.raw
         });
     }
-    return errors 
+    return errors
   }
 });

@@ -20,6 +20,14 @@ export default Controller.extend({
       {
         reject("passwords do not match");
       }
+      const badCharacters = ["*","\"","\'","(",")",";",":","@","&","=","+","$",",","/","?","#","[","]","\"", " "];
+      badCharacters.forEach((char)=> {
+        if(newUsername.indexOf(char) !== -1)
+        {
+          reject("username must be one word (no spaces) and not contain !*'();:@&=+$,/?#[]")
+        }
+      });
+
       resolve();
     });
   },
@@ -42,8 +50,9 @@ export default Controller.extend({
       this.getProperties('newUsername', 'newUserEmail', 'newUserPassword', 'newUserPasswordAgain');
       this.get('cs').log(newUsername, newUserEmail, newUserPassword, newUserPasswordAgain);
       this.validateRegistration().then(() => {
+        const lowercaseUser = newUsername.toLowerCase();
         let user = this.get('store').createRecord('account', {
-          username: newUsername,
+          username: lowercaseUser,
           password: newUserPassword,
           email: newUserEmail,
           created: new Date()

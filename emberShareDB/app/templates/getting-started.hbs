@@ -16,7 +16,7 @@ Lets start by making a new document
 </p>
 <h2>Part 1: Using MIMIC Libraries</h2>
 <p class = "tutorial-text">
-Next select the briefcase icon in the control panel and select maxiLib. This should insert a script tag in the &lt;head&gt; that will inlcude the MaxiLib JS Audio DSP library. MIMIC hosts several libraries that are either commonly used or developed specially for the site that are easily insertable this way.
+Next select the briefcase icon in the control panel and select maximilian. This should insert a script tag in the &lt;head&gt; that will inlcude the maximilian.js Audio DSP library. MIMIC hosts several libraries that are either commonly used or developed specially for the site that are easily insertable this way.
 </p>
 <img class = "tutorial-img" src = {{concat url "add-library.gif"}}/>
 <h2>Part 2: Uploading Media</h2>
@@ -30,13 +30,14 @@ Drop in this javascript into the script tag, inserting the name of your file whe
 </p>
 <pre>
   <code>
-let maxiAudio = new maximJs.maxiAudio();
-let sample = new maximJs.maxiSample();
+var maxi = maximilian();
+var maxiEngine = new maxi.maxiAudio();
+var sampler = new maxi.maxiSample();
 let rate = 1;
-maxiAudio.init();
-maxiAudio.loadSample(&lt;YOUR FILENAME&gt;,sample);
-maxiAudio.play = function() {
-  this.output = sample.play(rate)
+maxiEngine.init();
+maxiEngine.loadSample(&lt;YOUR FILENAME&gt;, sampler)
+maxiEngine.play = function() {
+	return sampler.play(rate);
 }
 
 </code>
@@ -75,7 +76,7 @@ To record insert the code below in your main script tag and rerun the file
 </p>
 <pre>
   <code>
-var recorder = new Recorder(maxiAudio.jsProcessor);
+var recorder = new Recorder(maxiEngine.maxiAudioProcessor);
 recorder.record();
 
 let download = ()=> {
@@ -105,12 +106,13 @@ Play round with the rate and all your output will be recorded. When you want to 
 
 
 <h1>Getting Started</h1>
-<p class = "tutorial-text">This guide will walk you through setting up your first project on MIMIC.
+<p class = "tutorial-text">This guide will walk you through setting up your first project on MIMIC. There is also an <a href = {{advancedurl}}> advanced walk through</a>
 </p>
+<br>
 <h2>Part 1: Make an Account</h2>
 <p class = "tutorial-text">You will need to make an account to create your own projects. Select "login" in the top right hand corner to do so.
 </p>
-<p class = "tutorial-text">Once you have an account, make a new project by going to the projects page, entering a name and clicking "create"
+<p class = "tutorial-text">Once you have an account, make a new project selecting the "my projects" drop down and clicking on the plus sign. You can change the name of your document to whatever you like.
 </p>
 <img class = "tutorial-img" src = {{concat url "createdoc.gif"}}/>
 <h2>Part 2: Use Some HTML</h2>

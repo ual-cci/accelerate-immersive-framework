@@ -5,11 +5,11 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
-    ace: {
+    codemirror: {
+      addons: ['mode/simple.js', 'mode/multiplex.js', 'comment/comment.js', 'hint/javascript-hint.js','hint/show-hint.js','hint/anyword-hint.js','hint/css-hint.js', "lint/lint.js", "lint/css-lint.js","hint/show-hint.css", "edit/matchbrackets.js"],
+      modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
       themes: ['monokai'],
-      modes: ['html', 'javascript'],
-      workers: ['html', 'javascript'],
-      exts: ['language_tools']
+      keymaps: ['sublime']
     },
 
     'ember-bootstrap': {
@@ -18,6 +18,8 @@ module.exports = function(defaults) {
       'importBootstrapCSS': false
     }
   });
+
+
 
   // Use `app.import` to add additional libraries to the generated
   // output files.

@@ -35,6 +35,7 @@ export default Service.extend({
       $.ajax({
           type: "GET",
           url: config.serverHost + "/documents/ops/" + doc,
+          headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
           this.set('ops', res.data);
           console.log("GOT OPS", res.data)
@@ -55,13 +56,12 @@ export default Service.extend({
           this.set('ptr', 0);
         }
         this.updateOps(prev);
-        resolve(this.getTransform(editor));
+        this.applyTransform(editor)
+        resolve();
       }
       if(isEmpty(this.get('ops')))
       {
-        this.loadOps()
-        .then(() => {fetch()})
-        .catch((err) => {reject(err)});
+        this.loadOps().then(() => {fetch()}).catch((err) => {reject(err)});
       }
       else
       {
@@ -151,10 +151,10 @@ export default Service.extend({
   nextOp(editor, rewind = false) {
     return this.shift(false, editor, rewind);
   },
-  getTransform(editor) {
+  applyTransform(editor) {
     if(!isEmpty(this.get('opsToApply')))
     {
-      return this.get('parser').opTransform(this.get('opsToApply'), editor);
+      return this.get('parser').applyOps(this.get('opsToApply'), editor);
     }
     else
     {

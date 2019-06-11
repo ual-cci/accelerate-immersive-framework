@@ -10,6 +10,6 @@ export default MediaQueriesService.extend({
     mobile: '(max-width: 767px)',
     desktop: '(min-width: 768px)',
     docs: '(min-width: 1050px)',
-    burger: '(max-width: 898px)'
+    burger: '(max-width: 450px)'
   },
 });

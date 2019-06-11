@@ -2,13 +2,13 @@ import Controller from '@ember/controller';
 import { inject }  from '@ember/service';
 import ShareDB from 'sharedb/lib/client';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import HTMLHint from 'htmlhint';
 import config from  '../config/environment';
 import { isEmpty } from '@ember/utils';
 import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
+import HTMLHint from 'htmlhint';
 
 export default Controller.extend({
   //Query Params
@@ -56,7 +56,7 @@ export default Controller.extend({
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:"700px",
+  aceW:"",
   savedVals:null,
   hideEditor:'false',
   embed:'false',
@@ -73,11 +73,13 @@ export default Controller.extend({
   isPlayingOps:false,
   scrollPositions:{},
   isRoot:true,
+  isMobile:false,
 
   showHUD:true,
   hudMessage:"Loading...",
 
   //Computed parameters
+
   aceStyle: computed('aceW', function() {
     this.updateDragPos();
     const aceW = this.get('aceW');
@@ -102,20 +104,30 @@ export default Controller.extend({
   init: function () {
     this._super();
     this.get('resizeService').on('didResize', event => {
-      const display = this.get('showCodeControls') ? "inline":"none"
-      if(this.get("mediaQueries.isDesktop"))
+      if(!this.get('leftCodeEditor'))
       {
-        this.updateDragPos()
+        this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
+        console.log("isMobile", this.get('isMobile'));
+        document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
+        if(this.get("mediaQueries.isDesktop"))
+        {
+          this.updateDragPos();
+        }
       }
-      $("#ace-container").css("display", display);
-    })
-    //this.hijackConsoleOutput()
+    });
+    this.begin();
+  },
+  begin: function() {
+    console.log("beginning");
+    this.set("hudMessage", "");
+    this.set("showHUD", true);
+    this.clearTabs();
+    this.initShareDB();
   },
   initShareDB: function() {
     console.log('initShareDB');
     this.set('leftCodeEditor', false);
     this.initWebSockets();
-    this.initAceEditor();
     this.addWindowListener();
     this.initUI();
   },
@@ -125,11 +137,10 @@ export default Controller.extend({
     const embedWithCode = this.get('showCode') == "true";
     this.set('isEmbedded', embed);
     this.set('isEmbeddedWithCode', embedWithCode);
-    this.set('showCodeControls', !(embed && !embedWithCode) || ((this.get('mediaQueries').isDesktop) && !embedWithCode));
-    var iframe = document.getElementById("output-iframe");
-    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDocument.body.style.padding = "0px";
-    iframeDocument.body.style.margin = "0px";
+    this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
+    console.log("isMobile", this.get('isMobile'));
+    this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
+    this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
     if(embed)
     {
       document.getElementById("main-code-container").style.height="97vh"
@@ -149,65 +160,26 @@ export default Controller.extend({
     $("#mimic-navbar").css("display", embed ? "none" : "block");
     $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
     $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
-    const display = this.get('showCodeControls') ? "inline":"none"
-    $("#ace-container").css("display", display);
     this.updateDragPos();
     this.get('cs').observers.push(this);
   },
   updateDragPos: function() {
     const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
-    //const aceW = document.getElementById('ace-container').clientWidth;
-    //console.log("drag")
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
-      drag.style.right =(aceW - 31) + "px";
+      drag.style.right = (aceW - 31) + "px";
     }
     const tab = document.getElementById('project-tabs');
     if(!isEmpty(tab))
     {
       tab.style.width = aceW + "px"
     }
-  },
-  initAceEditor: function() {
     const editor = this.get('editor');
-    const session = editor.getSession();
-    console.log("Adding in commands");
-    editor.commands.addCommand({
-      name: "executeLines",
-      exec: ()=>{
-        console.log("executeLines");
-        this.updateIFrame(true)
-      },
-      bindKey: {mac: "shift-enter", win: "shift-enter"}
-    });
-    editor.commands.addCommand({
-      name: "pause",
-      exec: ()=>{
-        this.get('cs').logToScreen("pause")
-        this.set('renderedSource', "");
-      },
-      bindKey: {mac: "cmd-.", win: "ctrl-."}
-    });
-    editor.commands.addCommand({
-      name: "zoom-in",
-      exec: ()=>{
-        this.zoomIn();
-      },
-      bindKey: {mac: "cmd-=", win: "ctrl-="}
-    });
-    editor.commands.addCommand({
-      name: "zoom-out",
-      exec: ()=>{
-        this.zoomOut();
-      },
-      bindKey: {mac: "cmd--", win: "ctrl--"}
-    });
-    session.on('change',(delta)=>{
-      this.onSessionChange( delta);
-    });
-    session.setMode("ace/mode/html");
-    session.setUseWorker(false);
+    if(!isEmpty(editor))
+    {
+      editor.refresh();
+    }
   },
   initWebSockets: function() {
     let socket = this.get('socket');
@@ -396,22 +368,24 @@ export default Controller.extend({
     })
   },
   didReceiveDoc: function() {
+    console.log("isMobile", this.get('isMobile'));
+    document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
-      const session = editor.getSession();
       console.log("didReceiveDoc", doc.get('data').type);
       if(doc.get('data').type == "js")
       {
-        session.setMode("ace/mode/javascript");
+        editor.setOption("mode","javascript");
       }
       else
       {
-        session.setMode("ace/mode/html");
+        editor.setOption("mode","htmlmixed");
       }
       this.set('surpress', true);
-      session.setValue(doc.get('data').source);
+      editor.setValue(doc.get('data').source);
+      editor.refresh();
       this.set('surpress', false);
       this.set('savedVals', doc.get('data').savedVals);
       this.setCanEditDoc();
@@ -424,7 +398,7 @@ export default Controller.extend({
         return;
       });
       console.log("CAN EDIT?", this.get('canEditDoc'))
-      editor.setReadOnly(!this.get('canEditDoc'));
+      editor.options.readOnly = !this.get('canEditDoc');
       this.set('showHUD', false);
       this.scrollToSavedPosition();
       this.set('titleName', doc.get('data').name + " by " + doc.get('data').owner);
@@ -497,15 +471,15 @@ export default Controller.extend({
   didReceiveOp: function (ops,source) {
     //console.log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
-    const editor = this.get('editor');
+    //const editor = this.get('editor');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
       {
         this.set('surpress', true);
-        console.log("applying remote op")
-        const deltas = this.get('codeParser').opTransform(ops, editor);
-        editor.session.getDocument().applyDeltas(deltas);
+        // console.log("applying remote op")
+        // const deltas = this.get('codeParser').opTransform(ops, editor);
+        // editor.session.getDocument().applyDeltas(deltas);
         this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
@@ -571,7 +545,15 @@ export default Controller.extend({
         catch (err)
         {
           droppedOps.push(op);
-          this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          if(isEmpty(this.get('model').data.parent))
+          {
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+          }
+          else
+          {
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. We recommend you create a new tab, copy acorss your code and delete this one.")
+          }
+
           this.set('showConnectionWarning', true);
           console.log("error submitting op (ws)",err)
           reject(err);
@@ -594,20 +576,6 @@ export default Controller.extend({
       }
     });
   },
-  zoomIn: function() {
-    const editor = this.get("editor");
-    this.incrementProperty('fontSize');
-    editor.setFontSize(this.get('fontSize'));
-  },
-  zoomOut: function() {
-    const editor = this.get("editor");
-    this.decrementProperty('fontSize');
-    if(this.get('fontSize') < 1)
-    {
-      this.set('fontSize', 1);
-    }
-    editor.setFontSize(this.get('fontSize'));
-  },
   doPlayOnLoad: function() {
     let model = this.get('model');
     const embed = this.get('isEmbedded');
@@ -622,7 +590,7 @@ export default Controller.extend({
       let model = this.get('model');
       if(!isEmpty(model.get('data').assets))
       {
-        this.set("hudMessage", "Loading Assets");
+        this.set("hudMessage", "Loading assets...");
         this.set("showHUD", true);
         this.get('assetService').preloadAssets(model.get('data').assets, model.id)
         .then(()=>{
@@ -641,33 +609,28 @@ export default Controller.extend({
       }
     });
   },
-  getSelectionRange: function() {
-    const editor = this.get('editor');
-    let selectionRange = editor.getSelectionRange();
-    if(selectionRange.start.row == selectionRange.end.row &&
-      selectionRange.start.column == selectionRange.end.column)
-      {
-        selectionRange.start.column = 0;
-        selectionRange.end.column = editor.session.getLine(selectionRange.start.row).length;
-      }
-      return selectionRange;
-  },
   getSelectedText: function()
   {
-    const editor = this.get('editor');
-    let selectionRange = this.getSelectionRange();
-    const content = editor.session.getTextRange(selectionRange);
-    return content;
+    const doc = this.get('editor').getDoc();
+    let selection = doc.getSelection();
+    if(selection.length === 0)
+    {
+      const line = this.get('editor').getCursor(true).line;
+      selection = doc.getLine(line);
+      console.log(this.get('editor').getCursor(true), doc.getLine(line))
+    }
+    return selection;
   },
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       if(!isEmpty(doc) && this.get('droppedOps').length == 0)
       {
-        const session = this.get('editor').getSession();
+        const source = this.get('editor').getValue();
+        console.log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        this.get('documentService').updateDoc(doc.id, "source", session.getValue())
+        this.get('documentService').updateDoc(doc.id, "source", source)
         .then(()=>resolve())
         .catch((err)=>{
           console.log("error updateSourceFromSession - updateDoc", err);
@@ -686,10 +649,9 @@ export default Controller.extend({
         this.updateSavedVals();
         const savedVals = this.get('savedVals');
         let model = this.get('model');
-        const editor = this.get('editor');
         const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
-        console.log("updateiframe", model.id)
+        console.log("updateiframe", toRender)
         this.get('documentService').getCombinedSource(model.id, true, toRender)
         .then((combined) => {
           this.get('cs').clear();
@@ -707,7 +669,6 @@ export default Controller.extend({
           {
             this.set('renderedSource', combined);
           }
-          this.updateLinting();
         });
       }).catch((err)=>{console.log(err)});
     }).catch((err)=>{console.log(err)});
@@ -723,40 +684,21 @@ export default Controller.extend({
     }, 250);
   },
   flashSelectedText: function() {
-    let selectionMarkers = document.getElementsByClassName('ace_selection');
-    for(let i = 0; i < selectionMarkers.length; i++)
-    {
-      selectionMarkers.item(i).style.background = 'rgba(255, 102, 255, 150)'
-    }
-    setTimeout(()=> {
-      for(let i = 0; i < selectionMarkers.length; i++)
-      {
-        selectionMarkers.item(i).style.background = 'rgba(255, 255, 255, 0)'
-      }
-    }, 500);
-    if(selectionMarkers.length < 1)
-    {
-      let activeMarkers = document.getElementsByClassName('ace_active-line');
-      for(let j = 0; j < activeMarkers.length; j++)
-      {
-        activeMarkers.item(j).style.background = 'rgba(255, 102, 255, 150)'
-      }
-      setTimeout(()=> {
-        for(let j = 0; j < activeMarkers.length; j++)
-        {
-          activeMarkers.item(j).style.background = 'rgba(255, 255, 255, 0)'
-        }
-      }, 500);
-    }
-  },
-  updateLinting: function() {
-    const doc = this.get('currentDoc');
-    const ruleSets = this.get('autocomplete').ruleSets(doc.get('data').type);
     const editor = this.get('editor');
-    const mainText = doc.get('data').source;
-    const messages = HTMLHint.HTMLHint.verify(mainText, ruleSets);
-    const errors = this.get('autocomplete').lintingErrors(messages);
-    editor.getSession().setAnnotations(errors);
+    let start = editor.getCursor(true);
+    let end = editor.getCursor(false);
+    if(start.line == end.line && start.ch == end.ch)
+    {
+      console.log("flash, single line");
+      start = {line:start.line, ch:0};
+      end = {line:end.line, ch:editor.getLine(end.line).length};
+      console.log("flash", start, end);
+    }
+    console.log("flash", start, end);
+    const marker = editor.getDoc().markText(start, end, {"className":"codeMirrorMarked"});
+    setTimeout(()=> {
+      marker.clear();
+    }, 500);
   },
   onCodingFinished: function() {
     if(this.get('autoRender'))
@@ -764,7 +706,6 @@ export default Controller.extend({
       this.flashAutoRender();
       this.updateIFrame();
     }
-    this.updateLinting();
     this.set('codeTimer', null);
   },
   restartCodeTimer: function() {
@@ -779,41 +720,26 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    //console.log("session change")
+    console.log("session change, surpress", surpress);
     if(!surpress && this.get('droppedOps').length == 0)
     {
-      const editor = this.editor;
-      const session = editor.getSession();
-
+      const editor = this.get('editor');
       this.incrementProperty('editCtr');
 
       if(!this.get('opsPlayer').atHead())
       {
-        console.log("not at head", doc.get('data').source, session.getValue());
+        console.log("not at head", doc.get('data').source, editor.getValue());
         this.submitOp({p: ["source", 0], sd: doc.get('data').source});
-        this.submitOp({p: ["source", 0], si: session.getValue()});
+        this.submitOp({p: ["source", 0], si: editor.getValue()});
       }
       else
       {
-        const aceDoc = session.getDocument();
-        const op = {};
-        const start = aceDoc.positionToIndex(delta.start);
-        op.p = ['source', parseInt(start)];
-        let action;
-        if (delta.action === 'insert') {
-          action = 'si';
-        } else if (delta.action === 'remove') {
-          action = 'sd';
-        } else {
-          throw new Error(`action ${action} not supported`);
-        }
-        const str = delta.lines.join('\n');
-        op[action] = str;
-        this.submitOp(op);
+        const ops = this.get('codeParser').getOps(delta, editor);
+        ops.forEach((op)=>{
+          this.submitOp(op);
+        })
       }
-
       this.get('opsPlayer').reset(doc.id);
-
       this.restartCodeTimer();
     }
   },
@@ -926,47 +852,44 @@ export default Controller.extend({
     this.set('scrollPositions', scrollPositions);
   },
   updateScrollPosition: function() {
-    const range = this.getSelectionRange();
-    this.get('scrollPositions')[this.get('currentDoc').id] = range.start.row
-    //console.log("SCROLL POS", this.get('scrollPositions'))
+    this.get('scrollPositions')[this.get('currentDoc').id] = this.get('editor').getCursor(true);
   },
   scrollToSavedPosition: function() {
     const pos = this.get('scrollPositions')[this.get('currentDoc').id];
-    const editor = this.get('editor');
-    //console.log("scrolling to ", pos)
-    //editor.renderer.scrollCursorIntoView({row: pos, column: 1}, 0.5)
-    editor.resize(true);
-    editor.gotoLine(pos);
-    editor.scrollToLine(pos, true, true, {})
-    Ember.run.scheduleOnce('render', this, () => editor.renderer.updateFull(true));
+    this.get('editor').scrollIntoView(pos);
   },
   skipOp:function(prev, rewind = false) {
     const update = ()=> {
-      const editor = this.get('editor');
-      const doc = this.get('currentDoc').id;
-      const apply = (deltas) => {
+      return new RSVP.Promise((resolve, reject)=> {
+        const editor = this.get('editor');
         this.set('surpress', true);
-        editor.session.getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-      }
-      if(prev)
-      {
-        this.get('opsPlayer').prevOp(editor, rewind)
-        .then((deltas)=>{apply(deltas)});
-      }
-      else
-      {
-        this.get('opsPlayer').nextOp(editor, rewind)
-        .then((deltas)=>{apply(deltas)});
-      }
+        console.log("SURPRESSING");
+        if(prev)
+        {
+          this.get('opsPlayer').prevOp(editor, rewind).then(()=>{resolve()});
+        }
+        else
+        {
+          this.get('opsPlayer').nextOp(editor, rewind).then(()=>{resolve()});
+        }
+      });
+
     }
     if(this.get('opsPlayer').atHead())
     {
-      this.updateSourceFromSession().then(update).catch((err)=>{console.log(err)})
+      this.updateSourceFromSession().then(()=> {
+        update().then(()=>{
+          this.set('surpress', false);
+          console.log("UNSURPRESSING");
+        });
+      }).catch((err)=>{console.log(err)})
     }
     else
     {
-      update();
+      update().then(()=>{
+        this.set('surpress', false);
+        console.log("UNSURPRESSING");
+      });
     }
   },
   updateSavedVals: function()
@@ -1117,7 +1040,7 @@ export default Controller.extend({
     }
   },
   hideCode: function(doHide) {
-    const container = document.getElementById('ace-container');
+    let container = document.getElementById('ace-container');
     $(container).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(container).removeClass(!doHide ? 'hiding-code' : 'showing-code');
     this.set("isDragging", false);
@@ -1125,23 +1048,26 @@ export default Controller.extend({
     $(tab).addClass(doHide ? 'hiding-code' : 'showing-code');
     $(tab).removeClass(!doHide ? 'hiding-code' : 'showing-code');
     setTimeout(()=> {
-      const max = 2 * document.getElementById("main-code-container").clientWidth / 3;
-      const w = this.get("isEmbeddedWithCode") ? max + "px" : container.clientWidth + "px";
+      const w = ($(window).width() / 2)  + "px";
       this.set('isShowingCode', !doHide);
+      console.log("setting aceW to ", doHide ? "30px" : w);
       this.set('aceW', doHide ? "30px" : w);
     }, 200)
   },
   actions: {
-    editorReady(editor) {
+
+    //codemirror
+    onEditorReady(editor) {
       this.set('editor', editor);
-      editor.setOption("enableBasicAutocompletion", true)
-      console.log('editor ready', editor)
-      this.set("hudMessage", "Loading Code");
-      this.set("showHUD", true);
-      this.clearTabs();
-      editor.setReadOnly(true);
-      this.initShareDB();
     },
+    onSessionChange(cm, change) {
+      this.set('editor', cm);
+      this.onSessionChange(change);
+    },
+    onReevaluate() {
+      this.updateIFrame(true);
+    },
+
     suggestCompletions(editor, session, position, prefix) {
       let suggestions = [];
       const assets = this.get('model').data.assets;
@@ -1235,7 +1161,7 @@ export default Controller.extend({
     //ASSETS
     assetError(err) {
       $("#asset-progress").css("display", "none");
-      alert("Error"+err);
+      alert("Error uploading there is a 100MB limit to assets");
     },
     assetProgress(e) {
       console.log("assetProgress", e.percent);
@@ -1255,8 +1181,11 @@ export default Controller.extend({
       const doc = this.get('model');
       let newAssets = doc.get('data').assets;
       newAssets.push(e);
-      this.get('documentService').updateDoc(doc.id, "assets", newAssets)
-      .then(()=>{
+      const actions = [
+        this.get('documentService').updateDoc(doc.id, "assets", newAssets),
+        this.get('documentService').updateDoc(doc.id, "assetQuota", e.size + doc.data.assetQuota)
+      ];
+      Promise.all(actions).then(()=>{
         if(!this.get('wsAvailable'))
         {
           this.refreshDoc();
@@ -1275,16 +1204,19 @@ export default Controller.extend({
       if(this.get('canEditDoc'))
       {
         if (confirm('Are you sure you want to delete?')) {
+          console.log("deleting asset", asset)
           this.get('assetService').deleteAsset(asset).then(()=> {
             const doc = this.get('model');
             let newAssets = doc.get('data').assets;
             newAssets = newAssets.filter((oldAsset) => {
-                console.log(oldAsset.fileId,asset)
-                return oldAsset.fileId !== asset
+                console.log(oldAsset.name,asset)
+                return oldAsset.name !== asset
             });
-
-            this.get('documentService').updateDoc(doc.id, "assets", newAssets)
-            .then(()=>{
+            const actions = [
+              this.get('documentService').updateDoc(doc.id, "assets", newAssets),
+              this.get('documentService').updateDoc(doc.id, "assetQuota", doc.data.assetQuota - oldAsset.size)
+            ];
+            Promise.all(actions).then(()=>{
               if(!this.get('wsAvailable'))
               {
                 this.refreshDoc();
@@ -1298,7 +1230,7 @@ export default Controller.extend({
     },
     previewAsset(asset)
     {
-      var url = config.serverHost + "/asset/"+asset.fileId;
+      var url = config.serverHost + "/asset/"+this.get('model').id + "/" + asset.name;
       const isImage = asset.fileType.includes("image");
       const isAudio = asset.fileType.includes("audio");
       const isVideo = asset.fileType.includes("video");
@@ -1346,15 +1278,15 @@ export default Controller.extend({
       document.getElementById("myDropdown").classList.toggle("show");
     },
     insertLibrary(lib) {
-      this.updateSourceFromSession().then(()=>{
-        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
-        this.submitOp(op);
-        this.set('surpress', true);
-        const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
-        this.get('editor.session').getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
-        document.getElementById("myDropdown").classList.toggle("show");
-      })
+      // this.updateSourceFromSession().then(()=>{
+      //   const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+      //   this.submitOp(op);
+      //   this.set('surpress', true);
+      //   const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
+      //   this.get('editor.session').getDocument().applyDeltas(deltas);
+      //   this.set('surpress', false);
+      //   document.getElementById("myDropdown").classList.toggle("show");
+      // })
     },
     toggleShowShare() {
       this.toggleProperty('showShare');
@@ -1483,7 +1415,7 @@ export default Controller.extend({
     },
     rewindOps() {
       this.set('surpress', true);
-      this.get('editor').session.setValue("");
+      this.get('editor').setValue("");
       this.set('renderedSource', "");
       this.set('surpress', false);
       this.skipOp(false, true);
