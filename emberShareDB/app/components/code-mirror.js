@@ -95,7 +95,6 @@ export default Component.extend({
               msg.style["background-color"] = "transparent";
               txt.style.display = "none";
             }
-            console.log(txt);
             widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: true, noHScroll: true}));
           }
         }

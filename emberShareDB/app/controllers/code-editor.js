@@ -1295,15 +1295,14 @@ export default Controller.extend({
       document.getElementById("myDropdown").classList.toggle("show");
     },
     insertLibrary(lib) {
-      // this.updateSourceFromSession().then(()=>{
-      //   const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
-      //   this.submitOp(op);
-      //   this.set('surpress', true);
-      //   const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
-      //   this.get('editor.session').getDocument().applyDeltas(deltas);
-      //   this.set('surpress', false);
-      //   document.getElementById("myDropdown").classList.toggle("show");
-      // })
+      this.updateSourceFromSession().then(()=>{
+        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+        this.submitOp(op);
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').applyOps([op], this.get('editor'));
+        this.set('surpress', false);
+        document.getElementById("myDropdown").classList.toggle("show");
+      })
     },
     toggleShowShare() {
       this.toggleProperty('showShare');
