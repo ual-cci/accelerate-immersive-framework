@@ -5,6 +5,7 @@ $mimic-yellow:#FFCE00;
 $mimic-green:#0ED779;
 $mimic-pink:#F79994;
 $mimic-blue:#4D42EB;
+$max-site-width:950px;
 
 .main-delete-button {
   background-color: rgba(0,0,0,0);
@@ -1432,7 +1433,7 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .limited-width-container {
-  max-width: 950px;
+  max-width: $max-site-width;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1478,7 +1479,7 @@ $footer-grey:#303030;
 #about-overlay-title {
   background-color: rgba(237,61,5,0.95);
   width:60%;
-  max-width: 950px;
+  max-width: $max-site-width;
   left:20vw;
   height:auto;
   position: absolute;
@@ -1501,7 +1502,7 @@ $footer-grey:#303030;
 #about-overlay-desc {
   background-color: rgba(255,206,0,0.95);
   width:60%;
-  max-width: 950px;
+  max-width: $max-site-width;
   left: 20vw;
   height: 270px;
   padding-left: 50px;
@@ -1544,7 +1545,7 @@ $footer-grey:#303030;
 
 #about-text-container {
   width:90%;
-  max-width: 950px;
+  max-width: $max-site-width;
   margin-top:70px;
   margin-left: auto;
   margin-right: auto;
@@ -1565,15 +1566,20 @@ $footer-grey:#303030;
 }
 
 #logo-container {
+  max-width: $max-site-width;
   width:auto;
   margin:auto;
+}
+
+.footer-logo-cell {
+  padding-left: 0px;
 }
 
 .footer-logo-img {
   margin-bottom: 10px;
   margin-top: 10px;
   margin-right: 10px;
-  margin-left: 10px;
+  margin-left: 0px;
   height: 50px;
   display: table-cell;
   vertical-align: middle;
@@ -1592,7 +1598,7 @@ $footer-grey:#303030;
 }
 
 #ahrc-logo {
-  width:181px;
+  width:171px;
 }
 
 #google-logo {
@@ -1696,7 +1702,7 @@ $footer-grey:#303030;
 }
 
 #example-container {
-  max-width: 950px;
+  max-width: $max-site-width;
   margin:auto!important;
   padding-top:70px;
 }
@@ -1837,7 +1843,7 @@ $footer-grey:#303030;
 }
 
 #terms-container {
-  max-width: 950px;
+  max-width: $max-site-width;
   margin-right: auto;
   margin-left: auto;
   margin-top: 70px;
@@ -1869,6 +1875,16 @@ $footer-grey:#303030;
 
 #footer-copyright {
   padding-top: 5px;
+}
+
+#footer-contact {
+  text-align: left !important;
+  padding-left: 10px;
+}
+
+#footer-terms {
+  text-align: right !important;
+  padding-right: 10px;
 }
 
 #code-mirror-container {
