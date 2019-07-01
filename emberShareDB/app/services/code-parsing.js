@@ -463,7 +463,6 @@ export default Service.extend({
   getLanguage(source) {
     let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);
     let languageObj = hljs.getLanguage(highlightResult.language);
-    console.log("langauge obj", highlightResult.language);
     return highlightResult.language;
   }
 });

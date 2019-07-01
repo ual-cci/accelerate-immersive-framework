@@ -18,7 +18,6 @@ export default Component.extend({
       lineNumbers: true,
       matchBrackets: true,
       autoCloseTags: true,
-      lint: true,
       gutters: ["CodeMirror-lint-markers"],
       hintOptions:{hint:this.get("suggestCompletions")}
     });
@@ -56,40 +55,38 @@ export default Component.extend({
         var pos = doc.getCursor();
         var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
         widgets.length = 0
-
-        console.log("linter", mode)
-        if(mode == "javascript")
-        {
-          // var source = [
-          //   'function goo() {}',
-          //   'foo = 3;'
-          // ];
-          // var options = {
-          //   undef: true
-          // };
-          // var predef = {
-          //   foo: false
-          // };
-          // console.log(JSHINT.JSHINT)
-          // JSHINT.JSHINT(source, options, predef);
-          //
-          // console.log(JSHINT.JSHINT.data());
-        }
         const ruleSets = this.get('autocomplete').ruleSets(mode);
+        //Add script tags around javascript to force js linting
         const src = mode == "javascript" ? "<script>" + editor.getValue() + "</script>" : editor.getValue();
         var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
+          //HTMLHint misclassifies this, ignore
           if(err.message != "Tag must be paired, no start tag: [ </input> ]")
           {
             if (!err) continue
-            var msg = document.createElement("div")
-            var icon = msg.appendChild(document.createElement("span"))
-            icon.innerHTML = "!!"
-            icon.className = "lint-error-icon"
-            msg.appendChild(document.createTextNode(err.message))
-            msg.className = "lint-error"
-            widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}))
+            let msg = document.createElement("div");
+            msg.style["background-color"] = "transparent";
+            let icon = msg.appendChild(document.createElement("div"));
+            icon.innerHTML = "!!";
+            icon.className = "lint-error-icon";
+
+            let txt = document.createElement("div");
+            txt.innerHTML = err.message;
+            txt.style.display = "none";
+            msg.appendChild(txt);
+            msg.className = "lint-error";
+            icon.onmouseover = ()=> {
+              console.log("over");
+              msg.style["background-color"] = "white";
+              txt.style.display = "inline";
+            };
+            icon.onmouseout = ()=> {
+              msg.style["background-color"] = "transparent";
+              txt.style.display = "none";
+            }
+            console.log(txt);
+            widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: true, noHScroll: true}));
           }
         }
       })
