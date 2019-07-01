@@ -57,7 +57,15 @@ export default Component.extend({
         widgets.length = 0
         const ruleSets = this.get('autocomplete').ruleSets(mode);
         //Add script tags around javascript to force js linting
-        const src = mode == "javascript" ? "<script>" + editor.getValue() + "</script>" : editor.getValue();
+        let src = editor.getValue();
+        if(mode == "javascript")
+        {
+          src = "<script>" + editor.getValue() + "</script>";
+        }
+        else if (mode == "css")
+        {
+          src = "<style>" + editor.getValue() + "</style>";
+        }
         var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
