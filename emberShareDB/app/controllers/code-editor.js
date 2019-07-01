@@ -360,9 +360,16 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       console.log("didReceiveDoc", doc.get('data').type);
-      if(doc.get('data').type == "js")
+      if(!isEmpty(doc.get('data').parent))
       {
-        editor.setOption("mode","javascript");
+        if (this.get('codeParser').getLanguage(doc.get('data').source) == "css") {
+          console.log("CSS");
+          editor.setOption("mode","css");
+        }
+        else
+        {
+          editor.setOption("mode","javascript");
+        }
       }
       else
       {
@@ -1072,19 +1079,20 @@ export default Controller.extend({
       this.updateIFrame(true);
     },
 
-    suggestCompletions(editor, session, position, prefix) {
-      let suggestions = [];
+    suggestCompletions() {
+      let targets = [];
       const assets = this.get('model').data.assets;
       if(!isEmpty(assets))
       {
-        suggestions = suggestions.concat(this.get('autocomplete').assets(assets));
+        targets = targets.concat(this.get('autocomplete').assets(assets));
       }
       const children = this.get('children');
       if(!isEmpty(children))
       {
-        suggestions = suggestions.concat(this.get('autocomplete').tabs(children));
+        targets = targets.concat(this.get('autocomplete').tabs(children));
       }
-      return suggestions;
+
+      return this.get('autocomplete').toFind(this.get("editor"), targets);
     },
 
     //DOC PROPERTIES

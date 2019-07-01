@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import HTMLHint from 'htmlhint';
 import CodeMirror from 'codemirror';
 import { inject }  from '@ember/service';
+import JSHINT from 'jshint';
 
 export default Component.extend({
   autocomplete: inject('autocomplete'),
@@ -17,15 +18,10 @@ export default Component.extend({
       lineNumbers: true,
       matchBrackets: true,
       autoCloseTags: true,
-      lint: true,
-      gutters: ["CodeMirror-lint-markers"]
+      gutters: ["CodeMirror-lint-markers"],
+      hintOptions:{hint:this.get("suggestCompletions")}
     });
-    editor.showHints = true;
-    var orig = CodeMirror.hint.javascript;
-    CodeMirror.hint.javascript = function(cm) {
-      var inner = orig(cm) || {from: cm.getCursor(), to: cm.getCursor(), list: []};
-      return inner;
-    };
+
     editor.setOption("extraKeys", {
       "Ctrl-Space": "autocomplete",
       "Cmd-\=": (cm)=> {
@@ -60,36 +56,52 @@ export default Component.extend({
         var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
         widgets.length = 0
         const ruleSets = this.get('autocomplete').ruleSets(mode);
-        var messages = HTMLHint.HTMLHint.verify(editor.getValue(), ruleSets);
+        //Add script tags around javascript to force js linting
+        let src = editor.getValue();
+        if(mode == "javascript")
+        {
+          src = "<script>" + editor.getValue() + "</script>";
+        }
+        else if (mode == "css")
+        {
+          src = "<style>" + editor.getValue() + "</style>";
+        }
+        var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
-          if (!err) continue
-          var msg = document.createElement("div")
-          var icon = msg.appendChild(document.createElement("span"))
-          icon.innerHTML = "!!"
-          icon.className = "lint-error-icon"
-          msg.appendChild(document.createTextNode(err.message))
-          msg.className = "lint-error"
-          widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}))
+          //HTMLHint misclassifies this, ignore
+          if(err.message != "Tag must be paired, no start tag: [ </input> ]")
+          {
+            if (!err) continue
+            let msg = document.createElement("div");
+            msg.style["background-color"] = "transparent";
+            let icon = msg.appendChild(document.createElement("div"));
+            icon.innerHTML = "!!";
+            icon.className = "lint-error-icon";
+
+            let txt = document.createElement("div");
+            txt.innerHTML = err.message;
+            txt.style.display = "none";
+            msg.appendChild(txt);
+            msg.className = "lint-error";
+            icon.onmouseover = ()=> {
+              console.log("over");
+              msg.style["background-color"] = "white";
+              txt.style.display = "inline";
+            };
+            icon.onmouseout = ()=> {
+              msg.style["background-color"] = "transparent";
+              txt.style.display = "none";
+            }
+            console.log(txt);
+            widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: true, noHScroll: true}));
+          }
         }
       })
     }
 
     setTimeout(updateHints, 100);
 
-    CodeMirror.commands.autocomplete = function(cm) {
-        var doc = cm.getDoc();
-        var POS = doc.getCursor();
-        var mode = CodeMirror.innerMode(cm.getMode(), cm.getTokenAt(POS).state).mode.name;
-
-        if (mode == 'xml') {
-            CodeMirror.showHint(cm, CodeMirror.hint.html);
-        } else if (mode == 'javascript') {
-            CodeMirror.showHint(cm, CodeMirror.hint.javascript);
-        } else if (mode == 'css') {
-            CodeMirror.showHint(cm, CodeMirror.hint.css);
-        }
-    };
     editor.on('changes', (cm, change)=> {
       this.onChange(cm, change);
       clearTimeout(waiting);

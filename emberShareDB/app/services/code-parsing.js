@@ -4,6 +4,7 @@ import { acorn } from 'acorn'
 import { walk } from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
+import hljs from "highlight.js";
 
 export default Service.extend({
   store:inject('store'),
@@ -459,4 +460,9 @@ export default Service.extend({
       opToDelta(op);
     });
   },
+  getLanguage(source) {
+    let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);
+    let languageObj = hljs.getLanguage(highlightResult.language);
+    return highlightResult.language;
+  }
 });

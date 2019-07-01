@@ -1,37 +1,44 @@
 import Service from '@ember/service';
 
 export default Service.extend({
-  assets(assets) {
-    let fn = (asset)=> {
-      return {
-        value:asset.name.substring(0,2),
-        score:10000,
-        caption:asset.name,
-        meta:"MIMIC",
-        snippet:asset.name
-      }
-    }
-    return assets.map(fn);
-  },
-  tabs(children)
-  {
-    let fn = (child)=> {
-      return {
-        value:child.data.name.substring(0,2),
-        score:10000,
-        caption:child.data.name,
-        meta:"MIMIC",
-        snippet:child.data.name
-      }
-    }
-    return children.map(fn);
+   tabs:(children)=> {
+     return children.map((child)=>{return child.data.name});
+   },
+   assets:(assets)=> {
+     return assets.map((asset)=>{return asset.name});
+   },
+   toFind: (cm, targets)=> {
+     return new Promise((resolve, reject)=> {
+        setTimeout(()=> {
+          let cursor = cm.getCursor(), line = cm.getLine(cursor.line)
+          let start = cursor.ch, end = cursor.ch
+          let from, to;
+          let matches = [];
+          console.log("auto called");
+          while (start && /\w/.test(line.charAt(start - 1))) --start;
+            while (end < line.length && /\w/.test(line.charAt(end))) ++end
+              var word = line.slice(start, end).toLowerCase()
+              for (var i = 0; i < targets.length; i++)
+              {
+                console.log(word, targets[i], targets[i].indexOf(word));
+                if (targets[i].toLowerCase().indexOf(word) !== -1)
+                {
+                  matches.push(targets[i]);
+                  from = CodeMirror.Pos(cursor.line, start);
+                  to = CodeMirror.Pos(cursor.line, end);
+                }
+              }
+          console.log("returning", {list:matches, from:from, to:to})
+          resolve({list:matches, from:from, to:to});
+        }, 100)
+      })
   },
   ruleSets(docType) {
     console.log("getting rule set for" ,docType);
     let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
-      "attr-value-double-quotes": true,
+      "attr-value-double-quotes": false,
       "tag-pair": true,
       "spec-char-escape": true,
       "id-unique": true,
@@ -62,20 +69,5 @@ export default Service.extend({
       }
     }
     return ruleSets;
-  },
-  lintingErrors(messages) {
-    let errors = [];
-    for(let i = 0; i < messages.length; i++)
-    {
-        const message = messages[i];
-        errors.push({
-            row: message.line-1,
-            column: message.col-1,
-            text: message.message,
-            type: message.type,
-            raw: message.raw
-        });
-    }
-    return errors
   }
 });
