@@ -56,14 +56,16 @@ export default Component.extend({
         var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
         widgets.length = 0
         const ruleSets = this.get('autocomplete').ruleSets(mode);
-        //Add script tags around javascript to force js linting
+
         let src = editor.getValue();
         if(mode == "javascript")
         {
+          //Add script tags around javascript to force js linting
           src = "<script>" + editor.getValue() + "</script>";
         }
         else if (mode == "css")
         {
+          //Add style tags around css to force css linting
           src = "<style>" + editor.getValue() + "</style>";
         }
         var messages = HTMLHint.HTMLHint.verify(src, ruleSets);

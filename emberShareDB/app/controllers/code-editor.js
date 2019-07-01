@@ -362,11 +362,16 @@ export default Controller.extend({
       console.log("didReceiveDoc", doc.get('data').type);
       if(!isEmpty(doc.get('data').parent))
       {
-        if (this.get('codeParser').getLanguage(doc.get('data').source) == "css") {
-          console.log("CSS");
+        let lang = this.get('codeParser').getLanguage(doc.get('data').source);
+        if(isEmpty(lang))
+        {
+          editor.setOption("mode","htmlmixed");
+        }
+        else if (lang == "css")
+        {
           editor.setOption("mode","css");
         }
-        else
+        else if (lang == "javascript")
         {
           editor.setOption("mode","javascript");
         }
