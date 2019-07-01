@@ -38,7 +38,7 @@ export default Service.extend({
     let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
-      "attr-value-double-quotes": true,
+      "attr-value-double-quotes": false,
       "tag-pair": true,
       "spec-char-escape": true,
       "id-unique": true,
@@ -48,7 +48,7 @@ export default Service.extend({
         "display-property-grouping": true,
         "known-properties": true
       },
-      //"jshint": {"esversion": 6, "asi" : true}
+      "jshint": {"esversion": 6, "asi" : true}
     }
     if(docType == "javascript")
     {
@@ -69,20 +69,5 @@ export default Service.extend({
       }
     }
     return ruleSets;
-  },
-  lintingErrors(messages) {
-    let errors = [];
-    for(let i = 0; i < messages.length; i++)
-    {
-        const message = messages[i];
-        errors.push({
-            row: message.line-1,
-            column: message.col-1,
-            text: message.message,
-            type: message.type,
-            raw: message.raw
-        });
-    }
-    return errors
   }
 });

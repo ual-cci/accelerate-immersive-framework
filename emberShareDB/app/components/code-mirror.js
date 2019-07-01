@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import HTMLHint from 'htmlhint';
 import CodeMirror from 'codemirror';
 import { inject }  from '@ember/service';
+import JSHINT from 'jshint';
 
 export default Component.extend({
   autocomplete: inject('autocomplete'),
@@ -55,18 +56,41 @@ export default Component.extend({
         var pos = doc.getCursor();
         var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
         widgets.length = 0
+
+        console.log("linter", mode)
+        if(mode == "javascript")
+        {
+          // var source = [
+          //   'function goo() {}',
+          //   'foo = 3;'
+          // ];
+          // var options = {
+          //   undef: true
+          // };
+          // var predef = {
+          //   foo: false
+          // };
+          // console.log(JSHINT.JSHINT)
+          // JSHINT.JSHINT(source, options, predef);
+          //
+          // console.log(JSHINT.JSHINT.data());
+        }
         const ruleSets = this.get('autocomplete').ruleSets(mode);
-        var messages = HTMLHint.HTMLHint.verify(editor.getValue(), ruleSets);
+        const src = mode == "javascript" ? "<script>" + editor.getValue() + "</script>" : editor.getValue();
+        var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
-          if (!err) continue
-          var msg = document.createElement("div")
-          var icon = msg.appendChild(document.createElement("span"))
-          icon.innerHTML = "!!"
-          icon.className = "lint-error-icon"
-          msg.appendChild(document.createTextNode(err.message))
-          msg.className = "lint-error"
-          widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}))
+          if(err.message != "Tag must be paired, no start tag: [ </input> ]")
+          {
+            if (!err) continue
+            var msg = document.createElement("div")
+            var icon = msg.appendChild(document.createElement("span"))
+            icon.innerHTML = "!!"
+            icon.className = "lint-error-icon"
+            msg.appendChild(document.createTextNode(err.message))
+            msg.className = "lint-error"
+            widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}))
+          }
         }
       })
     }

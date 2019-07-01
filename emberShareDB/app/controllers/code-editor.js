@@ -360,9 +360,16 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       console.log("didReceiveDoc", doc.get('data').type);
-      if(doc.get('data').type == "js")
+      if(!isEmpty(doc.get('data').parent))
       {
-        editor.setOption("mode","javascript");
+        if (this.get('codeParser').getLanguage(doc.get('data').source) == "css") {
+          console.log("CSS");
+          editor.setOption("mode","css");
+        }
+        else
+        {
+          editor.setOption("mode","javascript");
+        }
       }
       else
       {
