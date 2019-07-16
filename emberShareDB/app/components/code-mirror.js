@@ -54,7 +54,7 @@ export default Component.extend({
         }
         var doc = editor.getDoc();
         var pos = doc.getCursor();
-        var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
+        var mode = editor.getMode().name;
         widgets.length = 0
         const ruleSets = this.get('autocomplete').ruleSets(mode);
 
