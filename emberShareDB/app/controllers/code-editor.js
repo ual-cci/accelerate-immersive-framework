@@ -362,11 +362,16 @@ export default Controller.extend({
       console.log("didReceiveDoc", doc.get('data').type);
       if(!isEmpty(doc.get('data').parent))
       {
-        if (this.get('codeParser').getLanguage(doc.get('data').source) == "css") {
-          console.log("CSS");
+        let lang = this.get('codeParser').getLanguage(doc.get('data').source);
+        if(isEmpty(lang))
+        {
+          editor.setOption("mode","htmlmixed");
+        }
+        else if (lang == "css")
+        {
           editor.setOption("mode","css");
         }
-        else
+        else if (lang == "javascript")
         {
           editor.setOption("mode","javascript");
         }
@@ -1290,15 +1295,14 @@ export default Controller.extend({
       document.getElementById("myDropdown").classList.toggle("show");
     },
     insertLibrary(lib) {
-      // this.updateSourceFromSession().then(()=>{
-      //   const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
-      //   this.submitOp(op);
-      //   this.set('surpress', true);
-      //   const deltas = this.get('codeParser').opTransform([op], this.get('editor'));
-      //   this.get('editor.session').getDocument().applyDeltas(deltas);
-      //   this.set('surpress', false);
-      //   document.getElementById("myDropdown").classList.toggle("show");
-      // })
+      this.updateSourceFromSession().then(()=>{
+        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.data.source'))
+        this.submitOp(op);
+        this.set('surpress', true);
+        const deltas = this.get('codeParser').applyOps([op], this.get('editor'));
+        this.set('surpress', false);
+        document.getElementById("myDropdown").classList.toggle("show");
+      })
     },
     toggleShowShare() {
       this.toggleProperty('showShare');

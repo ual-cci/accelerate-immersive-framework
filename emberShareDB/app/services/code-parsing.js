@@ -409,7 +409,7 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.text.join('\n');
     op['si'] =  str;
-    console.log("delta op", op);
+    //console.log("delta op", op);
     return op
   },
   removeOp(delta, editor) {
@@ -418,16 +418,16 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.removed.join('\n');
     op['sd'] =  str;
-    console.log("delta op", op);
+    //console.log("delta op", op);
     return op
   },
   getOps(delta, editor) {
-    console.log('delta',delta);
+    //console.log('delta',delta);
     let ops = [];
     delta.forEach((change)=> {
       if(change.origin === "playback")
       {
-        console.log("ignoring change")
+        //console.log("ignoring change")
         return ops;
       }
       if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)
@@ -462,7 +462,7 @@ export default Service.extend({
   },
   getLanguage(source) {
     let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);
-    let languageObj = hljs.getLanguage(highlightResult.language);
+    //console.log("language", highlightResult.language);
     return highlightResult.language;
   }
 });

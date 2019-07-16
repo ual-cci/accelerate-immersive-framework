@@ -3,6 +3,7 @@ import HTMLHint from 'htmlhint';
 import CodeMirror from 'codemirror';
 import { inject }  from '@ember/service';
 import JSHINT from 'jshint';
+import { isEmpty } from '@ember/utils';
 
 export default Component.extend({
   autocomplete: inject('autocomplete'),
@@ -53,26 +54,43 @@ export default Component.extend({
         }
         var doc = editor.getDoc();
         var pos = doc.getCursor();
-        var mode = CodeMirror.innerMode(editor.getMode(), editor.getTokenAt(pos).state).mode.name;
+        var mode = editor.getMode().name;
         widgets.length = 0
         const ruleSets = this.get('autocomplete').ruleSets(mode);
-        //Add script tags around javascript to force js linting
+
         let src = editor.getValue();
         if(mode == "javascript")
         {
+          //Add script tags around javascript to force js linting
           src = "<script>" + editor.getValue() + "</script>";
         }
         else if (mode == "css")
         {
+          //Add style tags around css to force css linting
           src = "<style>" + editor.getValue() + "</style>";
         }
         var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
+        //collate all errors on the same line together
+        var lines = {};
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
           //HTMLHint misclassifies this, ignore
           if(err.message != "Tag must be paired, no start tag: [ </input> ]")
           {
-            if (!err) continue
+            if(!isEmpty(lines[err.line]))
+            {
+              lines[err.line] = lines[err.line] + "\n" + err.message;
+            }
+            else
+            {
+              lines[err.line] = err.message;
+            }
+          }
+        }
+        console.log("lines",lines);
+        for (let line in lines) {
+          if (lines.hasOwnProperty(line))
+          {
             let msg = document.createElement("div");
             msg.style["background-color"] = "transparent";
             let icon = msg.appendChild(document.createElement("div"));
@@ -80,7 +98,7 @@ export default Component.extend({
             icon.className = "lint-error-icon";
 
             let txt = document.createElement("div");
-            txt.innerHTML = err.message;
+            txt.innerHTML = lines[line];
             txt.style.display = "none";
             msg.appendChild(txt);
             msg.className = "lint-error";
@@ -93,8 +111,7 @@ export default Component.extend({
               msg.style["background-color"] = "transparent";
               txt.style.display = "none";
             }
-            console.log(txt);
-            widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: true, noHScroll: true}));
+            widgets.push(editor.addLineWidget(parseInt(line) - 1, msg, {coverGutter: true, noHScroll: true}));
           }
         }
       })
