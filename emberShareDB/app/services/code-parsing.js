@@ -1,7 +1,7 @@
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
-import { acorn } from 'acorn'
-import { walk } from 'acorn/dist/walk'
+import acorn from 'acorn'
+import walk from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 import hljs from "highlight.js";
@@ -161,6 +161,8 @@ export default Service.extend({
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
     let didEdit = false;
+    //console.log("inserting stateful callbacks");
+    //console.log(acorn, walk);
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
     {
@@ -168,6 +170,7 @@ export default Service.extend({
       newSrc = newSrc + script.preamble;
       let ops = [];
       let added = false;
+      //console.log("trying script", script.src);
       try {
         walk.simple(acorn.parse(script.src), {
           VariableDeclaration: (node) => {
@@ -251,6 +254,7 @@ export default Service.extend({
                   let delim = j < node.arguments.length - 1 ? "," : ""
                   output = output + "JSON.stringify(" + val + ")" + delim;
                 }
+                console.log("adding in console statement");
                 const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
                 let index = node.end;
                 const end = script.src.substring(index, index + 1);
@@ -264,7 +268,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        console.log("acorn couldnt parse script, probably src")
+        console.log("acorn couldnt parse script, probably src", err)
       }
       if(ops.length > 0)
       {
