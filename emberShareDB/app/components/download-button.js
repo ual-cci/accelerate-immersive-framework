@@ -9,10 +9,11 @@ export default Component.extend(FileSaverMixin, {
   assetService: inject('assets'),
   store: inject('store'),
   documentService: inject('documents'),
+  cs: inject('console'),
   actions: {
     download() {
       const data = this.get('doc');
-      console.log(data);
+      this.get('cs').log(data);
       let zip = new JSZip();
       this.get('documentService').getCombinedSource(data.id)
       .then((source) => {
@@ -29,7 +30,7 @@ export default Component.extend(FileSaverMixin, {
         .then((blob) => {
           this.saveFileAs(data.name + "-MIMIC.zip", blob, 'application/zip');
         });
-      }).catch((err)=>console.log(err));
+      }).catch((err)=>this.get('cs').log(err));
     }
   }
 });

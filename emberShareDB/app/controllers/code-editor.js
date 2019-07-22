@@ -9,7 +9,6 @@ import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
 import HTMLHint from 'htmlhint';
-import log4javascript from 'log4javascript';
 
 export default Controller.extend({
   //Query Params

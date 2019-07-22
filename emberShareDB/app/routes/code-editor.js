@@ -1,6 +1,7 @@
 import Route from '@ember/routing/route';
-
+import { inject }  from '@ember/service';
 export default Route.extend({
+  cs: inject('console'),
   queryParams: {
     showCode: {
       replace:true
@@ -20,7 +21,7 @@ export default Route.extend({
     }
   },
   deactivate: function() {
-    console.log("leaving code-editor");
+    this.get('cs').log("leaving code-editor");
     this._super();
     this.get('controller').send('cleanUp');
   },

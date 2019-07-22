@@ -16,7 +16,6 @@ export default Component.extend({
   },
   actions: {
     onFilter() {
-      console.log("FILTER", this.get('filter').id)
       this.get('onFilter')(this.get('filter'));
     },
   }

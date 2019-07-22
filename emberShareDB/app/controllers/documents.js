@@ -107,7 +107,7 @@ export default Controller.extend({
       {
         searchTerm = " ";
       }
-      console.log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
+      this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
       this.updateSelectedFilter();
       this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
     }, 400)
@@ -174,7 +174,7 @@ export default Controller.extend({
     createNewDocument() {
       let docName = this.get('docName');
       const isPrivate = this.get('isPrivate');
-      console.log("new doc", docName);
+      this.get('cs').log("new doc", docName);
       if(docName.length > 1)
       {
         const src = this.get('documentService').getDefaultSource();
@@ -258,7 +258,7 @@ export default Controller.extend({
     },
     flashResults()
     {
-      console.log("flashing results")
+      this.get('cs').log("flashing results")
       $("#document-container").addClass("fading-in")
       $("#document-container").removeClass("fading-out")
       if(!isEmpty(this.get('fadeTimeout')))

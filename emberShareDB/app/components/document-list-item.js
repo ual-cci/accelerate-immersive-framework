@@ -6,6 +6,7 @@ export default Component.extend({
   document:null,
   documentService:inject('documents'),
   store:inject('store'),
+  cs: inject('console'),
   sessionAccount:inject('session-account'),
   canEdit:computed('document', function() {
     return this.get('sessionAccount').currentUserName == this.get('document').owner;
@@ -29,7 +30,7 @@ export default Component.extend({
         const op = {p:["dontPlay"], oi:toggled ? "true":"false"}
         this.get('documentService').submitOp(op, docId);
       }).catch((err) => {
-        console.log("ERROR", err);
+        this.get('cs').log("ERROR", err);
       });
     }
   }

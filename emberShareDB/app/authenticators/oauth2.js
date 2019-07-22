@@ -6,13 +6,15 @@ import { isEmpty } from '@ember/utils';
 import { run } from '@ember/runloop';
 import { makeArray } from '@ember/array';
 import { assign } from '@ember/polyfills';
+import { inject }  from '@ember/service';
 
 export default OAuth2PasswordGrant.extend({
   serverTokenEndpoint: `${config.oauthHost}/token`,
   serverTokenRevocationEndpoint: `${config.oauthHost}/revoke`,
+  cs: inject('console'),
   authenticate(identification, password, scope = [], headers = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      console.log("trying to authenticate");
+      this.get('cs').log("trying to authenticate");
       const data = { 'grant_type': 'password', username: identification, password };
       const serverTokenEndpoint = this.get('serverTokenEndpoint');
       const useResponse = this.get('rejectWithResponse');
@@ -22,9 +24,9 @@ export default OAuth2PasswordGrant.extend({
       }
       this.makeRequest(serverTokenEndpoint, data, headers).then((response) => {
         run(() => {
-          console.log(response)
+          this.get('cs').log(response)
           if (!this._validate(response)) {
-            console.log('access_token is missing in server response');
+            this.get('cs').log('access_token is missing in server response');
             reject('access_token is missing in server response');
           }
 

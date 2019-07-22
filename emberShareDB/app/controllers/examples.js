@@ -29,7 +29,6 @@ export default Controller.extend({
   ],
   actions: {
     onClick(example) {
-      console.log("clicked", example.docid)
       this.transitionToRoute('code-editor', example.docid)
     }
   }

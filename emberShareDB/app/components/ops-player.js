@@ -1,14 +1,15 @@
 import Component from '@ember/component';
-
+import { inject }  from '@ember/service';
 export default Component.extend({
   isPlaying:false,
+  cs: inject('console'),
   init() {
     this._super(...arguments);
-    console.log("init op player", this.get('isPlaying'))
+    this.get('cs').log("init op player", this.get('isPlaying'))
   },
   didUpdateAttrs() {
     this._super(...arguments);
-    console.log("did upate op player", this.get('isPlaying'))
+    this.get('cs').log("did upate op player", this.get('isPlaying'))
   },
   actions:{
     prev() {
