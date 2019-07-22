@@ -384,6 +384,7 @@ export default Controller.extend({
       }
       this.set('surpress', true);
       editor.setValue(doc.get('data').source);
+      editor.clearHistory();
       editor.refresh();
       this.set('surpress', false);
       this.set('savedVals', doc.get('data').savedVals);
