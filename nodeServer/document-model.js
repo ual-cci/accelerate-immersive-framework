@@ -385,6 +385,23 @@ function startDocAPI(app)
     });
   });
 
+  app.get('/source/:id', (req,res) => {
+    var doc = shareDBConnection.get(contentCollectionName, req.params.id);
+    doc.fetch(function(err) {
+      if (err || !doc.data) {
+        console.log("database error making document", doc.id);
+        res.status(404).send("database error making document" + err);
+        return;
+      }
+      else
+      {
+        //let reply = {attributes:doc.data.source,id:doc.data.documentId,type:"document"};
+        console.log("sending",doc.data["source"]);
+        res.status(200).send(doc.data["source"]);
+      }
+    });
+  });
+
   app.get('/documents/:id', (req,res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
     doc.fetch(function(err) {

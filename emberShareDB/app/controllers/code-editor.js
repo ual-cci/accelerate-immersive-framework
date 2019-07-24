@@ -529,7 +529,7 @@ export default Controller.extend({
             if(err)
             {
               droppedOps.push(op);
-              this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work")
+              this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
               this.set('showConnectionWarning', true);
               this.get('cs').log("error submitting op (ws)")
               reject(err);
@@ -547,11 +547,11 @@ export default Controller.extend({
           droppedOps.push(op);
           if(isEmpty(this.get('model').data.parent))
           {
-            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please fork this document to fix issues")
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
           }
           else
           {
-            this.set('connectionWarning', "Warning: Your document may have become corrupted. We recommend you create a new tab, copy acorss your code and delete this one.")
+            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
           }
 
           this.set('showConnectionWarning', true);
@@ -568,7 +568,7 @@ export default Controller.extend({
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
           droppedOps.push(op);
-          this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid loosing work");
+          this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work");
           this.set('showConnectionWarning', true);
           reject(err);
           return;
