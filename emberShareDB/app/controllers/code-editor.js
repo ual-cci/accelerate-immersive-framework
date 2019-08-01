@@ -675,7 +675,7 @@ export default Controller.extend({
   },
   flashAutoRender:function()
   {
-    let autoInput = document.getElementsByClassName('ace_content').item(0)
+    let autoInput = document.getElementsByClassName('CodeMirror').item(0)
     autoInput.style["border-style"] = "solid"
     autoInput.style["border-width"] = "5px"
     autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
