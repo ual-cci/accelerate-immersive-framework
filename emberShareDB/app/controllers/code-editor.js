@@ -162,6 +162,7 @@ export default Controller.extend({
       }
 
       $("#mimic-navbar").css("display", embed ? "none" : "block");
+      $("#mimic-footer").css("display", embed ? "none" : "block");
       $("#main-site-container").css("padding-left", embed ? "0%" : "8%");
       $("#main-site-container").css("padding-right", embed ? "0%" : "8%");
       this.updateDragPos();
@@ -1087,7 +1088,7 @@ export default Controller.extend({
       this.updateIFrame(true);
     },
 
-    suggestCompletions() {
+    suggestCompletions(editor, options) {
       let targets = [];
       const assets = this.get('model').data.assets;
       if(!isEmpty(assets))
@@ -1100,7 +1101,7 @@ export default Controller.extend({
         targets = targets.concat(this.get('autocomplete').tabs(children));
       }
 
-      return this.get('autocomplete').toFind(this.get("editor"), targets);
+      return this.get('autocomplete').toFind(editor, options, targets);
     },
 
     //DOC PROPERTIES

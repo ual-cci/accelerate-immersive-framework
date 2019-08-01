@@ -1,37 +1,161 @@
 import Service from '@ember/service';
 import CodeMirror from 'codemirror';
 import { inject } from '@ember/service';
+import { isEmpty } from '@ember/utils';
 
 export default Service.extend({
-   cs:inject('console'),
-   tabs:(children)=> {
-     return children.map((child)=>{return child.data.name});
-   },
-   assets:(assets)=> {
-     return assets.map((asset)=>{return asset.name});
-   },
-   toFind: (cm, targets)=> {
-     return new Promise((resolve, reject)=> {
-        setTimeout(()=> {
-          let cursor = cm.getCursor(), line = cm.getLine(cursor.line)
-          let start = cursor.ch, end = cursor.ch
-          let from, to;
-          let matches = [];
-          while (start && /\w/.test(line.charAt(start - 1))) --start;
-            while (end < line.length && /\w/.test(line.charAt(end))) ++end
-              var word = line.slice(start, end).toLowerCase()
-              for (var i = 0; i < targets.length; i++)
-              {
-                if (targets[i].toLowerCase().indexOf(word) !== -1)
-                {
-                  matches.push(targets[i]);
-                  from = CodeMirror.Pos(cursor.line, start);
-                  to = CodeMirror.Pos(cursor.line, end);
-                }
-              }
-          resolve({list:matches, from:from, to:to});
-        }, 100)
-      })
+  cs:inject('console'),
+  tabs:(children)=> {
+    return children.map((child)=>{return child.data.name});
+  },
+  assets:(assets)=> {
+    return assets.map((asset)=>{return asset.name});
+  },
+  stringProps:("charAt charCodeAt indexOf lastIndexOf substring substr slice trim trimLeft trimRight " +
+  "toUpperCase toLowerCase split concat match replace search").split(" "),
+  arrayProps:("length concat join splice push pop shift unshift slice reverse sort indexOf " +
+  "lastIndexOf every some filter forEach map reduce reduceRight ").split(" "),
+  funcProps:"prototype apply call bind".split(" "),
+  javascriptKeywords:("break case catch class const continue debugger default delete do else export extends false finally for function " +
+  "if in import instanceof new null return super switch this throw true try typeof var void while with yield").split(" "),
+  forEach(arr, f) {
+    for (var i = 0, e = arr.length; i < e; ++i) f(arr[i]);
+  },
+  arrayContains(arr, item) {
+    if (!Array.prototype.indexOf) {
+      var i = arr.length;
+      while (i--) {
+        if (arr[i] === item) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return arr.indexOf(item) != -1;
+  },
+  forAllProps(obj, callback) {
+    if (!Object.getOwnPropertyNames || !Object.getPrototypeOf) {
+      for (var name in obj) callback(name)
+    } else {
+      for (var o = obj; o; o = Object.getPrototypeOf(o))
+      Object.getOwnPropertyNames(o).forEach(callback)
+    }
+  },
+  getCompletions (token, context, keywords, options) {
+    var found = [], start = token.string, global = options && options.globalScope || window;
+    let maybeAdd = (str)=> {
+      if (str.lastIndexOf(start, 0) == 0 && !this.arrayContains(found, str)) found.push(str);
+    }
+    let gatherCompletions = (obj)=> {
+      if (typeof obj == "string") this.forEach(this.get('stringProps'), maybeAdd);
+      else if (obj instanceof Array) this.forEach(this.get('arrayProps'), maybeAdd);
+      else if (obj instanceof Function) this.forEach(this.get('funcProps'), maybeAdd);
+      this.forAllProps(obj, maybeAdd)
+    }
+
+    if (context && context.length) {
+      // If this is a property, see if it belongs to some object we can
+      // find in the current environment.
+      var obj = context.pop(), base;
+      if (obj.type && obj.type.indexOf("variable") === 0) {
+        if (options && options.additionalContext)
+        base = options.additionalContext[obj.string];
+        if (!options || options.useGlobalScope !== false)
+        base = base || global[obj.string];
+      } else if (obj.type == "string") {
+        base = "";
+      } else if (obj.type == "atom") {
+        base = 1;
+      } else if (obj.type == "function") {
+        if (global.jQuery != null && (obj.string == '$' || obj.string == 'jQuery') &&
+        (typeof global.jQuery == 'function'))
+        base = global.jQuery();
+        else if (global._ != null && (obj.string == '_') && (typeof global._ == 'function'))
+        base = global._();
+      }
+      while (base != null && context.length)
+      base = base[context.pop().string];
+      if (base != null) gatherCompletions(base);
+    } else {
+      // If not, just look in the global object and any local scope
+      // (reading into JS mode internals to get at the local and global variables)
+      for (var v = token.state.localVars; v; v = v.next) maybeAdd(v.name);
+      for (var v = token.state.globalVars; v; v = v.next) maybeAdd(v.name);
+      if (!options || options.useGlobalScope !== false)
+      gatherCompletions(global);
+      this.forEach(keywords, maybeAdd);
+    }
+    return found;
+  },
+  jsScriptHint (editor, keywords, getToken, options) {
+    // Find the token at the cursor
+    var cur = editor.getCursor(), token = getToken(editor, cur);
+    if (/\b(?:string|comment)\b/.test(token.type)) return;
+    var innerMode = CodeMirror.innerMode(editor.getMode(), token.state);
+    if (innerMode.mode.helperType === "json") return;
+    token.state = innerMode.state;
+
+    // If it's not a 'word-style' token, ignore the token.
+    if (!/^[\w$_]*$/.test(token.string)) {
+      token = {start: cur.ch, end: cur.ch, string: "", state: token.state,
+      type: token.string == "." ? "property" : null};
+    } else if (token.end > cur.ch) {
+      token.end = cur.ch;
+      token.string = token.string.slice(0, cur.ch - token.start);
+    }
+
+    var tprop = token;
+    // If it is a property, find out what it is a property of.
+    while (tprop.type == "property") {
+      tprop = getToken(editor, CodeMirror.Pos(cur.line, tprop.start));
+      if (tprop.string != ".") return;
+      tprop = getToken(editor, CodeMirror.Pos(cur.line, tprop.start));
+      if (!context) var context = [];
+      context.push(tprop);
+    }
+    return {list: this.getCompletions(token, context, keywords, options),
+            from: CodeMirror.Pos(cur.line, token.start),
+            to: CodeMirror.Pos(cur.line, token.end)}
+  },
+  toFind (editor, options, targets) {
+    return new Promise((resolve, reject)=> {
+      setTimeout(()=> {
+        let cursor = editor.getCursor(), line = editor.getLine(cursor.line)
+        let start = cursor.ch, end = cursor.ch
+        let from, to;
+        let matches = [];
+        while (start && /\w/.test(line.charAt(start - 1))) --start;
+        while (end < line.length && /\w/.test(line.charAt(end))) ++end
+        var word = line.slice(start, end).toLowerCase()
+        if(word.length > 1)
+        {
+          for (var i = 0; i < targets.length; i++)
+          {
+            if (targets[i].toLowerCase().indexOf(word) !== -1)
+            {
+              matches.push(targets[i]);
+              from = CodeMirror.Pos(cursor.line, start);
+              to = CodeMirror.Pos(cursor.line, end);
+            }
+          }
+        }
+        if(word.length > 0)
+        {
+          const js = this.jsScriptHint(editor,
+            this.get('javascriptKeywords'),
+            (e, cur) => {return e.getTokenAt(cur)},
+            options
+          );
+          if(!isEmpty(js))
+          {
+            to = js.to;
+            from = js.from;
+            matches = matches.concat(js.list);
+          }
+        }
+        resolve({list:matches, from:from, to:to});
+      }, 100)
+    })
   },
   ruleSets(docType) {
     this.get('cs').log("getting rule set for" ,docType);

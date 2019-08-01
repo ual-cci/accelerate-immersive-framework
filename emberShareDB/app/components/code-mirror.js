@@ -20,10 +20,24 @@ export default Component.extend({
       lineNumbers: true,
       matchBrackets: true,
       autoCloseTags: true,
+      autocomplete:true,
       gutters: ["CodeMirror-lint-markers"],
       hintOptions:{hint:this.get("suggestCompletions")}
     });
-
+    editor.on("keyup", (cm, event) => {
+        //console.log(event.keyCode)
+        if (!cm.state.completionActive
+          && event.keyCode != 8
+          && event.keyCode != 32
+          && event.keyCode != 13
+          && event.keyCode != 37
+          && event.keyCode != 38
+          && event.keyCode != 39
+          && event.keyCode != 40
+        ) {
+            cm.showHint({completeSingle: false});
+        }
+    });
     editor.setOption("extraKeys", {
       "Ctrl-Space": "autocomplete",
       "Cmd-\=": (cm)=> {
