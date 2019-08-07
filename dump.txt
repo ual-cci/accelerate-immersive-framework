@@ -1,0 +1,10 @@
+== Info:   Trying ::1...
+== Info: Connected to localhost (::1) port 4001 (#0)
+=> Send header, 86 bytes (0x56)
+0000: GET /api/tags HTTP/1.1
+0018: Host: localhost:4001
+002e: User-Agent: curl/7.47.0
+0047: Accept: */*
+0054: 
+== Info: Recv failure: Connection reset by peer
+== Info: Closing connection 0
