@@ -721,7 +721,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    this.get('cs').log("session change, surpress", surpress);
+    //this.get('cs').log("session change, surpress", surpress);
     if(!surpress && this.get('droppedOps').length == 0)
     {
       const editor = this.get('editor');
@@ -1089,6 +1089,7 @@ export default Controller.extend({
     },
 
     suggestCompletions(editor, options) {
+      this.get('cs').log("CUSTOM COMPLETIONS");
       let targets = [];
       const assets = this.get('model').data.assets;
       if(!isEmpty(assets))

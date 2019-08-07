@@ -22,11 +22,11 @@ export default Component.extend({
       autoCloseTags: true,
       autocomplete:true,
       gutters: ["CodeMirror-lint-markers"],
-      hintOptions:{hint:this.get("suggestCompletions")}
+      //hintOptions:{hint:this.get("suggestCompletions")}
     });
     editor.on("keyup", (cm, event) => {
-        //console.log(event.keyCode)
         if (!cm.state.completionActive
+          && !cm.options.readOnly
           && event.keyCode != 8
           && event.keyCode != 32
           && event.keyCode != 13
@@ -35,7 +35,16 @@ export default Component.extend({
           && event.keyCode != 39
           && event.keyCode != 40
         ) {
+          let cursor = cm.getCursor(), line = cm.getLine(cursor.line)
+          let start = cursor.ch, end = cursor.ch
+          let from, to;
+          while (start && /\w/.test(line.charAt(start - 1))) --start;
+          while (end < line.length && /\w/.test(line.charAt(end))) ++end
+          var word = line.slice(start, end).toLowerCase()
+          if(word.length > 1)
+          {
             cm.showHint({completeSingle: false});
+          }
         }
     });
     editor.setOption("extraKeys", {
@@ -102,7 +111,7 @@ export default Component.extend({
             }
           }
         }
-        this.get('cs').log("lines",lines);
+        //this.get('cs').log("lines",lines);
         for (let line in lines) {
           if (lines.hasOwnProperty(line))
           {

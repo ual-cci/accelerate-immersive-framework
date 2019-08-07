@@ -158,7 +158,7 @@ export default Service.extend({
     })
   },
   ruleSets(docType) {
-    this.get('cs').log("getting rule set for" ,docType);
+    //this.get('cs').log("getting rule set for" ,docType);
     let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,
