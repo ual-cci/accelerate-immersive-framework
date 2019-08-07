@@ -1,6 +1,9 @@
 import Service from '@ember/service';
+import CodeMirror from 'codemirror';
+import { inject } from '@ember/service';
 
 export default Service.extend({
+   cs:inject('console'),
    tabs:(children)=> {
      return children.map((child)=>{return child.data.name});
    },
@@ -14,13 +17,11 @@ export default Service.extend({
           let start = cursor.ch, end = cursor.ch
           let from, to;
           let matches = [];
-          console.log("auto called");
           while (start && /\w/.test(line.charAt(start - 1))) --start;
             while (end < line.length && /\w/.test(line.charAt(end))) ++end
               var word = line.slice(start, end).toLowerCase()
               for (var i = 0; i < targets.length; i++)
               {
-                console.log(word, targets[i], targets[i].indexOf(word));
                 if (targets[i].toLowerCase().indexOf(word) !== -1)
                 {
                   matches.push(targets[i]);
@@ -28,13 +29,12 @@ export default Service.extend({
                   to = CodeMirror.Pos(cursor.line, end);
                 }
               }
-          console.log("returning", {list:matches, from:from, to:to})
           resolve({list:matches, from:from, to:to});
         }, 100)
       })
   },
   ruleSets(docType) {
-    console.log("getting rule set for" ,docType);
+    this.get('cs').log("getting rule set for" ,docType);
     let ruleSets = {
       "tagname-lowercase": true,
       "attr-lowercase": true,

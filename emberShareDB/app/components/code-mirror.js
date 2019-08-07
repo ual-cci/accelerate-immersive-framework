@@ -8,6 +8,7 @@ import { isEmpty } from '@ember/utils';
 export default Component.extend({
   autocomplete: inject('autocomplete'),
   fontSize:14,
+  cs: inject('console'),
   didInsertElement() {
     this._super(...arguments);
     const myTextArea = this.element.querySelector("#code-mirror-container");
@@ -87,7 +88,7 @@ export default Component.extend({
             }
           }
         }
-        console.log("lines",lines);
+        this.get('cs').log("lines",lines);
         for (let line in lines) {
           if (lines.hasOwnProperty(line))
           {
@@ -103,7 +104,7 @@ export default Component.extend({
             msg.appendChild(txt);
             msg.className = "lint-error";
             icon.onmouseover = ()=> {
-              console.log("over");
+              this.get('cs').log("over");
               msg.style["background-color"] = "white";
               txt.style.display = "inline";
             };

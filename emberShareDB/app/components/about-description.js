@@ -22,6 +22,5 @@ export default Component.extend({
     {
       desc.style['background-color'] = this.get('colours')[colour2];
     }
-    console.log("REFRESH", colour1, colour2)
   }
 });

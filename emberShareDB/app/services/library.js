@@ -15,7 +15,6 @@ export default Service.extend({
   url(id) {
     let url = ""
     this.get('libraryMap').forEach((lib)=>{
-      console.log("comparing", lib.id, id)
       if(lib.id == id) {
         url = lib.url
       }

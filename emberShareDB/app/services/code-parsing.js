@@ -1,7 +1,7 @@
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
-import { acorn } from 'acorn'
-import { walk } from 'acorn/dist/walk'
+import acorn from 'acorn'
+import walk from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 import hljs from "highlight.js";
@@ -34,7 +34,7 @@ export default Service.extend({
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         if(ptr == 0)
         {
-          console.log("found start of <link");
+          this.get('cs').log("found start of <link");
           searchIndex = index;
           tagStartIndex = searchIndex;
           preamble = source.substring(prevEnd, searchIndex);
@@ -45,7 +45,7 @@ export default Service.extend({
           linkStartIndex = searchIndex;
           tag = source.substring(tagStartIndex, searchIndex);
           found = true;
-          console.log(tag);
+          this.get('cs').log(tag);
           searchIndex = index + searchStrs[ptr].length;
           newSrc = newSrc + preamble;
           let added = false;
@@ -53,7 +53,7 @@ export default Service.extend({
           const attr = parsedTag.documentElement.attributes;
           let styleSheet = false;
           let media;
-          console.log("stylesheet", attr);
+          this.get('cs').log("stylesheet", attr);
           for(let i = 0; i < attr.length; i++)
           {
             if(attr[i].nodeName == "rel" && attr[i].nodeValue == "stylesheet")
@@ -67,7 +67,7 @@ export default Service.extend({
           }
           if(styleSheet)
           {
-            console.log("stylesheet", children);
+            this.get('cs').log("stylesheet", children);
             for(let i = 0; i < attr.length; i++)
             {
               if(attr[i].nodeName == "href")
@@ -85,7 +85,7 @@ export default Service.extend({
                     newSrc = newSrc + children[j].data.source;
                     newSrc = newSrc +"\n</style>";
                     added = true;
-                    //console.log(newSrc);
+                    //this.get('cs').log(newSrc);
                     break;
                   }
                 }
@@ -125,12 +125,12 @@ export default Service.extend({
         const attr = parsedTag.documentElement.attributes;
         for(let i = 0; i < attr.length; i++)
         {
-          //console.log(attr[i].nodeName)
+          //this.get('cs').log(attr[i].nodeName)
           if(attr[i].nodeName == "src")
           {
             for(let j = 0; j < children.length; j++)
             {
-              //console.log(children[j].data.name, attr[i].nodeValue)
+              //this.get('cs').log(children[j].data.name, attr[i].nodeValue)
               if(children[j].data.name == attr[i].nodeValue)
               {
                 newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
@@ -161,6 +161,8 @@ export default Service.extend({
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
     let didEdit = false;
+    //this.get('cs').log("inserting stateful callbacks");
+    //this.get('cs').log(acorn, walk);
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
     {
@@ -168,6 +170,7 @@ export default Service.extend({
       newSrc = newSrc + script.preamble;
       let ops = [];
       let added = false;
+      //this.get('cs').log("trying script", script.src);
       try {
         walk.simple(acorn.parse(script.src), {
           VariableDeclaration: (node) => {
@@ -251,6 +254,7 @@ export default Service.extend({
                   let delim = j < node.arguments.length - 1 ? "," : ""
                   output = output + "JSON.stringify(" + val + ")" + delim;
                 }
+                this.get('cs').log("adding in console statement");
                 const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
                 let index = node.end;
                 const end = script.src.substring(index, index + 1);
@@ -264,7 +268,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        console.log("acorn couldnt parse script, probably src")
+        this.get('cs').log("acorn couldnt parse script, probably src", err)
       }
       if(ops.length > 0)
       {
@@ -299,7 +303,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    //console.log("SOURCE",newSrc);
+    //this.get('cs').log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {
@@ -342,7 +346,7 @@ export default Service.extend({
     return scripts;
   },
   replaceAssets(source, assets, docId){
-    //console.log("ORIGINAL", source)
+    //this.get('cs').log("ORIGINAL", source)
     return new RSVP.Promise((resolve, reject)=> {
       const replaceAll = async ()=> {
         for(let i = 0; i < assets.length; i++)
@@ -352,7 +356,7 @@ export default Service.extend({
           const fileType = assets[i].fileType;
           let asset = this.get('store').peekRecord('asset',fileId);
 
-          console.log("replaceAssets",fileType)
+          this.get('cs').log("replaceAssets",fileType)
 
           //If file is media replace with base64
           if(this.get('assetService').isMedia(fileType))
@@ -360,29 +364,29 @@ export default Service.extend({
             if(!isEmpty(asset))
             {
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-              console.log("replaced base64")
+              this.get('cs').log("replaced base64")
               source = source.replace(new RegExp(toFind,"gm"),b64);
             }
             else
             {
-              console.log("need to fetch asset for conversion");
+              this.get('cs').log("need to fetch asset for conversion");
               await this.get('assetService').fetchAsset(assets[i], docId);
-              console.log("finding record");
+              this.get('cs').log("finding record");
               asset = this.get('store').peekRecord('asset',fileId);
-              console.log("found record");
+              this.get('cs').log("found record");
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
               source = source.replace(new RegExp(toFind,"gm"),b64);
-              console.log("replaced base64")
+              this.get('cs').log("replaced base64")
             }
           }
           else
           {
             //Else just use endpoint
             const url = config.serverHost + "/asset/" + docId + "/" + toFind
-            console.log("replaced url", url)
+            this.get('cs').log("replaced url", url)
             source = source.replace(new RegExp("\"" + toFind + "\"","gm"), "\"" + url + "\"");
             source = source.replace(new RegExp("\'" + toFind + "\'","gm"), "\"" + url + "\"");
-            //console.log(source)
+            //this.get('cs').log(source)
           }
         }
         resolve(source);
@@ -409,7 +413,7 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.text.join('\n');
     op['si'] =  str;
-    //console.log("delta op", op);
+    //this.get('cs').log("delta op", op);
     return op
   },
   removeOp(delta, editor) {
@@ -418,16 +422,16 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.removed.join('\n');
     op['sd'] =  str;
-    //console.log("delta op", op);
+    //this.get('cs').log("delta op", op);
     return op
   },
   getOps(delta, editor) {
-    //console.log('delta',delta);
+    //this.get('cs').log('delta',delta);
     let ops = [];
     delta.forEach((change)=> {
       if(change.origin === "playback")
       {
-        //console.log("ignoring change")
+        //this.get('cs').log("ignoring change")
         return ops;
       }
       if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)
@@ -462,7 +466,7 @@ export default Service.extend({
   },
   getLanguage(source) {
     let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);
-    //console.log("language", highlightResult.language);
+    //this.get('cs').log("language", highlightResult.language);
     return highlightResult.language;
   }
 });

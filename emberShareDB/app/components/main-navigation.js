@@ -9,6 +9,7 @@ export default Component.extend({
   mediaQueries:inject(),
   sessionAccount: inject('session-account'),
   store: inject('store'),
+  cs: inject('console'),
   logoURL:config.localOrigin + "/images/logo-animation-cropped.gif",
   url:config.localOrigin,
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
@@ -45,11 +46,11 @@ export default Component.extend({
       this.get('onGuides')();
     },
     openDoc(doc){
-      console.log(doc);
+      this.get('cs').log(doc);
       this.get('openDoc')(doc);
     },
     openGuide(guide){
-      console.log(guide);
+      this.get('cs').log(guide);
       this.get('openGuide')(guide);
     }
   }

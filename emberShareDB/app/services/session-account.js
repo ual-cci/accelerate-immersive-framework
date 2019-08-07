@@ -53,7 +53,7 @@ export default Service.extend({
   },
   loadCurrentUser() {
     return new RSVP.Promise((resolve, reject) => {
-      //console.log(this.get('session.data'))
+      //this.get('cs').log(this.get('session.data'))
       const currentUserName = this.get('session.data.authenticated.user_id');
       this.set('bearerToken', this.get('session.data.authenticated.access_token'));
       if (!isEmpty(currentUserName)) {

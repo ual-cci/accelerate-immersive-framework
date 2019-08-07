@@ -1,9 +1,10 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
 import { isEmpty } from '@ember/utils';
-
+import { inject }  from '@ember/service';
 export default Component.extend({
   filter: null,
+  cs: inject('console'),
   killAnimation() {
     if(!isEmpty(this.get('animationInterval')))
     {
@@ -119,7 +120,7 @@ export default Component.extend({
           })
           if(isCircle)
           {
-            console.log(this.get('colourId'), r, x, w, xShift)
+            this.get('cs').log(this.get('colourId'), r, x, w, xShift)
           }
           x += xShift
         }
@@ -132,7 +133,7 @@ export default Component.extend({
         i.xr = i.x + i.r
         i.x2r = i.x + i.r / 2
       })
-      console.log("shapes", sh);
+      this.get('cs').log("shapes", sh);
       this.set('shapes', sh);
       this.updateAnimationState();
     }

@@ -42,7 +42,7 @@ export default EmberUploader.FileField.extend({
     });
   },
   filesDidChange: async function(files) {
-    console.log("files to upload", files)
+    this.get('cs').log("files to upload", files)
     for(var i = 0; i < files.length; i++)
     {
       await this.uploadFile(files[i])

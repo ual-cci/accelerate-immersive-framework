@@ -10,7 +10,7 @@ export default Route.extend({
     this._super(controller, model);
     if(controller)
     {
-      console.log("setupController document", model.query.filter.sortBy)
+      this.get('cs').log("setupController document", model.query.filter.sortBy)
       controller.send('updateSelectedFilter', model.query.filter.sortBy);
       controller.send('flashResults')
     }
@@ -18,7 +18,7 @@ export default Route.extend({
   model(params) {
     let currentUserId = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
-    console.log("document model", currentUserId, currentUserName, params.sort);
+    this.get('cs').log("document model", currentUserId, currentUserName, params.sort);
     const sort = params.sort ? params.sort : "views";
     let filter = {
       filter:{
@@ -32,25 +32,25 @@ export default Route.extend({
     {
       if(!isEmpty(currentUserName))
       {
-        console.log("has name but doesnt have currentUserId",currentUserName)
+        this.get('cs').log("has name but doesnt have currentUserId",currentUserName)
         return new RSVP.Promise((resolve, reject)=> {
           this.get('sessionAccount').getUserFromName().then(()=>{
             this.get('sessionAccount').updateOwnedDocuments().then(()=>{
               filter.filter.currentUser = this.get('sessionAccount').currentUserId;
-              console.log("document model got id",filter.filter.currentUser);
+              this.get('cs').log("document model got id",filter.filter.currentUser);
               this.get('store').query('document', filter).then((res)=> {
                 resolve(res);
               })
             }).catch((err)=> {
-              console.log('updateOwnedDocuments',err);
+              this.get('cs').log('updateOwnedDocuments',err);
             })
           }).catch((err)=> {
-            console.log('error getUserFromName',err);
+            this.get('cs').log('error getUserFromName',err);
             filter.filter.currentUser = "";
             this.get('store').query('document', filter).then((res)=> {
               resolve(res);
             }).catch((err)=>{
-              console.log('error query',err);
+              this.get('cs').log('error query',err);
               reject(err);
             });
           });

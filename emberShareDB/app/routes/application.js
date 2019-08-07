@@ -17,7 +17,7 @@ export default Route.extend(ApplicationRouteMixin, {
   },
   sessionAuthenticated() {
     this._super(...arguments);
-    console.log("session authenticated");
+    this.get('cs').log("session authenticated");
     this._loadCurrentUser();
   },
   _loadCurrentUser() {

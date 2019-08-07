@@ -20,7 +20,7 @@ export default Service.extend({
     }
     else
     {
-      console.log("checking head", ptr, this.get('ops').length)
+      this.get('cs').log("checking head", ptr, this.get('ops').length)
       return ptr >= this.get('ops').length - 1;
     }
   },
@@ -30,7 +30,7 @@ export default Service.extend({
   },
   loadOps() {
     const doc = this.get('doc');
-    console.log("loading ops", doc);
+    this.get('cs').log("loading ops", doc);
     return new RSVP.Promise((resolve, reject) => {
       $.ajax({
           type: "GET",
@@ -38,7 +38,7 @@ export default Service.extend({
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
           this.set('ops', res.data);
-          console.log("GOT OPS", res.data)
+          this.get('cs').log("GOT OPS", res.data)
           this.set('ptr', this.get('ops').length);
           resolve(res.data);
         }).catch((err) => {
@@ -122,7 +122,7 @@ export default Service.extend({
           }
           if(toApply.length > 0)
           {
-            console.log(toApply);
+            this.get('cs').log(toApply);
             this.set('opsToApply', toApply);
           }
         }
@@ -132,7 +132,7 @@ export default Service.extend({
         hasHitBounds = true;
       }
     }
-    console.log("newPtr", newPtr, "oldPtr", this.get('ptr'))
+    this.get('cs').log("newPtr", newPtr, "oldPtr", this.get('ptr'))
     if(this.inBounds(newPtr))
     {
       this.set('ptr', newPtr);
