@@ -5,7 +5,7 @@ var docAPI = require('./document-model.js');
 var guid = require('./uuid.js');
 var cors = require('express-cors');
 var config = require('./config.js');
-
+var bodyParser = require('body-parser');
 const app = express();
 
 startServer();
@@ -18,7 +18,7 @@ process.on('uncaughtException', function (err) {
 function startServer()
 {
   console.log("STARTING SERVER")
-  app.use(express.static('static'));
+  app.use('/ccAsset', bodyParser.raw({type: '*/*'}));
   app.use(express.json({limit: '50mb'}));
   app.use(express.urlencoded({extended: true, limit: '50mb'}));
   app.use(function(req, res, next) {

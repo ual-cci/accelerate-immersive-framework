@@ -14,6 +14,7 @@ var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
+var stream = require('stream');
 const http = require("http")
 let documentMongo;
 const MAX_FILES_PER_DOC = 100000000;
@@ -24,7 +25,7 @@ var initDocAPI = function(server, app, db, collection, uri)
   contentCollectionName = collection;
   console.log("DB:" + contentDBName + "/" + contentCollectionName);
   mongoUri = uri;
-  startAssetAPI(app);
+  startAssetAPI(server, app);
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
@@ -40,7 +41,7 @@ function handleError(err)
   console.log("error:"+err);
 }
 
-function startAssetAPI(app)
+function startAssetAPI(server, app)
 {
   documentMongo = mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
@@ -51,6 +52,28 @@ function startAssetAPI(app)
     {
       console.log("Connected successfully to asset database");
       const db = client.db(contentDBName);
+      app.post('/ccAsset', app.oauth.authenticate(), function(req, res) {
+        console.log("ccAsset", req.body, req.headers);
+        var writestream = gridFS.createWriteStream({
+          filename: req.headers['x-file-name'],
+          mode: 'w',
+          content_type: req.headers['content-type'],
+        });
+        var bufferStream = new stream.PassThrough();
+        bufferStream.end(req.body);
+        bufferStream.pipe(writestream);
+        writestream.on('close', function(file) {
+          const newAsset = {
+            name:req.headers['x-file-name'],
+            fileId:file._id,
+            fileType:req.headers['content-type'],
+            size:file.length
+          };
+          console.log('success uploading asset', file.length);
+          res.status(200);
+          res.json(newAsset);
+        })
+      });
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
@@ -104,6 +127,8 @@ function startAssetAPI(app)
           }
         });
       });
+
+
 
       app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
         console.log("assetWITHURL", req.body)
