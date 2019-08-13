@@ -600,7 +600,7 @@ const libraryMap = [
   {title:"Marked", id:"Marked", url:"https://mimicproject.com/libs/marked.js"},
   {title:"MaxiLib", id:"maxiLib", url:"https://mimicproject.com/libs/maxiLib.js"},
   {title:"MaximJS", id:"MaximJS", url:"https://mimicproject.com/libs/maxim.js"},
-  {title:"Nexus", id:"nexusUI", url:"https://mimicproject.com/libs/nexusUI.js"},
+  {title:"Nexus", id:"nexusUI", url:"https://mimicproject.com/libs/nexusUI.min.js"},
   {title:"Processing", id:"processing.js", url:"https://mimicproject.com/libs/processing.js"},
   {title:"p5", id:"p5", url:"https://mimicproject.com/libs/p5.min.js"},
   {title:"SoundJS", id:"SoundJS", url:"https://mimicproject.com/libs/soundjs.js"}
@@ -620,7 +620,18 @@ function libraryURL(id) {
 function insertLibrary(lib, source) {
   console.log('inserting library', lib, source)
   let insertAfter = "<head>"
-  let index = source.indexOf(insertAfter) + insertAfter.length;
+  let searchIndex = source.indexOf(insertAfter);
+  let index = 0;
+  if(searchIndex >= 0)
+  {
+    index = searchIndex + insertAfter.length;
+  }
+  else
+  {
+    insertAfter = "<body>"
+    searchIndex = source.indexOf(insertAfter);
+    index = searchIndex + insertAfter.length;
+  }
   let insert = "\n <script src = \"" + libraryURL(lib) +
   "\"></script>"
   const op = {p: ["source", index], si:insert};
