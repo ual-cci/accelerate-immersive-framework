@@ -14,6 +14,7 @@ var shareDBMongo;
 var shareDB;
 var shareDBConnection;
 var gridFS;
+var stream = require('stream');
 const http = require("http")
 let documentMongo;
 const MAX_FILES_PER_DOC = 100000000;
@@ -24,7 +25,7 @@ var initDocAPI = function(server, app, db, collection, uri)
   contentCollectionName = collection;
   console.log("DB:" + contentDBName + "/" + contentCollectionName);
   mongoUri = uri;
-  startAssetAPI(app);
+  startAssetAPI(server, app);
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
   shareDBConnection = shareDB.connect();
@@ -40,7 +41,7 @@ function handleError(err)
   console.log("error:"+err);
 }
 
-function startAssetAPI(app)
+function startAssetAPI(server, app)
 {
   documentMongo = mongo.MongoClient.connect(mongoUri, function(err, client) {
     if(err)
@@ -51,6 +52,28 @@ function startAssetAPI(app)
     {
       console.log("Connected successfully to asset database");
       const db = client.db(contentDBName);
+      app.post('/ccAsset', app.oauth.authenticate(), function(req, res) {
+        console.log("ccAsset", req.body, req.headers);
+        var writestream = gridFS.createWriteStream({
+          filename: req.headers['x-file-name'],
+          mode: 'w',
+          content_type: req.headers['content-type'],
+        });
+        var bufferStream = new stream.PassThrough();
+        bufferStream.end(req.body);
+        bufferStream.pipe(writestream);
+        writestream.on('close', function(file) {
+          const newAsset = {
+            name:req.headers['x-file-name'],
+            fileId:file._id,
+            fileType:req.headers['content-type'],
+            size:file.length
+          };
+          console.log('success uploading asset', file.length);
+          res.status(200);
+          res.json(newAsset);
+        })
+      });
 
       gridFS = Gridfs(db, mongo);
       app.post('/asset', multiparty, function(req,res) {
@@ -104,6 +127,8 @@ function startAssetAPI(app)
           }
         });
       });
+
+
 
       app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
         console.log("assetWITHURL", req.body)
@@ -570,14 +595,15 @@ function submitOp(docId, op) {
 }
 
 const libraryMap = [
-  {title:"MMLL", id:"mmll", url:"MMLL.js"},
-  {title:"Marked", id:"Marked", url:"marked.js"},
-  {title:"MaxiLib", id:"maxiLib", url:"maxiLib.js"},
-  {title:"MaximJS", id:"MaximJS", url:"maxim.js"},
-  {title:"Nexus", id:"nexusUI", url:"nexusUI.min.js"},
-  {title:"Processing", id:"processing.js", url:"processing.js"},
-  {title:"p5", id:"p5", url:"p5.min.js"},
-  {title:"SoundJS", id:"SoundJS", url:"soundjs.js"}
+  {title:"ThreeJS", id:"THREE", url:"https://cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.min.js"},
+  {title:"MMLL", id:"mmll", url:"https://mimicproject.com/libs/MMLL.js"},
+  {title:"Marked", id:"Marked", url:"https://mimicproject.com/libs/marked.js"},
+  {title:"MaxiLib", id:"maxiLib", url:"https://mimicproject.com/libs/maxiLib.js"},
+  {title:"MaximJS", id:"MaximJS", url:"https://mimicproject.com/libs/maxim.js"},
+  {title:"Nexus", id:"nexusUI", url:"https://mimicproject.com/libs/nexusUI.js"},
+  {title:"Processing", id:"processing.js", url:"https://mimicproject.com/libs/processing.js"},
+  {title:"p5", id:"p5", url:"https://mimicproject.com/libs/p5.min.js"},
+  {title:"SoundJS", id:"SoundJS", url:"https://mimicproject.com/libs/soundjs.js"}
 ];
 
 function libraryURL(id) {
@@ -595,7 +621,7 @@ function insertLibrary(lib, source) {
   console.log('inserting library', lib, source)
   let insertAfter = "<head>"
   let index = source.indexOf(insertAfter) + insertAfter.length;
-  let insert = "\n <script src = \"" + "https://mimicproject.com/libs/" + libraryURL(lib) +
+  let insert = "\n <script src = \"" + libraryURL(lib) +
   "\"></script>"
   const op = {p: ["source", index], si:insert};
   return op;

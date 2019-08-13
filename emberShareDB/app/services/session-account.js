@@ -44,6 +44,7 @@ export default Service.extend({
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data:{username:username}
         }).then((res) => {
+          console.log("USERID", res.data.attr.accountId)
           this.set("currentUserId", res.data.attr.accountId);
           resolve(res);
         }).catch((err) => {
