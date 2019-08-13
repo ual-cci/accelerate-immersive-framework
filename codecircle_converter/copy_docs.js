@@ -6,8 +6,8 @@ var cors = require('express-cors');
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var db
 var gridFS
-const CODE_CIRCLE_USER_ID = "2a19e213-d6c4-d3c0-a6a7-781f64622703"
-//const CODE_CIRCLE_USER_ID = "52cdaefb-ac09-82cd-ef02-678b26b842a9"
+//const CODE_CIRCLE_USER_ID = "2a19e213-d6c4-d3c0-a6a7-781f64622703"
+const CODE_CIRCLE_USER_ID = "476c9092-5d8a-747d-7089-9b4af31fddae"
 const CODE_CIRCLE_USER_NAME = "codecircle"
 const ASSET_SERVING_PORT = 3000
 const cc_mongoIP = "127.0.0.1";
@@ -23,7 +23,7 @@ var toArray = require('stream-to-array')
 
 const upload =
 [
-"65gmEWQbALkbQNPya",
+//"65gmEWQbALkbQNPya",
 // "xwwTkx4bowrHQhYSz",
 // "auFBDt9CCCxJ5uCa3",
 // "j3h8FvfvLiXx45X7x",
@@ -38,7 +38,7 @@ const upload =
 // 'cgJMcjXgunAemDD7B',
 // 'DgwG7gm6EsYYRPp7W',
 // 'GAR9Tv9LXrRYBxSL7',
-// 'HfvHJWxKLPJBxYpTW',
+'HfvHJWxKLPJBxYpTW',
 // 'ywwcqZjWfujwiGX4J',
 // 'uYk2SLcT77YJFL7Xu',
 // 'sY9PXXZGjAgv48NGY',
@@ -211,7 +211,7 @@ var getToken = ()=> {
 }
 
 var postDoc = (snapshot, doc)=> {
-  console.log("POSTing", doc)
+  console.log("POSTing")
   var tags = doc.tags
   tags.push("written by " + doc.username)
   console.log("tags", tags)
@@ -284,47 +284,55 @@ var postLibraries = (docid, libs)=> {
   });
 }
 
-var postAssets = (docid, newDocID)=> {
-  console.log("uploading assets from", docid, "to", newDocID)
+var uploadedAssets = [];
+var postAsset = (file) => {
   return new Promise((resolve, reject)=> {
-    getAssets(docid).then((assets)=> {
-      console.log("NUM ASSETS",assets.length)
-      assets.forEach(async (file)=> {
-        var uploaded = [];
-        var assetHTTP = new XMLHttpRequest();
-        var assetData = {
-          url: 'http://localhost:' + ASSET_SERVING_PORT +  '/asset/'+file.copies.doc_assets.key,
-          mimetype: file.original.type,
-          name:file.original.name
+    if(typeof file.copies === "undefined")
+    {
+      resolve();
+    }
+    else
+    {
+      const assetHTTP = new XMLHttpRequest();
+      assetHTTP.onreadystatechange = ()=> {
+        if (assetHTTP.readyState == 4 && assetHTTP.status == 200)
+        {
+          var uploadedAsset = JSON.parse(assetHTTP.responseText)
+          console.log("success adding asset uploadedAsset", uploadedAssets, uploadedAsset)
+          uploadedAssets.push(uploadedAsset)
+          resolve()
         }
-        assetHTTP.onreadystatechange = async ()=> {
-          if (assetHTTP.readyState == 4 && assetHTTP.status == 200)
-          {
-            var uploadedAsset = JSON.parse(assetHTTP.responseText)
-            console.log("success adding asset", )
-            uploaded.push(uploadedAsset)
-            if(uploaded.length == assets.length)
-            {
-             resolve(uploaded)
-            }
-          }
-        }
-        const assetID = file.copies.doc_assets.key;
-        var readstream = gridFS.createReadStream({
-           _id: assetID
-        });
-        toArray(readstream)
-        .then(function (parts) {
-          const buffer = parts[0];
-          assetHTTP.open('POST', MIMIC_API_URL + "/ccAsset", true);
-          assetHTTP.setRequestHeader('X-File-Name', file.original.name);
-          assetHTTP.setRequestHeader('X-File-Size', file.original.size);
-          assetHTTP.setRequestHeader('Content-Type', file.original.type);
-          assetHTTP.setRequestHeader('Authorization', 'Bearer ' + token);
-          console.log(file.original.name,file.original.size,file.original.type)
-          assetHTTP.send(buffer);
-        })
+      }
+      const assetID = file.copies.doc_assets.key;
+      var readstream = gridFS.createReadStream({
+         _id: assetID
+      });
+      toArray(readstream).then((parts)=> {
+        const buffer = Buffer.concat(parts)
+        assetHTTP.open('POST', MIMIC_API_URL + "/ccAsset", true);
+        assetHTTP.setRequestHeader('X-File-Name', file.original.name);
+        assetHTTP.setRequestHeader('X-File-Size', file.original.size);
+        assetHTTP.setRequestHeader('Content-Type', file.original.type);
+        assetHTTP.setRequestHeader('Authorization', 'Bearer ' + token);
+        console.log("uploading",buffer, parts.length, file.original.name, file.original.size, file.original.type)
+        assetHTTP.send(buffer);
       })
+    }
+  });
+
+}
+
+var postAssets = async (docid, newDocID)=> {
+  console.log("uploading assets from", docid, "to", newDocID)
+  return new Promise(async (resolve, reject)=> {
+    getAssets(docid).then(async (assets)=> {
+      console.log("NUM ASSETS",assets.length)
+      uploadedAssets = [];
+      for(let i = 0; i < assets.length; i++)
+      {
+        await postAsset(assets[i])
+      }
+      resolve(uploadedAssets)
     })
   })
 }
