@@ -1716,6 +1716,7 @@ $footer-grey:#303030;
 
 .example-desc-text {
   padding:5px;
+  font-size: 14pt;
   overflow: hidden;
 }
 
@@ -1764,7 +1765,7 @@ $footer-grey:#303030;
   font-size: 16pt;
   overflow:hidden;
   font-weight: bold;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
