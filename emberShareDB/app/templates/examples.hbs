@@ -1,5 +1,10 @@
 <div id = "example-container" class = "row">
-  {{#each examples as |example index|}}
-    {{example-tile onClick = (action 'onClick' example) example = example index = index}}
+  {{#each examples as |category index|}}
+    <h1>{{category.title}}</h1>
+    <div class = "row">
+    {{#each category.docs as |example|}}
+      {{example-tile onClick = (action 'onClick' example) example = example index = index}}
+    {{/each}}
+  </div>
   {{/each}}
 </div>

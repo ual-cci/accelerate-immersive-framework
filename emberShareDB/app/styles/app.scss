@@ -1653,22 +1653,6 @@ $footer-grey:#303030;
   font-size: 14pt;
 }
 
-// #tile0.example-tile-title{
-//   color: $mimic-orange;
-// }
-// #tile1.example-tile-title  {
-//   color: $mimic-yellow;
-// }
-// #tile2.example-tile-title  {
-//   color: $mimic-green;
-// }
-// #tile3.example-tile-title {
-//   color: $mimic-pink;
-// }
-// #tile4.example-tile-title {
-//   color: $mimic-blue
-// }
-
 #tile0.example-tile-container {
   border-color: $mimic-orange;
 }
@@ -1710,7 +1694,6 @@ $footer-grey:#303030;
 .example-tile-container-outer {
   height: 235px;
   cursor: pointer;
-  max-width: 250px;
   padding-left: 0px;
   padding-right: 0px;
 }
@@ -1719,6 +1702,7 @@ $footer-grey:#303030;
   height: 90%;
   margin: 10px;
   border: solid 2px;
+  overflow: hidden;
 }
 
 .example-tile-hover {
@@ -1730,8 +1714,15 @@ $footer-grey:#303030;
   background-color: rgba(255,255,255,0);
 }
 
+.example-desc-text {
+  padding:5px;
+  overflow: hidden;
+}
+
 .example-desc-container {
-  height:50%;
+  height:65px;
+  width:240px;
+  padding-right: 10px;
   padding: 5px;
   overflow: hidden;
 }
@@ -1741,12 +1732,15 @@ $footer-grey:#303030;
 }
 
 .example-color {
-  height:50%;
+  height:105px;
+  width:240px;
   background-color: blue;
 }
 
 .shape-cell {
   cursor: pointer;
+  height: 100%;
+  width: 100%;
   font-size: 14pt;
   font-weight: bold;
   overflow: hidden;
@@ -1770,7 +1764,7 @@ $footer-grey:#303030;
   font-size: 16pt;
   overflow:hidden;
   font-weight: bold;
-  text-align: left;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

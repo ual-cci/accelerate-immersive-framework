@@ -7,6 +7,9 @@ import config from  '../config/environment';
 import RSVP from 'rsvp';
 export default Component.extend({
   example:"",
+  description:computed('example', function() {
+    return this.get('example').desc
+  }),
   isSelected:false,
   store:inject('store'),
   docid:computed('example', function() {
