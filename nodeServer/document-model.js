@@ -420,8 +420,9 @@ function startDocAPI(app)
       }
       else
       {
-        //let reply = {attributes:doc.data.source,id:doc.data.documentId,type:"document"};
         console.log("sending",doc.data["source"]);
+        res.header("Content-Type", "application/javascript; charset=UTF-8");
+        res.header("Cache-Control", "max-age=3600");
         res.status(200).send(doc.data["source"]);
       }
     });

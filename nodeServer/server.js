@@ -19,6 +19,8 @@ function startServer()
 {
   console.log("STARTING SERVER")
   app.use('/ccAsset', bodyParser.raw({type: '*/*',limit: '100mb'}));
+  app.use('/source', bodyParser.raw({type: '*/*',limit: '100mb'}));
+  app.use('/asset/:docid/:filename', bodyParser.raw({type: '*/*',limit: '100mb'}));
   app.use(express.json({limit: '100mb'}));
   app.use(express.urlencoded({extended: true, limit: '100mb'}));
   app.use(function(req, res, next) {
