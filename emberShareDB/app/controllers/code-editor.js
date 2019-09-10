@@ -1234,9 +1234,11 @@ export default Controller.extend({
                 this.get('cs').log(oldAsset.name,asset)
                 return oldAsset.name !== asset
             });
+            let totalSize = 0;
+            newAssets.forEach((a)=>{totalSize+=a.size});
             const actions = [
               this.get('documentService').updateDoc(doc.id, "assets", newAssets),
-              this.get('documentService').updateDoc(doc.id, "assetQuota", doc.data.assetQuota - oldAsset.size)
+              this.get('documentService').updateDoc(doc.id, "assetQuota", totalSize)
             ];
             Promise.all(actions).then(()=>{
               if(!this.get('wsAvailable'))

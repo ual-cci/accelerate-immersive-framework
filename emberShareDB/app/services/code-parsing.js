@@ -146,7 +146,17 @@ export default Service.extend({
       if(!added)
       {
         newSrc = newSrc + script.scriptTag;
-        newSrc = newSrc + script.src;
+        let js = script.src;
+        for(let j = 0; j < children.length; j++)
+        {
+          const child = children[j];
+          const url = config.serverHost + "/source/" + child.documentId;
+          console.log("BEFORE", child.name);
+          js = js.replace(new RegExp("\"" + child.name + "\"","gm"), "\"" + url + "\"");
+          js = js.replace(new RegExp("\'" + child.name + "\'","gm"), "\"" + url + "\"");
+          console.log("AFTER", js);
+        };
+        newSrc = newSrc + js;
       }
       newSrc = newSrc + this.insertStyleSheets(script.post, children);
     }
