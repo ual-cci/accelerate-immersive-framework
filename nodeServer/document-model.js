@@ -128,39 +128,37 @@ function startAssetAPI(server, app)
         });
       });
 
-
-
-      app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
-        console.log("assetWITHURL", req.body)
-        const mimetype = req.body.mimetype;
-        const name = req.body.name;
-        const url = req.body.url;
-        var writestream = gridFS.createWriteStream({
-          filename: name,
-          mode: 'w',
-          content_type: mimetype,
-        });
-
-        http.get(url, response => {
-          console.log('got resource', response.body)
-          var stream = response.pipe(writestream);
-          writestream.on('close', function(file) {
-            const content_type = mimetype;
-            const newAsset = {
-              name:name,
-              fileId:file._id,
-              fileType:content_type,
-              size:file.length
-            };
-            console.log('success uploading asset', file.length);
-            res.status(200);
-            res.json(newAsset);
-            fs.unlink(url, function(err) {
-               console.log('success!')
-             });
-          });
-        });
-      });
+      // app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
+      //   console.log("assetWITHURL", req.body)
+      //   const mimetype = req.body.mimetype;
+      //   const name = req.body.name;
+      //   const url = req.body.url;
+      //   var writestream = gridFS.createWriteStream({
+      //     filename: name,
+      //     mode: 'w',
+      //     content_type: mimetype,
+      //   });
+      //
+      //   http.get(url, response => {
+      //     console.log('got resource', response.body)
+      //     var stream = response.pipe(writestream);
+      //     writestream.on('close', function(file) {
+      //       const content_type = mimetype;
+      //       const newAsset = {
+      //         name:name,
+      //         fileId:file._id,
+      //         fileType:content_type,
+      //         size:file.length
+      //       };
+      //       console.log('success uploading asset', file.length);
+      //       res.status(200);
+      //       res.json(newAsset);
+      //       fs.unlink(url, function(err) {
+      //          console.log('success!')
+      //        });
+      //     });
+      //   });
+      // });
 
       app.get('/asset/:docid/:filename', function(req, res) {
         var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
@@ -422,7 +420,7 @@ function startDocAPI(app)
       {
         console.log("sending",doc.data["source"]);
         res.header("Content-Type", "application/javascript; charset=UTF-8");
-        res.header("Cache-Control", "max-age=3600");
+        res.header("Cache-Control", "no-store");
         res.status(200).send(doc.data["source"]);
       }
     });
