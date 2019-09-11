@@ -74,7 +74,7 @@ export default Component.extend({
     let updateHints = ()=> {
       editor.operation(()=> {
         for (var i = 0; i < widgets.length; ++i){
-          editor.removeLineWidget(widgets[i])
+          editor.setGutterMarker(widgets[i], "CodeMirror-linenumbers", null)
         }
         var doc = editor.getDoc();
         var pos = doc.getCursor();
@@ -99,7 +99,8 @@ export default Component.extend({
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
           //HTMLHint misclassifies this, ignore
-          if(err.message != "Tag must be paired, no start tag: [ </input> ]")
+          if(err.message != "Tag must be paired, no start tag: [ </input> ]" &&
+             err.message != "Unnecessary semicolon.")
           {
             if(!isEmpty(lines[err.line]))
             {
@@ -117,6 +118,8 @@ export default Component.extend({
           {
             let msg = document.createElement("div");
             msg.style["background-color"] = "transparent";
+            msg.style["width"] = "1000px";
+            msg.style["height"] = "100%";
             let icon = msg.appendChild(document.createElement("div"));
             icon.innerHTML = "!!";
             icon.className = "lint-error-icon";
@@ -128,14 +131,15 @@ export default Component.extend({
             msg.className = "lint-error";
             icon.onmouseover = ()=> {
               this.get('cs').log("over");
-              msg.style["background-color"] = "white";
+              msg.style["background-color"] = "rgba(255,255,255,0.8)";
               txt.style.display = "inline";
             };
             icon.onmouseout = ()=> {
               msg.style["background-color"] = "transparent";
               txt.style.display = "none";
             }
-            widgets.push(editor.addLineWidget(parseInt(line) - 1, msg, {coverGutter: true, noHScroll: true}));
+            //widgets.push(editor.addLineWidget(parseInt(line) - 1, msg, {coverGutter: true, noHScroll: true}));
+            widgets.push(editor.setGutterMarker(parseInt(line) - 1, "CodeMirror-linenumbers", msg));
           }
         }
       })
