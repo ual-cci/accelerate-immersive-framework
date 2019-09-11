@@ -1319,7 +1319,7 @@ export default Controller.extend({
       this.get('cs').log(this.get('showAssets'))
     },
     enterFullscreen() {
-      var target = document.getElementById("output-iframe");
+      var target = document.getElementById("main-code-container");
       if (target.requestFullscreen) {
         target.requestFullscreen();
       } else if (target.msRequestFullscreen) {
