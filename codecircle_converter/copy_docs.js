@@ -11,10 +11,10 @@ const CODE_CIRCLE_USER_ID = "476c9092-5d8a-747d-7089-9b4af31fddae"
 const CODE_CIRCLE_USER_NAME = "codecircle"
 const ASSET_SERVING_PORT = 3000
 const cc_mongoIP = "127.0.0.1";
-const cc_mongoPort = "27017";
+const cc_mongoPort = "27018";
 const cc_contentDBName = "cc_documents";
-//const MIMIC_API_URL = "https://dev.codecircle.gold.ac.uk/api"
-const MIMIC_API_URL = "http://localhost:8080"
+const MIMIC_API_URL = "https://dev.codecircle.gold.ac.uk/api"
+//const MIMIC_API_URL = "http://localhost:8080"
 const cc_mongoUri = 'mongodb://'+cc_mongoIP+':'+cc_mongoPort+'/'+cc_contentDBName;
 const app = express();
 let token = "";
@@ -23,35 +23,7 @@ var toArray = require('stream-to-array')
 
 const upload =
 [
-//"65gmEWQbALkbQNPya",
-// "xwwTkx4bowrHQhYSz",
-// "auFBDt9CCCxJ5uCa3",
-// "j3h8FvfvLiXx45X7x",
-// "eea5ERsNRT7Qdrb2Y",
-// "KddxGTEhyC9FENyTJ",
-// "qagRGoZYgArmKgAb3",
-// "QtBmG3omkKHbwa7bF",
-// "e4YoWDX3P57PEHkzv",
-// 'PtCfEgLNYmT4YLHtK',
-// 'CA4RuTqopxco34weL',
-// 'jbnJRvwiDbznTk2cQ',
-// 'cgJMcjXgunAemDD7B',
-// 'DgwG7gm6EsYYRPp7W',
-// 'GAR9Tv9LXrRYBxSL7',
-'HfvHJWxKLPJBxYpTW',
-// 'ywwcqZjWfujwiGX4J',
-// 'uYk2SLcT77YJFL7Xu',
-// 'sY9PXXZGjAgv48NGY',
-// 'twzXajMKHNM5uraTb',
-// 'sPC9w7mFD5GFfPrSS',
-// 'Pna9FNXgW2AmeRx25',
-// 'pWQrQZbmawfrADq89',
-// 'XfoN9skouxfrjKqwY',
-// 'oXTCJ3FgK7kiyemp8',
-// 'ipTKvFqtECLC5FybA',
-// "cmNvBAHzcceFQH5cy",
-// "zBZoTXxSrmHvXReLW",
-// "Y42hpBSymrgQuf2gJ"
+  "2TF6cSP38YGtioZ3R"
 ]
 
 console.log("STARTING SERVER")

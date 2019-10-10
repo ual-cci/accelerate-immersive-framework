@@ -218,6 +218,7 @@ export default Service.extend({
           }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
           combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
+          combined = this.get('codeParser').insertDatasetId(combined, docId);
           if(replaceAssets)
           {
             this.get('cs').log("doc service", docId)

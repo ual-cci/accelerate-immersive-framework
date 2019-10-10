@@ -166,6 +166,13 @@ export default Service.extend({
     }
     return newSrc;
   },
+  insertDatasetId(src, docId)
+  {
+    const toFind = /new Dataset\(\)/g;
+    const replace = "new Dataset(\"" + docId + "\")";
+    const newSrc = src.replace(toFind, replace);
+    return newSrc;
+  },
   insertStatefullCallbacks(src, savedVals) {
     let newSrc = "";
     this.set('savedVals', savedVals);

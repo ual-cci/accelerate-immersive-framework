@@ -683,7 +683,7 @@ function createDoc(attr) {
             dontPlay:false,
             children:[],
             parent:attr.parent,
-            type:attr.parent ? "js" : "html",
+            type:attr.parent ? null : "html",
             assetQuota:attr.assetQuota ? attr.assetQuota : 0
           },()=> {
             let op = {};

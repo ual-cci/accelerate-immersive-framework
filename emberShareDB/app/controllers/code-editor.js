@@ -355,6 +355,21 @@ export default Controller.extend({
       });
     })
   },
+  setLanguage: function() {
+    const editor = this.get('editor');
+    const doc = this.get('currentDoc');
+    let lang = "htmlmixed"
+    if(!isEmpty(doc.get('data').parent))
+    {
+      const analysedLang = this.get('codeParser').getLanguage(doc.get('data').source);
+      if(!isEmpty(analysedLang))
+      {
+        lang = analysedLang;
+      }
+      this.get('documentService').updateDoc(doc.id, "type", lang);
+    }
+    editor.setOption("mode", lang);
+  },
   didReceiveDoc: function() {
     this.get('cs').log("isMobile", this.get('isMobile'));
     document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
@@ -363,26 +378,7 @@ export default Controller.extend({
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');
       this.get('cs').log("didReceiveDoc", doc.get('data').type);
-      if(!isEmpty(doc.get('data').parent))
-      {
-        let lang = this.get('codeParser').getLanguage(doc.get('data').source);
-        if(isEmpty(lang))
-        {
-          editor.setOption("mode","htmlmixed");
-        }
-        else if (lang == "css")
-        {
-          editor.setOption("mode","css");
-        }
-        else if (lang == "javascript")
-        {
-          editor.setOption("mode","javascript");
-        }
-      }
-      else
-      {
-        editor.setOption("mode","htmlmixed");
-      }
+      this.setLanguage();
       this.set('surpress', true);
       editor.setValue(doc.get('data').source);
       editor.clearHistory();
@@ -738,7 +734,11 @@ export default Controller.extend({
         const ops = this.get('codeParser').getOps(delta, editor);
         ops.forEach((op)=>{
           this.submitOp(op);
-        })
+        });
+        if(isEmpty(doc.type))
+        {
+          this.setLanguage();
+        }
       }
       this.get('opsPlayer').reset(doc.id);
       this.restartCodeTimer();
