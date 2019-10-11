@@ -150,7 +150,7 @@ export default Service.extend({
         for(let j = 0; j < children.length; j++)
         {
           const child = children[j];
-          const url = config.serverHost + "/source/" + child.documentId;
+          const url = config.redirectServerHost + "/source/" + child.documentId;
           console.log("BEFORE", child.name);
           js = js.replace(new RegExp("\"" + child.name + "\"","gm"), "\"" + url + "\"");
           js = js.replace(new RegExp("\'" + child.name + "\'","gm"), "\"" + url + "\"");

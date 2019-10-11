@@ -17,6 +17,7 @@ Router.map(function() {
   this.route('getting-started', { path: '/getting-started/:topic' });
   this.route('guides', { path: '/guides/:topic' });
   this.route('examples');
+  this.route('api', {path:'/api/*endpoint'});
 });
 
 export default Router;
