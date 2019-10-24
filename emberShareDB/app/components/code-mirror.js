@@ -25,8 +25,10 @@ export default Component.extend({
       //hintOptions:{hint:this.get("suggestCompletions")}
     });
     editor.on("keyup", (cm, event) => {
+        //console.log("KEY", event.keyCode);
         if (!cm.state.completionActive
           && !cm.options.readOnly
+          && event.keyCode != 9 //tab
           && event.keyCode != 8
           && event.keyCode != 32
           && event.keyCode != 13

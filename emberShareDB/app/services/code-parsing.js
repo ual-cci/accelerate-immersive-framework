@@ -151,10 +151,10 @@ export default Service.extend({
         {
           const child = children[j];
           const url = config.redirectServerHost + "/source/" + child.documentId;
-          console.log("BEFORE", child.name);
+          this.get('cs').log("BEFORE", child.name);
           js = js.replace(new RegExp("\"" + child.name + "\"","gm"), "\"" + url + "\"");
           js = js.replace(new RegExp("\'" + child.name + "\'","gm"), "\"" + url + "\"");
-          console.log("AFTER", js);
+          this.get('cs').log("AFTER", js);
         };
         newSrc = newSrc + js;
       }

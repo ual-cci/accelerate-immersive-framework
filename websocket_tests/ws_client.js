@@ -10,7 +10,6 @@ ws.on('error', function(err) {
 ws.on('open', function open() {
   ws.send('hello from client');
 });
-
 ws.on('message', function incoming(data) {
   console.log("rec from server: "+data);
 });

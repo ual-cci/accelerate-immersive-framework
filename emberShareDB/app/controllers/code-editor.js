@@ -56,7 +56,7 @@ export default Controller.extend({
   isDragging:false,
   startWidth:0,
   startX:0,
-  aceW:"",
+  codeW:"",
   savedVals:null,
   hideEditor:'false',
   embed:'false',
@@ -80,12 +80,12 @@ export default Controller.extend({
 
   //Computed parameters
 
-  aceStyle: computed('aceW', function() {
+  aceStyle: computed('codeW', function() {
     this.updateDragPos();
-    const aceW = this.get('aceW');
+    const codeW = this.get('codeW');
     const display = this.get('showCodeControls') ? "inline":"none";
-    //this.get('cs').log("updating ace style", aceW, display)
-    return htmlSafe("width: " + aceW + "; display: " + display + ";");
+    //this.get('cs').log("updating ace style", codeW, display)
+    return htmlSafe("width: " + codeW + "; display: " + display + ";");
   }),
   titleNoName: computed('titleName', function() {
     return this.get('titleName').split("by")[0];
@@ -107,6 +107,13 @@ export default Controller.extend({
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {
+        //Bound the code window
+        const codeW = parseInt(this.get('codeW').substring(0, this.get('codeW').length-2));
+        const containerW = document.getElementById("main-code-container").offsetWidth;
+        if(codeW > containerW)
+        {
+          this.set('codeW', containerW + "px");
+        }
         this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
         this.get('cs').log("isMobile", this.get('isMobile'));
         document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
@@ -144,7 +151,7 @@ export default Controller.extend({
       this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
       this.get('cs').log("isMobile", this.get('isMobile'));
       this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
-      this.set("aceW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
+      this.set("codeW", embedWithCode ? "0px" : ($(window).width() / 2)  + "px");
       if(embed)
       {
         document.getElementById("main-code-container").style.height="97vh"
@@ -860,16 +867,16 @@ export default Controller.extend({
     this.get('editor').scrollIntoView(pos);
   },
   updateDragPos: function() {
-    const aceW = parseInt(this.get('aceW').substring(0, this.get('aceW').length-2));
+    const codeW = parseInt(this.get('codeW').substring(0, this.get('codeW').length-2));
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
     {
-      drag.style.right = (aceW - 31) + "px";
+      drag.style.right = (codeW - 31) + "px";
     }
     const tab = document.getElementById('project-tabs');
     if(!isEmpty(tab))
     {
-      tab.style.width = aceW + "px"
+      tab.style.width = codeW + "px"
     }
     const editor = this.get('editor');
     if(!isEmpty(editor))
@@ -1051,11 +1058,11 @@ export default Controller.extend({
     update(document.getElementById("embedded-run-button"));
   },
   updateTabbarLocation: function() {
-    const aceW = this.get('aceW');
+    const codeW = this.get('codeW');
     let tab = document.getElementById('project-tabs');
     if(tab)
     {
-      tab.style.width = aceW
+      tab.style.width = codeW
     }
   },
   hideCode: function(doHide) {
@@ -1069,8 +1076,8 @@ export default Controller.extend({
     setTimeout(()=> {
       const w = ($(window).width() / 2)  + "px";
       this.set('isShowingCode', !doHide);
-      this.get('cs').log("setting aceW to ", doHide ? "30px" : w);
-      this.set('aceW', doHide ? "30px" : w);
+      this.get('cs').log("setting codeW to ", doHide ? "30px" : w);
+      this.set('codeW', doHide ? "30px" : w);
     }, 200)
   },
   actions: {
@@ -1388,7 +1395,7 @@ export default Controller.extend({
       if(this.get('isDragging'))
       {
         //this.get('cs').log('mouseMove',e.target);
-        this.set('aceW',(this.get('startWidth') - e.clientX + this.get('startX')) + "px");
+        this.set('codeW',(this.get('startWidth') - e.clientX + this.get('startX')) + "px");
       }
     },
     mouseoverCodeTransport(e)
