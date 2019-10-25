@@ -68,6 +68,10 @@ export default Component.extend({
       },
       "Shift-Enter": (cm)=>  {
         this.onReevaluate();
+      },
+      "Cmd-/": (cm)=>  {
+        cm.toggleComment();
+        console.log("COMMENT");
       }
     });
     var widgets = [];
