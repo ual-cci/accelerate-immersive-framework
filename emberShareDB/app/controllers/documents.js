@@ -15,8 +15,9 @@ export default Controller.extend({
   isPrivateText:computed('isPrivate', function() {
     return this.get('isPrivate') ? "private":"public";
   }),
-  searchTerm:computed('model', function() {
-    return this.get('model').query.filter.search;
+  searchTerm:computed('model.filter', function() {
+    this.get('cs').log("search term", this.get('model').filter.search);
+    return this.get('model').filter.search;
   }),
   feedbackMessage: "",
   sort:"views",
@@ -25,11 +26,11 @@ export default Controller.extend({
   canGoBack:computed('page', function() {
     return this.get('page') > 0;
   }),
-  canGoForwards:computed('model', function() {
-    return this.get('model').length >= 20;
+  canGoForwards:computed('model.docs', function() {
+    return this.get('model').docs.length >= 20;
   }),
-  hasNoDocuments:computed('model', function() {
-    return this.get('model').length == 0;
+  hasNoDocuments:computed('model.docs', function() {
+    return this.get('model').docs.length == 0;
   }),
   isMore:true,
   loadMoreCtr:0,
@@ -66,7 +67,13 @@ export default Controller.extend({
     var newF = []
     this.get('showingFilters').forEach((f)=> {
       Ember.set(f, "isSelected", f.id == this.get('sort'));
-      Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == this.get('searchTerm'));
+      let searchBar = document.getElementById("searchTerm");
+      let searchTerm = " "
+      if(!isEmpty(searchBar))
+      {
+        searchTerm = searchBar.value;
+      }
+      Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == searchTerm);
       newF.push(f)
     })
     Ember.run(()=> {
@@ -105,10 +112,11 @@ export default Controller.extend({
     $("#document-container").addClass("fading-out")
     setTimeout(()=> {
       this.get('sessionAccount').getUserFromName();
-      let searchTerm = this.get('searchTerm');
-      if(isEmpty(searchTerm))
+      let searchBar = document.getElementById("searchTerm");
+      let searchTerm = " "
+      if(!isEmpty(searchBar))
       {
-        searchTerm = " ";
+        searchTerm = searchBar.value;
       }
       this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
       this.updateSelectedFilter();
@@ -116,37 +124,32 @@ export default Controller.extend({
     }, 400)
   },
   recent() {
-    //this.set('searchTerm', " ");
     this.set('page', 0);
     this.set('sort', "date");
     this.updateResults();
   },
   popular() {
-    //this.set('searchTerm', " ");
     this.set('page', 0);
     this.set('sort', "views");
     this.updateResults();
   },
   forked() {
-    //this.set('searchTerm', " ");
     this.set('page', 0);
     this.set('sort', "forks");
     this.updateResults();
   },
   editted() {
-    //this.set('searchTerm', " ");
     this.set('page', 0);
     this.set('sort', "edits");
     this.updateResults();
   },
   updated() {
-    //this.set('searchTerm', " ");
     this.set('page', 0);
     this.set('sort', "updated");
     this.updateResults();
   },
   tag(tag) {
-    this.set('searchTerm', tag.substr(1));
+    document.getElementById("searchTerm").value = tag.substr(1);
     this.set('page', 0);
     this.updateResults();
   },
@@ -163,7 +166,6 @@ export default Controller.extend({
         this.get('documentService').deleteDoc(documentId)
         .then(() => {
           this.get('cs').log("deleted, updating results");
-          this.set('searchTerm', this.get('sessionAccount').currentUserName);
           this.updateResults();
         }).catch((err) => {
           this.get('cs').log("error deleting", err);

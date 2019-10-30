@@ -1,6 +1,6 @@
 <div id = "main-document-container" class = "limited-width-container">
 <form {{action 'search' on='submit'}}>
-  {{input id='searchTerm' class = "limited-width-container" placeholder='search' value=searchTerm key-press=(action "search")}}
+  {{input id='searchTerm' class = "limited-width-container" placeholder='search' value=model.filter.search key-press=(action "search")}}
 </form>
 <div class = "row" id = "doc-create-container">
 <!-- {{#if session.isAuthenticated}}
@@ -113,7 +113,7 @@
 </div>
 <div class = "container-fluid" id = "document-container">
   <div class = "row">
-    {{#each model as |document index|}}
+    {{#each model.docs as |document index|}}
         {{document-list-item
           document=document
           index=index

@@ -10,36 +10,36 @@ export default Route.extend({
     this._super(controller, model);
     if(controller)
     {
-      this.get('cs').log("setupController document", model.query.filter.sortBy)
-      controller.send('updateSelectedFilter', model.query.filter.sortBy);
+      this.get('cs').log("setupController document", model.docs.query.filter.sortBy)
+      controller.send('updateSelectedFilter', model.docs.query.filter.sortBy);
       controller.send('flashResults')
     }
   },
   model(params) {
-    let currentUserId = this.get('sessionAccount').currentUserId;
-    let currentUserName = this.get('sessionAccount').currentUserName;
-    this.get('cs').log("document model", currentUserId, currentUserName, params.sort);
-    const sort = params.sort ? params.sort : "views";
-    let filter = {
-      filter:{
-        search:params.search,
-        page:params.page,
-        currentUser:currentUserId,
-        sortBy:params.sort
+    return new RSVP.Promise((resolve, reject)=> {
+      let currentUserId = this.get('sessionAccount').currentUserId;
+      let currentUserName = this.get('sessionAccount').currentUserName;
+      this.get('cs').log("document model", currentUserId, currentUserName, params.sort);
+      const sort = params.sort ? params.sort : "views";
+      let filter = {
+        filter:{
+          search:params.search,
+          page:params.page,
+          currentUser:currentUserId,
+          sortBy:params.sort
+        }
       }
-    }
-    if(isEmpty(currentUserId))
-    {
-      if(!isEmpty(currentUserName))
+      if(isEmpty(currentUserId))
       {
-        this.get('cs').log("has name but doesnt have currentUserId",currentUserName)
-        return new RSVP.Promise((resolve, reject)=> {
+        if(!isEmpty(currentUserName))
+        {
+          this.get('cs').log("has name but doesnt have currentUserId",currentUserName)
           this.get('sessionAccount').getUserFromName().then(()=>{
             this.get('sessionAccount').updateOwnedDocuments().then(()=>{
               filter.filter.currentUser = this.get('sessionAccount').currentUserId;
               this.get('cs').log("document model got id",filter.filter.currentUser);
               this.get('store').query('document', filter).then((res)=> {
-                resolve(res);
+                resolve({docs:res, filter:filter.filter});
               })
             }).catch((err)=> {
               this.get('cs').log('updateOwnedDocuments',err);
@@ -48,41 +48,37 @@ export default Route.extend({
             this.get('cs').log('error getUserFromName',err);
             filter.filter.currentUser = "";
             this.get('store').query('document', filter).then((res)=> {
-              resolve(res);
+              resolve({docs:res, filter:filter.filter});
             }).catch((err)=>{
               this.get('cs').log('error query',err);
               reject(err);
             });
           });
-        });
-      }
-      else {
-        return new RSVP.Promise((resolve, reject) => {
+        }
+        else
+        {
           this.get('sessionAccount').updateOwnedDocuments().then(()=>{
             this.get('store').query('document', filter).then((res)=> {
-              resolve(res);
+              resolve({docs:res, filter:filter.filter});
             }).catch((err)=>reject(err));
           }).catch((err)=>reject(err));
+        }
+      }
+      else if (!isEmpty(currentUserName))
+      {
+        this.get('store').query('document', filter).then((res)=> {
+          resolve({docs:res, filter:filter.filter});
+        }).catch((err)=>reject(err));
+      }
+      else
+      {
+        filter.filter.currentUser = "";
+        this.get('store').query('document', filter).then((res)=> {
+          this.get('cs').log("c")
+          resolve({docs:res, filter:filter.filter});
         });
       }
-    }
-    else if (!isEmpty(currentUserName))
-    {
-      return new RSVP.Promise((resolve, reject) => {
-        this.get('store').query('document', filter).then((res)=> {
-          resolve(res);
-        }).catch((err)=>reject(err));
-      });
-    }
-    else
-    {
-      filter.filter.currentUser = "";
-      return new RSVP.Promise((resolve, reject) => {
-        this.get('store').query('document', filter).then((res)=> {
-          resolve(res);
-        }).catch((err)=>reject(err));
-      });
-    }
+    }).catch((err)=>reject(err));;
   },
   actions: {
     error(error, transition) {
