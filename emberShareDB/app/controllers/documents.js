@@ -15,6 +15,9 @@ export default Controller.extend({
   isPrivateText:computed('isPrivate', function() {
     return this.get('isPrivate') ? "private":"public";
   }),
+  searchTerm:computed('model', function() {
+    return this.get('model').query.filter.search;
+  }),
   feedbackMessage: "",
   sort:"views",
   page:0,

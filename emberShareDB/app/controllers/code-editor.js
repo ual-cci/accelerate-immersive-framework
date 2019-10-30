@@ -141,7 +141,6 @@ export default Controller.extend({
   },
   initUI: function() {
     this.set('collapsed', true);
-    this.get('cs').log("hello world", "hello world","hello world","hello world");
     setTimeout(()=> {
       const embed = this.get('embed') == "true";
       const embedWithCode = this.get('showCode') == "true";

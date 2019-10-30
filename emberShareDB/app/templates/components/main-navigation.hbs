@@ -58,6 +58,7 @@
             <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
         {{/ddm.item}}
         {{/each}}
+        <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'allDocs'}}>...</a>
         <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'createDoc'}}>+</a>
       {{/dd.menu}}
     {{/nav.dropdown}}

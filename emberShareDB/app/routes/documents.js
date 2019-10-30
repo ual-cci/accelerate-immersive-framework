@@ -68,12 +68,20 @@ export default Route.extend({
     }
     else if (!isEmpty(currentUserName))
     {
-      return this.get('store').query('document', filter);
+      return new RSVP.Promise((resolve, reject) => {
+        this.get('store').query('document', filter).then((res)=> {
+          resolve(res);
+        }).catch((err)=>reject(err));
+      });
     }
     else
     {
       filter.filter.currentUser = "";
-      return this.get('store').query('document', filter);
+      return new RSVP.Promise((resolve, reject) => {
+        this.get('store').query('document', filter).then((res)=> {
+          resolve(res);
+        }).catch((err)=>reject(err));
+      });
     }
   },
   actions: {

@@ -29,6 +29,10 @@ export default Controller.extend({
     transitionToDoc(doc) {
       this.transitionToRoute('code-editor', doc);
     },
+    transitionToUserDocs(user) {
+      console.log("GETTING DOCS FOR USER:",user)
+      this.transitionToRoute('documents', user, 0, "date");
+    },
     transitionToGuide(guide) {
       this.transitionToRoute('guides', guide);
     },

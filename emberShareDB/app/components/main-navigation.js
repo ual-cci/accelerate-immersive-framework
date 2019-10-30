@@ -24,6 +24,10 @@ export default Component.extend({
           this.get('onCreateDoc')();
       });
     },
+    allDocs() {
+      this.get('cs').log(this.get('sessionAccount').currentUserName);
+      this.get('openUserDocs')(this.get('sessionAccount').currentUserName);
+    },
     login() {
       this.get('onLogin')();
     },
