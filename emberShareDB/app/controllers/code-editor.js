@@ -655,7 +655,7 @@ export default Controller.extend({
         const mainText = model.get('data').source;
         let toRender = selection ? this.getSelectedText() : mainText;
         //this.get('cs').log("updateiframe", toRender)
-        this.get('documentService').getCombinedSource(model.id, true, toRender)
+        this.get('documentService').getCombinedSource(model.id, true, toRender, savedVals)
         .then((combined) => {
           this.get('cs').clear();
           if(selection)
@@ -787,6 +787,7 @@ export default Controller.extend({
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
         self.set('savedVals', savedVals);
+        //this.get('cs').log(e.data[0], e.data[1])
       }
       else if(e.data[0] == "console")
       {

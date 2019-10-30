@@ -178,8 +178,7 @@ export default Service.extend({
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
     let didEdit = false;
-    //this.get('cs').log("inserting stateful callbacks");
-    //this.get('cs').log(acorn, walk);
+    this.get('cs').log("inserting stateful callbacks");
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
     {
@@ -187,7 +186,7 @@ export default Service.extend({
       newSrc = newSrc + script.preamble;
       let ops = [];
       let added = false;
-      //this.get('cs').log("trying script", script.src);
+      this.get('cs').log("trying script", script.src);
       try {
         walk.simple(acorn.parse(script.src), {
           VariableDeclaration: (node) => {
@@ -320,7 +319,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    //this.get('cs').log("SOURCE",newSrc);
+    this.get('cs').log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {

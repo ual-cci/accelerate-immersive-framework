@@ -206,7 +206,7 @@ export default Service.extend({
       }).catch((err)=>reject(err));
     });
   },
-  getCombinedSource(docId, replaceAssets = false, mainText)
+  getCombinedSource(docId, replaceAssets = false, mainText, savedVals)
   {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
@@ -216,8 +216,12 @@ export default Service.extend({
           {
             mainText = doc.data.source;
           }
+          if(isEmpty(savedVals))
+          {
+            savedVals = doc.data.savedVals;
+          }
           let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
-          combined = this.get('codeParser').insertStatefullCallbacks(combined, doc.data.savedVals);
+          combined = this.get('codeParser').insertStatefullCallbacks(combined, savedVals);
           combined = this.get('codeParser').insertDatasetId(combined, docId);
           if(replaceAssets)
           {
