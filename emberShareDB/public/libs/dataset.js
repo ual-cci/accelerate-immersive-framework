@@ -87,7 +87,12 @@ class Dataset {
     this.updateRows();
   }
 
-  addRegression(workerUrl, n, callback, gui = true) {
+  addRegression(
+      n,
+      callback,
+      workerUrl = "https://mimicproject.com/libs/regressionWorker.js",
+      gui = true)
+    {
     this.setWorker(workerUrl)
     this.onResult = callback;
     this.classifier = false;
@@ -109,7 +114,12 @@ class Dataset {
     }
   }
 
-  addClassifier(workerUrl, n, callback, gui = true) {
+  addClassifier(
+      n,
+      callback,
+      workerUrl = "https://mimicproject.com/libs/classificationWorker.js",
+      gui = true)
+    {
     this.setWorker(workerUrl)
     this.onResult = callback;
     this.classifier = true;
