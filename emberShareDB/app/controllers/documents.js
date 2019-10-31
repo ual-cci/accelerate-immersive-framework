@@ -15,10 +15,6 @@ export default Controller.extend({
   isPrivateText:computed('isPrivate', function() {
     return this.get('isPrivate') ? "private":"public";
   }),
-  searchTerm:computed('model.filter', function() {
-    this.get('cs').log("search term", this.get('model').filter.search);
-    return this.get('model').filter.search;
-  }),
   feedbackMessage: "",
   sort:"views",
   page:0,
@@ -67,18 +63,24 @@ export default Controller.extend({
     var newF = []
     this.get('showingFilters').forEach((f)=> {
       Ember.set(f, "isSelected", f.id == this.get('sort'));
-      let searchBar = document.getElementById("searchTerm");
-      let searchTerm = " "
-      if(!isEmpty(searchBar))
-      {
-        searchTerm = searchBar.value;
-      }
+      const searchTerm = this.getSearchTerm();
       Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == searchTerm);
       newF.push(f)
     })
     Ember.run(()=> {
       this.set('showingFilters', newF);
     });
+  },
+  getSearchTerm() {
+    let searchBar = document.getElementById("searchTerm");
+    let searchTerm = " "
+    if(!isEmpty(searchBar))
+    {
+      searchTerm = searchBar.value;
+      //Strip uncessary whitespace
+      searchTerm = searchTerm.replace(/^\s+|\s+$|\s+(?=\s)/g, "");
+    }
+    return searchTerm;
   },
   updateFiltersToShow() {
      var toShow = 5;
@@ -113,11 +115,7 @@ export default Controller.extend({
     setTimeout(()=> {
       this.get('sessionAccount').getUserFromName();
       let searchBar = document.getElementById("searchTerm");
-      let searchTerm = " "
-      if(!isEmpty(searchBar))
-      {
-        searchTerm = searchBar.value;
-      }
+      const searchTerm = this.getSearchTerm();
       this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
       this.updateSelectedFilter();
       this.transitionToRoute('documents', searchTerm, this.get('page'), this.get('sort'));
@@ -216,7 +214,7 @@ export default Controller.extend({
       }
       this.set('searchTimeout', setTimeout(()=> {
         this.updateResults();
-        this.set('searchTimeout', nil);
+        this.set('searchTimeout', null);
       }, 500))
     },
     nextPage() {

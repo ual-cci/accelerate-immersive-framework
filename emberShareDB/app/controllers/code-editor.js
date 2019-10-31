@@ -194,7 +194,7 @@ export default Controller.extend({
         socket = new ReconnectingWebSocket(config.wsHost)
         this.set('socket', socket);
         socket.onopen = () => {
-          this.get('cs').log("web socket open");
+          console.log("web socket open");
           if(this.get('leftCodeEditor'))
           {
             this.get('cs').log("opened connection but had already left code editor")
@@ -564,6 +564,7 @@ export default Controller.extend({
       }
       else
       {
+        console.log("WARNING, websockets failed, attempting https to send op");
         this.get('documentService').submitOp(op, doc.id).then(() => {
           this.get('cs').log("did sumbit op",op);
           resolve();
@@ -1294,6 +1295,17 @@ export default Controller.extend({
         let model = this.get('model');
         model.get('data').readOnly = !model.get('data').readOnly;
         this.get('documentService').updateDoc(model.id, 'readOnly', model.get('data').readOnly)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
+      }
+    },
+    toggleDontPlay() {
+      if(this.get('isOwner'))
+      {
+        let model = this.get('model');
+        model.get('data').dontPlay = !model.get('data').readOnly;
+        this.get('documentService').updateDoc(model.id, 'dontPlay', model.get('data').readOnly)
         .catch((err)=>{
           this.get('cs').log('error updating doc', err);
         });
