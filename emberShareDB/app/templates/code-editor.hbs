@@ -110,6 +110,11 @@
         {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
         <span class="tooltiptext">WARNING! Other users can edit your code</span>
       </div>
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="readOnlyCheckbox">DONT PLAY ON OPEN</label>
+        {{input type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
+        <span class="tooltiptext">Dont play on open</span>
+      </div>
       {{#if canEditDoc}}
         <div class="tooltip">
           <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>

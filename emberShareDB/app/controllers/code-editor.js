@@ -1299,6 +1299,17 @@ export default Controller.extend({
         });
       }
     },
+    toggleDontPlay() {
+      if(this.get('isOwner'))
+      {
+        let model = this.get('model');
+        model.get('data').dontPlay = !model.get('data').readOnly;
+        this.get('documentService').updateDoc(model.id, 'dontPlay', model.get('data').readOnly)
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
+      }
+    },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
