@@ -413,6 +413,12 @@ export default Service.extend({
   /*
   We have rolled our own because the code mirror implementation
   (doc.indexFromPos) return incorrect values for {} when auto indented
+  ALSO:Multi line undo error
+  When you tab or shift tab multi lines, then undo we get bulked operations
+  occuring with lines coming from bottom to top, this causes issues with
+  "getLine()" its measuring lines in a doc post change (doesnt effect us top
+  to bottom as it never reaches the lines below itself). This is fixed by sorting
+  ops by line before
   */
   indexFromPos(pos, editor) {
     let index = 0
@@ -442,12 +448,22 @@ export default Service.extend({
     return op
   },
   getOps(delta, editor) {
-    //this.get('cs').log('delta',delta);
     let ops = [];
+    const compare = (a, b) => {
+      if ( a.from.line < b.from.line ){
+        return -1;
+      }
+      if ( a.from.line > b.from.line ){
+        return 1;
+      }
+      return 0;
+    }
+    //Sort by line to avoid errors with undo (see explanation in comment by indexFromPos)
+    delta = delta.sort(compare);
     delta.forEach((change)=> {
       if(change.origin === "playback")
       {
-        //this.get('cs').log("ignoring change")
+        this.get('cs').log("ignoring change")
         return ops;
       }
       if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)

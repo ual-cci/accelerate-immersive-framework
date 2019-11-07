@@ -514,7 +514,7 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       let droppedOps = this.get('droppedOps');
       //let droppedOps = [1,2,3]
-      //this.get('cs').log("Submitting op")
+      //this.get('cs').log("Submitting op", op)
       if(droppedOps.length > 0) {
         this.set('droppedOps', droppedOps.push(op));
         reject();

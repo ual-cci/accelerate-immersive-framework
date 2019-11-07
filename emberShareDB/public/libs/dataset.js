@@ -100,7 +100,7 @@ class Dataset {
     this.guiParent.appendChild(container);
     for(let i = 0; i < n; i++)
     {
-      var slider = document.createElement('input');
+      let slider = document.createElement('input');
       slider.type = 'range';
       slider.min = 0;
       slider.max = 1;
@@ -183,7 +183,7 @@ class Dataset {
           }
           else
           {
-			      this.outputGUI[i].value = event.data[i];
+			this.outputGUI[i].value = event.data[i];
           }
           this.onResult({index:i, data:event.data[i]});
         }
