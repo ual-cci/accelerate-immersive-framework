@@ -28,6 +28,7 @@ export default Component.extend({
         //console.log("KEY", event.keyCode);
         if (!cm.state.completionActive
           && !cm.options.readOnly
+          && event.keyCode > 31
           && event.keyCode != 9 //tab
           && event.keyCode != 8
           && event.keyCode != 32

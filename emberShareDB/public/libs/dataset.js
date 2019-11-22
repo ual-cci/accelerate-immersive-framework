@@ -7,6 +7,8 @@ class Dataset {
     this.recording = false;
     this.running = false;
     this.temp = [];
+    this.numOutputs = 1;
+    this.gui = false;
     this.DATASET_KEY = "dataset";
     this.REC_KEY = "recordingRound";
     this.store = localforage.createInstance({name: docId});
@@ -90,55 +92,66 @@ class Dataset {
   addRegression(
       n,
       callback,
-      workerUrl = "https://mimicproject.com/libs/regressionWorker.js",
-      gui = true)
+      gui = true,
+      workerUrl = "https://mimicproject.com/libs/regressionWorker.js"
+      )
     {
     this.setWorker(workerUrl)
     this.onResult = callback;
     this.classifier = false;
-    let container = document.createElement("div");
-    this.guiParent.appendChild(container);
-    for(let i = 0; i < n; i++)
+    this.numOutputs = n;
+    this.gui = gui;
+    if(gui)
     {
-      let slider = document.createElement('input');
-      slider.type = 'range';
-      slider.min = 0;
-      slider.max = 1;
-      slider.value = 0.5;
-      slider.step = 0.01;
-      this.outputGUI.push(slider);
-      slider.onchange = ()=> {
-      	this.onResult({data:slider.value,index:i});
-   	  }
-      container.appendChild(slider);
+      let container = document.createElement("div");
+      this.guiParent.appendChild(container);
+      for(let i = 0; i < n; i++)
+      {
+        let slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = 0;
+        slider.max = 1;
+        slider.value = 0.5;
+        slider.step = 0.01;
+        this.outputGUI.push(slider);
+        slider.onchange = ()=> {
+          this.onResult({data:slider.value,index:i});
+        }
+        container.appendChild(slider);
+      }
     }
   }
 
   addClassifier(
       n,
       callback,
-      workerUrl = "https://mimicproject.com/libs/classificationWorker.js",
-      gui = true)
+      gui = true,
+      workerUrl = "https://mimicproject.com/libs/classificationWorker.js")
     {
     this.setWorker(workerUrl)
     this.onResult = callback;
     this.classifier = true;
-    let container = document.createElement("div");
-    var selectList = document.createElement("select");
-    selectList.id = "dropdown";
-    selectList.onchange = ()=> {
-      this.onResult({data:selectList.selectedIndex, index:0});
-    }
-    this.guiParent.appendChild(container);
-    container.appendChild(selectList);
-    for (let i = 0; i < n; i++)
+    this.numOutputs = 1;
+    this.gui = gui;
+    if(gui)
     {
-        var option = document.createElement("option");
-        option.value = i;
-        option.text = i;
-        selectList.appendChild(option);
+      let container = document.createElement("div");
+      var selectList = document.createElement("select");
+      selectList.id = "dropdown";
+      selectList.onchange = ()=> {
+        this.onResult({data:selectList.selectedIndex, index:0});
+      }
+      this.guiParent.appendChild(container);
+      container.appendChild(selectList);
+      for (let i = 0; i < n; i++)
+      {
+          var option = document.createElement("option");
+          option.value = i;
+          option.text = i;
+          selectList.appendChild(option);
+      }
+      this.outputGUI.push(selectList);
     }
-    this.outputGUI.push(selectList);
   }
 
   updateButtons() {
@@ -175,15 +188,11 @@ class Dataset {
     this.myWorker.onmessage = (event)=>{
       if(this.onResult)
       {
-        for(let i = 0; i < this.outputGUI.length; i++)
+        for(let i = 0; i < this.numOutputs; i++)
         {
-          if(this.classifier)
+          if(this.gui)
           {
             this.outputGUI[i].value = event.data[i];
-          }
-          else
-          {
-			this.outputGUI[i].value = event.data[i];
           }
           this.onResult({index:i, data:event.data[i]});
         }
