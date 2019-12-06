@@ -391,7 +391,7 @@ export default Service.extend({
               asset = this.get('store').peekRecord('asset',fileId);
               this.get('cs').log("found record");
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-              source = source.replace(new RegExp(toFind,"gm"),b64);
+              source = source.replace(new RegExp(toFind,"gm"), b64);
               this.get('cs').log("replaced base64")
             }
           }

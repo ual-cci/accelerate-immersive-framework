@@ -1,5 +1,5 @@
 import Module from 'https://mimicproject.com/libs/maximilian.wasmmodule.js';
-class MaxiProcessor extends AudioWorkletProcessor {
+class MaxiSynthProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [{
         name: 'gain',
@@ -440,4 +440,4 @@ class MaxiProcessor extends AudioWorkletProcessor {
 
 }
 
-registerProcessor("maxi-processor", MaxiProcessor);
+registerProcessor("maxi-synth-processor", MaxiSynthProcessor);
