@@ -5,6 +5,7 @@ self.addEventListener('message', function(e) {
   if(e.data.action == "train") {
     //Respond to train msg
     myRegresion.train(e.data.data);
+    self.postMessage("trainingend");
   }
   if(e.data.action == "run") {
     //Respond to run msg
