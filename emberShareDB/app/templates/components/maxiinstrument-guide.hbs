@@ -1,0 +1,170 @@
+<p class = "tutorial-text">
+MaxiInstruments
+</p>
+<p class = "tutorial-text">
+MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the learner.js library. They are AudioWorklets so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
+</p>
+<p class = "tutorial-text">
+1. Initialise the object
+<pre>
+<code>
+const instruments = new MaxiInstruments();
+</code>
+</pre>
+<p class = "tutorial-text">
+2. Add the GUI
+</p>
+<p class = "tutorial-text">
+Give the instruments the HTML element you want to attach the GUI to
+</p>
+<pre>
+<code>
+instruments.guiElement = document.getElementById("synths");
+</code>
+</pre>
+<p class = "tutorial-text">
+3. Load the modules
+</p>
+<p class = "tutorial-text">
+You need to load in the audio workout modules, when this is done you can start adding instruments
+</p>
+<pre>
+<code>
+instruments.loadModules().then(()=> {
+
+//Add instruments here!!
+
+});
+</code>
+</pre>
+</p>
+<p class = "tutorial-text">
+4. MaxiSynth
+</p>
+<p class = "tutorial-text">
+MaxiSynth is a simple subtractive synthesiser.
+</p>
+<p class = "tutorial-text">
+Use the code below to add one synth, with the synths being stored in the instrument object’s .synth property. You can add as many as you like, depending on how much your set up can handle. Each will have its own GUI.
+</p>
+<pre>
+<code>
+instruments.addSynth();
+</code>
+</pre>
+<p class = "tutorial-text">
+You can either have a two tone synthesiser where the frequency of each oscillator is controller by a slider OR you can have a polyphonic (up to 8 voice) synth where the frequency is specified by either a provided sequence or MIDI controller. Defaults to false.
+</p>
+<pre>
+<code>
+instruments.synths[0].useFreqSliders(true);
+</code>
+</pre>
+<p class = "tutorial-text">
+You can specific the oscillator function for each
+</p>
+<pre>
+<code>
+//0 = sine, 1 = triangle, 2 = saw, 3 = noise
+instruments.synths[0].setOsc(2);
+</code>
+</pre>
+<p class = "tutorial-text">
+You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names.
+</p>
+<pre>
+<code>
+instruments.synths[0].mapped = ["frequency", "frequency2"];
+</code>
+</pre>
+<p class = "tutorial-text">
+5. MaxiSampler
+</p>
+<p class = "tutorial-text">
+Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 8 samples). They are stored in the instrument object’s .samplers property. Each will have its own GUI
+</p>
+<p class = "tutorial-text">
+Load each sample by passing the url and an index (of the 8 slots) to store the sample.
+</p>
+<pre>
+<code>
+instruments.samplers[0].loadSample("909.wav", 0);
+</code>
+</pre>
+<p class = "tutorial-text">
+Similarly to the MaxiSynth, you can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names.
+</p>
+<pre>
+<code>
+instruments.samplers[0].mapped = ["rate"];
+</code>
+</pre>
+<p class = "tutorial-text">
+6. Adding the Model
+</p>
+<p class = "tutorial-text">
+The instruments will work out how many outputs you need, given the mapped parameters you have specified
+</p>
+<pre>
+<code>
+learner.addRegression(instruments.getNumMappedOutputs(), false);
+</code>
+</pre>
+<p class = "tutorial-text">
+7. Providing the input
+</p>
+<p class = "tutorial-text">
+When you are providing a new example, the instruments object will give you all the current values of the mapped parameters of all your instruments with the getMappedOutputs() function
+</p>
+<pre>
+<code>
+learner.newExample(x, instruments.getMappedOutputs());
+</code>
+</pre>
+<p class = "tutorial-text">
+8. Responding to the output
+</p>
+<p class = "tutorial-text">
+The instruments object can update the mapped parameters provided by the model (in response to inputs) using the updateMappedOutputs(data) function.
+</p>
+<pre>
+<code>
+learner.onOutput = (data)=> {
+	instruments.updateMappedOutputs(data);
+ }
+</code>
+</pre>
+<p class = "tutorial-text">
+Controlling the Instruments
+</p>
+<p class = "tutorial-text">
+Both samplers and synths respond to simple noteon, noteoff commands. If you are using controlling the frequency of your synth externally, you should also provide a frequency.
+</p>
+<pre>
+<code>
+instruments.synths[0].noteon(440);
+instruments.synths[0].noteoff(440);
+</code>
+</pre>
+<p class = "tutorial-text">
+For samplers, noteoffs are not necessary and you provide the index of the sample you wish to trigger
+</p>
+<pre>
+<code>
+instruments.samplers[0].noteon(2);
+</code>
+</pre>
+<p class = "tutorial-text">
+You can also specify a sequence yourself.
+</p>
+<p class = "tutorial-text">
+Here are some examples sequenced in various ways, all using Posenet as an input
+<ul>
+  <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li>
+  <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li>
+  <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Hand coded seqeunce</a></li>
+</ul>
+</p>
+<p class = "tutorial-text">
+You can find a bunch of fun inputs <a href = "https://mimicproject.com/d/learner%20input/0/views">here</a>
+</p>

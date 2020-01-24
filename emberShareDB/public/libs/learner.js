@@ -77,6 +77,14 @@ class Learner {
     datalog.id = "datalog";
     parent.appendChild(datalog);
 
+    this.randomiseBtn = document.createElement("BUTTON");
+    this.randomiseBtn.onclick = ()=>{
+      this.randomise();
+    };
+    this.randomiseBtn.innerHTML = "Randomise";
+    this.randomiseBtn.style.display = "none";
+    parent.appendChild(this.randomiseBtn);
+
     this.guiParent = parent;
 
     this.updateRows();
@@ -95,6 +103,7 @@ class Learner {
     if(gui)
     {
       let container = document.createElement("div");
+      this.randomiseBtn.style.display = "block";
       this.guiParent.appendChild(container);
       for(let i = 0; i < n; i++)
       {
@@ -126,6 +135,7 @@ class Learner {
     {
       let container = document.createElement("div");
       var selectList = document.createElement("select");
+      this.randomiseBtn.style.display = "none";
       selectList.id = "dropdown";
       selectList.onchange = ()=> {
         this.onOutput({data:selectList.selectedIndex, index:0});
@@ -219,6 +229,21 @@ class Learner {
     this.store.setItem(this.DATASET_KEY,[]).then(()=> {
 		this.updateRows();
     });
+  }
+
+  randomise() {
+    for(let i = 0; i < this.numOutputs; i++)
+    {
+      const rand = Math.random();
+      if(this.gui)
+      {
+        this.outputGUI[i].value = rand;
+      }
+      if(this.onOutput)
+      {
+		this.onOutput({index:i, data:rand});
+      }
+    }
   }
 
   print() {

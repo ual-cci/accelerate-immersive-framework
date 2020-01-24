@@ -1,0 +1,85 @@
+<p class = "tutorial-text">
+Learner.js
+</p>
+<p class = "tutorial-text">
+This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools.
+</p>
+<p class = "tutorial-text">
+Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
+</p>
+<p class = "tutorial-text">
+1. Initialise  the object
+</p>
+<pre>
+<code>
+const learner = new Learner();
+</code>
+</pre>
+<p class = "tutorial-text">
+2.  Add GUI
+</p>
+<p class = "tutorial-text">
+Give the learner the HTML element you want to attach the GUI to
+<pre>
+<code>
+learner.addGUI(document.getElementById("dataset"));
+</code>
+</pre>
+<p class = "tutorial-text">
+When you run the program you will see that you are given a number of simple controls including record, train, run, clear. You are also given a set of controls to set the output state. For classifiers, this will be a dropdown menu. For Regression models, this will be a slider per output.
+</p>
+<p class = "tutorial-text">
+3. Add Model
+</p>
+<p class = "tutorial-text">
+You can now specify a model to use. For regression (continuous values), use the code below, specifying the number of outputs you want to control.
+</p>
+<pre>
+<code>
+learner.addRegression(3)
+</code>
+</pre>
+<p class = "tutorial-text">
+For classification (discrete states), use the code below specifying the number of classes you wish to discriminate between
+</p>
+<pre>
+<code>
+learner.addClassification(4)
+</code>
+</pre>
+<p class = "tutorial-text">
+4. Add data
+</p>
+<p class = "tutorial-text">
+The learner expects to receive examples that are paired input and output mappings. For example, you could add the x and y position of the mouse every time it is moved (the input), paired with the current colour of canvas object (the output).
+</p>
+<p class = "tutorial-text">
+If you are recording, every time you add a new example the pairing is stored in the dataset. If you are running, just the input is used and given to the model, which then provides a new output based on the data it has seen.
+</p>
+<p class = "tutorial-text">
+Use the code below to add and array of inputs and an array of outputs.
+</p>
+<pre>
+<code>
+learner.newExample(x, y);
+</code>
+</pre>
+<p class = "tutorial-text">
+5. Respond to outputs
+</p>
+<p class = "tutorial-text">
+Finally, you should specify a function the is called when an a new output value is available. When you are not running, this will be in response to the GUI (the dropdown or the sliders) changing. If you are running, this will be the models response to an input. The function returns a data object, which has an index property (specifying which output it relates to) and a data property, giving the new value. Below is an example of the new value being stored in an array (y). Obviously, you can do something more fun.
+</p>
+<pre>
+<code>
+learner.onOutput = (data)=> {
+  y[data.index] = data.data;
+});
+</code>
+</pre>
+
+<p class = "tutorial-text">
+You can find a bunch of fun inputs <a href = "https://mimicproject.com/d/learner%20input/0/views">here</a>
+</p>
+
+</p>

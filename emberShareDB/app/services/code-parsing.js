@@ -168,8 +168,8 @@ export default Service.extend({
   },
   insertDatasetId(src, docId)
   {
-    const toFind = /new Dataset\(\)/g;
-    const replace = "new Dataset(\"" + docId + "\")";
+    const toFind = /new Learner\(\)/g;
+    const replace = "new Learner(\"" + docId + "\")";
     const newSrc = src.replace(toFind, replace);
     return newSrc;
   },

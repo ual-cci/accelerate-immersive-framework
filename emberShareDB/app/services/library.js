@@ -11,6 +11,9 @@ export default Service.extend({
     {title:"SoundJS", id:"SoundJS", url:"soundjs.js"},
     {title:"EvoLib", id:"evolib", url:"evolib.js"},
     {title:"Chrome Auto Player", id:"chromeplayer", url:"chrome-player.js"},
+    {title:"RapidLib", id:"rapidlib", url:"rapidLib.js"},
+    {title:"Learner.js", id:"learner", url:"learner.js"},
+    {title:"Maxi Instrument", id:"maxiinstrument", url:"maxiInstruments.js"},
   ],
   url(id) {
     let url = ""

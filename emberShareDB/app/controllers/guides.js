@@ -31,4 +31,12 @@ export default Controller.extend({
     this.get('cs').log(this.get('model'))
     return this.get('model').id == "kadenze"
   }),
+  isLearner:computed('model', function() {
+    this.get('cs').log(this.get('model'))
+    return this.get('model').id == "learner"
+  }),
+  isMaxiInstruments:computed('model', function() {
+    this.get('cs').log("IS MAXI", this.get('model').id == "maxi-instruments");
+    return this.get('model').id == "maxi-instrument"
+  }),
 });

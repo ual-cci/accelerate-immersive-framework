@@ -234,13 +234,13 @@ class MaxiSynth {
     }
   }
 
-  setInputMode(p) {
+  useFreqSliders(p) {
     const param = this.node.parameters.get("poly");
     if(param)
     {
-      param.setValueAtTime(p ? 1 : 0, this.context.currentTime)
+      param.setValueAtTime(p ? 0 : 1, this.context.currentTime)
     }
-    const vis = p ? "hidden" : "visible"
+    const vis = p ? "visible" : "hidden"
     let elem = document.getElementsByClassName("cell_frequency");
     for (let e of elem) {
       e.style.visibility = vis;

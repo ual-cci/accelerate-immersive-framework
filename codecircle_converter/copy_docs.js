@@ -11,7 +11,7 @@ const CODE_CIRCLE_USER_ID = "476c9092-5d8a-747d-7089-9b4af31fddae"
 const CODE_CIRCLE_USER_NAME = "codecircle"
 const ASSET_SERVING_PORT = 3000
 const cc_mongoIP = "127.0.0.1";
-const cc_mongoPort = "27018";
+const cc_mongoPort = "27017";
 const cc_contentDBName = "cc_documents";
 const MIMIC_API_URL = "https://dev.codecircle.gold.ac.uk/api"
 //const MIMIC_API_URL = "http://localhost:8080"
@@ -20,6 +20,9 @@ const app = express();
 let token = "";
 var FormData = require('form-data');
 var toArray = require('stream-to-array')
+
+const csv = require('csv-parser');
+const fs = require('fs');
 
 const upload =
 [
@@ -52,28 +55,30 @@ app.options("/*", function(req, res, next){
 var server = http.createServer(app);
 server.listen(ASSET_SERVING_PORT);
 
-mongo.MongoClient.connect(cc_mongoUri, (err, client)=> {
-  if(err)
-  {
-    console.log("DOCUMENT MODEL - error connecting to database", err);
-  }
-  else
-  {
-    console.log("Connected successfully to server");
-    db = client.db(cc_contentDBName);
-    gridFS = Grid(db, mongo);
-    app.get('/asset/:id', (req, res)=> {
-      console.log("serving",req.params.id)
-       var readstream = gridFS.createReadStream({
-          _id: req.params.id
-       });
-       readstream.pipe(res);
-    });
-    upload.forEach((doc)=> {
-      transferDoc(doc)
-    })
-  }
-});
+var doTransfer = ()=> {
+  mongo.MongoClient.connect(cc_mongoUri, (err, client)=> {
+    if(err)
+    {
+      console.log("DOCUMENT MODEL - error connecting to database", err);
+    }
+    else
+    {
+      console.log("Connected successfully to server");
+      db = client.db(cc_contentDBName);
+      gridFS = Grid(db, mongo);
+      app.get('/asset/:id', (req, res)=> {
+        console.log("serving",req.params.id)
+         var readstream = gridFS.createReadStream({
+            _id: req.params.id
+         });
+         readstream.pipe(res);
+      });
+      upload.forEach((doc)=> {
+        transferDoc(doc)
+      })
+    }
+  });
+}
 
 
 var transferDoc = (docid)=> {
@@ -96,9 +101,100 @@ var transferDoc = (docid)=> {
     })
   }).catch(err=>reject(err))
 }
+const ccDataDir = "/Users/louismccallum/Documents/programming/MIMIC/codecircle_data_analysis/"
+var readCSV = ()=> {
+  return new Promise((resolve, reject)=> {
+    let ids = [];
+    fs.createReadStream(ccDataDir + 'doc_data.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        ids.push(row[Object.getOwnPropertyNames(row)[0]]);
+      })
+      .on('end', () => {
+        console.log('CSV file successfully processed');
+        resolve(ids);
+      });
+  });
+}
+
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const csvWriter = createCsvWriter({
+  path: ccDataDir + 'namesanddates.csv',
+  header: [
+    {id:'docid', title:'docid'},
+    {id: 'username', title: 'username'},
+    {id: 'created', title: 'created'},
+    {id:'length', title:'length'}
+  ]
+});
+var writeCSV = (data)=> {
+  return new Promise((resolve, reject)=> {
+    csvWriter.writeRecords(data).then(()=> {
+      console.log('The CSV file was written successfully');
+      resolve();
+    });
+  });
+}
+
+var getData = async (ids)=> {
+  console.log(ids)
+  return new Promise((resolve, reject)=> {
+    mongo.MongoClient.connect(cc_mongoUri, async (err, client)=> {
+      if(err)
+      {
+        console.log("DOCUMENT MODEL - error connecting to database", err);
+      }
+      else
+      {
+        db = client.db(cc_contentDBName);
+        let list = [];
+        var fn = async ()=> {
+          for(const doc of ids) {
+            await getUsernameAndDate(doc).then((data)=>{
+              var d = new Date(data[1])
+              list.push({docid:doc, username:data[0], created:d.getTime(), length:data[2]});
+            });
+          };
+          resolve(list);
+        }
+        fn();
+      }
+    });
+  });
+}
+
+readCSV().then((ids)=>{
+  getData(ids).then((data)=> {
+    writeCSV(data);
+  });
+});
+
+var getUsernameAndDate = async (docid)=> {
+  console.log("get data...", docid)
+  return new Promise((resolve, reject)=> {
+    getSnapshot(docid).then((snapshot)=> {
+      getDocumentData(docid).then((doc)=> {
+        let count = (main_str, sub_str)=>
+        {
+        main_str += '';
+        sub_str += '';
+
+        if (sub_str.length <= 0)
+        {
+            return main_str.length + 1;
+        }
+
+           subStr = sub_str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+           return (main_str.match(new RegExp(subStr, 'gi')) || []).length;
+        }
+        resolve([doc.username, doc.createdOn, count(snapshot, "\n")])
+      })
+    })
+  }).catch(err=>reject(err));
+}
 
 
-var getSnapshot = (docid) =>
+var getSnapshot = async (docid) =>
 {
   console.log("getting snapshot for", docid)
   return new Promise((resolve, reject)=> {
@@ -118,7 +214,7 @@ var getSnapshot = (docid) =>
   })
 }
 
-var getDocumentData = (docid) => {
+var getDocumentData = async (docid) => {
   console.log("getting document data for", docid)
   return new Promise((resolve, reject)=> {
     let docsCollections = "documents"
