@@ -49,11 +49,11 @@ class Learner {
       parent = p;
     }
     //parent.style.display = "none";
-    const table = document.createElement("TABLE");
-    parent.appendChild(table)
+
     this.selectorContainer = document.createElement('div');
     parent.appendChild(this.selectorContainer)
-
+   	const table = document.createElement("TABLE");
+    parent.appendChild(table)
     let row = table.insertRow();
     let cell = row.insertCell();
     let recBtn = document.createElement("BUTTON");
@@ -111,6 +111,9 @@ class Learner {
     datalog.id = "datalog";
     cell.appendChild(datalog);
 
+    const title = document.createElement("span");
+    title.innerHTML = "Select your outputs"
+    this.selectorContainer.appendChild(title);
     this.randomiseBtn = document.createElement("BUTTON");
     this.randomiseBtn.onclick = ()=>{
       this.randomise();

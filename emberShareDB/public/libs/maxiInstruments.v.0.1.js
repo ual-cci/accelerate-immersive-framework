@@ -13,8 +13,17 @@ class MaxiInstruments {
     };
     nexusUI.src = 'https://mimicproject.com/libs/nexusUI.js';
     document.getElementsByTagName('head')[0].appendChild(nexusUI);
-    this.synthWorkletUrl = "https://mimicproject.com/libs/maxiSynthProcessor.js";
-    this.samplerWorkletUrl = "https://mimicproject.com/libs/maxiSamplerProcessor.js";
+    this.version = "v.0.1";
+  }
+
+  getSynthName()
+  {
+    return "https://mimicproject.com/libs/maxiSynthProcessor." + this.version + ".js";
+  }
+
+  getSamplerName()
+  {
+    return "https://mimicproject.com/libs/maxiSamplerProcessor." + this.version + ".js";
   }
 
   getInstruments() {
@@ -75,8 +84,10 @@ class MaxiInstruments {
           //
           this.audioContext = new AudioContext({latencyHint:'playback', sample: 44100});
           Promise.all([
-              this.loadModule(this.synthWorkletUrl),
-              this.loadModule(this.samplerWorkletUrl)
+			      this.loadModule(this.getSynthName()),
+            this.loadModule(this.getSamplerName())
+              // this.loadModule(synthWorkletUrl),
+              // this.loadModule(samplerWorkletUrl)
           ]).then(()=> {
             resolve();
           }).catch((err)=> {
