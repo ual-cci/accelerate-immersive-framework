@@ -13,8 +13,8 @@ class MaxiInstruments {
     };
     nexusUI.src = 'https://mimicproject.com/libs/nexusUI.js';
     document.getElementsByTagName('head')[0].appendChild(nexusUI);
-    this.synthWorkletUrl = "https://mimicproject.com/libs/maxiSynthProcessor.v.0.1.js";
-    this.samplerWorkletUrl = "https://mimicproject.com/libs/maxiSamplerProcessor.v.0.1js";
+    this.synthWorkletUrl = "https://mimicproject.com/libs/maxiSynthProcessor.js";
+    this.samplerWorkletUrl = "https://mimicproject.com/libs/maxiSamplerProcessor.js";
   }
 
   getInstruments() {
@@ -75,8 +75,8 @@ class MaxiInstruments {
           //
           this.audioContext = new AudioContext({latencyHint:'playback', sample: 44100});
           Promise.all([
-              this.loadModule(synthWorkletUrl),
-              this.loadModule(samplerWorkletUrl)
+              this.loadModule(this.synthWorkletUrl),
+              this.loadModule(this.samplerWorkletUrl)
           ]).then(()=> {
             resolve();
           }).catch((err)=> {
@@ -149,8 +149,8 @@ class MaxiInstrument {
     const len = asTime.totalTime * 44100;
    	let toAdd = [];
     notes.forEach((n)=> {
-      toAdd.push({cmd:"noteon", f:Nexus.mtof(n.pitch), t:n.startTime * 44100});
-      toAdd.push({cmd:"noteoff", f:Nexus.mtof(n.pitch), t:n.endTime * 44100});
+      toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:n.startTime * 44100});
+      toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:n.endTime * 44100});
     });
     this.node.port.postMessage({sequence:toAdd});
     this.node.port.postMessage({length:len});
@@ -293,6 +293,11 @@ class MaxiSynth extends MaxiInstrument {
     return window.frameElement.name + "_synth_" + this.index;
   }
 
+  getFreq(n)
+  {
+    return Nexus.mtof(n);
+  }
+
   addGUI(element) {
     const rowLength = 4;
     const table = document.createElement("TABLE");
@@ -403,6 +408,11 @@ class MaxiSampler extends MaxiInstrument {
         this.scale[v+"_"+i] = coreScale[v]
       });
     }
+  }
+
+  getFreq(n)
+  {
+    return n;
   }
 
   getParamKey()
