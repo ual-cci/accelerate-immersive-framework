@@ -168,7 +168,7 @@ class MaxiSamplerProcessor extends AudioWorkletProcessor {
         let rate = parameters['rate_'+i][0]
         let gain = parameters['gain_' + i][0];
         //let gain = i == 0 ? 1:0;
-      	this.dcoOut += s.playOnce(1) * gain;
+      	this.dcoOut += s.playOnce(rate) * gain;
       }
       this.adsr[index].trigger = 0;
       index++;

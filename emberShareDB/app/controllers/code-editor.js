@@ -74,6 +74,7 @@ export default Controller.extend({
   scrollPositions:{},
   isRoot:true,
   isMobile:false,
+  iframeTitle:"title",
 
   showHUD:true,
   hudMessage:"Loading...",
@@ -380,6 +381,7 @@ export default Controller.extend({
     this.get('cs').log("isMobile", this.get('isMobile'));
     document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
     return new RSVP.Promise((resolve, reject) => {
+      this.set("iframeTitle", this.get('model').id)
       const doc = this.get('currentDoc');
       this.get('opsPlayer').reset(doc.id);
       const editor = this.get('editor');

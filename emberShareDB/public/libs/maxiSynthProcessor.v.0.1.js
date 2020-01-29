@@ -7,7 +7,7 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
       },
       {
         name: 'poly',
-        defaultValue: 1.0
+        defaultValue: 0.0
       },
       {
         name: 'oscFn',
@@ -240,7 +240,7 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
       if(nextCmd.cmd === "noteon")
       {
         const o =  this.getAvailableOsc();
-        console.log("on", f, o);
+        //console.log("on", f, o);
         if(o >= 0)
         {
           this.adsr[o].setAttack(this.parameters.attack[0]);
@@ -262,7 +262,7 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
           if(release >= 0)
           {
             this.adsr[release].trigger = 0;
-            console.log("off", f, release);
+            //console.log("off", f, release);
             const t =  this.getTriggeredForFreq(f);
             this.released.push({f:f, o:release, off:releaseTime});
             this.remove(this.triggered, this.triggered[t]);

@@ -1,6 +1,7 @@
 class Learner {
 
   constructor(docId) {
+    docId = window.frameElement.name;
     this.outputGUI = [];
     this.classifier = true;
     this.recordingRound = 0;
@@ -10,6 +11,8 @@ class Learner {
     this.y = [];
     this.numOutputs = 1;
     this.gui = false;
+    this.recLimit = 0;
+    this.countIn = 0;
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.async = true;
@@ -45,49 +48,68 @@ class Learner {
     {
       parent = p;
     }
+    //parent.style.display = "none";
+    const table = document.createElement("TABLE");
+    parent.appendChild(table)
     this.selectorContainer = document.createElement('div');
     parent.appendChild(this.selectorContainer)
+
+    let row = table.insertRow();
+    let cell = row.insertCell();
     let recBtn = document.createElement("BUTTON");
     recBtn.id = "rec-btn";
     recBtn.onclick = ()=>{
       this.record();
     };
     recBtn.innerHTML = "Record";
-    parent.appendChild(recBtn);
+    cell.appendChild(recBtn);
+    cell = row.insertCell();
+    const countDown = document.createElement('span')
+    countDown.id = "countdown-span";
+    cell.appendChild(countDown);
 
+	row = table.insertRow();
+    cell = row.insertCell();
     let trainBtn = document.createElement("BUTTON");
     trainBtn.id = "train-btn";
     trainBtn.onclick = ()=>{
       this.train();
     };
     trainBtn.innerHTML = "Train";
-    parent.appendChild(trainBtn);
+    cell.appendChild(trainBtn);
 
+    row = table.insertRow();
+    cell = row.insertCell();
     let runBtn = document.createElement("BUTTON");
     runBtn.id = "run-btn";
     runBtn.onclick = ()=>{
       this.run();
     };
     runBtn.innerHTML = "Run";
-    parent.appendChild(runBtn);
+    cell.appendChild(runBtn);
 
+    row = table.insertRow();
+    cell = row.insertCell();
     let deleteLastBtn = document.createElement("BUTTON");
     deleteLastBtn.onclick = ()=>{
       this.deleteLastRound();
     };
     deleteLastBtn.innerHTML = "Delete Last Round";
-    parent.appendChild(deleteLastBtn);
+    cell.appendChild(deleteLastBtn);
 
+    cell = row.insertCell();
     let deleteBtn = document.createElement("BUTTON");
     deleteBtn.onclick = ()=>{
       this.clear();
     };
     deleteBtn.innerHTML = "Clear";
-    parent.appendChild(deleteBtn);
+    cell.appendChild(deleteBtn);
 
+    row = table.insertRow();
+    cell = row.insertCell();
     let datalog = document.createElement('span')
     datalog.id = "datalog";
-    parent.appendChild(datalog);
+    cell.appendChild(datalog);
 
     this.randomiseBtn = document.createElement("BUTTON");
     this.randomiseBtn.onclick = ()=>{
@@ -95,7 +117,7 @@ class Learner {
     };
     this.randomiseBtn.innerHTML = "Randomise";
     this.randomiseBtn.style.display = "none";
-    parent.appendChild(this.randomiseBtn);
+    this.selectorContainer.appendChild(this.randomiseBtn);
 
     this.guiParent = parent;
 
@@ -194,6 +216,14 @@ class Learner {
     });
   }
 
+  setCountIn(val) {
+    this.countIn = val;
+  }
+
+  setRecordLimit(val) {
+    this.recLimit = val;
+  }
+
   newExample(input, y) {
     if(this.recording)
     {
@@ -248,16 +278,65 @@ class Learner {
     this.updateButtons();
   }
 
+  limitRecord() {
+    let timeLeft = this.recLimit;
+    const label = document.getElementById("countdown-span");
+    this.stopInterval = setInterval(()=>{
+      timeLeft -= 1;
+      label.innerHTML = "stopping in " + timeLeft + " secs"
+    }, 1000);
+    this.stopTimeout = setTimeout(()=>{
+      this.stopTimeout = null;
+      this.record();
+    }, this.countIn * 1000)
+  }
+
   record() {
-    this.running = false;
-    this.recording = !this.recording;
-    if(!this.recording)
+    if(this.stopInterval)
     {
-      this.save();
+      clearTimeout(this.stopTimeout);
+      clearInterval(this.stopInterval);
+      this.stopInterval = null;
+      this.stopTimeout = null;
+      const label = document.getElementById("countdown-span");
+      label.innerHTML = "";
     }
-    this.updateButtons();
-    const run = document.getElementById("run-btn");
-    run.disabled = true;
+    const doRun = ()=> {
+      this.running = false;
+      this.recording = !this.recording;
+      if(!this.recording)
+      {
+        this.save();
+      }
+      else if(this.recLimit > 0)
+      {
+		this.limitRecord();
+      }
+      this.updateButtons();
+      const run = document.getElementById("run-btn");
+      run.disabled = true;
+    }
+    if(this.countIn > 0 && !this.recording)
+    {
+      let timeLeft = this.countIn;
+      const label = document.getElementById("countdown-span");
+      const rec = document.getElementById("rec-btn");
+      rec.disabled = true;
+      let interval = setInterval(()=>{
+        timeLeft -= 1;
+        label.innerHTML = "recording in " + timeLeft + " secs"
+      }, 1000);
+      setTimeout(()=>{
+        clearInterval(interval);
+        label.innerHTML = "";
+        rec.disabled = false;
+        doRun();
+      }, this.countIn * 1000)
+    }
+    else
+    {
+      doRun();
+    }
   }
 
   clear() {
