@@ -111,9 +111,10 @@ class Learner {
     datalog.id = "datalog";
     cell.appendChild(datalog);
 
-    const title = document.createElement("span");
-    title.innerHTML = "Select your outputs"
-    this.selectorContainer.appendChild(title);
+    this.outputLabel = document.createElement("span");
+    this.outputLabel.innerHTML = "Select your outputs"
+    this.outputLabel.style.display = "none";
+    this.selectorContainer.appendChild(this.outputLabel);
     this.randomiseBtn = document.createElement("BUTTON");
     this.randomiseBtn.onclick = ()=>{
       this.randomise();
@@ -141,6 +142,7 @@ class Learner {
     {
       let container = this.selectorContainer;
       this.randomiseBtn.style.display = "block";
+      this.outputLabel.style.display = "block";
       for(let i = 0; i < n; i++)
       {
         let slider = document.createElement('input');
