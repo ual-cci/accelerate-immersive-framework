@@ -8,6 +8,10 @@ This is a quick walkthrough of how to use Learner.js on the MIMIC platform to qu
 Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
 </p>
 <p class = "tutorial-text">
+If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way. 
+</p>
+
+<p class = "tutorial-text">
 1. Set up
 </p>
 <p class = "tutorial-text">
@@ -80,7 +84,7 @@ learner.newExample(x, y);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can also use the following functions to provide a count in to recording, this will delay the start of recording the given number of seconds after the "record" button has been pressed. You can also choose to limit recording time, again specifying a given number of seconds beforehand you want to record for before it is automatically shut off. Both default to 0. 
+You can also use the following functions to provide a count in to recording, this will delay the start of recording the given number of seconds after the "record" button has been pressed. You can also choose to limit recording time, again specifying a given number of seconds beforehand you want to record for before it is automatically shut off. Both default to 0.
 <pre>
 <code>
 learner.setCountIn(5)
@@ -108,7 +112,7 @@ learner.onOutput = (data)=> {
 </pre>
 
 <p class = "tutorial-text">
-You can find a bunch of fun inputs <a href = "https://mimicproject.com/d/learner%20input/0/views">here</a>
+You can find a bunch of fun inputs <a href = "https://mimicproject.com/inputs">here</a>
 </p>
 
 </p>

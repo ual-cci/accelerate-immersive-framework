@@ -59,7 +59,7 @@ export default Controller.extend({
         });
         user.save().then(() => {
           this.get('cs').log("user created");
-          this.set('registerMessage', 'user created');
+          this.set('registerMessage', 'Your new user account has been created, please sign in to continue');
         }).catch((err) => {
           this.get('cs').log(err);
           this.set('registerMessage', 'Error:' + err);

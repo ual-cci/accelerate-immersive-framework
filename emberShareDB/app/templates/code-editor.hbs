@@ -6,7 +6,7 @@
   {{else}}
   <div id = "doc-title-container">
     {{#if isNotEdittingDocName}}
-      <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
+        <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
     {{else}}
       {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
@@ -216,6 +216,16 @@
             <div></div>
             {{else}}
             <div id = "playback-container">
+              <p class = "side-menu-label">code</p>
+              <div class="tooltip">
+                <span class="tooltiptext">Play / Pause program</span>
+              {{#bs-button
+                class = "clear-btn"
+                id = "embedded-run-button"
+                icon="glyphicon glyphicon-play"
+                onClick=(action "playOrPause") }}
+              {{/bs-button}}
+            </div>
               {{ops-player
                 onSkip = (action 'skipOp')
                 onPlay = (action 'playOps')
@@ -223,7 +233,7 @@
                 onPause = (action 'pauseOps')
                 isPlaying = isPlayingOps
               }}
-              {{#bs-button
+              <!-- {{#bs-button
                 class = "clear-btn"
                 icon="glyphicon glyphicon-zoom-in"
                 onClick=(action "zoomIn")}}
@@ -232,7 +242,7 @@
                 class = "clear-btn"
                 icon="glyphicon glyphicon-zoom-out"
                 onClick=(action "zoomOut")}}
-              {{/bs-button}}
+              {{/bs-button}} -->
             </div>
             {{/if}}
             {{/if}}

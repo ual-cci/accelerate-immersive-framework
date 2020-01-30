@@ -12,7 +12,9 @@ export default Controller.extend({
       //Audio features
       {docid:"c339340d-bd82-f0e1-5929-edb9a206b319",desc:"An example of using Nick Collins MMLL.js library to get a range of audio features from either the microphone or audio file. Features include spectral percentile, sensory dissonance and brightness (spectral centroid)"},
       //Chords
-      {docid:"db87ed04-9d7a-5cfc-a218-dd9cc9580929",desc:"An example of using Nick Collins MMLL.js library to get a chords and tempo from either the microphone or audio file. Chords are recorded on each beat."},
+      {docid:"db87ed04-9d7a-5cfc-a218-dd9cc9580929",desc:"An example of using Nick Collins MMLL.js library to get a chords and tempo from either the microphone or audio file. Chords are recorded every time they change, along with the time interval since the last change."},
+      //pitch
+      {docid:"41a3320b-d2d1-983a-05db-8f9f6ce8d693",desc:"An example of using Nick Collins MMLL.js library to get a [itch] and tempo from either the microphone or audio file. Pitch is recorded on each beat."},
       //Speech to Text
       {docid:"9f28c6b2-eb52-141c-a447-472f2e9e2669",desc:"Using the native in browser speech to text. Each time you speak, the text is transcribed, encoded into a vector and inputted into the dataset / model"},
     ]},
@@ -25,16 +27,19 @@ export default Controller.extend({
       {docid:"48d5b6d9-794e-97d4-a16e-4780cf6c4a8c",desc:"Uses the ml5 / tensorflow Posenet model to provide full skeleton, possible for multi person"},
       //Emotions
       {docid:"d87b4f42-c131-ca7a-127f-c6df8f475329",desc:"Uses FaceAPI to provide inputs for 9 emotion categories from face analysis"},
+      //Coco Object Detection
+      {docid:"f0f185b8-4b13-8f83-f815-872d6556c47e",desc:"Uses the Tensorflow Coco object detector. Provides labels and bounding boxes for objects, this example adds the bounding box for any objects identified as people."},
+
     ]},
     {title:"Sensors", docs:[
       //Microbit
-      {docid:"90def343-a896-31d4-d818-20d89b9bc631",desc:"Uses the BodyPix model to provide full skeleton / body segmentation, possible for multi person"},
+      {docid:"f7686716-7c64-c87c-b413-07fb8828fafc",desc:"Connect to a BBC Micro:bit using WebBLE. Records accelerometer values. Code modified from https://github.com/antefact/microBit.js. Visit here to download firmware to upload onto your microbit"},
     ]},
     {title:"Text", docs:[
       //Sentiment
-      {docid:"90def343-a896-31d4-d818-20d89b9bc631",desc:"Uses the BodyPix model to provide full skeleton / body segmentation, possible for multi person"},
+      {docid:"62050fce-d4a9-7aaa-e563-51a8992e1d45",desc:"Uses a Sentiment analysis model from Tensorflow. Three text boxes are used as input and their respective sentiments are used as inputs to the model / dataset"},
       //Toxicity
-      {docid:"90def343-a896-31d4-d818-20d89b9bc631",desc:"Uses the BodyPix model to provide full skeleton / body segmentation, possible for multi person"},
+      {docid:"c6c5ab4d-d7fa-a4c5-1793-dc1f99d1f16e",desc:"Uses a Toxicity analysis model from Tensorflow. Text input is used and the respective toxicity probabilities for 7 categories are used as inputs to the model / dataset"},
     ]},
 
   ],
