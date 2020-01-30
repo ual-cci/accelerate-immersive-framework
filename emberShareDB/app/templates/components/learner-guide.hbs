@@ -8,7 +8,18 @@ This is a quick walkthrough of how to use Learner.js on the MIMIC platform to qu
 Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
 </p>
 <p class = "tutorial-text">
-1. Initialise  the object
+1. Set up
+</p>
+<p class = "tutorial-text">
+Include the library
+</p>
+<pre>
+<xmp>
+&lt;script src = "https://mimicproject.com/libs/learner.v.0.1.js"&gt;&lt;/script&gt;
+</xmp>
+</pre>
+<p class = "tutorial-text">
+Initialise the object
 </p>
 <pre>
 <code>
@@ -54,7 +65,11 @@ learner.addClassification(4)
 The learner expects to receive examples that are paired input and output mappings. For example, you could add the x and y position of the mouse every time it is moved (the input), paired with the current colour of canvas object (the output).
 </p>
 <p class = "tutorial-text">
-If you are recording, every time you add a new example the pairing is stored in the dataset. If you are running, just the input is used and given to the model, which then provides a new output based on the data it has seen.
+It is important to note that one piece of code (below) serves two purposes.
+<ul>
+  <li>If you are <strong>recording</strong>, every time you add a new example the pairing is stored in the dataset.</li>
+  <li>If you are <strong>running</strong>, just the input is used and given to the model, which then provides a new output based on the data it has seen.</li>
+</ul>
 </p>
 <p class = "tutorial-text">
 Use the code below to add and array of inputs and an array of outputs.
@@ -65,15 +80,29 @@ learner.newExample(x, y);
 </code>
 </pre>
 <p class = "tutorial-text">
+You can also use the following functions to provide a count in to recording, this will delay the start of recording the given number of seconds after the "record" button has been pressed. You can also choose to limit recording time, again specifying a given number of seconds beforehand you want to record for before it is automatically shut off. Both default to 0. 
+<pre>
+<code>
+learner.setCountIn(5)
+learner.setRecordLimit(5)
+</code>
+</pre>
+</p>
+<p class = "tutorial-text">
 5. Respond to outputs
 </p>
 <p class = "tutorial-text">
-Finally, you should specify a function the is called when an a new output value is available. When you are not running, this will be in response to the GUI (the dropdown or the sliders) changing. If you are running, this will be the models response to an input. The function returns a data object, which has an index property (specifying which output it relates to) and a data property, giving the new value. Below is an example of the new value being stored in an array (y). Obviously, you can do something more fun.
+Finally, you should specify a function the is called when an a new output value is available. Again this function serves two purposes with one piece of code.
+<ul>
+  <li>When you are  <strong>not running</strong>, this will be in response to the GUI (the dropdown or the sliders) changing. </li>
+  <li>If you are  <strong>running</strong>, this will be the models response to an input. </li>
+</ul>
+The function returns an array of output values. Obviously, you can do something more fun.
 </p>
 <pre>
 <code>
 learner.onOutput = (data)=> {
-  y[data.index] = data.data;
+  y = data;
 });
 </code>
 </pre>

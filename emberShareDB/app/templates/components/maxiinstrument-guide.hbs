@@ -2,15 +2,28 @@
 MaxiInstruments
 </p>
 <p class = "tutorial-text">
-MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the learner.js library. They are AudioWorklets so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
+MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the learner.js library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
 <p class = "tutorial-text">
-1. Initialise the object
+1. Set up
+</p>
+<p class = "tutorial-text">
+Include the library
+</p>
 <pre>
 <code>
-const instruments = new MaxiInstruments();
+&lt;script src = "https://mimicproject.com/libs/maxiInstruments.v.0.1.js"&gt;&lt;/script&gt;
 </code>
 </pre>
+<p class = "tutorial-text">
+Initialise the object
+</p>
+<pre>
+<code>
+const maxiInstruments = new MaxiInstruments();
+</code>
+</pre>
+
 <p class = "tutorial-text">
 2. Add the GUI
 </p>
@@ -37,7 +50,6 @@ instruments.loadModules().then(()=> {
 });
 </code>
 </pre>
-</p>
 <p class = "tutorial-text">
 4. MaxiSynth
 </p>
@@ -70,7 +82,7 @@ instruments.synths[0].setOsc(2);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names.
+You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. The code below shows how you would select the frequencies of the two oscillators to be controlled by your regression model.
 </p>
 <pre>
 <code>
@@ -78,13 +90,16 @@ instruments.synths[0].mapped = ["frequency", "frequency2"];
 </code>
 </pre>
 <p class = "tutorial-text">
+The synth also has a Randomise button that will select random values for your selected parameters. This can help you find fun sounds when making your own mappings.
+</p>
+<p class = "tutorial-text">
 5. MaxiSampler
 </p>
 <p class = "tutorial-text">
-Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 8 samples). They are stored in the instrument object’s .samplers property. Each will have its own GUI
+Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 4 samples). They are stored in the instrument object’s .samplers property. Each will have its own GUI
 </p>
 <p class = "tutorial-text">
-Load each sample by passing the url and an index (of the 8 slots) to store the sample.
+Load each sample by passing the url and an index (of the 4 slots) to store the sample.
 </p>
 <pre>
 <code>
@@ -103,8 +118,9 @@ instruments.samplers[0].mapped = ["rate"];
 6. Adding the Model
 </p>
 <p class = "tutorial-text">
-The instruments will work out how many outputs you need, given the mapped parameters you have specified
+You can now start mapping your chosen parameters to a given input using the Learner.js library. More information about this  can ben found in this <a href = "https://mimicproject.com/guides/learner">guide</a>. The instruments will work out how many outputs you need, given the mapped parameters you have specified. The second argument of "false" tells Learner.js that you don't need an additional GUI for your regression model, because you have the GUI provided by the instrument.
 </p>
+
 <pre>
 <code>
 learner.addRegression(instruments.getNumMappedOutputs(), false);
@@ -115,6 +131,13 @@ learner.addRegression(instruments.getNumMappedOutputs(), false);
 </p>
 <p class = "tutorial-text">
 When you are providing a new example, the instruments object will give you all the current values of the mapped parameters of all your instruments with the getMappedOutputs() function
+</p>
+<p class = "tutorial-text">
+It is important to note that one piece of code (below) serves two purposes.
+<ul>
+  <li>If you are <strong>recording</strong>, every time you add a new example the pairing is stored in the dataset.</li>
+  <li>If you are <strong>running</strong>, just the input is used and given to the model, which then provides a new output based on the data it has seen.</li>
+</ul>
 </p>
 <pre>
 <code>
@@ -135,7 +158,7 @@ learner.onOutput = (data)=> {
 </code>
 </pre>
 <p class = "tutorial-text">
-Controlling the Instruments
+9. Controlling the Instruments
 </p>
 <p class = "tutorial-text">
 Both samplers and synths respond to simple noteon, noteoff commands. If you are using controlling the frequency of your synth externally, you should also provide a frequency.
@@ -155,8 +178,55 @@ instruments.samplers[0].noteon(2);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can also specify a sequence yourself.
+You can also specify a sequence yourself. We use the same structure of NoteSequence used by Google's Magenta project. This aved us some time and makes the libraries nicely interchangeable. This does mean that if you are going to use your own sequences, you will have to include the Magenta libary using the code below.
 </p>
+<pre>
+<code>
+&lt;script src = "https://cdn.jsdelivr.net/npm/@magenta/music@1.11.0"&gt;&lt;/script&gt;
+</code>
+</pre>
+<p class = "tutorial-text">
+	Now you can specify as sequence given
+	<ul>
+		<li>A tempo</li>
+		<li>A definition of stepsPerQuarter. We define time in steps and this tells us how many represent a quarter note / crotchet</li>
+		<li>An array of notes objects, including pitch (MIDI), a start time and end time each in steps</li>
+		<li>A total length, also in steps</li>
+	</ul>
+	See the code below as an example
+</p>
+<pre>
+	<code>
+const inputSeq = {
+	tempos: [{time:0, qpm:80}],
+	notes:[{pitch:60, quantizedStartStep:0, quantizedEndStep:2},
+		{pitch:67, quantizedStartStep:4, quantizedEndStep:6}],
+	quantizationInfo:{stepsPerQuarter: 4},
+	totalQuantizedSteps:32,
+};
+	</code>
+</pre>
+<p class = "tutorial-text">
+	You can then set the sequence to the instrument
+</p>
+<pre>
+	<code>
+		instruments.synths[0].setSequence(inputSeq);
+	</code>
+</pre>
+<p class = "tutorial-text">
+	You can also input sequences generated from Magenta directly into the synths. Below is an example using one of Magenta's pretrained recurrent neural networks to complete the sequence given above, and playing it directly on a MaxiSynth.
+</p>
+<pre>
+	<code>
+let rnn = new mm.MusicRNN(MODEL_URL);
+rnn.initialize().then(()=> {
+	rnn.continueSequence(inputSeq, 32, 1.5).then((newSeq)=> {
+		instruments.synths[0].setSequence(newSeq);
+	});
+});
+	</code>
+</pre>
 <p class = "tutorial-text">
 Here are some examples sequenced in various ways, all using Posenet as an input
 <ul>

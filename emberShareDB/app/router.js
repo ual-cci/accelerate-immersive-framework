@@ -18,6 +18,7 @@ Router.map(function() {
   this.route('guides', { path: '/guides/:topic' });
   this.route('examples');
   this.route('api', {path:'/api/*endpoint'});
+  this.route('inputs');
 });
 
 export default Router;

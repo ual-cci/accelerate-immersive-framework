@@ -149,12 +149,12 @@ class Learner {
         slider.type = 'range';
         slider.min = 0;
         slider.max = 1;
-        slider.value = 0.5;
+        slider.value = 0;
         slider.step = 0.01;
         this.outputGUI.push(slider);
         this.y.push(0);
-        slider.onchange = ()=> {
-          this.y[i] = slider.value;
+        slider.onchange = ()=>{
+          this.y[i] = parseFloat(slider.value);
           this.onOutput(this.y);
         }
         container.appendChild(slider);
@@ -179,7 +179,7 @@ class Learner {
       selectList.id = "dropdown";
       this.y.push(0);
       selectList.onchange = ()=> {
-        this.y[0] = selectList.selectedIndex;
+        this.y[0] = parseInt(selectList.selectedIndex);
         this.onOutput(this.y)
       }
       container.appendChild(selectList);
@@ -240,6 +240,19 @@ class Learner {
       //RUN
       this.myWorker.postMessage({action:"run",data:input});
     }
+  }
+
+  updateOutput(index, val)
+  {
+      if(this.gui)
+      {
+        this.outputGUI[index].value = val;
+      }
+      this.y[index] = val;
+      if(this.onOutput)
+      {
+		this.onOutput(this.y)
+      }
   }
 
   setWorker(url) {
@@ -353,15 +366,7 @@ class Learner {
   randomise() {
     for(let i = 0; i < this.numOutputs; i++)
     {
-      const rand = Math.random();
-      if(this.gui)
-      {
-        this.outputGUI[i].value = rand;
-      }
-      if(this.onOutput)
-      {
-		this.onOutput({index:i, data:rand});
-      }
+	     this.updateOutput(i, Math.random());
     }
   }
 
