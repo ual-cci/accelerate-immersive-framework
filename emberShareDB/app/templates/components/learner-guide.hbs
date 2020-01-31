@@ -8,7 +8,10 @@ This is a quick walkthrough of how to use Learner.js on the MIMIC platform to qu
 Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
 </p>
 <p class = "tutorial-text">
-If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way. 
+If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way.
+</p>
+<p class = "tutorial-text">
+You can also find a bunch of fun inputs <a href = "https://mimicproject.com/inputs">here</a>
 </p>
 
 <p class = "tutorial-text">
@@ -110,9 +113,32 @@ learner.onOutput = (data)=> {
 });
 </code>
 </pre>
-
 <p class = "tutorial-text">
-You can find a bunch of fun inputs <a href = "https://mimicproject.com/inputs">here</a>
+External Outputs
+</p>
+<p class = "tutorial-text">
+  You can use the examples below to output with MIDI control message or OSC messages to control music or visual programs locally (Max/MSP, Supercollider, openFrameworks, Processing, PD etc....)
+<ul>
+<li><a href = "https://mimicproject.com/code/0105741f-2241-6bc0-7fa5-c2003ff8c4ca">MIDI example sketch </a></li>This uses WebMidi to send the output values as control changes. Note WebMidi is curently only supported in Chrome. You can send to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. First refresh devices, select your from the dropdown, then click "Connect".
+<li><a href = "https://mimicproject.com/code/247e4538-0366-b735-9052-0e875a96a140">OSC example sketch </a></li> As you cannot OSC directly form a browser, this connects to a local Node.js program via webosckets then forwards the data out via OSC, where you can do with it what you will.
+<ol>
+  <li>First, download the node program from <a href = "https://github.com/Louismac/osc-repeater">here</a>. </li>
+  <li>Install <a href = "http://(https//nodejs.org/en/download/)">node </a> if you dont have it on your laptop</li>
+  <li>In the terminal (OSX) or command-prompt (windows), navigate (cd) to the folder you unzipped to code to and run
+  <pre>
+  <code>
+    npm install & node osc-repeater.js
+  </code>
+  </pre>
+  </li>
+  <li>This should now forward the outputs from MIMIC to the port you have specfied in the code (defaults to 57120).</li>
+</ol>
+</ul>
+</p>
+<p class = "tutorial-text">
+6. Now be free and make amazing projects! 
+</p>
+<p class = "tutorial-text">You can find a bunch of fun inputs <a href = "https://mimicproject.com/inputs">here</a>
 </p>
 
 </p>
