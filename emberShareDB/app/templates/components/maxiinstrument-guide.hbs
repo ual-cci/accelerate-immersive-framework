@@ -2,7 +2,7 @@
 MaxiInstruments
 </p>
 <p class = "tutorial-text">
-MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the learner.js library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
+MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
 <p class = "tutorial-text">
 Currently, Chromium-based browsers have a bug that may cause slight crackling in Audio Worklet based programs. This bug was introduced in Chrome 79 and is out of our control, sorry!. You can follow the bug <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">here</a> and also download and run older versions of Chrome from <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">here</a>, we recommend Chrome 78 in private mode for best results. Hopefully this will be fixed soon.
@@ -233,9 +233,9 @@ rnn.initialize().then(()=> {
 <p class = "tutorial-text">
 Here are some examples sequenced in various ways, all using Posenet as an input
 <ul>
-  <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li>
-  <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li>
-  <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Hand coded seqeunce</a></li>
+  <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li> This example allows you to play notes into the synth using an external MIDI instrument, whilst mapping the parameters to a different input. Note WebMidi is curently only supported in Chrome. You can connect to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. If you were genreating notes in an another program (Max/MSP, supercollider), this would be a good way to trigger MaxiSynth. First refresh devices, select your from the dropdown, then click "Connect".
+  <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li> This allows you use a one-shot sequencer to program a tune yourself, whilst mapping the parameters of the synths to one of the inputs.
+  <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Hand coded / Magenta seqeunce</a></li> This shows you how you can program in your own sequence by hand, or generate a sequence using Google's Magenta models and plug that straight into a synth. You can then map the synth parameters to one of the inputs.
 </ul>
 </p>
 <p class = "tutorial-text">

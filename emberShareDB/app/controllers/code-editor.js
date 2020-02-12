@@ -38,7 +38,6 @@ export default Controller.extend({
   editor: null,
   suppress: false,
   codeTimer: null,
-  renderedSource:"",
   isNotEdittingDocName:true,
   canEditDoc:false,
   showReadOnly:false,
@@ -78,6 +77,8 @@ export default Controller.extend({
 
   showHUD:true,
   hudMessage:"Loading...",
+
+  renderedSource:"",
 
   //Computed parameters
 
@@ -673,11 +674,23 @@ export default Controller.extend({
           }
           else
           {
-            this.set('renderedSource', combined);
+            this.writeIframeContent(combined);
           }
         });
       }).catch((err)=>{this.get('cs').log(err)});
     }).catch((err)=>{this.get('cs').log(err)});
+  },
+  writeIframeContent:function(src) {
+      const viewer = document.getElementById("output-iframe");
+      const cd = viewer.contentDocument;
+      cd.open();
+      cd.write(src);
+      cd.close();
+      //Have to do a hard reload on pause to kill processes e.g. Audio
+      if(src == "")
+      {
+        cd.location.reload();
+      }
   },
   flashAutoRender:function()
   {
@@ -977,7 +990,7 @@ export default Controller.extend({
         this.get('opsPlayer').reset(doc.id);
         this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
-        this.set('renderedSource',"");
+        this.writeIframeContent("");
         const sharedDBDoc = this.get('sharedDBDoc');
         if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
         {
@@ -1359,7 +1372,7 @@ export default Controller.extend({
         this.set('fetchingDoc', false);
         this.set('showHUD', false);
         this.showFeedback("");
-        this.set('renderedSource',"");
+        this.writeIframeContent("");
         this.set('droppedOps', []);
         this.set("consoleOutput", "");
         this.set("titleName", "");
@@ -1435,7 +1448,7 @@ export default Controller.extend({
       }
       else
       {
-        this.set('renderedSource', "");
+        this.writeIframeContent("");
       }
       this.toggleProperty('doPlay')
       this.updatePlayButton();
@@ -1444,7 +1457,7 @@ export default Controller.extend({
       this.updateIFrame();
     },
     pauseCode() {
-      this.set('renderedSource', "");
+      this.writeIframeContent("");
     },
     hideCode() {
       this.hideCode(true);
@@ -1460,7 +1473,7 @@ export default Controller.extend({
     rewindOps() {
       this.set('surpress', true);
       this.get('editor').setValue("");
-      this.set('renderedSource', "");
+      this.writeIframeContent("");
       this.set('surpress', false);
       this.skipOp(false, true);
     },

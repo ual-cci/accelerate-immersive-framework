@@ -1,4 +1,7 @@
-@import 'bootstrap';
+// Required
+@import "ember-bootstrap/bootstrap";
+// Optional - Bootstrapping/Resetting
+
 
 $mimic-orange:#ED3D05;
 $mimic-yellow:#FFCE00;
@@ -13,7 +16,7 @@ $max-site-width:950px;
 }
 
 body {
-  font-family: "karla";
+  font-family: "karla" !important;
   outline:0;
   margin:0;
   border:0;
@@ -22,6 +25,10 @@ body {
 
 body::-webkit-scrollbar {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+button {
+  background-color:clear !important;
 }
 
 button:focus {
@@ -1400,8 +1407,8 @@ input[id="searchTerm"]:-ms-input-placeholder {
 }
 
 .tooltip {
-  position: relative;
-  display: inline-block;
+  position: relative !important;
+  display: inline-block !important;
   opacity: 1 !important;
   z-index:500!important;
 }

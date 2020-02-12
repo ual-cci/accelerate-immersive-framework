@@ -85,7 +85,7 @@ class MIDI {
 		console.log("output Device : " + this.output.name);
 		if(!vel) {vel = 60;}
 		if(!channel) {channel = "all";}
-		this.output.playNote(note, channel, {rawVelocity: vel, duration:dur, time: WebMidi.time + time});
+		this.output.playNote(note, channel, {rawVelocity: true, velocity: vel, duration:dur, time: WebMidi.time + time});
 	}
 
 	noteOff(note, vel, channel, dur, time){
@@ -96,7 +96,7 @@ class MIDI {
 		} else {
 			if(!vel) {vel = 60;}
 			if(!channel) {channel = "all";}
-			this.output.stopNote(note, channel, {rawVelocity: vel, duration:dur, time: WebMidi.time + time});
+			this.output.stopNote(note, channel, {rawVelocity: true, velocity: vel, duration:dur, time: WebMidi.time + time});
 		}
 	}
 
