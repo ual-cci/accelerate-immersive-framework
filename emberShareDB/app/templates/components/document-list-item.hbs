@@ -20,10 +20,11 @@
     {{#if canEdit}}
       <div class="tooltip">
         <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-        {{input type="checkbox" checked=doPlay click=(action 'toggleDontPlay')}}
+        {{input role="checkbox" type="checkbox" checked=doPlay click=(action 'toggleDontPlay')}}
         <span class="tooltiptext">Play on Open</span>
       </div>
       {{#bs-button class = "main-delete-button"
+      tabIndex = "0"
       icon="glyphicon glyphicon-trash"
       onClick=(action 'delete')}}
       {{/bs-button}}

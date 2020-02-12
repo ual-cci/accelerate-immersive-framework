@@ -1,4 +1,5 @@
 <div>
+  <header>
   <div id = "code-header-container" class = "limited-width-container">
   <h4><span>{{feedbackMessage}}</span></h4>
   {{#if isEmbedded}}
@@ -6,9 +7,13 @@
   {{else}}
   <div id = "doc-title-container">
     {{#if isNotEdittingDocName}}
-        <span id = "doc-title" class="label label-default" {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
+        <span id = "doc-title" class="label label-default"
+        role = "button" tabIndex = "0"
+        {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
     {{else}}
-      {{input value=titleNoName type="form-control" id="doc-name-input" name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
+      {{input role = "form" value=titleNoName
+      type="form-control" id="doc-name-input"
+      name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
     {{/if}}
     {{#if mediaQueries.isDesktop}}
     <div id = "doc-controls-container">
@@ -16,22 +21,22 @@
         </div>
           <div id = "transport-container">
             <div class="tooltip col-2">
-              {{#bs-button icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
+              {{#bs-button (html-attributes aria-label="Render Code") icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
               <span class="tooltiptext">Render Code</span>
             </div>
             {{#if isOwner}}
               <div class="tooltip">
                 {{#if showAssets}}
-                  {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="hide assets") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
                 {{else}}
-                  {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="show assets") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
                 {{/if}}
                 <span class="tooltiptext">Add Files to Use</span>
               </div>
               {{#if isRoot}}
               <div class="tooltip">
                 <div class="dropdown">
-                  {{#bs-button id = "add-library-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="add library") id = "add-library-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
                  <div id="myDropdown" class="dropdown-content">
                   {{#each libraries as |lib|}}
                     {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
@@ -44,17 +49,17 @@
             {{/if}}
             <div class="tooltip">
               {{#if showSettings}}
-                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="hide settings") id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
               {{else}}
-                {{#bs-button id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="show settings") id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
               {{/if}}
               <span class="tooltiptext">Show Document Settings</span>
             </div>
             <div class="tooltip">
               {{#if showShare}}
-                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowShare")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="hide Share") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowShare")}}{{/bs-button}}
               {{else}}
-                {{#bs-button class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="show share") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
               {{/if}}
               <span class="tooltiptext">Share links</span>
             </div>
@@ -63,12 +68,12 @@
               <span class="tooltiptext">Download Project as Zip</span>
             </div>
             <div class="tooltip col-2">
-              {{#bs-button style = "font-size:16pt;" icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
+              {{#bs-button (html-attributes aria-label="full screen") style = "font-size:16pt;" icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
               <span class="tooltiptext">Enter Fullscreen</span>
             </div>
             {{#if isOwner}}
               <div class="tooltip col-2">
-                {{#bs-button icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="delete document") icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
                 <span class="tooltiptext">Delete Document</span>
               </div>
             {{/if}}
@@ -76,7 +81,7 @@
     </div>
     {{else}}
       <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
-        {{#bs-button icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
+        {{#bs-button (html-attributes aria-label="render code") icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
         <span class="tooltiptext">Render Code</span>
       </div>
     {{/if}}
@@ -91,34 +96,40 @@
   <div id = "settings-container">
     {{#if session.isAuthenticated}}
       <div class="tooltip">
-        {{#bs-button class = "clear-text-btn" onClick=(action "forkDocument")}}FORK{{/bs-button}}
+        {{#bs-button (html-attributes aria-label="fork document")
+        tabIndex = "0"
+        class = "clear-text-btn"
+        onClick=(action "forkDocument")}}FORK{{/bs-button}}
         <span class="tooltiptext">Make Your Own Copy</span>
       </div>
       <div class="tooltip">
-        {{#bs-button class = "clear-text-btn" onClick=(action "flagDocument")}}FLAG{{/bs-button}}
+        {{#bs-button (html-attributes aria-label="flag document")
+        tabIndex = "0"
+        class = "clear-text-btn"
+        onClick=(action "flagDocument")}}FLAG{{/bs-button}}
         <span class="tooltiptext">Report as Inappropriate</span>
       </div>
     {{/if}}
     {{#if isOwner}}
       <div class="tooltip">
         <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
-        {{input type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
+        {{input tabIndex = "0" type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
         <span class="tooltiptext">Other users can discover</span>
       </div>
       <div class="tooltip">
         <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
-        {{input type="checkbox" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
+        {{input type="checkbox" tabIndex = "0" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
         <span class="tooltiptext">WARNING! Other users can edit your code</span>
       </div>
       <div class="tooltip">
         <label class = "doc-checkbox" for="readOnlyCheckbox">DONT PLAY ON OPEN</label>
-        {{input type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
+        {{input tabIndex = "0" type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
         <span class="tooltiptext">Dont play on open</span>
       </div>
       {{#if canEditDoc}}
         <div class="tooltip">
           <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-          {{input type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+          {{input tabIndex = "0" type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
           <span class="tooltiptext">Render Code Whilst Typing</span>
         </div>
       {{/if}}
@@ -131,8 +142,16 @@
           {{#each model.assets as |asset|}}
             <div class = "asset-container">
               <p class = "file-text file-name">{{asset.name}}</p>
-              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-remove" onClick=(action "deleteAsset" asset.name)}}{{/bs-button}}
-              {{#bs-button class = "clear-btn file-btn" icon="glyphicon glyphicon-eye-open" onClick=(action "previewAsset" asset)}}{{/bs-button}}
+              {{#bs-button (html-attributes aria-label="delete asset")
+              tabIndex = "0"
+              class = "clear-btn file-btn"
+              icon="glyphicon glyphicon-remove"
+              onClick=(action "deleteAsset" asset.name)}}{{/bs-button}}
+              {{#bs-button (html-attributes aria-label="preview asset")
+              tabIndex = "0"
+              class = "clear-btn file-btn"
+              icon="glyphicon glyphicon-eye-open"
+              onClick=(action "previewAsset" asset)}}{{/bs-button}}
             </div>
           {{/each}}
         </div>
@@ -160,8 +179,6 @@
     }}
   {{/if}}
   {{/if}}
-
-
   </div>
     {{#if mediaQueries.isDesktop}}
     {{#if isEmbedded}}
@@ -175,6 +192,8 @@
         onCreate = (action 'newTab')}}
     {{/if}}
     {{/if}}
+  </header>
+  <main>
     <div id = "main-code-container">
       {{#if showHUD}}
         {{loading-hud message = hudMessage hideWheel = isEmbedded}}
@@ -182,6 +201,7 @@
       {{#if isEmbeddedWithCode}}
       <div id = "embedded-run-container">
         {{#bs-button
+          (html-attributes aria-label="play or pause")
           class = "clear-text-btn embedded-menu-button"
           id = "embedded-run-button"
           icon="glyphicon glyphicon-play"
@@ -189,11 +209,13 @@
         {{/bs-button}}
         {{#if isShowingCode}}
         {{#bs-button
+          (html-attributes aria-label="hide code")
           class = "clear-text-btn embedded-menu-button"
           onClick=(action "hideCode")}}Hide Code
         {{/bs-button}}
         {{else}}
         {{#bs-button
+          (html-attributes aria-label="show code")
           class = "clear-text-btn embedded-menu-button"
           onClick=(action "showCode")}}Show Code
         {{/bs-button}}
@@ -206,9 +228,13 @@
         {{#if showCodeControls}}
         <div id = "drag-container">
           {{#if isShowingCode}}
-            {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-right" onClick=(action "hideCode")}}{{/bs-button}}
+            {{#bs-button (html-attributes aria-label="hide code")
+            class = "hide-code-btn" icon="glyphicon glyphicon-menu-right"
+            onClick=(action "hideCode")}}{{/bs-button}}
           {{else}}
-            {{#bs-button class = "hide-code-btn" icon="glyphicon glyphicon-menu-left" onClick=(action "showCode")}}{{/bs-button}}
+            {{#bs-button (html-attributes aria-label="show code")
+            class = "hide-code-btn" icon="glyphicon glyphicon-menu-left"
+            onClick=(action "showCode")}}{{/bs-button}}
           {{/if}}
           <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
             {{#if isShowingCode}}
@@ -220,6 +246,7 @@
               <div class="tooltip">
                 <span class="tooltiptext">Play / Pause program</span>
               {{#bs-button
+                (html-attributes aria-label="play or pause")
                 class = "clear-btn"
                 id = "embedded-run-button"
                 icon="glyphicon glyphicon-play"
@@ -250,7 +277,7 @@
         {{/if}}
         {{/if}}
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <iframe id = "output-iframe" srcdoc = {{renderedSource}} frameBorder="0" name = {{iframeTitle}}></iframe>
+        <iframe title = "output-frame" id = "output-iframe" srcdoc = {{renderedSource}} frameBorder="0" name = {{iframeTitle}}></iframe>
       </div>
         <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
           {{#if isEmbeddedWithCode}}
@@ -262,6 +289,7 @@
                 <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
                 {{#if session.isAuthenticated}}
                   {{#bs-button
+                    (html-attributes aria-label="fork document")
                     class = "clear-text-btn"
                     id = "read-only-fork-button"
                     onClick=(action "forkDocument") }}
@@ -286,6 +314,7 @@
           }}
           </div>
       </div>
+    </main>
       {{#if isMobile}}
         <div></div>
       {{else}}
@@ -293,6 +322,7 @@
           <div></div>
         {{else}}
           <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
+          <label style = "color:transparent;" for="console">output console</label>
         {{/if}}
       {{/if}}
 </div>

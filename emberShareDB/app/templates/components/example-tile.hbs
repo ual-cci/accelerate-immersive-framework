@@ -1,4 +1,9 @@
-<div class = "example-tile-container-outer col-xs-12 col-sm-12" onclick = {{action 'onClick'}} onmouseover={{action "onover"}} onmouseout={{action "onout"}}>
+<div role = "button" tabIndex = "0"
+class = "example-tile-container-outer col-xs-12 col-sm-12"
+onclick = {{action 'onClick'}}
+onmouseover={{action "onover"}}
+onmouseout={{action "onout"}}
+onkeypress = {{action 'onClick'}}>
   <div class = "example-tile-container" id = {{colourId}}>
     <table>
         <caption style = "padding:0px;color:inherit;"><p class = "example-tile-title" id = {{colourId}}>{{name}}</p></caption>

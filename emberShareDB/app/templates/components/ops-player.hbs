@@ -1,21 +1,21 @@
 <p class = "side-menu-label">code player</p>
 <div class="tooltip">
   <span class="tooltiptext">Rewind to Beginning</span>
-  {{#bs-button class = "clear-btn " icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
+  {{#bs-button (html-attributes aria-label="Rewind to Beginning") class = "clear-btn " icon="glyphicon glyphicon-fast-backward" onClick=(action 'rewind')}}{{/bs-button}}
 </div>
 <div class="tooltip">
-  {{#bs-button class = "clear-btn " icon="glyphicon glyphicon-backward" onClick=(action 'prev')}}{{/bs-button}}
+  {{#bs-button (html-attributes aria-label="step back")class = "clear-btn " icon="glyphicon glyphicon-backward" onClick=(action 'prev')}}{{/bs-button}}
   <span class="tooltiptext">Step Back</span>
 </div>
 <div class="tooltip">
   {{#if isPlaying}}
-    {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-pause" onClick=(action 'pause')}}{{/bs-button}}
+    {{#bs-button (html-attributes aria-label="pause op playback") class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-pause" onClick=(action 'pause')}}{{/bs-button}}
   {{else}}
-    {{#bs-button class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'play')}}{{/bs-button}}
+    {{#bs-button (html-attributes aria-label="play ops") class = "clear-btn " id = "ops-play-btn" icon="glyphicon glyphicon-play" onClick=(action 'play')}}{{/bs-button}}
   {{/if}}
   <span class="tooltiptext">Play to End / Pause</span>
 </div>
 <div class="tooltip">
-  {{#bs-button class = "clear-btn" icon="glyphicon glyphicon-forward" onClick=(action 'next')}}{{/bs-button}}
+  {{#bs-button (html-attributes aria-label="skip op") class = "clear-btn" icon="glyphicon glyphicon-forward" onClick=(action 'next')}}{{/bs-button}}
   <span class="tooltiptext">Step Forwards</span>
 </div>

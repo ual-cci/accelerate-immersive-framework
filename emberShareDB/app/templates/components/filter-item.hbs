@@ -1,4 +1,7 @@
-<div class = {{concat "filter-item " filter.id}} onclick={{action 'onFilter'}}>
+<div role = "button" tabIndex = "0"
+class = {{concat "filter-item " filter.id}}
+onkeypress={{action 'onFilter'}}
+onclick={{action 'onFilter'}}>
   {{#if filter.highlightTitle}}
     <p class = {{concat "filter-text filter-text-selected " "filter-text-" filter.id}}>{{filter.title}}</p>
   {{else}}

@@ -235,13 +235,23 @@ export default Controller.extend({
       }
     }
   },
+  cleanUpShareDB: function()
+  {
+    if(this.get('wsAvailable') && !isEmpty(this.get('sharedDBDoc')))
+    {
+      try{
+        this.get('sharedDBDoc').destroy();
+      }
+      catch(err)
+      {
+        this.get('cs').log("error destroying sharedb connection", err);
+      }
+      this.set('sharedDBDoc', null);
+    }
+  },
   cleanUpConnections: function() {
     return new RSVP.Promise((resolve, reject)=> {
-      if(!isEmpty(this.get('sharedDBDoc')))
-      {
-        this.get('sharedDBDoc').destroy();
-        this.set('sharedDBDoc', null);
-      }
+      this.cleanUpShareDB();
       this.set('currentDoc', null);
       if(!isEmpty(this.get('socket')))
       {
@@ -283,13 +293,8 @@ export default Controller.extend({
       this.set('isRoot', docId == this.get('model').id)
       if(!isEmpty(doc))
       {
-        const sharedDBDoc = this.get('sharedDBDoc');
-        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
-        {
-          //Destroy connection to old doc
-          sharedDBDoc.destroy();
-          this.set('sharedDBDoc', null);
-        }
+        this.cleanUpShareDB();
+        this.set('sharedDBDoc', null);
         this.set('currentDoc', null);
       }
       this.connectToDoc(docId).then((newDoc)=> {
@@ -527,11 +532,11 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        //this.get('cs').log("Submitting op on ws")
+        this.get('cs').log("Submitting op on ws")
         try
         {
           sharedDBDoc.submitOp(op, (err) => {
-            //this.get('cs').log("callback", err)
+            this.get('cs').log("callback", err)
             if(err)
             {
               droppedOps.push(op);
@@ -682,14 +687,17 @@ export default Controller.extend({
   },
   writeIframeContent:function(src) {
       const viewer = document.getElementById("output-iframe");
-      const cd = viewer.contentDocument;
-      cd.open();
-      cd.write(src);
-      cd.close();
-      //Have to do a hard reload on pause to kill processes e.g. Audio
-      if(src == "")
+      if(!isEmpty(viewer))
       {
-        cd.location.reload();
+        const cd = viewer.contentDocument;
+        cd.open();
+        cd.write(src);
+        cd.close();
+        //Have to do a hard reload on pause to kill processes e.g. Audio
+        if(src == "")
+        {
+          cd.location.reload();
+        }
       }
   },
   flashAutoRender:function()
@@ -770,7 +778,7 @@ export default Controller.extend({
     this.removeWindowListener();
     var eventMethod = window.addEventListener ? "addEventListener":"attachEvent";
   	var eventer = window[eventMethod];
-    window.self = this;
+    //window.self = this;
   	var messageEvent = eventMethod === "attachEvent" ? "onmessage":"message";
   	eventer(messageEvent, this.handleWindowEvent, false);
     window.onclick = function(event) {
@@ -789,7 +797,7 @@ export default Controller.extend({
   removeWindowListener: function() {
     var eventMethod = window.removeEventListener ? "removeEventListener":"detachEvent";
     var eventer = window[eventMethod];
-    window.self = null;
+    //window.self = null;
     var messageEvent = eventMethod === "detachEvent" ? "onmessage":"message";
     eventer(messageEvent, this.handleWindowEvent, false);
   },
@@ -991,12 +999,7 @@ export default Controller.extend({
         this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
         this.writeIframeContent("");
-        const sharedDBDoc = this.get('sharedDBDoc');
-        if(this.get('wsAvailable') && !isEmpty(sharedDBDoc))
-        {
-          sharedDBDoc.destroy();
-          this.set('sharedDBDoc', null);
-        }
+        this.cleanUpShareDB();
         this.set('currentDoc', null);
         if(!isEmpty(this.get('editor')))
         {
@@ -1383,7 +1386,7 @@ export default Controller.extend({
           this.cleanUpConnections();
         }
         this.get('cs').log('cleaned up');
-        this.removeWindowListener();
+        //this.removeWindowListener();
       }
       this.set('leftCodeEditor', true);
       const actions = [this.updateSourceFromSession(), this.updateEditStats(), this.updateSavedVals()];

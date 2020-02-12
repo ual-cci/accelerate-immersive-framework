@@ -1,6 +1,6 @@
-<div class="uncharted-token-label">{{token}}
+<div role = "button" tabIndex = "0" class="uncharted-token-label">{{token}}
 {{#if canDelete}}
-  {{#bs-button class = "tag-delete-btn"
+  {{#bs-button role = "button" tabIndex = "0" class = "tag-delete-btn"
   onClick=(action 'onDelete')
   icon="glyphicon glyphicon-remove"}}
   {{/bs-button}}

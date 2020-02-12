@@ -17,12 +17,12 @@
         <div class="tooltip">
           <span class="tooltiptext">Add Tag</span>
           {{#if showInput}}
-            {{#bs-button class = "add-file-button" id = "add-tag"
+            {{#bs-button tabIndex = "0" class = "add-file-button" id = "add-tag"
               icon="glyphicon glyphicon-chevron-up"
               onClick=(action 'addPressed')}}
             {{/bs-button}}
           {{else}}
-            {{#bs-button class = "add-file-button" id = "add-tag"
+            {{#bs-button tabIndex = "0" class = "add-file-button" id = "add-tag"
               icon="glyphicon glyphicon-plus"
               onClick=(action 'addPressed')}}
             {{/bs-button}}
@@ -30,6 +30,7 @@
           </div>
           {{#if showInput}}
           {{input type='text'
+              tabIndex = "0"
               class='uncharted-token-input'
               id=tokenfieldId
               placeholder=placeholder

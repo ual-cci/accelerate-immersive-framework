@@ -1,6 +1,5 @@
 // Required
 @import "ember-bootstrap/bootstrap";
-// Optional - Bootstrapping/Resetting
 
 
 $mimic-orange:#ED3D05;
@@ -27,12 +26,13 @@ body::-webkit-scrollbar {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 
-button {
-  background-color:clear !important;
-}
+// button {
+//   background-color:transparent !important;
+// }
 
 button:focus {
-  outline:0 ! important;
+  outline:1 !important;
+  outline-color:white !important;
 }
 
 button:active {
@@ -476,7 +476,6 @@ input[id="docName"]:-ms-input-placeholder {
 .tab-btn:focus {
   background-color: transparent ! important;
   border:none ! important;
-  outline: none ! important;
 }
 
 .tab-btn:active {
@@ -1069,7 +1068,6 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .uncharted-token-input:focus {
-  outline:0;
 }
 
 .uncharted-token-input {
@@ -1086,7 +1084,6 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .uncharted-focus {
-  outline:0;
 }
 
 .inline-view {
@@ -1240,13 +1237,19 @@ input[id="docName"]:-ms-input-placeholder {
   font-weight: bold;
   margin-left: 20px;
 }
+#login-list-item {
+  float:right ! important;
+  position: relative;
+}
 
 #login-container {
   width:100px;
   height:50px;
   margin-right: 5px;
   float:right ! important;
-  position: relative;
+  position: absolute;
+  right:10px;
+  top:115px;
 }
 
 #login-button {

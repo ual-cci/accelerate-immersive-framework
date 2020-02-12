@@ -59,6 +59,7 @@ export default Controller.extend({
         });
         user.save().then(() => {
           this.get('cs').log("user created");
+          alert('Your new user account has been created, please sign in to continue')
           this.set('registerMessage', 'Your new user account has been created, please sign in to continue');
         }).catch((err) => {
           this.get('cs').log(err);

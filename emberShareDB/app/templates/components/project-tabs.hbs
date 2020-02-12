@@ -24,6 +24,7 @@
     {{/each}}
     <th>
       {{#bs-button class = "add-file-button"
+        role = "button" tabIndex = "0"
         onClick=(action 'createNewDocument')
         icon="glyphicon glyphicon-plus"
         }}
