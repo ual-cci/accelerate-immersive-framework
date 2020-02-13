@@ -1,6 +1,7 @@
 import Service, { inject } from '@ember/service';
 import config from  '../config/environment';
 import RSVP from 'rsvp';
+import { bind } from '@ember/runloop';
 
 export default Service.extend({
   sessionAccount:inject('session-account'),
@@ -12,13 +13,13 @@ export default Service.extend({
           type: "POST",
           url: config.serverHost + "/resetPassword",
           data: { username: username, hostURL:config.localOrigin }
-        }).then((res) => {
+        }).then(bind((res) => {
           this.get('cs').log("success",res);
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           this.get('cs').log("error",err.responseText);
           reject(err.responseText);
-        });
+        }));
     });
   },
   updatePassword(username, token, newPassword) {
@@ -28,13 +29,13 @@ export default Service.extend({
           type: "POST",
           url: config.serverHost + "/updatePassword",
           data: { username: username, token: token, password: newPassword}
-        }).then((res) => {
+        }).then(bind((res) => {
           this.get('cs').log("success",res);
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           this.get('cs').log("error",err);
           reject(err);
-        });
+        }));
     });
   },
   checkToken(username, token) {
@@ -44,13 +45,13 @@ export default Service.extend({
           type: "POST",
           url: config.serverHost + "/checkPasswordToken",
           data: { username: username, token: token}
-        }).then((res) => {
+        }).then(bind((res) => {
           this.get('cs').log("success",res);
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           this.get('cs').log("error",err);
           reject(err);
-        });
+        }));
     });
   },
 });

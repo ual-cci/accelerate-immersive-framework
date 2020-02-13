@@ -2,6 +2,7 @@ import Service, { inject } from '@ember/service';
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 import { isEmpty } from '@ember/utils';
+import { bind } from '@ember/runloop';
 
 export default Service.extend({
   sessionAccount:inject('session-account'),
@@ -14,13 +15,13 @@ export default Service.extend({
           type: "DELETE",
           url: config.serverHost + "/asset/"+doc+"/"+fileName,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
-        }).then((res) => {
+        }).then(bind((res) => {
           this.get('cs').log("success deleting asset");
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           this.get('cs').log("error",err);
           reject(err);
-        });
+        }));
     });
   },
   isMedia: function(fileType)

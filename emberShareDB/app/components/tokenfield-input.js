@@ -128,6 +128,10 @@ export default Component.extend({
         },
 
         selectToken(token, index) {
+          if(this.get('editable'))
+          {
+            return;
+          }
           console.log("HERE", token, index);
           this.searchTag(token);
           this.set('selectedTokenIndex', index);

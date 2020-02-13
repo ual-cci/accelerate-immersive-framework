@@ -2,6 +2,7 @@ import Service, { inject } from '@ember/service';
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 import { isEmpty } from '@ember/utils';
+import { bind } from '@ember/runloop';
 
 export default Service.extend({
   assetService: inject('assets'),
@@ -91,11 +92,11 @@ export default Service.extend({
           url: config.serverHost + "/submitOp",
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data: { op: op , documentId: doc}
-        }).then((res) => {
+        }).then(bind((res) => {
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           reject(err);
-        });
+        }));
     });
   },
   updateDoc(docId, field, value) {
@@ -131,12 +132,12 @@ export default Service.extend({
       $.ajax({
           type: "GET",
           url: config.serverHost + "/tags?limit=" + limit,
-        }).then((res) => {
+        }).then(bind((res) => {
           this.get('cs').log("tags", res);
           resolve(res);
-        }).catch((err) => {
+        })).catch(bind((err) => {
           reject(err);
-        });
+        }));
     });
   },
   deleteDoc(docId) {
@@ -153,17 +154,17 @@ export default Service.extend({
               type: "DELETE",
               url: config.serverHost + "/documents/" + docId,
               beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
-            }).then((res) => {
+            }).then(bind((res) => {
               this.get('cs').log('deleted', docId);
               const actions = [
                 doc.deleteRecord(),
                 this.get('sessionAccount').updateOwnedDocuments()
               ];
               Promise.all(actions).then(resolve).catch(reject);
-            }).catch((err) => {
+            })).catch(bind((err) => {
               this.get('cs').log('error deleting', docId);
               reject(err);
-            });
+            }));
         });
       });
     });
@@ -179,11 +180,11 @@ export default Service.extend({
           type: "GET",
           url: config.serverHost + "/flagDoc" + params,
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
-        }).then((res) => {
+        }).then(bind((res) => {
           resolve();
-        }).catch((err) => {
+        })).catch(bind((err) => {
           reject(err);
-        });
+        }));
     });
   },
   getChildren(childrenIds) {

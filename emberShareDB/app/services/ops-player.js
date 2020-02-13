@@ -2,6 +2,8 @@ import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import RSVP from 'rsvp';
 import config from  '../config/environment';
+import { bind } from '@ember/runloop';
+
 
 export default Service.extend({
   parser:inject('code-parsing'),
@@ -36,14 +38,14 @@ export default Service.extend({
           type: "GET",
           url: config.serverHost + "/documents/ops/" + doc,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
-        }).then((res) => {
+        }).then(bind((res) => {
           this.set('ops', res.data);
           this.get('cs').log("GOT OPS", res.data)
           this.set('ptr', this.get('ops').length);
           resolve(res.data);
-        }).catch((err) => {
+        })).catch(bind((err) => {
           reject(err);
-        });
+        }));
     });
   },
   shift(prev, editor, rewind = false) {

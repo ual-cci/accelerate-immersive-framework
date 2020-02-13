@@ -2,6 +2,8 @@ import RSVP from 'rsvp';
 import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import config from  '../config/environment';
+import { bind } from '@ember/runloop';
+
 
 export default Service.extend({
   session: inject('session'),
@@ -43,13 +45,13 @@ export default Service.extend({
           url: config.serverHost + "/accounts",
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data:{username:username}
-        }).then((res) => {
+        }).then(bind((res) => {
           console.log("USERID", res.data.attr.accountId)
           this.set("currentUserId", res.data.attr.accountId);
           resolve(res);
-        }).catch((err) => {
+        })).catch(bind((err) => {
           reject(err);
-        });
+        }));
     });
   },
   loadCurrentUser() {
