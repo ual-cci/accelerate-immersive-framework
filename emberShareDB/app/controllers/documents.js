@@ -39,7 +39,15 @@ export default Controller.extend({
     // {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
   ],
   allFilters:[],
-  showingFilters:computed('model', function() {
+  showingFilters:[],
+  init: function () {
+    this._super();
+    this.get('resizeService').on('didResize', event => {
+      this.updateFiltersToShow();
+    })
+    this.setShowingFilters();
+  },
+  setShowingFilters () {
     this.get('documentService').getPopularTags(11)
     .then((results) => {
       var all = this.get('sortingFilters');
@@ -52,13 +60,6 @@ export default Controller.extend({
       this.set('allFilters', all)
       this.updateFiltersToShow()
     });
-    return [];
-  }),
-  init: function () {
-    this._super();
-    this.get('resizeService').on('didResize', event => {
-      this.updateFiltersToShow();
-    })
   },
   updateSelectedFilter() {
     var newF = []
@@ -112,7 +113,7 @@ export default Controller.extend({
   },
   updateResults()
   {
-    $("#document-container").addClass("fading-out")
+    document.getElementById("document-container").classList.add("fading-out");
     setTimeout(()=> {
       this.get('sessionAccount').getUserFromName();
       let searchBar = document.getElementById("searchTerm");
@@ -262,18 +263,22 @@ export default Controller.extend({
     },
     flashResults()
     {
-      this.get('cs').log("flashing results")
-      $("#document-container").addClass("fading-in")
-      $("#document-container").removeClass("fading-out")
-      if(!isEmpty(this.get('fadeTimeout')))
+      const container = document.getElementById("document-container");
+      if(!isEmpty(container))
       {
-        clearTimeout(this.get('fadeTimeout'))
+        this.get('cs').log("flashing results")
+        container.classList.add("fading-in");
+        container.classList.remove("fading-out");
+        if(!isEmpty(this.get('fadeTimeout')))
+        {
+          clearTimeout(this.get('fadeTimeout'))
+        }
+        this.set('fadeTimeout', setTimeout(()=> {
+          container.classList.remove("fading-in");
+          container.classList.remove("fading-out");
+          this.set('fadeTimeout', null);
+        }, 500));
       }
-      this.set('fadeTimeout', setTimeout(()=> {
-        $("#document-container").removeClass("fading-out")
-        $("#document-container").removeClass("fading-in")
-        this.set('fadeTimeout', null);
-      }, 500));
     }
   }
 });

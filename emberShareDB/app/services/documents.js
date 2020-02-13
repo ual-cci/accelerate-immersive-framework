@@ -36,7 +36,7 @@ export default Service.extend({
         {
           this.get('cs').log("NOT A PARENT, updating parent with myself as a child");
           this.get('store').findRecord('document', parent, { reload: true }).then((parentDoc) => {
-            let children = parentDoc.data.children;
+            let children = parentDoc.get('children');
             children.push(response.id);
             this.get('cs').log("updating", parent, children)
             this.updateDoc(parent, "children", children).then(()=> {
@@ -60,9 +60,9 @@ export default Service.extend({
     this.get('cs').log("forking", docId, children);
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
-        this.get('cs').log("found record, making copy of parent", doc.data);
+        //this.get('cs').log("found record, making copy of parent", doc.data);
         let newData = doc.data;
-        newData.name = "Fork of " + doc.data.name;
+        newData.name = "Fork of " + doc.get('name');
         this.makeNewDoc(newData, docId, null).then((newDoc)=> {
           const makeChildren = async (c) => {
             for(const child of c) {
@@ -200,7 +200,7 @@ export default Service.extend({
       }
       let actions = childrenIds.map(fetch);
       Promise.all(actions).then((children) =>  {
-        fetch(children[0].data.parent).then((parent)=> {
+        fetch(children[0].get('parent')).then((parent)=> {
           resolve({children:children, parent:parent});
         }).catch((err)=>resolve(children));
       }).catch((err)=>reject(err));
@@ -211,22 +211,22 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        this.getChildren(doc.data.children).then((childDocs)=> {
+        this.getChildren(doc.get('children')).then((childDocs)=> {
           if(isEmpty(mainText))
           {
-            mainText = doc.data.source;
+            mainText = doc.get('source');
           }
           if(isEmpty(savedVals))
           {
-            savedVals = doc.data.savedVals;
+            savedVals = doc.get('savedVals');
           }
-          let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.data.assets);
+          let combined = this.get('codeParser').insertChildren(mainText, childDocs.children, doc.get('assets'));
           combined = this.get('codeParser').insertStatefullCallbacks(combined, savedVals);
           combined = this.get('codeParser').insertDatasetId(combined, docId);
           if(replaceAssets)
           {
             this.get('cs').log("doc service", docId)
-            this.get('codeParser').replaceAssets(combined, doc.data.assets, docId)
+            this.get('codeParser').replaceAssets(combined, doc.get('assets'), docId)
             .then((withAssets)=> {
               resolve(withAssets)
             })

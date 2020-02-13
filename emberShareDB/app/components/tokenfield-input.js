@@ -56,20 +56,22 @@ export default Component.extend({
 
     didUpdateAttrs() {
       this._super(...arguments);
-      const addBtn = $(".add-file-button");
+      const addBtn = document.getElementById("add-tag");
       if (this.get('editable'))
       {
-        addBtn.css('display','block')
+        addBtn.style.display = 'block';
       }
       else
       {
-        addBtn.css('display','none')
+        addBtn.style.display = 'none';
       }
     },
 
     didInsertElement() {
         this._super(...arguments);
 
+        // const textInput = document.getElementsByClassName("uncharted-token-input");
+        // console.log(textInput);
         const textInput = $(".uncharted-token-input");
         this._textInputElement = textInput;
         textInput
@@ -77,10 +79,11 @@ export default Component.extend({
             .on('focus', this._focusHandler.bind(this))
             .on('blur', this._inputWasBlurred.bind(this));
 
-        this.$()
-            .on('keydown', this._tokenNavigationHandler.bind(this))
-            .on('focus', this._focusHandler.bind(this))
-            .on('blur', this._componentWasBlurred.bind(this));
+        const me = document.getElementsByClassName("uncharted-form-control")[0];
+        console.log(me)
+        me.onkeydown = this._tokenNavigationHandler.bind(this)
+        me.onfocus = this._focusHandler.bind(this)
+        me.onblur = this._componentWasBlurred.bind(this);
     },
 
     willDestroyElement() {
@@ -91,10 +94,11 @@ export default Component.extend({
             .off('focus', this._focusHandler.bind(this))
             .off('blur', this._inputWasBlurred.bind(this));
 
-        this.$()
-            .off('keydown', this._tokenNavigationHandler.bind(this))
-            .off('focus', this._focusHandler.bind(this))
-            .off('blur', this._componentWasBlurred.bind(this));
+        const me = document.getElementsByClassName("uncharted-form-control")[0];
+        console.log(me)
+        me.onkeydown = this._tokenNavigationHandler.bind(this)
+        me.onfocus = this._focusHandler.bind(this)
+        me.onblur = this._componentWasBlurred.bind(this);
     },
 
     toggleInput() {
@@ -268,7 +272,9 @@ export default Component.extend({
 
     // Internal methods
     _focusComponent() {
-        this.$().focus();
+      const me = document.getElementsByClassName("uncharted-form-control");
+      console.log(me)
+      me.focus();
     },
 
     _focusTextInput() {
