@@ -62,7 +62,7 @@ export default Service.extend({
       this.get('store').findRecord('document', docId).then((doc) => {
         //this.get('cs').log("found record, making copy of parent", doc.data);
         let newData = doc;
-        newData.name = "Fork of " + doc.get('name');
+        newData.set("name", "Fork of " + doc.get('name'));
         this.makeNewDoc(newData, docId, null).then((newDoc)=> {
           const makeChildren = async (c) => {
             for(const child of c) {
