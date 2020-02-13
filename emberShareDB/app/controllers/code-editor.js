@@ -543,11 +543,11 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        this.get('cs').log("Submitting op on ws")
+        //this.get('cs').log("Submitting op on ws")
         try
         {
           sharedDBDoc.submitOp(op, (err) => {
-            this.get('cs').log("callback", err)
+            //this.get('cs').log("callback", err)
             if(err)
             {
               droppedOps.push(op);

@@ -1,5 +1,5 @@
 <div id = "mimic-navbar" class = "limited-width-container">
-<img src={{logoURL}} class = "main-logo">
+<img src={{logoURL}} alt = "main logo" class = "main-logo">
 {{#bs-nav type="pills" as |nav|}}
 {{#if mediaQueries.isBurger}}
   {{#nav.dropdown as |dd|}}
@@ -26,7 +26,7 @@
     {{/dd.menu}}
   {{/nav.dropdown}}
 {{else}}
-  <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a>
+  <li><a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a></li>
   {{#nav.dropdown as |dd|}}
     {{#dd.toggle class = "nav-dropdown" }} explore <span class="caret"></span>{{/dd.toggle}}
     {{#dd.menu as |ddm|}}
@@ -64,6 +64,7 @@
     {{/nav.dropdown}}
   {{/if}}
 {{/if}}
+{{/bs-nav}}
 {{#if session.isAuthenticated}}
   <div id = "login-container">
     <div style = "float:right;" class="tooltip">
@@ -76,5 +77,4 @@
  <a {{action 'login'}} id = "login-button" class="navbar-right">log in</a>
 </div>
 {{/if}}
-{{/bs-nav}}
 </div>
