@@ -411,7 +411,7 @@ export default Controller.extend({
       editor.options.readOnly = !this.get('canEditDoc');
       this.set('showHUD', false);
       this.scrollToSavedPosition();
-      this.set('titleName', doc.get('name') + " by " + doc.get('owner'));
+      this.set('titleName', doc.get('name') + " by " + this.get('model.owner'));
       this.set('titleNoName', doc.get('name'));
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
@@ -426,7 +426,7 @@ export default Controller.extend({
       isSelected = data.documentId==currentDoc.id
     }
     this.set('parentData', {name:data.name,
-      id:data.documentId,
+      id:data.id,
       children:data.children,
       source:data.source,
       assets:data.assets,
@@ -455,7 +455,7 @@ export default Controller.extend({
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
     return new RSVP.Promise((resolve, reject)=> {
-      let model = Ember.get(this, 'model');
+      let model = this.get('model');
       if(model.children.length == 0)
       {
         this.set('tabs', []);
@@ -476,11 +476,11 @@ export default Controller.extend({
           this.set('children', data.children);
           this.setTabs(data.children);
           this.setParentData({
-              name:data.parent.name,
-              id:data.parent.id,
-              children:data.parent.children,
-              source:data.parent.source,
-              assets:data.parent.assets
+              name:this.get('model.name'),
+              id:this.get('model.id'),
+              children:this.get('model.children'),
+              source:this.get('model.source'),
+              assets:this.get('model.assets')
           })
           resolve();
         }).catch((err)=>{
@@ -567,7 +567,7 @@ export default Controller.extend({
         catch (err)
         {
           droppedOps.push(op);
-          if(isEmpty(Ember.get(this, 'parent')))
+          if(isEmpty(this.get('model.parent')))
           {
             this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
           }
@@ -722,13 +722,13 @@ export default Controller.extend({
   },
   flashAutoRender:function()
   {
-    let autoInput = document.getElementsByClassName('CodeMirror').item(0)
-    autoInput.style["border-style"] = "solid"
-    autoInput.style["border-width"] = "5px"
-    autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
-    setTimeout(()=> {
-        autoInput.style["border-style"] = "none"
-    }, 250);
+    // let autoInput = document.getElementsByClassName('CodeMirror').item(0)
+    // autoInput.style["border-style"] = "solid"
+    // autoInput.style["border-width"] = "5px"
+    // autoInput.style["border-color"] = 'rgba(255, 102, 255, 150)'
+    // setTimeout(()=> {
+    //     autoInput.style["border-style"] = "none"
+    // }, 250);
   },
   flashSelectedText: function() {
     const editor = this.get('editor');
@@ -1137,7 +1137,7 @@ export default Controller.extend({
     suggestCompletions(editor, options) {
       this.get('cs').log("CUSTOM COMPLETIONS");
       let targets = [];
-      const assets = Ember.get(this, 'assets');
+      const assets = this.get('model.assets');
       if(!isEmpty(assets))
       {
         targets = targets.concat(this.get('autocomplete').assets(assets));
@@ -1170,7 +1170,7 @@ export default Controller.extend({
     endEdittingDocName() {
       this.set('isNotEdittingDocName', true);
       const newName = this.get('titleNoName');
-      this.set('titleName', newName + " by " + Ember.get(this, 'owner'));
+      this.set('titleName', newName + " by " + this.get('model.owner'));
       this.get('documentService').updateDoc(this.get('currentDoc').id, 'name', newName)
       .then(()=>this.fetchChildren()
       .then(()=>this.get('sessionAccount').updateOwnedDocuments()));
@@ -1248,7 +1248,7 @@ export default Controller.extend({
       this.get('cs').log("assetComplete", e);
       document.getElementById("asset-progress").style.display = "none";
       const doc = this.get('model');
-      let newAssets = Ember.get(this, 'assets');
+      let newAssets = doc.assets;
       newAssets.push(e);
       const actions = [
         this.get('documentService').updateDoc(doc.id, "assets", newAssets),
@@ -1361,7 +1361,7 @@ export default Controller.extend({
     },
     insertLibrary(lib) {
       this.updateSourceFromSession().then(()=>{
-        const op = this.get('codeParser').insertLibrary(lib.id, Ember.get(this, 'source'))
+        const op = this.get('codeParser').insertLibrary(lib.id, this.get('model.source'))
         this.submitOp(op);
         this.set('surpress', true);
         const deltas = this.get('codeParser').applyOps([op], this.get('editor'));
@@ -1552,11 +1552,11 @@ export default Controller.extend({
           //SWITCH TO HOME TAB FIRST
           this.newDocSelected(this.get('model').id).then(()=>{
             this.get('documentService').deleteDoc(docId).then(()=> {
-              const children = Ember.get(this, 'children');
+              const children = this.get('model.children');
               var newChildren = children.filter((c) => {return c != docId})
               this.get('documentService').updateDoc(this.get('model').id, "children", newChildren)
               .then(()=> {
-                this.get('cs').log("Did delete child from parent model", Ember.get(this, 'children'));
+                this.get('cs').log("Did delete child from parent model", this.get('model.children'));
                 this.fetchChildren().then(()=>{
                   this.resetScrollPositions();
                 });

@@ -14,7 +14,7 @@ export default Service.extend({
   },
   makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("making doc");
+      this.get('cs').log("making doc", parent);
       const currentUser = this.get('sessionAccount').currentUserName;
       const currentUserId = this.get('sessionAccount').currentUserId;
       let doc = this.get('store').createRecord('document', {
@@ -61,13 +61,13 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId).then((doc) => {
         //this.get('cs').log("found record, making copy of parent", doc.data);
-        let newData = doc.data;
+        let newData = doc;
         newData.name = "Fork of " + doc.get('name');
         this.makeNewDoc(newData, docId, null).then((newDoc)=> {
           const makeChildren = async (c) => {
             for(const child of c) {
-              this.get('cs').log("making copy of child", child.data);
-              await this.makeNewDoc(child.data, docId, newDoc.id);
+              this.get('cs').log("making copy of child", child);
+              await this.makeNewDoc(child, docId, newDoc.id);
             }
             this.get('cs').log("completed forking root + children");
             resolve(newDoc);
@@ -143,9 +143,9 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       this.get('store').findRecord('document', docId)
       .then((doc) => {
-        this.get('cs').log('deleting doc : ' + doc.data.parent ? "parent" : "child");
-        let actions = doc.data.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name, docId)});
-        actions.concat(doc.data.children.map((c)=>this.deleteDoc(c)));
+        this.get('cs').log('deleting doc : ' + doc.parent ? "parent" : "child");
+        let actions = doc.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name, docId)});
+        actions.concat(doc.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {
           const token = "Bearer " + this.get('sessionAccount').bearerToken;
           this.get('cs').log("resolved promise (children, assets), deleting from server");

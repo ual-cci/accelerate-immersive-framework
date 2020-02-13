@@ -7,13 +7,13 @@ export default Component.extend({
   cs: inject('console'),
   actions:{
     createNewDocument() {
-      this.get('cs').log("creating new tab")
+      this.get('cs').log("creating new tab", this.get('parent').id)
       const parent = this.get('parent');
       const name = "newTab" + this.get('tabs').length;
       const data = {name:name, isPrivate:true, source:""}
       this.get('documentService').makeNewDoc(data, null, parent.id)
       .then((doc)=> {
-        this.get('onCreate')(doc.data.documentId)
+        this.get('onCreate')(doc.id)
       }).catch((error) => {
         this.get('cs').log(error);
       });

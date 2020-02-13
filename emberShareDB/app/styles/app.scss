@@ -180,6 +180,10 @@ h2 {
   font-size: 10pt;
 }
 
+.doc-item-tooltip {
+  top:19px;
+}
+
 .doc-list-icon-container
 {
   display: inline;
@@ -1904,7 +1908,7 @@ $footer-grey:#303030;
 }
 
 .CodeMirror {
-  height:100%!important;
+  height:80vh;
 }
 
 .lint-error {
