@@ -21,12 +21,13 @@ export default Route.extend({
       let currentUserName = this.get('sessionAccount').currentUserName;
       this.get('cs').log("document model", currentUserId, currentUserName, params.sort);
       const sort = params.sort ? params.sort : "views";
+      const search = params.search ? params.search : " ";
       let filter = {
         filter:{
-          search:params.search,
+          search:search,
           page:params.page,
           currentUser:currentUserId,
-          sortBy:params.sort
+          sortBy:sort
         }
       }
       if(isEmpty(currentUserId))

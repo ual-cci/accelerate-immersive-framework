@@ -82,6 +82,7 @@ export default Controller.extend({
       //Strip uncessary whitespace
       searchTerm = searchTerm.replace(/^\s+|\s+$|\s+(?=\s)/g, "");
     }
+    searchTerm = isEmpty(searchTerm) ? " " : searchTerm;
     return searchTerm;
   },
   updateFiltersToShow() {
