@@ -1,6 +1,7 @@
+import { run } from '@ember/runloop';
 import Controller from '@ember/controller';
 import { inject } from '@ember/service';
-import { computed } from '@ember/object';
+import { computed, set } from '@ember/object';
 import { isEmpty } from '@ember/utils';
 
 export default Controller.extend({
@@ -62,12 +63,12 @@ export default Controller.extend({
   updateSelectedFilter() {
     var newF = []
     this.get('showingFilters').forEach((f)=> {
-      Ember.set(f, "isSelected", f.id == this.get('sort'));
+      set(f, "isSelected", f.id == this.get('sort'));
       const searchTerm = this.getSearchTerm();
-      Ember.set(f, "highlightTitle", f.id == this.get('sort') || f.title == searchTerm);
+      set(f, "highlightTitle", f.id == this.get('sort') || f.title == searchTerm);
       newF.push(f)
     })
-    Ember.run(()=> {
+    run(()=> {
       this.set('showingFilters', newF);
     });
   },

@@ -1,4 +1,3 @@
-import Ember from 'ember';
 import layout from '../templates/components/tokenfield-input';
 import Component from '@ember/component';
 import { computed, observer } from '@ember/object';
@@ -51,7 +50,7 @@ export default Component.extend({
     init() {
         this._super(...arguments);
         if (isNone(this.get('tokens'))) {
-            this.set('tokens', Ember.A());
+            this.set('tokens', A());
         }
     },
 

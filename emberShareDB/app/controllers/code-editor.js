@@ -690,13 +690,22 @@ export default Controller.extend({
       if(!isEmpty(viewer))
       {
         const cd = viewer.contentDocument;
-        cd.open();
-        cd.write(src);
-        cd.close();
-        //Have to do a hard reload on pause to kill processes e.g. Audio
-        if(src == "")
+        if(!isEmpty(cd))
         {
-          cd.location.reload();
+          cd.open();
+          try {
+            cd.write(src);
+          }
+          catch (err)
+          {
+            this.get('cs').log("error running code", err);
+          }
+          cd.close();
+          //Have to do a hard reload on pause to kill processes e.g. Audio
+          if(src == "")
+          {
+            cd.location.reload();
+          }
         }
       }
   },

@@ -1,4 +1,4 @@
-import Service, {inject} from '@ember/service';
+import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import RSVP from 'rsvp';
 import config from  '../config/environment';

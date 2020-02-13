@@ -1,7 +1,8 @@
-import Ember from 'ember';
+import { computed } from '@ember/object';
+import Component from '@ember/component';
 import layout from '../templates/components/base-token';
 
-export default Ember.Component.extend({
+export default Component.extend({
     //Component properties
     layout, // For more info: https://discuss.emberjs.com/t/layout-property-for-declaring-html-in-component/12844/2
     classNames: ['uncharted-token'],
@@ -15,7 +16,7 @@ export default Ember.Component.extend({
     selectedTokenIndex: null,
     canDelete:true,
     // State
-    isSelected: Ember.computed('index', 'selectedTokenIndex', function() {
+    isSelected: computed('index', 'selectedTokenIndex', function() {
         return this.get('index') === this.get('selectedTokenIndex');
     }),
 

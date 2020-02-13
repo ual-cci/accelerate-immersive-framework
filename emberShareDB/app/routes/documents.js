@@ -1,5 +1,5 @@
 import Route from '@ember/routing/route';
-import {inject} from '@ember/service';
+import { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import RSVP from 'rsvp';
 
