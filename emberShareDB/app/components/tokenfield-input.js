@@ -128,7 +128,9 @@ export default Component.extend({
         },
 
         selectToken(token, index) {
-            this.set('selectedTokenIndex', index);
+          console.log("HERE", token, index);
+          this.searchTag(token);
+          this.set('selectedTokenIndex', index);
         }
     },
 
@@ -343,16 +345,16 @@ export default Component.extend({
       if (!this.get('editable')) {
         return;
       }
-        this._removeToken(value);
-        if (!isNone(this.get('inputValue'))) {
-            this._addToken(this.get('inputValue'));
-        }
-        this.set('inputValue', value);
-        schedule('afterRender', this, function () {
-            this._textInputElement.focus();
-            this._textInputElement.select();
-        });
-        this.set('showInput', true)
-        this.set('showDuplicateMessage', false);
+      this._removeToken(value);
+      if (!isNone(this.get('inputValue'))) {
+          this._addToken(this.get('inputValue'));
+      }
+      this.set('inputValue', value);
+      schedule('afterRender', this, function () {
+          this._textInputElement.focus();
+          this._textInputElement.select();
+      });
+      this.set('showInput', true)
+      this.set('showDuplicateMessage', false);
     }
 });

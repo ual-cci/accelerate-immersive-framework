@@ -98,9 +98,11 @@ Add this to your set of buttons:
   &lt;/button&gt;
 </code>
 </pre>
+<p class = "tutorial-text">
 Try clicking the new sound button until you get a decent sound. Then click on mutate repeatedly, and you should hear the sound changing slightly. This is the sound being mutated.
 
 The important code here is the call to Evolib.evolve:
+</p>
 <pre>
   <code>
 Evolib.evolve([0], 0.1);
@@ -114,12 +116,6 @@ The power of genetic algorithms lies in the fact that they represent the things 
 </p>
 <p class = "tutorial-text">
 The DNA of an evolib sound is a list of numbers, like this: 0.5, 0.125, 0.255 etc. One number might say what kind of module it is (&lt; 0.5? its a filter. &gt;= 0.5? its an oscillator). Another number might set up the initial state of the module, e.g. the filter cutoff frequency (0-5000Hz). Other numbers describe how that module should be wired to other modules, by specifying a connection range.
-</p>
-<p class = "tutorial-text">
-Here is the complete code:
-</p>
-<p class = "tutorial-text">
-  {{embedded-project docId = "afdc780-e5f8-3ff1-0e31-eb76859c6703" height = "350px"}}
 </p>
 <h2>
 Part 3: selecting sounds for breeding

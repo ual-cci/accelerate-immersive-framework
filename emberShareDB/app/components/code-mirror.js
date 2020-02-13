@@ -25,7 +25,7 @@ export default Component.extend({
       //hintOptions:{hint:this.get("suggestCompletions")}
     });
     editor.on("keyup", (cm, event) => {
-        //console.log("KEY", event.keyCode);
+        console.log("KEY", event.keyCode);
         if (!cm.state.completionActive
           && !cm.options.readOnly
           && event.keyCode > 31
@@ -37,6 +37,7 @@ export default Component.extend({
           && event.keyCode != 38
           && event.keyCode != 39
           && event.keyCode != 40
+          && event.keyCode != 224 //apple cmd
         ) {
           let cursor = cm.getCursor(), line = cm.getLine(cursor.line)
           let start = cursor.ch, end = cursor.ch

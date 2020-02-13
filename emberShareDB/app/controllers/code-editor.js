@@ -672,9 +672,8 @@ export default Controller.extend({
         this.updateSavedVals();
         const savedVals = this.get('savedVals');
         let model = this.get('model');
-        const mainText = model.get('source');
+        const mainText = this.get('model.source');
         let toRender = selection ? this.getSelectedText() : mainText;
-        //this.get('cs').log("updateiframe", toRender)
         this.get('documentService').getCombinedSource(model.id, true, toRender, savedVals)
         .then((combined) => {
           this.get('cs').clear();
@@ -686,7 +685,6 @@ export default Controller.extend({
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
-
           }
           else
           {
@@ -705,6 +703,7 @@ export default Controller.extend({
         {
           cd.open();
           try {
+            this.get('cs').log("writing src", src);
             cd.write(src);
           }
           catch (err)
@@ -751,6 +750,7 @@ export default Controller.extend({
     if(this.get('autoRender'))
     {
       this.flashAutoRender();
+      this.writeIframeContent("");
       this.updateIFrame();
     }
     this.set('codeTimer', null);
@@ -1110,8 +1110,11 @@ export default Controller.extend({
     container.classList.remove(!doHide ? 'hiding-code' : 'showing-code');
     this.set("isDragging", false);
     const tab = document.getElementById("project-tabs");
-    tab.classList.add(doHide ? 'hiding-code' : 'showing-code');
-    tab.classList.remove(!doHide ? 'hiding-code' : 'showing-code');
+    if(!isEmpty(tab))
+    {
+      tab.classList.add(doHide ? 'hiding-code' : 'showing-code');
+      tab.classList.remove(!doHide ? 'hiding-code' : 'showing-code');
+    }
     setTimeout(()=> {
       const w = (window.innerWidth / 2)  + "px";
       this.set('isShowingCode', !doHide);
@@ -1157,6 +1160,10 @@ export default Controller.extend({
       .catch((err)=>{
         this.get('cs').log('error updating doc', err);
       });
+    },
+    searchTag(tag) {
+      this.get('cs').log("search tag", tag)
+      this.transitionToRoute('documents', tag, 0, "views");
     },
     doEditDocName() {
       if(this.get('canEditDoc'))
@@ -1428,7 +1435,10 @@ export default Controller.extend({
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "none";
       let playback = document.querySelector('#playback-container');
-      playback.style["pointer-events"] = "none";
+      if(!isEmpty(playback))
+      {
+        playback.style["pointer-events"] = "none";
+      }
       let overlay2 = document.querySelector('#output-container');
       overlay2.style["pointer-events"] = "auto";
     },

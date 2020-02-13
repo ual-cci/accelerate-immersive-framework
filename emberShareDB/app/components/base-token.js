@@ -23,7 +23,10 @@ export default Component.extend({
     // Actions
     actions: {
         removeToken() {
-            this.removeToken();
+          this.removeToken();
+        },
+        selectToken() {
+          this.mouseDown();
         },
         onDelete() {
           this.removeToken();

@@ -21,22 +21,30 @@
         </div>
           <div id = "transport-container">
             <div class="tooltip col-2">
-              {{#bs-button (html-attributes aria-label="Render Code") icon="glyphicon glyphicon-play" id = "code-play-btn" class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
+              {{#bs-button (html-attributes aria-label="Render Code")
+              icon="glyphicon glyphicon-play" id = "code-play-btn"
+              class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
               <span class="tooltiptext">Render Code</span>
             </div>
             {{#if isOwner}}
               <div class="tooltip">
                 {{#if showAssets}}
-                  {{#bs-button (html-attributes aria-label="hide assets") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="hide assets")
+                  class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up"
+                  onClick=(action "toggleShowAssets")}}{{/bs-button}}
                 {{else}}
-                  {{#bs-button (html-attributes aria-label="show assets") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file" onClick=(action "toggleShowAssets")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="show assets")
+                  class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file"
+                  onClick=(action "toggleShowAssets")}}{{/bs-button}}
                 {{/if}}
                 <span class="tooltiptext">Add Files to Use</span>
               </div>
               {{#if isRoot}}
               <div class="tooltip">
                 <div class="dropdown">
-                  {{#bs-button (html-attributes aria-label="add library") id = "add-library-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
+                  {{#bs-button (html-attributes aria-label="add library")
+                  id = "add-library-btn" class = "clear-btn transport-btn"
+                  icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
                  <div id="myDropdown" class="dropdown-content">
                   {{#each libraries as |lib|}}
                     {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
@@ -49,17 +57,26 @@
             {{/if}}
             <div class="tooltip">
               {{#if showSettings}}
-                {{#bs-button (html-attributes aria-label="hide settings") id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="hide settings")
+                id = "settings-btn" class = "clear-btn transport-btn"
+                icon = "glyphicon glyphicon-chevron-up"
+                onClick=(action "toggleShowSettings")}}{{/bs-button}}
               {{else}}
-                {{#bs-button (html-attributes aria-label="show settings") id = "settings-btn" class = "clear-btn transport-btn" icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="show settings")
+                id = "settings-btn" class = "clear-btn transport-btn"
+                icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
               {{/if}}
               <span class="tooltiptext">Show Document Settings</span>
             </div>
             <div class="tooltip">
               {{#if showShare}}
-                {{#bs-button (html-attributes aria-label="hide Share") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up" onClick=(action "toggleShowShare")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="hide Share")
+                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up"
+                onClick=(action "toggleShowShare")}}{{/bs-button}}
               {{else}}
-                {{#bs-button (html-attributes aria-label="show share") class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share" onClick=(action "toggleShowShare")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="show share")
+                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share"
+                onClick=(action "toggleShowShare")}}{{/bs-button}}
               {{/if}}
               <span class="tooltiptext">Share links</span>
             </div>
@@ -175,6 +192,7 @@
       allowDuplicates=false
       placeholder="Enter Tags"
       editable=canEditDoc
+      searchTag=(action 'searchTag')
       tokensChanged=(action 'tagsChanged')
     }}
   {{/if}}

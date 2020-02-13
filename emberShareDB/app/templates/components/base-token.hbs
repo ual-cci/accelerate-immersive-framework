@@ -1,4 +1,4 @@
-<div role = "button" tabIndex = "0" class="uncharted-token-label">{{token}}
+<div role = "button" tabIndex = "0" class="uncharted-token-label" {{action 'selectToken'}}>{{token}}
 {{#if canDelete}}
   {{#bs-button role = "button" tabIndex = "0" class = "tag-delete-btn"
   onClick=(action 'onDelete')

@@ -87,7 +87,7 @@ learner.newExample(x, y);
 </code>
 </pre>
 <p class = "tutorial-text">
-Each dataset is specific to a MIMIC documents, and your dataset will be saved in the browser's IndexedDB. This means that will persist beyond reruns of the project, refreshes of the page and closing of the browser window (in public mode). You will <strong>loose</strong> the data if you clear your cache, or if you close the window and you are in private / incognito mode. 
+Each dataset is specific to a MIMIC documents, and your dataset will be saved in the browser's IndexedDB. This means that will persist beyond reruns of the project, refreshes of the page and closing of the browser window (in public mode). You will <strong>loose</strong> the data if you clear your cache, or if you close the window and you are in private / incognito mode.
 </p>
 <p class = "tutorial-text">
 You can also use the following functions to provide a count in to recording, this will delay the start of recording the given number of seconds after the "record" button has been pressed. You can also choose to limit recording time, again specifying a given number of seconds beforehand you want to record for before it is automatically shut off. Both default to 0.
@@ -122,7 +122,7 @@ External Outputs
 <p class = "tutorial-text">
   You can use the examples below to output with MIDI control message or OSC messages to control music or visual programs locally (Max/MSP, Supercollider, openFrameworks, Processing, PD etc....)
 <ul>
-<li><a href = "https://mimicproject.com/code/0105741f-2241-6bc0-7fa5-c2003ff8c4ca">MIDI example sketch </a></li>This uses WebMidi to send the output values as control changes. Note WebMidi is curently only supported in Chrome. You can send to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. First refresh devices, select your from the dropdown, then click "Connect".
+<li><a href = "https://mimicproject.com/code/034ea170-483e-229a-f0e2-837d76c721c0">MIDI example sketch </a></li>This uses WebMidi to send the output values as control changes. Note WebMidi is curently only supported in Chrome. You can send to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. First refresh devices, select your from the dropdown, then click "Connect".
 <li><a href = "https://mimicproject.com/code/247e4538-0366-b735-9052-0e875a96a140">OSC example sketch </a></li> As you cannot OSC directly form a browser, this connects to a local Node.js program via webosckets then forwards the data out via OSC, where you can do with it what you will.
 <ol>
   <li>First, download the node program from <a href = "https://github.com/Louismac/osc-repeater">here</a>. </li>
