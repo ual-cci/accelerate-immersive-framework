@@ -74,7 +74,7 @@ export default Service.extend({
               {
                 for(let j = 0; j < children.length; j++)
                 {
-                  if(children[j].data.name == attr[i].nodeValue)
+                  if(children[j].name == attr[i].nodeValue)
                   {
                     newSrc = newSrc + "<style type = \"text/css\" ";
                     if(media)
@@ -82,7 +82,7 @@ export default Service.extend({
                       newSrc = newSrc + "media = \"" + media+ "\"";
                     }
                     newSrc = newSrc + ">\n";
-                    newSrc = newSrc + children[j].data.source;
+                    newSrc = newSrc + children[j].source;
                     newSrc = newSrc +"\n</style>";
                     added = true;
                     //this.get('cs').log(newSrc);
@@ -131,10 +131,10 @@ export default Service.extend({
             for(let j = 0; j < children.length; j++)
             {
               //this.get('cs').log(children[j].data.name, attr[i].nodeValue)
-              if(children[j].data.name == attr[i].nodeValue)
+              if(children[j].name == attr[i].nodeValue)
               {
                 newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
-                newSrc = newSrc + children[j].data.source;
+                newSrc = newSrc + children[j].source;
                 added = true;
                 break;
               }
