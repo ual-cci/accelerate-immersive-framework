@@ -14,7 +14,7 @@ export default Controller.extend({
       //merk
       {docid:"305ac2de-3362-6c8d-e04c-d5a1072cc1c5",desc:"A Remapping of Magenta's MusicVAE drum models from London, UK. We sample the latent space, squish the hihats and play around with the drum mappings to see what happens if we make things a little bit more grimey. "},
       //markov
-      {docid:"01925a11-daee-a454-f2ca-3f729a707781",desc:"Quickly build your own generative drum models using keyboard input."},
+      {docid:"5f827ca2-aae0-b755-e432-f815c00a482a",desc:"Quickly build your own generative drum models using keyboard input."},
     ]},
     {title:"User Input",docs:[
       //audio triggers
