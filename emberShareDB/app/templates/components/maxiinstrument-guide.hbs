@@ -76,15 +76,6 @@ instruments.synths[0].useFreqSliders(true);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can specific the oscillator function for each
-</p>
-<pre>
-<code>
-//0 = sine, 1 = triangle, 2 = saw, 3 = noise
-instruments.synths[0].setOsc(2);
-</code>
-</pre>
-<p class = "tutorial-text">
 You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. The code below shows how you would select the frequencies of the two oscillators to be controlled by your regression model.
 </p>
 <pre>
@@ -181,7 +172,7 @@ instruments.samplers[0].noteon(2);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can also specify a sequence yourself. We use the same structure of NoteSequence used by Google's Magenta project. This aved us some time and makes the libraries nicely interchangeable. This does mean that if you are going to use your own sequences, you will have to include the Magenta libary using the code below.
+You can also specify a sequence yourself. We use the same structure of NoteSequence used by Google's Magenta project. This saved us some time and makes the libraries nicely interchangeable. This does mean that if you are going to use your own sequences, you will have to include the Magenta libary using the code below.
 </p>
 <pre>
 <code>
@@ -228,6 +219,16 @@ rnn.initialize().then(()=> {
 		instruments.synths[0].setSequence(newSeq);
 	});
 });
+	</code>
+</pre>
+<p class = "tutorial-text">
+	It also means you can use Magenta's built-in MIDI-to-NoteSequence conversion. Upload a MIDI file as an asset, then just use the code below to get a NoteSequence and pass it straight to a MaxiSynth.
+</p>
+<pre>
+	<code>
+  mm.urlToNoteSequence("MYMIDIFILE.mid").then((seq)=>{
+    instruments.synths[0].setSequence(seq)
+  });
 	</code>
 </pre>
 <p class = "tutorial-text">
