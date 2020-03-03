@@ -295,7 +295,7 @@
         {{/if}}
         {{/if}}
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <iframe title = "output-frame" id = "output-iframe" srcdoc = {{renderedSource}} frameBorder="0" name = {{iframeTitle}}></iframe>
+        <iframe title = "output-frame" id = "output-iframe" srcdoc = "" frameBorder="0" name = {{iframeTitle}}></iframe>
       </div>
         <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
           {{#if isEmbeddedWithCode}}

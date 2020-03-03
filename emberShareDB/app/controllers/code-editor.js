@@ -695,29 +695,35 @@ export default Controller.extend({
     }).catch((err)=>{this.get('cs').log(err)});
   },
   writeIframeContent:function(src) {
-      const viewer = document.getElementById("output-iframe");
-      if(!isEmpty(viewer))
+    const viewer = document.getElementById("output-iframe");
+    if(!isEmpty(viewer))
+    {
+      const cd = viewer.contentDocument;
+      if(!isEmpty(cd))
       {
-        const cd = viewer.contentDocument;
-        if(!isEmpty(cd))
+        cd.open();
+        try {
+          //this.get('cs').log("writing src", src);
+          cd.write(src);
+        }
+        catch (err)
         {
-          cd.open();
-          try {
-            this.get('cs').log("writing src", src);
-            cd.write(src);
-          }
-          catch (err)
-          {
-            this.get('cs').log("error running code", err);
-          }
-          cd.close();
-          //Have to do a hard reload on pause to kill processes e.g. Audio
-          if(src == "")
-          {
-            cd.location.reload();
-          }
+          this.get('cs').log("error running code", err);
+        }
+        cd.close();
+        //Have to do a hard reload on pause to kill processes e.g. Audio
+        if(src == "")
+        {
+          const parent = document.getElementById("output-container");
+          viewer.parentNode.removeChild(viewer);
+          const newIframe = document.createElement('iframe');
+          newIframe.setAttribute("id", "output-iframe");
+          newIframe.setAttribute("title", "output-iframe");
+          newIframe.setAttribute("name", this.get("iframeTitle"));
+          parent.appendChild(newIframe);
         }
       }
+    }
   },
   flashAutoRender:function()
   {
