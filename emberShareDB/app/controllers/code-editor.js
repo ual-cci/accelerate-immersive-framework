@@ -1445,8 +1445,6 @@ export default Controller.extend({
       {
         playback.style["pointer-events"] = "none";
       }
-      let overlay2 = document.querySelector('#output-container');
-      overlay2.style["pointer-events"] = "auto";
     },
     mouseUp(e) {
       //this.get('cs').log('mouseup',e.target);
@@ -1455,8 +1453,6 @@ export default Controller.extend({
       overlay.style["pointer-events"] = "auto";
       let playback = document.querySelector('#playback-container');
       playback.style["pointer-events"] = "auto";
-      let overlay2 = document.querySelector('#output-container');
-      overlay2.style["pointer-events"] = "none";
     },
     mouseMove(e) {
       if(this.get('isDragging'))

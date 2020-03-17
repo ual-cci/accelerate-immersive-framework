@@ -6,7 +6,11 @@ module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     // Add options here
     codemirror: {
-      addons: ['comment/comment.js','mode/simple.js', 'mode/multiplex.js', 'comment/comment.js', 'hint/javascript-hint.js','hint/show-hint.js','hint/css-hint.js','hint/anyword-hint.js', "lint/lint.js", "lint/lint.css","lint/css-lint.js","hint/show-hint.css", "edit/matchbrackets.js"],
+      addons: ['comment/comment.js','mode/simple.js', 'mode/multiplex.js',
+      'comment/comment.js', 'hint/javascript-hint.js','hint/show-hint.js',
+      'hint/css-hint.js','hint/anyword-hint.js', "lint/lint.js", "lint/lint.css",
+      "lint/css-lint.js","hint/show-hint.css", "edit/matchbrackets.js",
+      "search/search.js", "search/searchcursor.js","dialog/dialog.js","dialog/dialog.css"],
       modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
       themes: ['monokai'],
       keymaps: ['sublime']
