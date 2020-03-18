@@ -30,10 +30,14 @@
 <p class = "tutorial-text">
 Each guide below uses a MIMIC library to demonstrate how to use machine intelligence to make music in the browser
 </p>
-<div id = "guide-container">
-{{#each model as |guide|}}
-  <a class = "guide-link" href = {{guide.url}}>{{guide.name}}</a><br>
-{{/each}}
-</div>
+
+  {{#each model as |group index|}}
+    <h1>{{group.title}}</h1>
+    <div class = "row">
+    {{#each group.guides as |guide|}}
+      {{guide-tile onClick = (action 'onClick' guide) guide = guide index = index}}
+    {{/each}}
+  </div>
+  {{/each}}
 </div>
 {{/if}}

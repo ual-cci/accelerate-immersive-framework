@@ -39,4 +39,9 @@ export default Controller.extend({
     this.get('cs').log("IS MAXI", this.get('model').id == "maxi-instruments");
     return this.get('model').id == "maxi-instrument"
   }),
+  actions: {
+    onClick(guide) {
+      this.transitionToRoute('guides', guide.id)
+    }
+  }
 });

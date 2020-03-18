@@ -46,6 +46,12 @@ export default Component.extend({
     examples() {
       this.get('onExamples')();
     },
+    inputs() {
+      this.get('onInputs')();
+    },
+    outputs() {
+      this.get('onOutputs')();
+    },
     guides() {
       this.get('onGuides')();
     },

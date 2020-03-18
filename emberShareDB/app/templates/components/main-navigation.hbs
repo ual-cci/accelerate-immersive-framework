@@ -36,6 +36,12 @@
       {{#ddm.item}}
       <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
       {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'inputs'}} href = {{concat url "/inputs"}} class = "nav-button dropdown-item">inputs</a>
+      {{/ddm.item}}
+      {{#ddm.item}}
+      <a {{action 'outputs'}} href = {{concat url "/outputs"}} class = "nav-button dropdown-item">outputs</a>
+      {{/ddm.item}}
     {{/dd.menu}}
   {{/nav.dropdown}}
   {{#nav.dropdown as |dd|}}

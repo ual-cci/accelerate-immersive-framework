@@ -14,7 +14,7 @@ export default Controller.extend({
       //Chords
       {docid:"db87ed04-9d7a-5cfc-a218-dd9cc9580929",desc:"An example of using Nick Collins MMLL.js library to get a chords and tempo from either the microphone or audio file. Chords are recorded every time they change, along with the time interval since the last change."},
       //pitch
-      {docid:"41a3320b-d2d1-983a-05db-8f9f6ce8d693",desc:"An example of using Nick Collins MMLL.js library to get a [itch] and tempo from either the microphone or audio file. Pitch is recorded on each beat."},
+      {docid:"41a3320b-d2d1-983a-05db-8f9f6ce8d693",desc:"An example of using Nick Collins MMLL.js library to get a pitch and tempo from either the microphone or audio file. Pitch is recorded on each beat."},
       //Speech to Text
       {docid:"9f28c6b2-eb52-141c-a447-472f2e9e2669",desc:"Using the native in browser speech to text. Each time you speak, the text is transcribed, encoded into a vector and inputted into the dataset / model"},
     ]},

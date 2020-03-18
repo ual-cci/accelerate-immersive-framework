@@ -4,13 +4,22 @@ import { inject } from '@ember/service';
 
 export default Route.extend({
   guides:inject(),
+  cs: inject('console'),
   model(params) {
     const guides = this.get('guides').guides;
-    for(let i = 0; i < guides.length;i++)
+    this.get('cs').log(guides, params);
+    for(let i = 0; i < guides.length; i++)
     {
-      if(guides[i].id == params.topic)
+      let group = guides[i]
+      for (let j = 0; j < group.guides.length; j++)
       {
-        return guides[i]
+        let guide = group.guides[j];
+        this.get('cs').log(guide.id == params.topic,guide.id,params.topic);
+        if(guide.id == params.topic)
+        {
+          this.get('cs').log("EARLY RETURNIGN");
+          return guide;
+        }
       }
     }
     return guides

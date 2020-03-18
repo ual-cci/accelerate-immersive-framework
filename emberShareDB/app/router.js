@@ -19,6 +19,7 @@ Router.map(function() {
   this.route('examples');
   this.route('api', {path:'/api/*endpoint'});
   this.route('inputs');
+  this.route('outputs');
 });
 
 export default Router;

@@ -200,7 +200,7 @@ h2 {
   height:100%;
   float:left;
   padding-top: 17px;
-  text-overflow: ellipsis;
+  // text-overflow: ellipsis;
   max-width: 64%;
   overflow: hidden;
   white-space:nowrap;
@@ -1663,7 +1663,7 @@ $footer-grey:#303030;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 120px;
-  max-width: 750px;
+  max-width: 850px;
 }
 
 .tutorial-text {
@@ -1744,6 +1744,20 @@ $footer-grey:#303030;
   width:240px;
   padding-right: 10px;
   padding: 5px;
+  overflow: hidden;
+}
+
+.guide-desc-text {
+  padding:5px;
+  font-size: 12pt;
+  overflow: hidden;
+}
+
+.guide-author-container {
+  height:65px;
+  width:240px;
+  padding-right: 10px;
+  padding-left: 10px;
   overflow: hidden;
 }
 

@@ -14,6 +14,12 @@ export default Controller.extend({
     transitionToExamplesRoute() {
       this.transitionToRoute('examples');
     },
+    transitionToInputsRoute() {
+      this.transitionToRoute('inputs');
+    },
+    transitionToOutputsRoute() {
+      this.transitionToRoute('outputs');
+    },
     transitionToGuidesRoute() {
       this.transitionToRoute('guides', "root");
     },
