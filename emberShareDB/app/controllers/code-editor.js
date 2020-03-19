@@ -1126,6 +1126,11 @@ export default Controller.extend({
       this.set('isShowingCode', !doHide);
       this.get('cs').log("setting codeW to ", doHide ? "30px" : w);
       this.set('codeW', doHide ? "30px" : w);
+      const editor = this.get('editor');
+      if(!isEmpty(editor))
+      {
+        editor.refresh();
+      }
     }, 200)
   },
   actions: {
