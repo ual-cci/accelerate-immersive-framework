@@ -4,7 +4,6 @@ class MaxiInstruments {
     this.samplers = [];
     this.synths = [];
     this.synthProcessorName = 'maxi-synth-processor';
-    this.samplerProcessorName = 'maxi-sampler-processor';
     let nexusUI = document.createElement('script');
     nexusUI.type = 'text/javascript';
     nexusUI.async = true;
@@ -21,11 +20,6 @@ class MaxiInstruments {
     return document.location.origin + "/libs/maxiSynthProcessor." + this.version + ".js";
   }
 
-  getSamplerName()
-  {
-    return document.location.origin + "/maxiSamplerProcessor." + this.version + ".js";
-  }
-
   getInstruments() {
     return this.samplers.concat(this.synths);
   }
@@ -36,58 +30,52 @@ class MaxiInstruments {
 
   addSampler() {
     if (this.audioContext !== undefined) {
-      const isPublisher = this.synths.length == 0 && this.samplers.length == 0;
-      let sampler = new MaxiSampler(this.audioContext, this.samplerProcessorName, this.samplers.length, isPublisher);
+      this.node.port.postMessage({addSampler:true});
+      let sampler = new MaxiSampler(
+        this.node,
+        this.samplers.length,
+        "sampler",
+      	this.audioContext
+      );
       if(this.guiElement !== undefined)
       {
         sampler.addGUI(this.guiElement);
-      }
-      if(isPublisher)
-      {
-        this.setPublisher(sampler);
       }
       this.samplers.push(sampler);
     }
   }
 
   addSynth() {
-    if (this.audioContext !== undefined) {
-      const isPublisher = this.synths.length == 0 && this.samplers.length == 0;
+    if(this.audioContext !== undefined) {
+      this.node.port.postMessage({addSynth:true});
       let synth = new MaxiSynth(
-        this.audioContext,
-        this.synthProcessorName,
+        this.node,
         this.synths.length,
-        isPublisher);
+        "synth",
+      	this.audioContext
+      );
       if(this.guiElement !== undefined)
       {
         synth.addGUI(this.guiElement);
-      }
- 	  if(isPublisher)
-      {
-        this.setPublisher(synth);
       }
       this.synths.push(synth);
     }
   }
 
-  setPublisher(instrument) {
-    this.publisher = instrument;
-    instrument.onTick = (playHead)=> {
-      this.samplers.forEach((s)=> {
-        s.setParam("playHead", playHead)
-      });
-      this.synths.forEach((s)=> {
-        s.setParam("playHead", playHead)
-      });
+  setParam(name, val) {
+    let param = this.node.parameters.get(name);
+    if(param)
+    {
+      param.setValueAtTime(val, this.audioContext.currentTime)
     }
   }
 
   setLoop(val) {
-    this.publisher.setParam("loop", val);
+    this.setParam("loop", val - 1);
   }
 
   setTempo(tempo) {
-    this.publisher.node.port.postMessage({tempo:tempo});
+    this.node.port.postMessage({tempo:tempo});
   }
 
   getMappedOutputs() {
@@ -96,6 +84,33 @@ class MaxiInstruments {
     	y = y.concat(s.getMappedParameters());
     });
     return y;
+  }
+
+  createNode() {
+    return new Promise((resolve, reject)=> {
+     this.node = new AudioWorkletNode(
+        this.audioContext,
+        this.synthProcessorName,
+        {
+          processorOptions: {}
+        }
+      );
+      this.node.onprocessorerror = event => {
+        console.log(`MaxiProcessor Error detected: ` + event.data);
+      }
+      this.node.onprocessorstatechange = event => {
+        console.log(`MaxiProcessor state change detected: ` + audioWorkletNode.processorState);
+      }
+      this.node.port.onmessage = event => {
+        //this.onTick(event.data.playHead);
+      };
+      this.node.port.onmessageerror = event => {
+        console.log(`Error message from port: ` + event.data);
+      };
+      this.node.connect(this.audioContext.destination);
+      resolve()
+    });
+
   }
 
   loadModule(url) {
@@ -115,16 +130,12 @@ class MaxiInstruments {
     return new Promise((resolve, reject)=> {
       if (this.audioContext === undefined) {
         try {
-          this.audioContext = new AudioContext({latencyHint:'playback', sample: 44100});
-
-          Promise.all([
-			      this.loadModule(this.getSynthName()),
-            this.loadModule(this.getSamplerName())
-              // this.loadModule(synthWorkletUrl),
-              // this.loadModule(samplerWorkletUrl)
-          ]).then(()=> {
-
-            resolve();
+          this.audioContext = new AudioContext({
+            latencyHint:'playback',
+            sample: 44100
+          });
+         this.loadModule(synthWorkletUrl).then(()=> {
+            this.createNode().then(resolve);
           }).catch((err)=> {
             reject(err);
           });
@@ -174,47 +185,39 @@ class MaxiInstruments {
 
 class MaxiInstrument {
 
-  constructor(audioContext, customProcessorName, index, publisher) {
-    console.log("super constructor", audioContext)
-    this.context = audioContext;
-    this.customProcessorName = customProcessorName;
+  constructor(node, index, instrument, audioContext) {
+    this.node = node;
     this.index = index;
-    this.node = new AudioWorkletNode(
-      this.context,
-      this.customProcessorName,
-      {
-        processorOptions: {publisher:publisher}
-      }
-    );
-    this.node.onprocessorerror = event => {
-      console.log(`MaxiProcessor Error detected: ` + event.data);
-    }
-    this.node.onprocessorstatechange = event => {
-      console.log(`MaxiProcessor state change detected: ` + audioWorkletNode.processorState);
-    }
-    this.node.port.onmessage = event => {
-      this.onTick(event.data.playHead);
-    };
-    this.node.port.onmessageerror = event => {
-      console.log(`Error message from port: ` + event.data);
-    };
-    this.node.connect(this.context.destination);
+    this.instrument = instrument;
+    this.audioContext = audioContext;
     this.mapped = [];
     this.outputGUI = [];
   }
   noteon(freq = 1) {
-    this.node.port.postMessage({noteon:freq});
+    this.node.port.postMessage({
+      noteon:{
+        instrument:this.instrument,
+        index:this.index,
+        val:freq
+      }
+    });
   }
 
   noteoff(freq = 1) {
-    this.node.port.postMessage({noteoff:freq});
+    this.node.port.postMessage({
+      noteoff:{
+        instrument:this.instrument,
+        index:this.index,
+        val:freq
+      }
+    });
   }
 
   setSequence(seq, instruments = [], muteDrums = false) {
     const notes = seq.notes;
    	let toAdd = [];
     let mul = 1;
-    if(seq.quantizationInfo.stepsPerQuarter)
+    if(seq.quantizationInfo)
     {
 		mul = 24 / seq.quantizationInfo.stepsPerQuarter;
     }
@@ -240,12 +243,17 @@ class MaxiInstrument {
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
-    console.log(toAdd)
-    this.node.port.postMessage({sequence:toAdd});
+    this.node.port.postMessage({
+      sequence:{
+        instrument:this.instrument,
+        index:this.index,
+        val:toAdd
+      }
+    });
   }
 
   onGUIChange(val, index) {
-    this.onChange(val, this.parameters[index]);
+    this.onChange(val, Object.keys(this.parameters)[index]);
     this.saveParamValues();
   }
 
@@ -255,12 +263,8 @@ class MaxiInstrument {
   }
 
   onChange(val, key) {
-    const scaled = (this.scale[key].scale * val) + this.scale[key].translate;
-    const param = this.node.parameters.get(key);
-    if(param)
-    {
-      param.setValueAtTime(scaled, this.context.currentTime)
-    }
+    const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
+    this.setParam(key, scaled);
   }
 
   randomise() {
@@ -280,10 +284,21 @@ class MaxiInstrument {
   }
 
   setParam(name, val) {
-    const param = this.node.parameters.get(name);
+    let param = this.node.parameters.get(name);
     if(param)
     {
       param.setValueAtTime(val, this.context.currentTime)
+    }
+    else if (this.parameters[name])
+    {
+      this.parameters[name].val = val;
+      this.node.port.postMessage({
+        "parameters":{
+          instrument:this.instrument,
+          index:this.index,
+          val:this.parameters
+        }
+      });
     }
   }
 
@@ -293,7 +308,10 @@ class MaxiInstrument {
 
   saveParamValues() {
     const key = this.getParamKey();
-    window.localStorage.setItem(key, JSON.stringify(this.getParamValues()));
+    window.localStorage.setItem(
+      key,
+      JSON.stringify(this.getParamValues())
+    );
   }
 
   loadParamValues() {
@@ -320,43 +338,32 @@ class MaxiInstrument {
 
 class MaxiSynth extends MaxiInstrument {
 
-  constructor(audioContext,
-               customProcessorName,
-               index,
-               publisher) {
-    super(audioContext, customProcessorName, index, publisher);
+  constructor(node, index, instrument, audioContext) {
+    super(node, index, instrument, audioContext);
 
-    this.parameters = [
-      "frequency", "frequency2", "attack", "decay", "sustain", "release",
-      "lfoFrequency", "lfoPitchMod", "lfoFilterMod", "lfoAmpMod", "adsrAmpMod",
-      "adsrPitchMod", "adsrFilterMod", "cutoff", "Q", "oscFn"
-    ];
-    this.scale = {
-      "frequency":{scale:1000, translate:0},
-      "frequency2":{scale:1000, translate:0},
-      "attack":{scale:1500, translate:0},
-      "decay":{scale:1500, translate:0},
-      "sustain":{scale:1, translate:0},
-      "release":{scale:1500, translate:0},
-      "lfoFrequency":{scale:10, translate:0},
-      "lfoPitchMod":{scale:100, translate:0},
-      "lfoFilterMod":{scale:8000, translate:0},
-      "lfoAmpMod":{scale:1, translate:0},
-      "adsrAmpMod":{scale:1, translate:0},
-      "adsrPitchMod":{scale:100, translate:0},
-      "adsrFilterMod":{scale:1, translate:0},
-      "cutoff":{scale:2000, translate:40},
-      "Q":{scale:2, translate:0},
-      "oscFn":{scale:1, translate:0}
-    };
+    this.parameters = {
+      "frequency":{scale:1000, translate:0, val:440, default:440},
+      "frequency2":{scale:1000, translate:0, val:440, default:440},
+      "attack":{scale:1500, translate:0, val:1000, default:1000},
+      "decay":{scale:1500, translate:0, val:1000, default:1000},
+      "sustain":{scale:1, translate:0, val:1, default:1},
+      "release":{scale:1500, translate:0, val:1000, default:1000},
+      "lfoFrequency":{scale:10, translate:0, val:0, default:0},
+      "lfoPitchMod":{scale:100, translate:0, val:1, default:1},
+      "lfoFilterMod":{scale:8000, translate:0, val:1, default:1},
+      "lfoAmpMod":{scale:1, translate:0, val:0, default:0},
+      "adsrAmpMod":{scale:1, translate:0, val:1, default:1},
+      "adsrPitchMod":{scale:100, translate:0, val:1, default:1},
+      "adsrFilterMod":{scale:1, translate:0, val:1, default:1},
+      "cutoff":{scale:3000, translate:40, val:2000, default:2000},
+      "Q":{scale:2, translate:0, val:1, default:1},
+      "poly":{scale:1, translate:0, val:0, default:0},
+      "oscFn":{scale:1, translate:0, val:0, default:0},
+    }
   }
 
   setOsc(osc) {
-    const param = this.node.parameters.get("oscFn");
-    if(param)
-    {
-      param.setValueAtTime(osc, this.context.currentTime)
-    }
+    this.setParam("oscFn", osc);
   }
 
   getParamKey() {
@@ -394,7 +401,7 @@ class MaxiSynth extends MaxiInstrument {
     });
     oscillatorSelector.onchange = ()=> {
       const index = parseInt(oscillatorSelector.selectedIndex);
-      this.onGUIChange(index, this.parameters.length - 1);
+      this.onGUIChange(index, Object.keys(this.parameters).length - 1);
     }
     this.outputGUI.oscFn = oscillatorSelector;
 
@@ -644,10 +651,10 @@ class MaxiSynth extends MaxiInstrument {
     cell = row.insertCell();
     cell.appendChild(printParamsButton);
 
-    for(let i = 0; i < this.parameters.length; i++)
+    for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
-      let p = this.parameters[i];
-      if(p !== "oscFn")
+      let p = Object.keys(this.parameters)[i];
+      if(p !== "oscFn" && p !== "poly")
       {
         if(i % rowLength === 0)
         {
@@ -656,8 +663,8 @@ class MaxiSynth extends MaxiInstrument {
         cell = row.insertCell();
         cell.classList.add("cell_" + p);
         cell.style.border = "1px solid black";
-        let val = this.node.parameters.get(p).defaultValue;
-        val = (val - this.scale[p].translate) / this.scale[p].scale;
+        let val = this.parameters[p].default;
+        val = (val - this.parameters[p].translate) / this.parameters[p].scale;
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.min = 0;
@@ -681,13 +688,9 @@ class MaxiSynth extends MaxiInstrument {
     this.loadParamValues();
   }
 
-  useFreqSliders(p) {
-    const param = this.node.parameters.get("poly");
-    if(param)
-    {
-      param.setValueAtTime(p ? 0 : 1, this.context.currentTime)
-    }
-    const vis = p ? "visible" : "hidden"
+  useFreqSliders(useSliders) {
+    this.setParam("poly", useSliders ? 0 : 1)
+    const vis = useSliders ? "visible" : "hidden"
     let elem = document.getElementsByClassName("cell_frequency");
     for (let e of elem) {
       e.style.visibility = vis;
@@ -701,24 +704,19 @@ class MaxiSynth extends MaxiInstrument {
 
 class MaxiSampler extends MaxiInstrument {
 
-   constructor(audioContext, customProcessorName, index, publisher) {
-    super(audioContext, customProcessorName, index, publisher);
-    const core = [
-      "gain", "rate", "start", "end"
-    ];
-     const coreScale = {
-      "gain":{scale:1, translate:0, min:0, max:1},
-      "rate":{scale:1, translate:0, min:0, max:4},
-      "end":{scale:1, translate:0, min:0, max:1},
-      "start":{scale:1, translate:0, min:0, max:1}
+   constructor(node, index, instrument, audioContext) {
+    super(node, index, instrument, audioContext);
+    const core = {
+      "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
+      "rate":{scale:1, translate:0, min:0, max:4, val:1},
+      "end":{scale:1, translate:0, min:0, max:1, val:1},
+      "start":{scale:1, translate:0, min:0, max:1, val:0}
     };
-    this.scale = {};
-    this.parameters = [];
+    this.parameters = {};
     for(let i = 0; i < 4; i++)
     {
-      core.forEach((v)=> {
-        this.parameters.push(v+"_"+i);
-        this.scale[v+"_"+i] = coreScale[v]
+      Object.keys(core).forEach((v)=> {
+        this.parameters[v+"_"+i] = core[v]
       });
     }
   }
@@ -744,9 +742,9 @@ class MaxiSampler extends MaxiInstrument {
     element.appendChild(table);
     let row;
     table.style.border = "1px solid black"
-    for(let i = 0; i < this.parameters.length; i++)
+    for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
-      let p = this.parameters[i];
+      let p = Object.keys(this.parameters)[i];
       if(i % rowLength === 0)
       {
         row = table.insertRow();
@@ -754,17 +752,17 @@ class MaxiSampler extends MaxiInstrument {
       const cell = row.insertCell();
       cell.classList.add("cell_" + p);
       cell.style.border = "1px solid black";
-      let val = this.node.parameters.get(p).defaultValue;
+      let val = this.parameters[p].val;
       //const just_name = p.substring(0, p.length - 2)
-      const scaledVal = (val - this.scale[p].translate) / this.scale[p].scale;
+      const scaledVal = (val - this.parameters[p].translate) / this.parameters[p].scale;
       const numBox = document.createElement('div');
       cell.appendChild(numBox);
       numBox.setAttribute("id", p);
       var number = new Nexus.Number("#"+p,{
         'size': [30, 20],
         'value': scaledVal,
-        'min': this.scale[p].min,
-        'max': this.scale[p].max,
+        'min': this.parameters[p].min,
+        'max': this.parameters[p].max,
         'step': 0.05
       });
       this.outputGUI[p] = number;
@@ -782,19 +780,24 @@ class MaxiSampler extends MaxiInstrument {
   }
 
   loadSample(url, index) {
-    console.log("loadSamples");
-    if (this.context !== undefined) {
-      loadSampleToArray(this.context, index, url, this.sendAudioArray, this.node);
+    console.log("loadSamples", this.index);
+    if (this.audioContext !== undefined) {
+      loadSampleToArray(this.audioContext, index, url, this.sendAudioArray, this.node, this.index);
     } else throw "Audio Context is not initialised!";
   }
 
   sendAudioArray(sampleWorkletObjectName, float32Array, node) {
     console.log("sendAudioArray");
     if (float32Array !== undefined && node !== undefined) {
-      // console.log('f32array: ' + float32Array);
       node.port.postMessage({
-        audioBlob: float32Array,
-        index:parseInt(sampleWorkletObjectName)
+        audio:{
+          instrument:"sampler",
+          index:0,
+          val:{
+            audioBlob: float32Array,
+        	index:parseInt(sampleWorkletObjectName)
+          }
+        }
       });
     }
   }

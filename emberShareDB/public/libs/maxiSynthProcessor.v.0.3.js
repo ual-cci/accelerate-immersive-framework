@@ -1,93 +1,119 @@
 import Module from "https://mimicproject.com/libs/maximilian.wasmmodule.js"
-class MaxiSynthProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
-    return [{
-        name: 'gain',
-        defaultValue: 0.5
-      },
-      {
-        name: 'poly',
-        defaultValue: 0.0
-      },
-      {
-        name: 'oscFn',
-        defaultValue: 0
-      },
-      {
-        name: 'frequency',
-        defaultValue: 440.0
-      },
-      {
-        name: 'frequency2',
-        defaultValue: 220.0,
-      },
-      {
-        name: 'attack',
-        defaultValue: 1000.0
-      },
-      {
-        name: 'decay',
-        defaultValue: 1000.0
-      },
-      {
-        name: 'sustain',
-        defaultValue: 1.0
-      },
-      {
-        name: 'release',
-        defaultValue: 1000.0
-      },
-      {
-        name: 'lfoFrequency',
-        defaultValue: 0.0
-      },
-      {
-        name: 'lfoPitchMod',
-        defaultValue: 1.0
-      },
-      {
-        name: 'lfoFilterMod',
-        defaultValue: 1.0
-      },
-      {
-        name: 'lfoAmpMod',
-        defaultValue: 0.0
-      },
-      {
-        name: 'adsrAmpMod',
-        defaultValue: 1.0
-      },
-      {
-        name: 'adsrPitchMod',
-        defaultValue: 1.0
-      },
-      {
-        name: 'adsrFilterMod',
-        defaultValue: 1.0
-      },
-      {
-        name: 'cutoff',
-        defaultValue: 4000
-      },
-      {
-        name: 'Q',
-        defaultValue: 1.0
-      },
-      {
-        name: 'loop',
-        defaultValue: 96.0
-      },
-      {
-        name: 'playHead',
-        defaultValue: 0.0
-      },
-    ];
+
+class MaxiSamplerProcessor {
+   constructor() {
+    //Max polyphony
+    const voices = 4;
+    this.sampleRate = 44100;
+    this.DAC = [0];
+    this.dcoOut = 0;
+    this.dcfOut = 0;
+    this.samples = [];
+    this.adsr = [];
+    this.playHead = 0;
+    this.prevPlayHead = 0;
+    for(let i = 0; i < voices; i++)
+    {
+      this.samples.push(new Module.maxiSample());
+      this.adsr.push(new Module.maxiEnv());
+    }
+    this.dcf = new Module.maxiFilter();
+    this.seqPtr = 0;
+    this.sequence = [];
   }
 
-   constructor(options) {
-    super();
-    console.log("options", options)
-    //Max polyphony
+  doTrig() {
+    let trig = false;
+    if(this.seqPtr < this.sequence.length)
+    {
+      trig = this.sequence[this.seqPtr].t <= this.playHead;
+    }
+    return trig;
+  }
+
+  handleNoteOn(freq)
+  {
+    console.log("handleNoteOn", freq);
+  	this.handleCmd({cmd:"noteon", f:freq});
+  }
+
+  //Execute noteon/noteoffs (whether sequenced or manually triggered)
+  handleCmd(nextCmd) {
+    if(this.parameters)
+    {
+      const f = nextCmd.f;
+      console.log(nextCmd)
+      if(nextCmd.cmd === "noteon")
+      {
+        console.log("trigger",f);
+        this.samples[f].trigger();
+      }
+    }
+  }
+
+  handleLoop() {
+    this.seqPtr = 0;
+  }
+
+  tick(playHead) {
+    this.playHead = playHead;
+    if(this.playHead == 0 && this.prevPlayHead > 0)
+    {
+      this.handleLoop();
+    }
+
+    while(this.doTrig())
+    {
+      const nextCmd = this.sequence[this.seqPtr]
+      this.handleCmd(nextCmd);
+      this.seqPtr++;
+    }
+    this.prevPlayHead = this.playHead;
+  }
+
+  remove(array, element) {
+    const index = array.indexOf(element);
+    array.splice(index, 1);
+  }
+
+  onSample() {
+
+  }
+
+  signal(parameters) {
+    this.dcoOut = 0;
+    let index = 0;
+    for(let i = 0; i < this.samples.length; i++)
+    {
+      const s = this.samples[i];
+      if(s.isReady())
+      {
+        let end = this.parameters['end_'+i].val;
+        if(end == 0)
+        {
+          end = s.getLength();
+        }
+        let start = this.parameters['start_'+i].val;
+        let rate = this.parameters['rate_'+i].val
+        let gain = this.parameters['gain_' + i].val;
+        //let gain = i == 0 ? 1:0;
+      	this.dcoOut += s.playOnce(rate) * gain;
+      }
+      this.adsr[index].trigger = 0;
+      index++;
+
+    }
+   	return this.dcoOut;
+  }
+
+  logGain(gain) {
+    return 0.0375 * Math.exp(gain * 0.465);
+  }
+}
+
+class MaxiSynthProcessor {
+
+  constructor() {
     const voices = 8;
     this.sampleRate = 44100;
     this.DAC = [0];
@@ -104,46 +130,15 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
     }
     this.lfo = new Module.maxiOsc();
     this.dcf = new Module.maxiFilter();
-    this.publisher = options.processorOptions.publisher;
-    if(this.publisher)
-    {
-      console.log("making clock")
-      this.myClock = new Module.maxiClock();
-      this.myClock.setTempo(80);
-      this.myClock.setTicksPerBeat(24);
-    }
-    this.playHead = 0;
-    this.prevPlayHead = 0;
-
     this.seqPtr = 0;
     this.samplePtr = 0;
     this.sequence = [];
     this.poly = false;
-    this.port.onmessage = (event) => {
-      if(event.data.sequence)
-      {
-        this.sequence = event.data.sequence;
-      }
-      else if(event.data.length)
-      {
-        this.length = event.data.length;
-      }
-      else if(event.data.noteon)
-      {
-		      this.handleNoteOn(event.data.noteon);
-      }
-      else if(event.data.noteoff)
-      {
-		      this.handleNoteOff(event.data.noteoff);
-      }
-      else if(event.data.tempo)
-      {
-		      this.myClock.setTempo(event.data.tempo)
-      }
-    }
+    this.playHead = 0;
+    this.prevPlayHead = 0;
   }
 
-  //Find the oscillator to release for freq (for noteoff)
+    //Find the oscillator to release for freq (for noteoff)
   getTriggeredForFreq(f) {
     let osc = -1;
     for(let i = 0; i < this.triggered.length; i++)
@@ -216,8 +211,8 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
       }
       else if(this.parameters)
       {
-        this.handleCmd({cmd:"noteon", f:this.parameters.frequency[0]});
-        this.handleCmd({cmd:"noteon", f:this.parameters.frequency2[0]});
+        this.handleCmd({cmd:"noteon", f:this.parameters.frequency.val});
+        this.handleCmd({cmd:"noteon", f:this.parameters.frequency2.val});
       }
     }
     else
@@ -239,8 +234,8 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
     }
 	else if(this.parameters)
     {
-      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency[0]});
-      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency2[0]});;
+      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency.val});
+      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency2.val});;
     }
   }
 
@@ -257,10 +252,10 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
         //This will be -1 if no available oscillators
         if(o >= 0)
         {
-          this.adsr[o].setAttack(this.parameters.attack[0]);
-          this.adsr[o].setDecay(this.parameters.decay[0]);
-          this.adsr[o].setSustain(this.parameters.sustain[0]);
-          this.adsr[o].setRelease(this.parameters.release[0]);
+          this.adsr[o].setAttack(this.parameters.attack.val);
+          this.adsr[o].setDecay(this.parameters.decay.val);
+          this.adsr[o].setSustain(this.parameters.sustain.val);
+          this.adsr[o].setRelease(this.parameters.release.val);
           this.triggered.push({o:o, f:f});
           this.adsr[o].trigger = 1;
         }
@@ -272,7 +267,7 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
       else if(nextCmd.cmd === "noteoff")
       {
         let release = -1;
-        const releaseTime = (this.samplePtr + (this.parameters.release[0] / 1000 * this.sampleRate));
+        const releaseTime = (this.samplePtr + (this.parameters.release.val/ 1000 * this.sampleRate));
         if(this.poly)
         {
           //Release based on freq match
@@ -304,11 +299,15 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
   }
 
   handleLoop() {
-	  //Wrap around any release times
+	//Wrap around any release times
     for(let i = 0; i < this.released.length; i++)
     {
       this.released[i].off = this.released[i].off % this.length;
     }
+    //MIDIPANIC
+    this.triggered.forEach((trig)=> {
+      this.handleNoteOff(trig.f);
+    });
     //Restart loop
     this.samplePtr = this.seqPtr = 0;
   }
@@ -323,45 +322,19 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
     return trig;
   }
 
-  updateSeq() {
-      if(this.playHead == 0 && this.prevPlayHead > 0)
-      {
-        this.handleLoop();
-      }
-
-      while(this.doTrig())
-      {
-        const nextCmd = this.sequence[this.seqPtr]
-        this.handleCmd(nextCmd);
-        this.seqPtr++;
-      }
-      this.prevPlayHead = this.playHead;
-  }
-
-  handleSeq() {
-    this.samplePtr++;
-    if(this.myClock)
+  tick(playHead) {
+    this.playHead = playHead;
+    if(this.playHead == 0 && this.prevPlayHead > 0)
     {
-      this.myClock.ticker();
-      if(this.myClock.tick)
-      {
-        this.playHead = this.myClock.playHead;
-        this.updateSeq();
-        this.port.postMessage({playHead:this.playHead});
-        if(this.myClock.playHead >= this.parameters.loop[0])
-        {
-          this.myClock.playHead = -1;
-        }
-      }
+      this.handleLoop();
     }
-    else
+    while(this.doTrig())
     {
-      this.playHead = this.parameters.playHead[0];
-      if(this.playHead !== this.prevPlayHead)
-      {
-        this.updateSeq();
-      }
+      const nextCmd = this.sequence[this.seqPtr];
+      this.handleCmd(nextCmd);
+      this.seqPtr++;
     }
+    this.prevPlayHead = this.playHead;
   }
 
   remove(array, element) {
@@ -383,57 +356,63 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
     }
   }
 
-  handleScheduling() {
+  onSample() {
+    this.samplePtr++;
     this.removeReleased();
-    this.handleSeq();
   }
 
-  signal(parameters) {
-    this.parameters = parameters;
-    this.poly = this.parameters.poly[0] == 1;
-    this.handleScheduling();
-
-    const lfoOut = this.lfo.sinewave(parameters.lfoFrequency[0]);
-    const oscFn = this.getOscFn(parameters.oscFn[0]);
-    this.dcoOut = 0;
-    const out = this.triggered.concat(this.released);
-
-    for(let o of out)
+  signal() {
+    if(this.parameters)
     {
-      //console.log(o.o, o.f);
-      const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
-      const pitchMod = (parameters.adsrPitchMod[0] * envOut) + (lfoOut * parameters.lfoPitchMod[0]);
-      const ampOsc =  (lfoOut * parameters.lfoAmpMod[0])
-      const normalise = this.poly ? this.dco.length : 2.0;
-      const ampMod = ((envOut * parameters.adsrAmpMod[0]) + (ampOsc * envOut)) / normalise;
-      let f = this.poly ? o.f : o.o % 2 == 0 ? parameters.frequency[0] : parameters.frequency2[0];
-      f = f < 0 ? 0 : f;
-      let osc;
-      if(oscFn === "noise")
-      {
-        osc = this.dco[o.o].noise();
-      }
-      else
-      {
-        osc = this.dco[o.o][oscFn](f + pitchMod);
-      }
-      this.dcoOut += (osc * ampMod);
-    }
+      this.poly = this.parameters.poly.val == 1;
 
-    //Filter
-	//let filterEnv = envOut * parameters.adsrFilterMod[0]
-    const filterEnv = 1;
-    const filterOsc = lfoOut * parameters.lfoFilterMod[0];
-    let cutoff = parameters.cutoff[0];
-    cutoff = (cutoff * filterEnv) + filterOsc;
-    if (cutoff > 20000) {
-      cutoff = 20000;
+      const lfoOut = this.lfo.sinewave(this.parameters.lfoFrequency.val);
+      const oscFn = this.getOscFn(this.parameters.oscFn.val);
+      this.dcoOut = 0;
+      const out = this.triggered.concat(this.released);
+
+      for(let o of out)
+      {
+        //console.log(o.o, o.f);
+        const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
+        const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
+        const ampOsc =  (lfoOut * this.parameters.lfoAmpMod.val)
+        const normalise = this.poly ? this.dco.length : 2.0;
+        const ampMod = ((envOut * this.parameters.adsrAmpMod.val) + (ampOsc * envOut)) / normalise;
+        let f = this.poly ? o.f : o.o % 2 == 0 ? this.parameters.frequency.val : this.parameters.frequency2.val;
+        f = f < 0 ? 0 : f;
+        let osc;
+        if(oscFn === "noise")
+        {
+          osc = this.dco[o.o].noise();
+        }
+        else
+        {
+          osc = this.dco[o.o][oscFn](f + pitchMod);
+          //osc = this.dco[o.o][oscFn](f);
+        }
+        this.dcoOut += (osc * ampMod);
+      }
+
+      //Filter
+
+      let filterEnv = 1;
+      const filterOsc = lfoOut * this.parameters.lfoFilterMod.val;
+      let cutoff = this.parameters.cutoff.val;
+      cutoff = (cutoff * filterEnv) + filterOsc;
+      if (cutoff > 2000) {
+        cutoff = 2000;
+      }
+      if (cutoff < 40) {
+        cutoff = 40;
+      }
+      this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
+      return this.dcfOut;
     }
-    if (cutoff < 40) {
-      cutoff = 40;
+	else {
+      console.log("just 0")
+      return 0;
     }
-    this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, parameters.Q[0]);
-   	return this.dcfOut;
   }
 
   getOscFn(o)
@@ -453,13 +432,123 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
     }
     return oscFn;
   }
+}
+
+class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
+    static get parameterDescriptors() {
+      let core =  [{
+          name: 'gain',
+          defaultValue: 0.5
+        },
+        {
+          name: 'loop',
+          defaultValue: 96.0
+        },
+        {
+          name: 'playHead',
+          defaultValue: 0.0
+        },
+      ];
+      return core;
+    }
+
+   constructor(options) {
+    super();
+    console.log("options", options)
+    //Max polyphony
+    this.instruments = {synth:[], sampler:[]};
+    console.log("making clock")
+    this.myClock = new Module.maxiClock();
+    this.myClock.setTempo(80);
+    this.myClock.setTicksPerBeat(24);
+    this.playHead = 0;
+    this.port.onmessage = (event) => {
+      if(event.data.sequence)
+      {
+        console.log("sequnce", event.data.sequence);
+        const data = event.data.sequence;
+        this.instruments[data.instrument][data.index].sequence = data.val;
+      }
+      else if(event.data.addSynth)
+      {
+        console.log("ADDING SYNTH");
+        this.instruments.synth.push(new MaxiSynthProcessor());
+      }
+      else if(event.data.addSampler)
+      {
+        console.log("ADDING SAMPLER");
+        this.instruments.sampler.push(new MaxiSamplerProcessor());
+      }
+      else if(event.data.noteon)
+      {
+        const data = event.data.noteon;
+        this.instruments[data.instrument][data.index].handleNoteOn(data.val);
+      }
+      else if(event.data.noteoff)
+      {
+        const data = event.data.noteoff;
+        this.instruments[data.instrument][data.index].handleNoteOff(data.val);
+      }
+      else if(event.data.tempo)
+      {
+		this.myClock.setTempo(event.data.tempo)
+      }
+      else if(event.data.parameters)
+      {
+		    const data = event.data.parameters;
+        this.instruments[data.instrument][data.index].parameters = data.val
+      }
+      else if(event.data.audio !== undefined)
+      {
+        const data = event.data.audio;
+        const audioData = this.translateFloat32ArrayToBuffer(data.val.audioBlob);
+        this.instruments.sampler[data.index].samples[data.val.index].setSample(audioData);
+      }
+    }
+  }
+
+ translateFloat32ArrayToBuffer(audioFloat32Array) {
+
+    var maxiSampleBufferData = new Module.VectorDouble();
+    for (var i = 0; i < audioFloat32Array.length; i++) {
+      maxiSampleBufferData.push_back(audioFloat32Array[i]);
+    }
+    return maxiSampleBufferData;
+  }
 
   logGain(gain) {
     return 0.175 * Math.exp(gain * 0.465);
   }
 
+  getInstruments() {
+    return this.instruments.synth.concat(this.instruments.sampler)
+  }
+
+  onSample() {
+    this.getInstruments().forEach((s)=> {
+      s.onSample()
+    })
+    if(this.myClock)
+    {
+      this.myClock.ticker();
+      if(this.myClock.tick)
+      {
+        this.playHead = this.myClock.playHead;
+        this.getInstruments().forEach((s)=> {
+          s.tick(this.playHead);
+        })
+        this.port.postMessage({playHead:this.playHead});
+        if(this.myClock.playHead >= this.staticParameters.loop[0])
+        {
+          this.myClock.playHead = -1;
+        }
+      }
+    }
+  }
+
   process(inputs, outputs, parameters)
   {
+    this.staticParameters = parameters;
     const outputsLength = outputs.length;
     for (let outputId = 0; outputId < outputsLength; ++outputId) {
       let output = outputs[outputId];
@@ -480,15 +569,11 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
             }
           }
         }
-
-        if (parameters.gain.length === 1) {
-          for (let i = 0; i < 128; ++i) {
-            outputChannel[i] = this.signal(parameters) * this.logGain(parameters.gain[0]);
-          }
-        } else {
-          for (let i = 0; i < 128; ++i) {
-            outputChannel[i] = this.signal(parameters) * this.logGain(parameters.gain[i]);
-          }
+        for (let i = 0; i < 128; ++i) {
+          this.onSample();
+          this.getInstruments().forEach((s)=> {
+            outputChannel[i] += s.signal() * this.logGain(parameters.gain[0]);
+          });
         }
       }
     }
@@ -496,4 +581,4 @@ class MaxiSynthProcessor extends AudioWorkletProcessor {
   }
 
 }
-registerProcessor("maxi-synth-processor", MaxiSynthProcessor);
+registerProcessor("maxi-synth-processor", MaxiInstrumentsProcessor);
