@@ -13,6 +13,7 @@ class MaxiInstruments {
     nexusUI.src = document.location.origin + '/libs/nexusUI.js';
     document.getElementsByTagName('head')[0].appendChild(nexusUI);
     this.version = "v.0.3";
+    this.TICKS_PER_BEAT = 24;
   }
 
   getSynthName()
@@ -72,6 +73,10 @@ class MaxiInstruments {
 
   setLoop(val) {
     this.setParam("loop", val - 1);
+  }
+
+  setLoopBeats(val) {
+    this.setParam("loop", (val * this.TICKS_PER_BEAT) - 1);
   }
 
   setTempo(tempo) {
@@ -134,7 +139,7 @@ class MaxiInstruments {
             latencyHint:'playback',
             sample: 44100
           });
-         this.loadModule(synthWorkletUrl).then(()=> {
+         this.loadModule(this.getSynthName()).then(()=> {
             this.createNode().then(resolve);
           }).catch((err)=> {
             reject(err);
@@ -192,6 +197,7 @@ class MaxiInstrument {
     this.audioContext = audioContext;
     this.mapped = [];
     this.outputGUI = [];
+    this.TICKS_PER_BEAT = 24;
   }
   noteon(freq = 1) {
     this.node.port.postMessage({
@@ -219,7 +225,7 @@ class MaxiInstrument {
     let mul = 1;
     if(seq.quantizationInfo)
     {
-		mul = 24 / seq.quantizationInfo.stepsPerQuarter;
+		mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
     }
     notes.forEach((n)=> {
       let doAdd = true;
@@ -283,7 +289,18 @@ class MaxiInstrument {
     return vals;
   }
 
+  sendDefaultParam() {
+    this.node.port.postMessage({
+      "parameters":{
+        instrument:this.instrument,
+        index:this.index,
+        val:this.parameters
+      }
+    });
+  }
+
   setParam(name, val) {
+    console.log(name, val)
     let param = this.node.parameters.get(name);
     if(param)
     {
@@ -308,6 +325,7 @@ class MaxiInstrument {
 
   saveParamValues() {
     const key = this.getParamKey();
+    console.log(window.localStorage, key);
     window.localStorage.setItem(
       key,
       JSON.stringify(this.getParamValues())
@@ -342,24 +360,25 @@ class MaxiSynth extends MaxiInstrument {
     super(node, index, instrument, audioContext);
 
     this.parameters = {
-      "frequency":{scale:1000, translate:0, val:440, default:440},
-      "frequency2":{scale:1000, translate:0, val:440, default:440},
-      "attack":{scale:1500, translate:0, val:1000, default:1000},
-      "decay":{scale:1500, translate:0, val:1000, default:1000},
-      "sustain":{scale:1, translate:0, val:1, default:1},
-      "release":{scale:1500, translate:0, val:1000, default:1000},
-      "lfoFrequency":{scale:10, translate:0, val:0, default:0},
-      "lfoPitchMod":{scale:100, translate:0, val:1, default:1},
-      "lfoFilterMod":{scale:8000, translate:0, val:1, default:1},
-      "lfoAmpMod":{scale:1, translate:0, val:0, default:0},
-      "adsrAmpMod":{scale:1, translate:0, val:1, default:1},
-      "adsrPitchMod":{scale:100, translate:0, val:1, default:1},
-      "adsrFilterMod":{scale:1, translate:0, val:1, default:1},
-      "cutoff":{scale:3000, translate:40, val:2000, default:2000},
-      "Q":{scale:2, translate:0, val:1, default:1},
-      "poly":{scale:1, translate:0, val:0, default:0},
-      "oscFn":{scale:1, translate:0, val:0, default:0},
+      "frequency":{scale:1000, translate:0, val:440},
+      "frequency2":{scale:1000, translate:0, val:440},
+      "attack":{scale:1500, translate:0, val:1000},
+      "decay":{scale:1500, translate:0, val:1000},
+      "sustain":{scale:1, translate:0, val:1},
+      "release":{scale:1500, translate:0, val:1000},
+      "lfoFrequency":{scale:10, translate:0, val:0},
+      "lfoPitchMod":{scale:100, translate:0, val:1},
+      "lfoFilterMod":{scale:8000, translate:0, val:1},
+      "lfoAmpMod":{scale:1, translate:0, val:0},
+      "adsrAmpMod":{scale:1, translate:0, val:1},
+      "adsrPitchMod":{scale:100, translate:0, val:1},
+      "adsrFilterMod":{scale:1, translate:0, val:1},
+      "cutoff":{scale:3000, translate:40, val:2000},
+      "Q":{scale:2, translate:0, val:1},
+      "poly":{scale:1, translate:0, val:0},
+      "oscFn":{scale:1, translate:0, val:0},
     }
+    this.sendDefaultParam();
   }
 
   setOsc(osc) {
@@ -367,6 +386,7 @@ class MaxiSynth extends MaxiInstrument {
   }
 
   getParamKey() {
+    console.log("paramkey", window.frameElement.name + "_synth_" + this.index)
     return window.frameElement.name + "_synth_" + this.index;
   }
 
@@ -637,6 +657,7 @@ class MaxiSynth extends MaxiInstrument {
           this.outputGUI[key].value = val;
           this.onChange(val, key);
         });
+        this.saveParamValues();
       }
     }
 
@@ -663,7 +684,7 @@ class MaxiSynth extends MaxiInstrument {
         cell = row.insertCell();
         cell.classList.add("cell_" + p);
         cell.style.border = "1px solid black";
-        let val = this.parameters[p].default;
+        let val = this.parameters[p].val;
         val = (val - this.parameters[p].translate) / this.parameters[p].scale;
         const slider = document.createElement('input');
         slider.type = 'range';
@@ -719,6 +740,8 @@ class MaxiSampler extends MaxiInstrument {
         this.parameters[v+"_"+i] = core[v]
       });
     }
+    this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    this.sendDefaultParam();
   }
 
   getFreq(n)
@@ -782,23 +805,127 @@ class MaxiSampler extends MaxiInstrument {
   loadSample(url, index) {
     console.log("loadSamples", this.index);
     if (this.audioContext !== undefined) {
-      loadSampleToArray(this.audioContext, index, url, this.sendAudioArray, this.node, this.index);
+      this.loadSampleToArray(index, url)
     } else throw "Audio Context is not initialised!";
   }
 
-  sendAudioArray(sampleWorkletObjectName, float32Array, node) {
+  sendAudioArray(sampleWorkletObjectName, float32Array) {
     console.log("sendAudioArray");
-    if (float32Array !== undefined && node !== undefined) {
-      node.port.postMessage({
+    if (float32Array !== undefined && this.node !== undefined) {
+      this.node.port.postMessage({
         audio:{
           instrument:"sampler",
-          index:0,
+          index:this.index,
           val:{
             audioBlob: float32Array,
-        	index:parseInt(sampleWorkletObjectName)
+        	  index:parseInt(sampleWorkletObjectName)
           }
         }
       });
+    }
+  }
+
+  getArrayAsVectorDbl (arrayIn) {
+    var vecOut = new exports.VectorDouble();
+    for (var i = 0; i < arrayIn.length; i++) {
+      vecOut.push_back(arrayIn[i]);
+    }
+    return vecOut;
+  };
+
+  getBase64(str) {
+    //check if the string is a data URI
+    if (str.indexOf(';base64,') !== -1) {
+      //see where the actual data begins
+      var dataStart = str.indexOf(';base64,') + 8;
+      //check if the data is base64-encoded, if yes, return it
+      // taken from
+      // http://stackoverflow.com/a/8571649
+      return str.slice(dataStart).match(/^([A-Za-z0-9+\/]{4})*([A-Za-z0-9+\/]{4}|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)$/) ? str.slice(dataStart) : false;
+    } else return false;
+  };
+
+  //
+
+  removePaddingFromBase64(input) {
+    var lkey = this.keyStr.indexOf(input.charAt(input.length - 1));
+    if (lkey === 64) {
+      return input.substring(0, input.length - 1);
+    }
+    return input;
+  };
+
+  loadSampleToArray (sampleObjectName, url) {
+    var data = [];
+
+    var context = this.audioContext;
+
+    var b64 = this.getBase64(url);
+    if (b64) {
+      var ab_bytes = (b64.length / 4) * 3;
+      var arrayBuffer = new ArrayBuffer(ab_bytes);
+
+      b64 = this.removePaddingFromBase64(this.removePaddingFromBase64(b64));
+
+      var bytes = parseInt((b64.length / 4) * 3, 10);
+
+      var uarray;
+      var chr1, chr2, chr3;
+      var enc1, enc2, enc3, enc4;
+      var i = 0;
+      var j = 0;
+
+      uarray = new Uint8Array(arrayBuffer);
+
+      b64 = b64.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+      for (i = 0; i < bytes; i += 3) {
+        //get the 3 octects in 4 ascii chars
+        enc1 = this.keyStr.indexOf(b64.charAt(j++));
+        enc2 = this.keyStr.indexOf(b64.charAt(j++));
+        enc3 = this.keyStr.indexOf(b64.charAt(j++));
+        enc4 = this.keyStr.indexOf(b64.charAt(j++));
+
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+
+        uarray[i] = chr1;
+        if (enc3 !== 64) {
+          uarray[i + 1] = chr2;
+        }
+        if (enc4 !== 64) {
+          uarray[i + 2] = chr3;
+        }
+      }
+      context.decodeAudioData(
+        arrayBuffer, // has its content-type determined by sniffing
+        (buffer)=> {
+          data = buffer.getChannelData(0);
+          if (data) this.sendAudioArray(sampleObjectName, data);
+        },
+        (buffer)=> { // errorCallback
+          console.log("Error decoding source!");
+        }
+      );
+    } else {
+      var request = new XMLHttpRequest();
+      request.addEventListener("load", () => console.log("The transfer is complete."));
+      request.open("GET", url, true);
+      request.responseType = "arraybuffer";
+      request.onload = ()=>{
+        context.decodeAudioData(
+          request.response,
+          (buffer)=> {
+            data = buffer.getChannelData(0);
+            if (data) this.sendAudioArray(sampleObjectName, data);
+          },
+          (buffer)=> {
+            console.log("Error decoding source!");
+          },
+        )
+      };
+      request.send();
     }
   }
 }

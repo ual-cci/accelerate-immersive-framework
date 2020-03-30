@@ -15,7 +15,7 @@ Include the library
 </p>
 <pre>
 <code>
-&lt;script src = "https://mimicproject.com/libs/maxiInstruments.v.0.1.js"&gt;&lt;/script&gt;
+&lt;script src = "https://mimicproject.com/libs/maxiInstruments.v.0.3.js"&gt;&lt;/script&gt;
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -172,7 +172,40 @@ instruments.samplers[0].noteon(2);
 </code>
 </pre>
 <p class = "tutorial-text">
-You can also specify a sequence yourself. We use the same structure of NoteSequence used by Google's Magenta project. This saved us some time and makes the libraries nicely interchangeable. This does mean that if you are going to use your own sequences, you will have to include the Magenta libary using the code below.
+You can also specify a sequence yourself. We use broadly the same structure of NoteSequence used by Google's Magenta project making the libraries nicely interchangeable. We have chosen to adopt the MIDI standard of 24 ticks per beat.
+</p>
+<p class = "tutorial-text">
+The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats).
+</p>
+<pre>
+<code>
+instruments.setTempo(80);
+instruments.setLoop(96); //4 Beats
+instruments.setLoopBeats(4); //Equivalent in beats
+</code>
+</pre>
+<p class = "tutorial-text">
+You can then define sequences in terms of note ons and noteoff in ticks (quantizedStartStep and quantizedEndStep), and set them to a specific synth or sampler.
+</p>
+<pre>
+	<code>
+    const synthSeq = {
+      notes:[{pitch:60, quantizedStartStep:0, quantizedEndStep:12},
+             {pitch:67, quantizedStartStep:49, quantizedEndStep:72},
+            ],
+    };
+		instruments.synths[0].setSequence(synthSeq);
+
+    const samplerSeq = {
+      notes:[{pitch:0, quantizedStartStep:0},
+             {pitch:1, quantizedStartStep:49},
+            ],
+    };
+    instruments.samplers[0].setSequence(samplerSeq);
+	</code>
+</pre>
+<p class = "tutorial-text">
+You can also input sequences generated from Magenta directly into the synths. Below is an example using one of Magenta's pretrained recurrent neural networks to complete the a given seqeunce, and playing it directly on a MaxiSynth. First import the Magenta library.
 </p>
 <pre>
 <code>
@@ -180,14 +213,14 @@ You can also specify a sequence yourself. We use the same structure of NoteSeque
 </code>
 </pre>
 <p class = "tutorial-text">
-	Now you can specify as sequence given
-	<ul>
-		<li>A tempo</li>
-		<li>A definition of stepsPerQuarter. We define time in steps and this tells us how many represent a quarter note / crotchet</li>
-		<li>An array of notes objects, including pitch (MIDI), a start time and end time each in steps</li>
-		<li>A total length, also in steps</li>
-	</ul>
-	See the code below as an example
+In order to get a continued seqeunce from Magenta's pretrained models, you can specify given
+<ul>
+	<li>A tempo</li>
+	<li>A definition of stepsPerQuarter. We define time in steps and this tells us how many represent a quarter note / crotchet</li>
+	<li>An array of notes objects, including pitch (MIDI), a start time and end time each in steps</li>
+	<li>A total length, also in steps</li>
+</ul>
+See the code below as an example
 </p>
 <pre>
 	<code>
@@ -201,15 +234,7 @@ const inputSeq = {
 	</code>
 </pre>
 <p class = "tutorial-text">
-	You can then set the sequence to the instrument
-</p>
-<pre>
-	<code>
-		instruments.synths[0].setSequence(inputSeq);
-	</code>
-</pre>
-<p class = "tutorial-text">
-	You can also input sequences generated from Magenta directly into the synths. Below is an example using one of Magenta's pretrained recurrent neural networks to complete the sequence given above, and playing it directly on a MaxiSynth.
+Then you can feed to Magenta, and set the returned sequence directly to synth.
 </p>
 <pre>
 	<code>
@@ -219,16 +244,6 @@ rnn.initialize().then(()=> {
 		instruments.synths[0].setSequence(newSeq);
 	});
 });
-	</code>
-</pre>
-<p class = "tutorial-text">
-	It also means you can use Magenta's built-in MIDI-to-NoteSequence conversion. Upload a MIDI file as an asset, then just use the code below to get a NoteSequence and pass it straight to a MaxiSynth.
-</p>
-<pre>
-	<code>
-  mm.urlToNoteSequence("MYMIDIFILE.mid").then((seq)=>{
-    instruments.synths[0].setSequence(seq)
-  });
 	</code>
 </pre>
 <p class = "tutorial-text">

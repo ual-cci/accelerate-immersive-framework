@@ -1,5 +1,5 @@
-import Module from "https://mimicproject.com/libs/maximilian.wasmmodule.js"
-
+//import Module from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
+import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
 class MaxiSamplerProcessor {
    constructor() {
     //Max polyphony
@@ -14,10 +14,10 @@ class MaxiSamplerProcessor {
     this.prevPlayHead = 0;
     for(let i = 0; i < voices; i++)
     {
-      this.samples.push(new Module.maxiSample());
-      this.adsr.push(new Module.maxiEnv());
+      this.samples.push(new Maximilian.maxiSample());
+      this.adsr.push(new Maximilian.maxiEnv());
     }
-    this.dcf = new Module.maxiFilter();
+    this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
     this.sequence = [];
   }
@@ -33,7 +33,6 @@ class MaxiSamplerProcessor {
 
   handleNoteOn(freq)
   {
-    console.log("handleNoteOn", freq);
   	this.handleCmd({cmd:"noteon", f:freq});
   }
 
@@ -42,10 +41,9 @@ class MaxiSamplerProcessor {
     if(this.parameters)
     {
       const f = nextCmd.f;
-      console.log(nextCmd)
+      //console.log(nextCmd)
       if(nextCmd.cmd === "noteon")
       {
-        console.log("trigger",f);
         this.samples[f].trigger();
       }
     }
@@ -82,26 +80,29 @@ class MaxiSamplerProcessor {
 
   signal(parameters) {
     this.dcoOut = 0;
-    let index = 0;
-    for(let i = 0; i < this.samples.length; i++)
+    if(this.parameters)
     {
-      const s = this.samples[i];
-      if(s.isReady())
+      for(let i = 0; i < this.samples.length; i++)
       {
-        let end = this.parameters['end_'+i].val;
-        if(end == 0)
+        const s = this.samples[i];
+        if(s.isReady())
         {
-          end = s.getLength();
+          let end = this.parameters['end_'+i].val;
+          if(end == 0)
+          {
+            end = s.getLength();
+          }
+          let start = this.parameters['start_'+i].val;
+          let rate = this.parameters['rate_'+i].val
+          let gain = this.parameters['gain_' + i].val;
+          //let gain = i == 0 ? 1:0;
+          this.dcoOut += s.playOnce(rate) * gain;
         }
-        let start = this.parameters['start_'+i].val;
-        let rate = this.parameters['rate_'+i].val
-        let gain = this.parameters['gain_' + i].val;
-        //let gain = i == 0 ? 1:0;
-      	this.dcoOut += s.playOnce(rate) * gain;
+        this.adsr[i].trigger = 0;
       }
-      this.adsr[index].trigger = 0;
-      index++;
-
+    }
+    else {
+      //console.log("sampler no params")
     }
    	return this.dcoOut;
   }
@@ -125,11 +126,11 @@ class MaxiSynthProcessor {
     this.released = [];
     for(let i = 0; i < voices; i++)
     {
-      this.dco.push(new Module.maxiOsc());
-      this.adsr.push(new Module.maxiEnv());
+      this.dco.push(new Maximilian.maxiOsc());
+      this.adsr.push(new Maximilian.maxiEnv());
     }
-    this.lfo = new Module.maxiOsc();
-    this.dcf = new Module.maxiFilter();
+    this.lfo = new Maximilian.maxiOsc();
+    this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
     this.samplePtr = 0;
     this.sequence = [];
@@ -244,7 +245,7 @@ class MaxiSynthProcessor {
     if(this.parameters)
     {
       const f = nextCmd.f;
-      console.log("Synth cmd", nextCmd.cmd, nextCmd.f);
+      //console.log("Synth cmd", nextCmd.cmd, nextCmd.f);
       if(nextCmd.cmd === "noteon")
       {
         const o =  this.getAvailableOsc();
@@ -287,7 +288,7 @@ class MaxiSynthProcessor {
           for(let i = 0; i < 2; i++)
           {
             release = this.triggered[i].o;
-            console.log("off", f, release);
+            //console.log("off", f, release);
           	this.adsr[release].trigger = 0;
             this.released.push({f:f, o:release, off:releaseTime});
           }
@@ -454,30 +455,30 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
    constructor(options) {
     super();
-    console.log("options", options)
     //Max polyphony
     this.instruments = {synth:[], sampler:[]};
     console.log("making clock")
-    this.myClock = new Module.maxiClock();
+    this.TICKS_PER_BEAT = 24;
+    this.myClock = new Maximilian.maxiClock();
     this.myClock.setTempo(80);
-    this.myClock.setTicksPerBeat(24);
+    this.myClock.setTicksPerBeat(this.TICKS_PER_BEAT);
     this.playHead = 0;
     this.port.onmessage = (event) => {
       if(event.data.sequence)
       {
-        console.log("sequnce", event.data.sequence);
+        //console.log("sequnce", event.data.sequence);
         const data = event.data.sequence;
         this.instruments[data.instrument][data.index].sequence = data.val;
       }
       else if(event.data.addSynth)
       {
         console.log("ADDING SYNTH");
-        this.instruments.synth.push(new MaxiSynthProcessor());
+        this.instruments["synth"].push(new MaxiSynthProcessor());
       }
       else if(event.data.addSampler)
       {
         console.log("ADDING SAMPLER");
-        this.instruments.sampler.push(new MaxiSamplerProcessor());
+        this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
       else if(event.data.noteon)
       {
@@ -491,11 +492,12 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       }
       else if(event.data.tempo)
       {
-		this.myClock.setTempo(event.data.tempo)
+		    this.myClock.setTempo(event.data.tempo)
       }
       else if(event.data.parameters)
       {
 		    const data = event.data.parameters;
+        console.log(data);
         this.instruments[data.instrument][data.index].parameters = data.val
       }
       else if(event.data.audio !== undefined)
@@ -509,7 +511,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
  translateFloat32ArrayToBuffer(audioFloat32Array) {
 
-    var maxiSampleBufferData = new Module.VectorDouble();
+    var maxiSampleBufferData = new Maximilian.VectorDouble();
     for (var i = 0; i < audioFloat32Array.length; i++) {
       maxiSampleBufferData.push_back(audioFloat32Array[i]);
     }
