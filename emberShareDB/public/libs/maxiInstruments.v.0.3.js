@@ -225,13 +225,13 @@ class MaxiInstrument {
     let mul = 1;
     if(seq.quantizationInfo)
     {
-		mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
+		  mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
     }
     notes.forEach((n)=> {
       let doAdd = true;
       if(instruments.length > 0)
       {
-		doAdd = instruments.includes(n.instrument);
+		    doAdd = instruments.includes(n.instrument);
       }
       //If instrument selected, check for drums
       if(doAdd && muteDrums)
@@ -240,8 +240,20 @@ class MaxiInstrument {
       }
       if(doAdd)
       {
-        const start = n.quantizedStartStep;
-        const end = n.quantizedEndStep ? n.quantizedEndStep : start + 1;
+        let start = n.start;
+        if(!start && n.quantizedStartStep !== undefined)
+        {
+          start = n.quantizedStartStep;
+        }
+        let end = n.end;
+        if(!end && n.quantizedEndStep !== undefined)
+        {
+          end = n.quantizedEndStep
+        }
+        else
+        {
+          end = start + 1;
+        }
       	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul});
       	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});
       }
@@ -259,7 +271,8 @@ class MaxiInstrument {
   }
 
   onGUIChange(val, index) {
-    this.onChange(val, Object.keys(this.parameters)[index]);
+    const key = Object.keys(this.parameters)[index];
+    this.onChange(val, key);
     this.saveParamValues();
   }
 
@@ -300,7 +313,6 @@ class MaxiInstrument {
   }
 
   setParam(name, val) {
-    console.log(name, val)
     let param = this.node.parameters.get(name);
     if(param)
     {
@@ -309,6 +321,10 @@ class MaxiInstrument {
     else if (this.parameters[name])
     {
       this.parameters[name].val = val;
+      if(name == "poly")
+      {
+        console.log(name, val)
+      }
       this.node.port.postMessage({
         "parameters":{
           instrument:this.instrument,
@@ -325,7 +341,6 @@ class MaxiInstrument {
 
   saveParamValues() {
     const key = this.getParamKey();
-    console.log(window.localStorage, key);
     window.localStorage.setItem(
       key,
       JSON.stringify(this.getParamValues())
@@ -339,8 +354,11 @@ class MaxiInstrument {
     {
       Object.keys(vals).forEach((key)=>{
         const val = parseFloat(vals[key]);
-        this.outputGUI[key].value = val;
-        this.onChange(val, key);
+        if(this.outputGUI[key])
+        {
+          this.outputGUI[key].value = val;
+          this.onChange(val, key);
+        }
       });
     }
   }
@@ -360,8 +378,7 @@ class MaxiSynth extends MaxiInstrument {
     super(node, index, instrument, audioContext);
 
     this.parameters = {
-      "frequency":{scale:1000, translate:0, val:440},
-      "frequency2":{scale:1000, translate:0, val:440},
+      "gain":{scale:1, translate:0, val:1},
       "attack":{scale:1500, translate:0, val:1000},
       "decay":{scale:1500, translate:0, val:1000},
       "sustain":{scale:1, translate:0, val:1},
@@ -370,12 +387,12 @@ class MaxiSynth extends MaxiInstrument {
       "lfoPitchMod":{scale:100, translate:0, val:1},
       "lfoFilterMod":{scale:8000, translate:0, val:1},
       "lfoAmpMod":{scale:1, translate:0, val:0},
-      "adsrAmpMod":{scale:1, translate:0, val:1},
       "adsrPitchMod":{scale:100, translate:0, val:1},
-      "adsrFilterMod":{scale:1, translate:0, val:1},
       "cutoff":{scale:3000, translate:40, val:2000},
       "Q":{scale:2, translate:0, val:1},
-      "poly":{scale:1, translate:0, val:0},
+      "frequency":{scale:1000, translate:0, val:440},
+      "frequency2":{scale:1000, translate:0, val:440},
+      "poly":{scale:1, translate:0, val:1},
       "oscFn":{scale:1, translate:0, val:0},
     }
     this.sendDefaultParam();
@@ -386,7 +403,6 @@ class MaxiSynth extends MaxiInstrument {
   }
 
   getParamKey() {
-    console.log("paramkey", window.frameElement.name + "_synth_" + this.index)
     return window.frameElement.name + "_synth_" + this.index;
   }
 
@@ -654,8 +670,11 @@ class MaxiSynth extends MaxiInstrument {
         const preset = presets[index];
         Object.keys(preset.vals).forEach((key)=>{
           const val = preset.vals[key];
-          this.outputGUI[key].value = val;
-          this.onChange(val, key);
+          if(this.outputGUI[key])
+          {
+            this.outputGUI[key].value = val;
+            this.onChange(val, key);
+          }
         });
         this.saveParamValues();
       }
@@ -707,6 +726,7 @@ class MaxiSynth extends MaxiInstrument {
 
     }
     this.loadParamValues();
+    this.useFreqSliders(this.parameters["poly"] == 0)
   }
 
   useFreqSliders(useSliders) {
@@ -730,15 +750,19 @@ class MaxiSampler extends MaxiInstrument {
     const core = {
       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
       "rate":{scale:1, translate:0, min:0, max:4, val:1},
-      "end":{scale:1, translate:0, min:0, max:1, val:1},
-      "start":{scale:1, translate:0, min:0, max:1, val:0}
+      // "end":{scale:1, translate:0, min:0, max:1, val:1},
+      // "start":{scale:1, translate:0, min:0, max:1, val:0}
     };
+    this.voices = 8;
+    this.group = 1;
     this.parameters = {};
-    for(let i = 0; i < 4; i++)
+    const keys = Object.keys(core);
+    for(let i = 0; i < this.voices; i++)
     {
-      Object.keys(core).forEach((v)=> {
-        this.parameters[v+"_"+i] = core[v]
-      });
+      for(let j = 0; j < keys.length; j++) {
+        const key = keys[j]+"_"+i;
+        this.parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
+      };
     }
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
@@ -754,13 +778,38 @@ class MaxiSampler extends MaxiInstrument {
     return window.frameElement.name + "_sampler_" + this.index;
   }
 
+  toggleGroup() {
+    this.group = this.group == 0 ? 1 : 0;
+    const changeGroupButton = document.getElementById("changeGroupButton");
+    const slots = this.group == 0 ? "5-8" : "1-4";
+    changeGroupButton.innerHTML = "View Samples " + slots;
+    const indexes = [0,1,2,3].map(x => x + ((this.voices / 2) * this.group))
+    Object.keys(this.parameters).forEach((p)=> {
+      let elem = document.getElementsByClassName("cell_" + p);
+      const i = parseInt(p.split("_")[1])
+      const vis = indexes.includes(i) ? "table-cell" : "none";
+      for (let e of elem)
+      {
+        e.style.display = vis;
+      }
+    })
+
+  }
+
   addGUI(element) {
-    const rowLength = 8;
+    const rowLength = 4;
     const title = document.createElement('p');
     title.innerHTML = "MaxiSampler";
     title.style.fontSize = "10pt";
     title.style.margin = "3pt";
     element.appendChild(title);
+    const changeGroupButton = document.createElement("BUTTON");
+    changeGroupButton.innerHTML = "View Samples 5-8";
+    changeGroupButton.id = "changeGroupButton";
+    changeGroupButton.onclick = ()=>{
+      this.toggleGroup();
+    }
+    element.appendChild(changeGroupButton);
     const table = document.createElement("TABLE");
     element.appendChild(table);
     let row;
@@ -776,30 +825,27 @@ class MaxiSampler extends MaxiInstrument {
       cell.classList.add("cell_" + p);
       cell.style.border = "1px solid black";
       let val = this.parameters[p].val;
-      //const just_name = p.substring(0, p.length - 2)
-      const scaledVal = (val - this.parameters[p].translate) / this.parameters[p].scale;
-      const numBox = document.createElement('div');
-      cell.appendChild(numBox);
-      numBox.setAttribute("id", p);
-      var number = new Nexus.Number("#"+p,{
-        'size': [30, 20],
-        'value': scaledVal,
-        'min': this.parameters[p].min,
-        'max': this.parameters[p].max,
-        'step': 0.05
-      });
-      this.outputGUI[p] = number;
-      number.on('change', (v)=> {
-      	this.onGUIChange(v, i);
-      })
+      val = (val - this.parameters[p].translate) / this.parameters[p].scale;
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.min = this.parameters[p].min;
+      slider.max = this.parameters[p].max;
+      slider.step = 0.01;
+      slider.value = val;
+      this.outputGUI[p] = slider;
+      slider.onchange = ()=> {
+        this.onGUIChange(slider.value, i);
+      }
+      cell.appendChild(slider);
       const label = document.createElement('p');
       label.innerHTML = p;
-      label.style.width = "30px";
+      label.style.width = "100px";
       label.style.fontSize = "8pt";
       label.style.margin = "2px";
       cell.appendChild(label);
     }
     this.loadParamValues();
+    this.toggleGroup();
   }
 
   loadSample(url, index) {

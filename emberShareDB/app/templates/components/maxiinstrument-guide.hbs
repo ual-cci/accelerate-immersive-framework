@@ -90,10 +90,10 @@ The synth also has a Randomise button that will select random values for your se
 5. MaxiSampler
 </p>
 <p class = "tutorial-text">
-Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 4 samples). They are stored in the instrument object’s .samplers property. Each will have its own GUI
+Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 8 samples). They are stored in the instrument object’s samplers property. Each will have its own GUI, showing the controls for 4 samples at a time.
 </p>
 <p class = "tutorial-text">
-Load each sample by passing the url and an index (of the 4 slots) to store the sample.
+Load each sample by passing the url and an index (of the 8 slots) to store the sample.
 </p>
 <pre>
 <code>
@@ -105,7 +105,7 @@ Similarly to the MaxiSynth, you can then pick which parameters of the synth you 
 </p>
 <pre>
 <code>
-instruments.samplers[0].mapped = ["rate"];
+instruments.samplers[0].mapped = ["rate_0", "gain_1"];
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -175,7 +175,7 @@ instruments.samplers[0].noteon(2);
 You can also specify a sequence yourself. We use broadly the same structure of NoteSequence used by Google's Magenta project making the libraries nicely interchangeable. We have chosen to adopt the MIDI standard of 24 ticks per beat.
 </p>
 <p class = "tutorial-text">
-The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats).
+The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats). All note-ons are released at the end of the loop as a safety measure.
 </p>
 <pre>
 <code>
@@ -185,23 +185,23 @@ instruments.setLoopBeats(4); //Equivalent in beats
 </code>
 </pre>
 <p class = "tutorial-text">
-You can then define sequences in terms of note ons and noteoff in ticks (quantizedStartStep and quantizedEndStep), and set them to a specific synth or sampler.
+You can then define sequences in terms of note ons and noteoff in ticks, and set them to a specific synth or sampler. Samplers are oneshot so only require a start.
 </p>
 <pre>
 	<code>
-    const synthSeq = {
-      notes:[{pitch:60, quantizedStartStep:0, quantizedEndStep:12},
-             {pitch:67, quantizedStartStep:49, quantizedEndStep:72},
-            ],
-    };
-		instruments.synths[0].setSequence(synthSeq);
+const synthSeq = {
+  notes:[{pitch:60, start:0, end:12},
+         {pitch:67, start:49, end:72},
+        ],
+};
+instruments.synths[0].setSequence(synthSeq);
 
-    const samplerSeq = {
-      notes:[{pitch:0, quantizedStartStep:0},
-             {pitch:1, quantizedStartStep:49},
-            ],
-    };
-    instruments.samplers[0].setSequence(samplerSeq);
+const samplerSeq = {
+  notes:[{pitch:0, start:0},
+         {pitch:1, end:49},
+        ],
+};
+instruments.samplers[0].setSequence(samplerSeq);
 	</code>
 </pre>
 <p class = "tutorial-text">
@@ -225,11 +225,13 @@ See the code below as an example
 <pre>
 	<code>
 const inputSeq = {
-	tempos: [{time:0, qpm:80}],
-	notes:[{pitch:60, quantizedStartStep:0, quantizedEndStep:2},
-		{pitch:67, quantizedStartStep:4, quantizedEndStep:6}],
-	quantizationInfo:{stepsPerQuarter: 4},
-	totalQuantizedSteps:32,
+  tempos: [{time:0, qpm:80}],
+  notes:[
+    {pitch:60, quantizedStartStep:0, quantizedEndStep:2},
+    {pitch:67, quantizedStartStep:4, quantizedEndStep:6}
+  ],
+  quantizationInfo:{stepsPerQuarter: 4},
+  totalQuantizedSteps:32,
 };
 	</code>
 </pre>
@@ -240,9 +242,12 @@ Then you can feed to Magenta, and set the returned sequence directly to synth.
 	<code>
 let rnn = new mm.MusicRNN(MODEL_URL);
 rnn.initialize().then(()=> {
-	rnn.continueSequence(inputSeq, 32, 1.5).then((newSeq)=> {
-		instruments.synths[0].setSequence(newSeq);
-	});
+  rnn.continueSequence(inputSeq, 32, 1.5).then((newSeq)=> {
+    instruments.setTempo(newSeq.tempos[0].qpm);
+    const loop = 24 / newSeq.quantizationInfo.stepsPerQuarter * newSeq.totalQuantizedSteps;
+    instruments.setLoop(loop)
+    instruments.synths[0].setSequence(newSeq);
+  });
 });
 	</code>
 </pre>
@@ -251,7 +256,9 @@ Here are some examples sequenced in various ways, all using Posenet as an input
 <ul>
   <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li> This example allows you to play notes into the synth using an external MIDI instrument, whilst mapping the parameters to a different input. Note WebMidi is curently only supported in Chrome. You can connect to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. If you were genreating notes in an another program (Max/MSP, supercollider), this would be a good way to trigger MaxiSynth. First refresh devices, select your from the dropdown, then click "Connect".
   <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li> This allows you use a one-shot sequencer to program a tune yourself, whilst mapping the parameters of the synths to one of the inputs.
-  <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Hand coded / Magenta seqeunce</a></li> This shows you how you can program in your own sequence by hand, or generate a sequence using Google's Magenta models and plug that straight into a synth. You can then map the synth parameters to one of the inputs.
+  <li><a href = "https://mimicproject.com/code/f6bdb7ad-4cb0-8652-0dee-f0c7db9fede5">Hand coded sequence</a></li> This shows you how you can program in your own sequence by hand.
+  <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Magenta Generated sequence</a></li> This shows you how you can generate a sequence using Google's Magenta models and plug that straight into a synth.
+  <li><a href = "https://mimicproject.com/code/1cc85746-67d2-0cef-7f69-a238c6d2b489">MIDI File playback</a></li> This shows you how you can upload a MIDI File as an asset then play on a MaxiSynth.
 </ul>
 </p>
 <p class = "tutorial-text">
