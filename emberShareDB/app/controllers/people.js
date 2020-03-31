@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
-
+import { computed, set } from '@ember/object';
 export default Controller.extend({
-  people:[
+  people:computed(()=>{return [
     {name:"Mick Grierson", role:"Primary Investigator", imgURL:"https://www.arts.ac.uk/__data/assets/image/0024/168135/1340.png", personalURL:"https://www.arts.ac.uk/research/ual-staff-researchers/mick-grierson"},
     {name:"Thor Magnusson", role:"Co Investigator", imgURL:"https://profiles.sussex.ac.uk/p164902-thor-magnusson/photo", personalURL:"https://twitter.com/thormagnusson"},
     {name:"Nick Collins", role:"Co Investigator", imgURL:"https://www.dur.ac.uk/images/music/NEW-WEB/staff/Nick-Collins.jpg", personalURL:"https://composerprogrammer.com/"},
@@ -13,7 +13,7 @@ export default Controller.extend({
     {name:"Francisco Bernardo", role:"Post Doc", imgURL:"https://profiles.sussex.ac.uk/p472667-francisco-bernardo/photo", personalURL:"https://frantic0.com/"},
     {name:"Vit Ruzicka", role:"Post Doc", imgURL:"https://people.phys.ethz.ch/~ruzickav/img/vr.jpg", personalURL:"https://people.phys.ethz.ch/~ruzickav/"},
     {name:"Gabriel Vigliensoni", role:"Post Doc", imgURL:"http://www.musicapopular.cl/wp-content/uploads/2015/07/gabrielvigliensoni.jpg", personalURL:"https://www.vigliensoni.com/"},
-  ],
+  ]}),
   actions:{
     onClick(person) {
       this.transitionToRoute('code-editor', example.docid)
