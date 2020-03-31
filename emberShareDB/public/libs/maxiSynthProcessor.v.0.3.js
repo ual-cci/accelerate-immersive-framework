@@ -73,9 +73,9 @@ class MaxiSamplerProcessor {
     array.splice(index, 1);
   }
 
-  onSample() {
-
-  }
+  //CURRENTLY UNUSED STUBS
+  onSample() {}
+  onStop() {}
 
   signal(parameters) {
     this.dcoOut = 0;
@@ -311,10 +311,7 @@ class MaxiSynthProcessor {
     {
       this.released[i].off = this.released[i].off % loopEnd;
     }
-    //MIDIPANIC
-    this.triggered.forEach((trig)=> {
-      this.externalNoteOff(trig.f);
-    });
+    this.midiPanic();
     //Restart loop
     this.samplePtr = this.seqPtr = 0;
   }
@@ -366,6 +363,16 @@ class MaxiSynthProcessor {
   onSample() {
     this.samplePtr++;
     this.removeReleased();
+  }
+
+  onStop() {
+    this.midiPanic();
+  }
+
+  midiPanic() {
+    this.triggered.forEach((trig)=> {
+      this.externalNoteOff(trig.f);
+    });
   }
 
   signal() {
@@ -450,7 +457,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         {
           name: 'playHead',
           defaultValue: 0.0
-        },
+        }
       ];
       return core;
     }
@@ -463,38 +470,38 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.myClock = new Maximilian.maxiClock();
     this.myClock.setTempo(80);
     this.myClock.setTicksPerBeat(this.TICKS_PER_BEAT);
-    this.playHead = 0;
+    this.isPlaying = true;
     this.port.onmessage = (event) => {
-      if(event.data.sequence)
+      if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
         this.instruments[data.instrument][data.index].sequence = data.val;
       }
-      else if(event.data.addSynth)
+      else if(event.data.addSynth !== undefined)
       {
         console.log("ADDING SYNTH");
         this.instruments["synth"].push(new MaxiSynthProcessor());
       }
-      else if(event.data.addSampler)
+      else if(event.data.addSampler !== undefined)
       {
         console.log("ADDING SAMPLER");
         this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
-      else if(event.data.noteon)
+      else if(event.data.noteon !== undefined)
       {
         const data = event.data.noteon;
         this.instruments[data.instrument][data.index].externalNoteOn(data.val);
       }
-      else if(event.data.noteoff)
+      else if(event.data.noteoff !== undefined)
       {
         const data = event.data.noteoff;
         this.instruments[data.instrument][data.index].externalNoteOff(data.val);
       }
-      else if(event.data.tempo)
+      else if(event.data.tempo !== undefined)
       {
 		    this.myClock.setTempo(event.data.tempo)
       }
-      else if(event.data.parameters)
+      else if(event.data.parameters !== undefined)
       {
 		    const data = event.data.parameters;
         this.instruments[data.instrument][data.index].parameters = data.val
@@ -504,6 +511,14 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         const data = event.data.audio;
         const audioData = this.translateFloat32ArrayToBuffer(data.val.audioBlob);
         this.instruments.sampler[data.index].samples[data.val.index].setSample(audioData);
+      }
+      else if(event.data.togglePlaying !== undefined)
+      {
+        this.toggleIsPlaying();
+      }
+      else if(event.data.rewind !== undefined)
+      {
+        this.rewind();
       }
     }
   }
@@ -525,23 +540,37 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     return this.instruments.synth.concat(this.instruments.sampler)
   }
 
+  toggleIsPlaying() {
+    console.log("PAUSE/PLAY")
+    this.isPlaying = !this.isPlaying;
+    if(!this.isPlaying)
+    {
+      this.getInstruments().forEach((s)=> {
+        s.onStop()
+      })
+    }
+  }
+
+  rewind() {
+    this.myClock.playHead = -1;
+  }
+
   onSample() {
     this.getInstruments().forEach((s)=> {
       s.onSample()
     })
-    if(this.myClock)
+    if(this.myClock && this.isPlaying)
     {
       this.myClock.ticker();
       if(this.myClock.tick)
       {
-        this.playHead = this.myClock.playHead;
         const loopEnd = this.staticParameters.loop[0];
         const beatLength = 60 / this.myClock.bpm;
         const loopInSamples = (loopEnd / 24) * beatLength * 44100;
         this.getInstruments().forEach((s)=> {
-          s.tick(this.playHead, loopInSamples);
+          s.tick(this.myClock.playHead, loopInSamples);
         })
-        this.port.postMessage({playHead:this.playHead});
+        this.port.postMessage({playHead:this.myClock.playHead});
         if(this.myClock.playHead >= loopEnd)
         {
           this.myClock.playHead = -1;

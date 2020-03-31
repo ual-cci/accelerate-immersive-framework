@@ -16,8 +16,7 @@ class MaxiInstruments {
     this.TICKS_PER_BEAT = 24;
   }
 
-  getSynthName()
-  {
+  getSynthName() {
     return document.location.origin + "/libs/maxiSynthProcessor." + this.version + ".js";
   }
 
@@ -84,7 +83,7 @@ class MaxiInstruments {
   }
 
   getMappedOutputs() {
-	let y = [];
+	  let y = [];
     this.getInstruments().forEach((s)=> {
     	y = y.concat(s.getMappedParameters());
     });
@@ -115,7 +114,6 @@ class MaxiInstruments {
       this.node.connect(this.audioContext.destination);
       resolve()
     });
-
   }
 
   loadModule(url) {
@@ -168,7 +166,7 @@ class MaxiInstruments {
         if(s.mapped.length > 0)
         {
           s.onMLChange(val, outputCtr)
-		  found = true;
+		      found = true;
         }
         outputCtr++;
         if(outputCtr >= s.mapped.length)
@@ -184,6 +182,15 @@ class MaxiInstruments {
     if (this.audioContext !== undefined) {
       this.audioContext.suspend();
     }
+  }
+
+  playPause() {
+    this.node.port.postMessage({togglePlaying:true});
+  }
+
+  rewind() {
+    console.log("REWIND")
+    this.node.port.postMessage({rewind:true});
   }
 
 }

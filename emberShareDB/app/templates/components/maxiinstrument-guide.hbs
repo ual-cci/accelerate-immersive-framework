@@ -5,7 +5,7 @@ MaxiInstruments
 MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
 <p class = "tutorial-text">
-Currently, Chromium-based browsers have a bug that may cause slight crackling in Audio Worklet based programs. This bug was introduced in Chrome 79 and is out of our control, sorry!. You can follow the bug <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">here</a> and also download and run older versions of Chrome from <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">here</a>, we recommend Chrome 78 in private mode for best results. Hopefully this will be fixed soon.
+Previously, Chromium-based browsers (around Chrome 79) had a bug that may cause slight crackling in Audio Worklet based programs. However, we now believe this bug to be fixed (Chrome 80 onwards). If you are experiencing this issue, <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">you can follow the bug </a>and also download and run <a href ="https://www.google.com/chrome/canary/" >Canary (newer beta version of Chrome)</a> or <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">older versions of Chrome</a> to get better results.
 </p>
 <p class = "tutorial-text">
 1. Set up
@@ -164,7 +164,7 @@ instruments.synths[0].noteoff(440);
 </code>
 </pre>
 <p class = "tutorial-text">
-For samplers, noteoffs are not necessary and you provide the index of the sample you wish to trigger
+For samplers, noteoffs are not necessary and you provide the index of the sample you wish to trigger. For eaxmple, the code below would trigger the sample in the third slot of the first sampler. You only require a noteon for samplers as they are one-shot.
 </p>
 <pre>
 <code>
@@ -175,13 +175,15 @@ instruments.samplers[0].noteon(2);
 You can also specify a sequence yourself. We use broadly the same structure of NoteSequence used by Google's Magenta project making the libraries nicely interchangeable. We have chosen to adopt the MIDI standard of 24 ticks per beat.
 </p>
 <p class = "tutorial-text">
-The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats). All note-ons are released at the end of the loop as a safety measure.
+The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats). All note-ons are released at the end of the loop as a safety measure. You can also play / pause with playPause(), or rewind() to reset the clock to 0.
 </p>
 <pre>
 <code>
 instruments.setTempo(80);
 instruments.setLoop(96); //4 Beats
 instruments.setLoopBeats(4); //Equivalent in beats
+instruments.playPause(); //Toggle playback
+instruments.rewind(); //Reset clock to 0
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -190,16 +192,18 @@ You can then define sequences in terms of note ons and noteoff in ticks, and set
 <pre>
 	<code>
 const synthSeq = {
-  notes:[{pitch:60, start:0, end:12},
-         {pitch:67, start:49, end:72},
-        ],
+  notes:[
+    {pitch:60, start:0, end:12},
+    {pitch:67, start:49, end:72},
+  ],
 };
 instruments.synths[0].setSequence(synthSeq);
 
 const samplerSeq = {
-  notes:[{pitch:0, start:0},
-         {pitch:1, end:49},
-        ],
+  notes:[
+    {pitch:0, start:0},
+    {pitch:1, end:49},
+  ],
 };
 instruments.samplers[0].setSequence(samplerSeq);
 	</code>
@@ -213,7 +217,7 @@ You can also input sequences generated from Magenta directly into the synths. Be
 </code>
 </pre>
 <p class = "tutorial-text">
-In order to get a continued seqeunce from Magenta's pretrained models, you can specify given
+In order to get a continued seqeunce from Magenta's pretrained models, you can specify a seed sequence given
 <ul>
 	<li>A tempo</li>
 	<li>A definition of stepsPerQuarter. We define time in steps and this tells us how many represent a quarter note / crotchet</li>
@@ -243,9 +247,13 @@ Then you can feed to Magenta, and set the returned sequence directly to synth.
 let rnn = new mm.MusicRNN(MODEL_URL);
 rnn.initialize().then(()=> {
   rnn.continueSequence(inputSeq, 32, 1.5).then((newSeq)=> {
+
+    //Set the tempo and loop point
     instruments.setTempo(newSeq.tempos[0].qpm);
     const loop = 24 / newSeq.quantizationInfo.stepsPerQuarter * newSeq.totalQuantizedSteps;
     instruments.setLoop(loop)
+
+    //Set the note sequence
     instruments.synths[0].setSequence(newSeq);
   });
 });
@@ -254,7 +262,7 @@ rnn.initialize().then(()=> {
 <p class = "tutorial-text">
 Here are some examples sequenced in various ways, all using Posenet as an input
 <ul>
-  <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li> This example allows you to play notes into the synth using an external MIDI instrument, whilst mapping the parameters to a different input. Note WebMidi is curently only supported in Chrome. You can connect to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. If you were genreating notes in an another program (Max/MSP, supercollider), this would be a good way to trigger MaxiSynth. First refresh devices, select your from the dropdown, then click "Connect".
+  <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li> This example allows you to play notes into the synth using an external MIDI instrument, whilst mapping the parameters to a different input. Note WebMidi is curently only supported in Chrome. You can connect to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. If you were generating notes in an another program (Max/MSP, Supercollider, PD), this would be a good way to trigger MaxiSynth. First refresh devices, then select your MIDI source from the dropdown.
   <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li> This allows you use a one-shot sequencer to program a tune yourself, whilst mapping the parameters of the synths to one of the inputs.
   <li><a href = "https://mimicproject.com/code/f6bdb7ad-4cb0-8652-0dee-f0c7db9fede5">Hand coded sequence</a></li> This shows you how you can program in your own sequence by hand.
   <li><a href = "https://mimicproject.com/code/fa99819f-775c-2552-198c-2340739a1b5c">Magenta Generated sequence</a></li> This shows you how you can generate a sequence using Google's Magenta models and plug that straight into a synth.
@@ -262,5 +270,5 @@ Here are some examples sequenced in various ways, all using Posenet as an input
 </ul>
 </p>
 <p class = "tutorial-text">
-You can find a bunch of fun inputs <a href = "https://mimicproject.com/inputs">here</a>
+You can find a <a href = "https://mimicproject.com/inputs">bunch of fun inputs</a>
 </p>
