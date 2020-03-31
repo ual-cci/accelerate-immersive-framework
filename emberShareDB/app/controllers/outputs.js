@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
-
+import { computed, set } from '@ember/object';
 export default Controller.extend({
-  examples:[
+  examples:computed(()=>{return [
     {title:"External", docs:[
       //OSC
       {docid:"247e4538-0366-b735-9052-0e875a96a140",desc:"As you cannot OSC directly form a browser, this connects to a local Node.js program via webosckets then forwards the data out via OSC, where you can do with it what you will."},
@@ -20,7 +20,7 @@ export default Controller.extend({
       //Handcode
       {docid:"f6bdb7ad-4cb0-8652-0dee-f0c7db9fede5",desc:"Using AudioWorklet backed synthesiser and sampler. Handcode a sequence to playback on an instrument."},
     ]},
-  ],
+  ]}),
   actions: {
     onClick(example) {
       this.transitionToRoute('code-editor', example.docid)

@@ -31,17 +31,18 @@ export default Controller.extend({
   }),
   isMore:true,
   loadMoreCtr:0,
-  sortingFilters:[
+  sortingFilters:computed(()=>{
+    return [
     {title:"NEWEST", id:"date", isSelected:false, highlightTitle:false},
     {title:"POPULAR", id:"views", isSelected:false, highlightTitle:false},
     {title:"MOST REMIXED", id:"forks", isSelected:false, highlightTitle:false},
     {title:"MOST EDITED", id:"edits", isSelected:false, highlightTitle:false},
     // {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
-  ],
-  allFilters:[],
-  showingFilters:[],
+  ]}),
   init: function () {
     this._super();
+    this.set('allFilters', []);
+    this.set('showingFilters', []);
     this.get('resizeService').on('didResize', event => {
       this.updateFiltersToShow();
     })

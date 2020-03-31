@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
-
+import { computed, set } from '@ember/object';
 export default Controller.extend({
-  examples:[
+  examples:computed(()=>{return [
     {title:"Audio Remix",docs:[
       //LSTM
       {docid:"84bf177b-af84-85c3-4933-32076561aca0",desc:" This demonstrates an LSTM audio generation process using MAGNet, a spectral approach to audio analysis and generation with neural networks. The techniques included here were used as part of the Mezzanine Vs. MAGNet project featured as part of the Barbican's AI: More than Human exhibition. Here you can try out some pre-trained models. "},
@@ -38,7 +38,7 @@ export default Controller.extend({
       //lyrics
       {docid:"66a88951-a7d6-cc9f-0d8b-b043e4b952b0",desc:"Having trouble writing the lyrics to your song? Using a pre-trained model on common English words, we can find similar words , find an \"average\" of two words, and \"solve\" two words like an analogy "},
     ]}
-  ],
+  ]}),
   actions: {
     onClick(example) {
       this.transitionToRoute('code-editor', example.docid)

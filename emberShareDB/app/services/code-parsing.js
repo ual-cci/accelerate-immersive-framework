@@ -5,6 +5,7 @@ import walk from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
 import hljs from "highlight.js";
+import { computed, set } from '@ember/object';
 
 export default Service.extend({
   store:inject('store'),
@@ -14,7 +15,7 @@ export default Service.extend({
   script:"",
   savedVals:null,
   hasPVals:false,
-  parser:new DOMParser(),
+  parser:computed(()=>{return new DOMParser()}),
   insertLibrary(lib, source) {
     let insertAfter = "<head>"
     let index = source.indexOf(insertAfter) + insertAfter.length;

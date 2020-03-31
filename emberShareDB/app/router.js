@@ -20,6 +20,7 @@ Router.map(function() {
   this.route('api', {path:'/api/*endpoint'});
   this.route('inputs');
   this.route('outputs');
+  this.route('people');
 });
 
 export default Router;

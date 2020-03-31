@@ -31,7 +31,6 @@ export default Controller.extend({
 
   //Parameters
   con: null,
-  children: [],
   parentData: null,
   currentDoc:null,
   editor: null,
@@ -63,13 +62,10 @@ export default Controller.extend({
   editCtr:0,
   fontSize:14,
   fetchingDoc:false,
-  droppedOps:[],
   consoleOutput:"",
-  tabs:[],
   feedbackTimer:null,
   doPlay:true,
   isPlayingOps:false,
-  scrollPositions:{},
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
@@ -102,7 +98,10 @@ export default Controller.extend({
   //Functions
   init: function () {
     this._super();
-
+    this.set('tabs',[]);
+    this.set('droppedOps',[]);
+    this.set('children',[]);
+    this.set('scrollPositions',{});
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {

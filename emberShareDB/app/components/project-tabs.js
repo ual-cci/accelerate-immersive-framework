@@ -1,10 +1,14 @@
 import Component from '@ember/component';
 import { inject } from '@ember/service';
+import { computed, set } from '@ember/object';
 
 export default Component.extend({
   documentService:inject('documents'),
-  tabs:[],
   cs: inject('console'),
+  didReceiveAttrs() {
+    this._super(...arguments);
+    this.set('tabs', []);
+  },
   actions:{
     createNewDocument() {
       this.get('cs').log("creating new tab", this.get('parent').id)

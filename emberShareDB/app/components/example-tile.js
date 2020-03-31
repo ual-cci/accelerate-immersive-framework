@@ -22,7 +22,6 @@ export default Component.extend({
   colourId:computed('index', function() {
     return "tile" + this.get('index') % 5;
   }),
-  tags:[],
   didReceiveAttrs() {
     this._super(...arguments);
     this.get('store').findRecord('document', this.get('example').docid)

@@ -1,7 +1,8 @@
 import Service from '@ember/service';
+import { computed, set } from '@ember/object';
 
 export default Service.extend({
-  libraryMap: [
+  libraryMap: computed(()=>{return [
     {title:"MMLL", id:"mmll", url:"MMLL.js"},
     {title:"Marked", id:"Marked", url:"marked.js"},
     {title:"maximilian.js", id:"maximilian", url:"maximilian.js"},
@@ -14,7 +15,7 @@ export default Service.extend({
     {title:"RapidLib", id:"rapidlib", url:"rapidLib.js"},
     {title:"Learner.js", id:"learner", url:"learner.js"},
     {title:"Maxi Instrument", id:"maxiinstrument", url:"maxiInstruments.js"},
-  ],
+  ]}),
   url(id) {
     let url = ""
     this.get('libraryMap').forEach((lib)=>{

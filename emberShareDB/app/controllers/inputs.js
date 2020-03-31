@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
-
+import { computed, set } from '@ember/object';
 export default Controller.extend({
-  examples:[
+  examples:computed(()=>{return[
     {title:"Mouse Input", docs:[
       //Microbit
       {docid:"3738a892-330f-15ae-673e-5cb38f25a8e8",desc:"Just the bare minimum recording mouse X and Y"},
@@ -42,7 +42,7 @@ export default Controller.extend({
       {docid:"c6c5ab4d-d7fa-a4c5-1793-dc1f99d1f16e",desc:"Uses a Toxicity analysis model from Tensorflow. Text input is used and the respective toxicity probabilities for 7 categories are used as inputs to the model / dataset"},
     ]},
 
-  ],
+  ]}),
   actions: {
     onClick(example) {
       this.transitionToRoute('code-editor', example.docid)

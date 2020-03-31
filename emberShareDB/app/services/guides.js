@@ -1,8 +1,9 @@
 import Service from '@ember/service';
 import config from  '../config/environment';
+import { computed, set } from '@ember/object';
 
 export default Service.extend({
-  guides:[
+  guides:computed(()=>{ return[
       {title:"Interactive Machine Learning",guides:[
         {id:"learner",name:"Building Mappings by Example with Learner.js", desc:"Learner.js provides an interface that allows you to easily record in examples of input and output pairings. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control!", author:"Louis McCallum"},
         {id:"kadenze",name:"Machine Learning for Musicians and Artists alongside Kadenze", desc:"Translating Wekinator based exercises to the MIMIC platform from Rebecca Fiebrink's excellent Kadenze course",author:"Louis McCallum"},
@@ -16,5 +17,5 @@ export default Service.extend({
       {title:"Musical Analysis",guides:[
         {id:"mmll",name:"Musical Machine Listening with MMLL.js", desc:"Machine listening is the attempt to make computers hear sound intelligently. The interest of the MIMIC project is in musical machine listening, that is, the computer understanding of musical audio signals, and the Musical Machine Listening Library introduced here (subsequently MMLL) is a javascript library to do just that, in the web browser. ",author:"Nick Collins"},
       ]},
-  ]
+  ]})
 });

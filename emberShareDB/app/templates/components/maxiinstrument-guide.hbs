@@ -101,7 +101,7 @@ instruments.samplers[0].loadSample("909.wav", 0);
 </code>
 </pre>
 <p class = "tutorial-text">
-Similarly to the MaxiSynth, you can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names.
+Similarly to the MaxiSynth, you can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. Each samples parameters are identified by an underscored index following the name (this is also visible on the GUI).
 </p>
 <pre>
 <code>
@@ -135,7 +135,10 @@ It is important to note that one piece of code (below) serves two purposes.
 </p>
 <pre>
 <code>
-learner.newExample(x, instruments.getMappedOutputs());
+const whenYouReceiveNewInputs = (newInputs)=> {
+  //Match them with outputs (instrument parameters)
+  learner.newExample(newInputs, instruments.getMappedOutputs());
+}
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -147,8 +150,9 @@ The instruments object can update the mapped parameters provided by the model (i
 <pre>
 <code>
 learner.onOutput = (data)=> {
-	instruments.updateMappedOutputs(data);
- }
+  //Update the instruments parameters with output of model
+  instruments.updateMappedOutputs(data);
+}
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -202,7 +206,7 @@ instruments.synths[0].setSequence(synthSeq);
 const samplerSeq = {
   notes:[
     {pitch:0, start:0},
-    {pitch:1, end:49},
+    {pitch:1, start:49},
   ],
 };
 instruments.samplers[0].setSequence(samplerSeq);

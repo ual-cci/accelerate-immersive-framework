@@ -1,11 +1,12 @@
 import Service from '@ember/service';
 import config from  '../config/environment';
+import { computed, set } from '@ember/object';
 
 export default Service.extend({
   output:"--MIMIC--",
-  observers:[],
   init() {
     this._super(...arguments);
+    this.set('observers', []);
     console.log("DEBUG INIT",config.debugConsole);
     this.setDebugMode(config.debugConsole);
   },
