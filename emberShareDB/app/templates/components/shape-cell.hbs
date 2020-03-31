@@ -1,5 +1,5 @@
 <div class = "shape-cell">
-  <svg class = "shape-svg" viewBox="0 0 100 50" preserveAspectRatio="none" >
+  <svg class = {{svgClass}} viewBox="0 0 100 50" preserveAspectRatio="none" >
     {{#each shapes as |s|}}
       {{#if s.isCircle}}
       <circle cx = {{s.x}} cy = {{s.y}} r = {{s.r}} fill="white" opacity="0.175" />

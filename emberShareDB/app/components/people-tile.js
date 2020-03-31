@@ -8,6 +8,7 @@ export default Component.extend({
   isSelected:false,
   store:inject('store'),
   index: 0,
+  svgClass:"shape-svg people-shape-svg",
   colourId:computed('index', function() {
     return "tile" + this.get('index') % 5;
   }),

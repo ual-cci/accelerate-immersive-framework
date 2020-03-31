@@ -7,7 +7,6 @@ export default Component.extend({
   cs: inject('console'),
   didReceiveAttrs() {
     this._super(...arguments);
-    this.set('tabs', []);
   },
   actions:{
     createNewDocument() {

@@ -5,6 +5,7 @@ import { inject }  from '@ember/service';
 export default Component.extend({
   filter: null,
   cs: inject('console'),
+  svgClass:"shape-svg",
   killAnimation() {
     if(!isEmpty(this.get('animationInterval')))
     {
