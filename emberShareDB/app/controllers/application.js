@@ -29,6 +29,9 @@ export default Controller.extend({
     transitionToAboutRoute() {
       this.transitionToRoute('about');
     },
+    transitionToPeopleRoute() {
+      this.transitionToRoute('people');
+    },
     transitionToTermsRoute() {
       this.transitionToRoute('terms');
     },

@@ -26,7 +26,17 @@
     {{/dd.menu}}
   {{/nav.dropdown}}
 {{else}}
-  <li><a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button">about</a></li>
+{{#nav.dropdown as |dd|}}
+  {{#dd.toggle class = "nav-dropdown" }} about <span class="caret"></span>{{/dd.toggle}}
+  {{#dd.menu as |ddm|}}
+    {{#ddm.item}}
+    <a {{action 'about'}} href = {{concat url "/onAbout"}}  class = "nav-button dropdown-item">about</a>
+    {{/ddm.item}}
+    {{#ddm.item}}
+    <a {{action 'people'}}  href = {{concat url "/people"}} class = "nav-button dropdown-item">people</a>
+    {{/ddm.item}}
+  {{/dd.menu}}
+{{/nav.dropdown}}
   {{#nav.dropdown as |dd|}}
     {{#dd.toggle class = "nav-dropdown" }} explore <span class="caret"></span>{{/dd.toggle}}
     {{#dd.menu as |ddm|}}

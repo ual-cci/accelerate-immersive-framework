@@ -1,0 +1,20 @@
+<div role = "button" tabIndex = "0"
+class = "example-tile-container-outer col-xs-4 col-sm-4"
+onclick = {{action 'onClick'}}
+onmouseover={{action "onover"}}
+onmouseout={{action "onout"}}
+onkeypress = {{action 'onClick'}}>
+  <div class = "people-color" id = {{colourId}}>
+    <p class = "person-container">
+      <img src = {{person.imgURL}} class = "people-pic"/>
+    </p>
+    {{shape-cell isSelected = isSelected colourId = colourId fullSize=fullSize}}
+
+    <p class = "people-name">
+      {{person.name}}
+    </p>
+    <p class = "people-role">
+      {{person.role}}
+    </p>
+  </div>
+</div>

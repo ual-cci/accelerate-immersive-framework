@@ -1704,22 +1704,35 @@ $footer-grey:#303030;
   background-color: $mimic-blue
 }
 
+#tile0.people-color {
+  background-color: $mimic-orange;
+}
+#tile1.people-color  {
+  background-color: $mimic-yellow;
+}
+#tile2.people-color  {
+  background-color: $mimic-green;
+}
+#tile3.people-color  {
+  background-color: $mimic-pink;
+}
+#tile4.people-color  {
+  background-color: $mimic-blue
+}
+
 #example-container {
   max-width: $max-site-width;
   margin:auto!important;
-  padding-top:70px;
 }
 
 .example-tile-container-outer {
   height: 235px;
   cursor: pointer;
-  padding-left: 0px;
-  padding-right: 0px;
 }
 
 .example-tile-container {
   height: 90%;
-  margin: 10px;
+  margin: auto;
   border: solid 2px;
   overflow: hidden;
 }
@@ -1769,6 +1782,55 @@ $footer-grey:#303030;
   height:105px;
   width:240px;
   background-color: blue;
+}
+
+.people-pic {
+  height:105px;
+  width:auto;
+}
+
+.person-container {
+  height:105px;
+  width:105px;
+  margin-right:auto;
+  margin-left:auto;
+  text-align: center;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.people-name {
+  font-size: 20pt;
+  text-align: center;
+}
+
+.people-role {
+  font-size: 14pt;
+  text-align: center;
+}
+
+.people-color {
+  height:215px;
+  width:240px;
+  margin:auto;
+  padding-top:10px;
+  background-color: blue;
+}
+
+.people-shape-svg {
+  width:250px;
+  height:210px !important;
+  position:absolute;
+  top:0% !important;
+  left:0px;
+}
+
+.shape-svg {
+  width:250px;
+  height:105px;
+  position:absolute;
+  top:50%;
+  left:0px;
 }
 
 .shape-cell {

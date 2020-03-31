@@ -1,0 +1,7 @@
+<div id = "example-container" class = "row">
+<h1 style = "text-align:center">The MIMIC Project Team
+</h1>
+  {{#each people as |person index|}}
+    {{people-tile onClick = (action 'onClick' person) person = person index = index}}
+  {{/each}}
+</div>

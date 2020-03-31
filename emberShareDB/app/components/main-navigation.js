@@ -43,6 +43,9 @@ export default Component.extend({
     gettingStarted() {
       this.get('onGettingStarted')();
     },
+    people() {
+      this.get('onPeople')();
+    },
     examples() {
       this.get('onExamples')();
     },
