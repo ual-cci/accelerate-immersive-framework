@@ -4,20 +4,30 @@ class MaxiInstruments {
     this.samplers = [];
     this.synths = [];
     this.synthProcessorName = 'maxi-synth-processor';
+    this.version = "v.0.3";
+    this.TICKS_PER_BEAT = 24;
     let nexusUI = document.createElement('script');
     nexusUI.type = 'text/javascript';
     nexusUI.async = true;
     nexusUI.onload = function(){
       console.log("nexusUI onload!");
     };
-    nexusUI.src = document.location.origin + '/libs/nexusUI.js';
+    let origin = document.location.origin
+    if(origin.includes("file"))
+    {
+      origin = "http://127.0.0.1:4200"
+    }
+    nexusUI.src = origin + '/libs/nexusUI.js';
     document.getElementsByTagName('head')[0].appendChild(nexusUI);
-    this.version = "v.0.3";
-    this.TICKS_PER_BEAT = 24;
   }
 
   getSynthName() {
-    return document.location.origin + "/libs/maxiSynthProcessor." + this.version + ".js";
+    let origin = document.location.origin
+    if(origin.includes("file"))
+    {
+      origin = "http://127.0.0.1:4200"
+    }
+    return origin + "/libs/maxiSynthProcessor." + this.version + ".js";
   }
 
   getInstruments() {
@@ -205,6 +215,12 @@ class MaxiInstrument {
     this.mapped = [];
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
+    this.docId = "local";
+    console.log(window)
+    if(window.frameElement)
+    {
+      this.docid == window.frameElement.name
+    }
   }
   noteon(freq = 1) {
     this.node.port.postMessage({
@@ -410,7 +426,7 @@ class MaxiSynth extends MaxiInstrument {
   }
 
   getParamKey() {
-    return window.frameElement.name + "_synth_" + this.index;
+    return this.docId + "_synth_" + this.index;
   }
 
   getFreq(n) {
@@ -782,7 +798,7 @@ class MaxiSampler extends MaxiInstrument {
 
   getParamKey()
   {
-    return window.frameElement.name + "_sampler_" + this.index;
+    return this.docId + "_sampler_" + this.index;
   }
 
   toggleGroup() {

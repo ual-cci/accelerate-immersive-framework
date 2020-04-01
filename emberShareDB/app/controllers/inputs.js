@@ -35,6 +35,10 @@ export default Controller.extend({
       //Microbit
       {docid:"f7686716-7c64-c87c-b413-07fb8828fafc",desc:"Connect to a BBC Micro:bit using WebBLE. Records accelerometer values. Code modified from https://github.com/antefact/microBit.js. Visit here to download firmware to upload onto your microbit"},
     ]},
+    {title:"MIDI", docs:[
+      //Microbit
+      {docid:"9f017abd-11ea-8d49-6e4f-6b16061cff5b",desc:"Record MIDI CC values into a dataset"},
+    ]},
     {title:"Text", docs:[
       //Sentiment
       {docid:"62050fce-d4a9-7aaa-e563-51a8992e1d45",desc:"Uses a Sentiment analysis model from Tensorflow. Three text boxes are used as input and their respective sentiments are used as inputs to the model / dataset"},

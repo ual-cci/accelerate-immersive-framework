@@ -1,7 +1,10 @@
 class Learner {
 
   constructor(docId) {
-    docId = window.frameElement.name;
+    if(docId === undefined)
+    {
+      docId = window.frameElement.name;
+    }
     this.outputGUI = [];
     this.classifier = true;
     this.recordingRound = 0;
@@ -38,7 +41,12 @@ class Learner {
         this.updateRows();
       });
     };
-    script.src = document.location.origin + '/libs/localforage.min.js';
+    let origin = document.location.origin
+    if(origin.includes("file"))
+    {
+      origin = "."
+    }
+    script.src = origin + '/libs/localforage.min.js';
     document.getElementsByTagName('head')[0].appendChild(script);
   }
 
@@ -68,7 +76,7 @@ class Learner {
     countDown.id = "countdown-span";
     cell.appendChild(countDown);
 
-	row = table.insertRow();
+	   row = table.insertRow();
     cell = row.insertCell();
     let trainBtn = document.createElement("BUTTON");
     trainBtn.id = "train-btn";
@@ -132,41 +140,51 @@ class Learner {
       n,
       gui = true
       )
-    {
-    const workerUrl = document.location.origin + "/libs/regressionWorker.js"
-    this.setWorker(workerUrl)
-    this.classifier = false;
-    this.numOutputs = n;
-    this.gui = gui;
-    if(gui)
-    {
-      let container = this.selectorContainer;
-      this.randomiseBtn.style.display = "block";
-      this.outputLabel.style.display = "block";
-      for(let i = 0; i < n; i++)
+   {
+     let origin = document.location.origin
+     if(origin.includes("file"))
+     {
+       origin = "http://127.0.0.1:4200"
+     }
+     const workerUrl = origin + "/libs/regressionWorker.js"
+      this.setWorker(workerUrl)
+      this.classifier = false;
+      this.numOutputs = n;
+      this.gui = gui;
+      if(gui)
       {
-        let slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = 0;
-        slider.max = 1;
-        slider.value = 0;
-        slider.step = 0.01;
-        this.outputGUI.push(slider);
-        this.y.push(0);
-        slider.onchange = ()=>{
-          this.y[i] = parseFloat(slider.value);
-          this.onOutput(this.y);
+        let container = this.selectorContainer;
+        this.randomiseBtn.style.display = "block";
+        this.outputLabel.style.display = "block";
+        for(let i = 0; i < n; i++)
+        {
+          let slider = document.createElement('input');
+          slider.type = 'range';
+          slider.min = 0;
+          slider.max = 1;
+          slider.value = 0;
+          slider.step = 0.01;
+          this.outputGUI.push(slider);
+          this.y.push(0);
+          slider.onchange = ()=>{
+            this.y[i] = parseFloat(slider.value);
+            this.onOutput(this.y);
+          }
+          container.appendChild(slider);
         }
-        container.appendChild(slider);
       }
-    }
   }
 
   addClassifier(
       n,
       gui = true)
+  {
+    let origin = document.location.origin
+    if(origin.includes("file"))
     {
-    const workerUrl = document.location.origin + "/libs/classificationWorker.js"
+      origin = "http://127.0.0.1:4200"
+    }
+    const workerUrl = origin + "/libs/classificationWorker.js"
     this.setWorker(workerUrl)
     this.classifier = true;
     this.numOutputs = 1;
@@ -258,7 +276,6 @@ class Learner {
   setWorker(url) {
     this.myWorker = this.createWorker(url);
     this.myWorker.onmessage = (event)=>{
-      console.log(event.data);
       if(event.data == "trainingend")
       {
         this.disableButtons(false);

@@ -1,4 +1,10 @@
-importScripts("https://www.doc.gold.ac.uk/eavi/rapidmix/RapidLib.js");
+let url = "https://mimicproject.com/libs/rapidLib.js"
+try {
+  importScripts(url);
+} catch (err) {
+  let url = "http://localhost:4200/libs/rapidLib.js"
+  importScripts(url);
+}
 const rapidLib = RapidLib();
 const myClassification = new rapidLib.Classification();
 self.addEventListener('message', function(e) {
