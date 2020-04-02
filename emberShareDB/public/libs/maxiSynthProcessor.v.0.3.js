@@ -141,7 +141,7 @@ class MaxiSynthProcessor {
     let osc = -1;
     for(let i = 0; i < this.triggered.length; i++)
     {
-      if(this.triggered[i].f === f)
+      if(this.triggered[i].f == f)
       {
         osc = i;
         break;
@@ -239,6 +239,7 @@ class MaxiSynthProcessor {
     //This will be -1 if no available oscillators
     if(o >= 0)
     {
+      //console.log("triggering", freq, o)
       this.adsr[o].setAttack(this.parameters.attack.val);
       this.adsr[o].setDecay(this.parameters.decay.val);
       this.adsr[o].setSustain(this.parameters.sustain.val);
@@ -277,8 +278,10 @@ class MaxiSynthProcessor {
           {
             this.adsr[release].trigger = 0;
             const t =  this.getTriggeredForFreq(f);
-            const releaseTime = (this.samplePtr + (this.parameters.release.val / 1000 * this.sampleRate));
+            let releaseTime = (this.samplePtr + (this.parameters.release.val / 1000 * this.sampleRate));
+            releaseTime = Math.round(releaseTime)
             this.released.push({f:f, o:release, off:releaseTime});
+            //console.log("releasing", f, release, t, releaseTime, this.samplePtr)
             this.remove(this.triggered, this.triggered[t]);
           }
         }
@@ -301,7 +304,7 @@ class MaxiSynthProcessor {
     }
     for(let i = 0; i < this.released.length; i++)
     {
-      this.remove(this.triggered, i);
+      this.remove(this.triggered, this.triggered[i]);
     }
   }
 
@@ -310,9 +313,11 @@ class MaxiSynthProcessor {
     for(let i = 0; i < this.released.length; i++)
     {
       this.released[i].off = this.released[i].off % loopEnd;
+      //console.log("wrapping round", this.released[i].off, this.released[i].f)
     }
     this.midiPanic();
     //Restart loop
+    //console.log(this.samplePtr)
     this.samplePtr = this.seqPtr = 0;
   }
 
@@ -349,9 +354,10 @@ class MaxiSynthProcessor {
   removeReleased() {
     let toRemove = [];
     this.released.forEach((o, i)=>{
-      if(this.samplePtr >= o.off)
+      if(this.samplePtr > o.off)
       {
-        toRemove.push(i);
+        //console.log("removing", o.f, o.off, this.samplePtr, i)
+        toRemove.push(o);
       }
     });
     for(let i = 0; i < toRemove.length; i++)
@@ -362,7 +368,10 @@ class MaxiSynthProcessor {
 
   onSample() {
     this.samplePtr++;
-    this.removeReleased();
+    if(this.samplePtr % 3 == 0)
+    {
+      this.removeReleased();
+    }
   }
 
   onStop() {
@@ -391,7 +400,7 @@ class MaxiSynthProcessor {
         const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
         const ampOsc =  (lfoOut * this.parameters.lfoAmpMod.val)
         const normalise = poly ? this.dco.length : 2.0;
-        const ampMod = ((envOut) + (ampOsc * envOut)) / normalise;
+        const ampMod = ((envOut) + (ampOsc * envOut)) / 3;
         let f = poly ? o.f : o.o % 2 == 0 ? this.parameters.frequency.val : this.parameters.frequency2.val;
         f = f < 0 ? 0 : f;
         let osc;
@@ -423,7 +432,7 @@ class MaxiSynthProcessor {
       return this.dcfOut;
     }
 	else {
-      console.log("just 0")
+      //console.log("just 0")
       return 0;
     }
   }
