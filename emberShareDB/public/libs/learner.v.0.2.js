@@ -166,7 +166,7 @@ class Learner {
           slider.step = 0.01;
           this.outputGUI.push(slider);
           this.y.push(0);
-          slider.onchange = ()=>{
+          slider.oninput = ()=>{
             this.y[i] = parseFloat(slider.value);
             this.onOutput(this.y);
           }
@@ -196,7 +196,7 @@ class Learner {
       this.randomiseBtn.style.display = "none";
       selectList.id = "dropdown";
       this.y.push(0);
-      selectList.onchange = ()=> {
+      selectList.oninput = ()=> {
         this.y[0] = parseInt(selectList.selectedIndex);
         this.onOutput(this.y)
       }

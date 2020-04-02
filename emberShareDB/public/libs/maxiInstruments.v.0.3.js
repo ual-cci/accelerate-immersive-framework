@@ -735,7 +735,7 @@ class MaxiSynth extends MaxiInstrument {
         slider.step = 0.01;
         slider.value = val;
         this.outputGUI[p] = slider;
-        slider.onchange = ()=> {
+        slider.oninput = ()=> {
           this.onGUIChange(slider.value, i);
         }
         cell.appendChild(slider);
@@ -856,7 +856,7 @@ class MaxiSampler extends MaxiInstrument {
       slider.step = 0.01;
       slider.value = val;
       this.outputGUI[p] = slider;
-      slider.onchange = ()=> {
+      slider.oninput = ()=> {
         this.onGUIChange(slider.value, i);
       }
       cell.appendChild(slider);
