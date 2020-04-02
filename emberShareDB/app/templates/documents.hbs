@@ -3,25 +3,11 @@
   {{input role = "form" id='searchTerm'
   class = "limited-width-container"
   placeholder='search'
-  value=model.filter.search
-  key-press=(action "search")}}
+  value=initialSearchValue
+  key-down=(action "search")}}
   <label for="searchTerm" style = "color:transparent;">search bar</label>
 </form>
 <div class = "row" id = "doc-create-container">
-<!-- {{#if session.isAuthenticated}}
-  <p id = "create-doc-title">Start new project</p>
-  <div id = "create-doc-form-container">
-    <form id = "create-doc-form" {{action 'createNewDocument' on='submit'}}>
-      {{input id='create-doc-name' placeholder='project title' value=docName}}
-    </form>
-  </div>
-  <div id = "create-doc-btn-container">
-    <button type="submit"  onclick = {{action 'createNewDocument'}} id = "create-doc-btn">create</button>
-    {{#bs-button onClick=(action 'isPrivateChanged') id ="private-btn"}}{{isPrivateText}}{{/bs-button}}
-  </div>
-{{else}}
-  <div id = "create-doc-placeholder"></div>
-{{/if}} -->
 </div>
 {{#if feedbackMessage}}
   <label>{{feedbackMessage}}</label>

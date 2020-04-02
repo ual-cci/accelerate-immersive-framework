@@ -16,6 +16,15 @@ export default Controller.extend({
   isPrivateText:computed('isPrivate', function() {
     return this.get('isPrivate') ? "private":"public";
   }),
+  initialSearchValue:computed('model.filter', {
+    set(key, value) {
+      return this._initialSearchValue = value;
+    },
+    get() {
+      const fromURL = this.get("model.filter.search");
+      return fromURL == " " ? null : fromURL;
+    }
+  }),
   feedbackMessage: "",
   sort:"views",
   page:0,
