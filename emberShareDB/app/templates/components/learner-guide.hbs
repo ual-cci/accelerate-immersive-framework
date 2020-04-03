@@ -1,6 +1,4 @@
-<p class = "tutorial-text">
-Learner.js
-</p>
+<h2>Learner.js</h2>
 <p class = "tutorial-text">
 This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools.
 </p>
@@ -15,7 +13,7 @@ If you want to follow along to this tutorial with a simple project, check out th
 You can also find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
 </p>
 
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 1. Set up
 </p>
 <p class = "tutorial-text">
@@ -34,7 +32,7 @@ Initialise the object
 const learner = new Learner();
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 2.  Add GUI
 </p>
 <p class = "tutorial-text">
@@ -44,10 +42,11 @@ Give the learner the HTML element you want to attach the GUI to
 learner.addGUI(document.getElementById("dataset"));
 </code>
 </pre>
+</p>
 <p class = "tutorial-text">
 When you run the program you will see that you are given a number of simple controls including record, train, run, clear. You are also given a set of controls to set the output state. For classifiers, this will be a dropdown menu. For Regression models, this will be a slider per output.
 </p>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 3. Add Model
 </p>
 <p class = "tutorial-text">
@@ -66,7 +65,7 @@ For classification (discrete states), use the code below specifying the number o
 learner.addClassification(4)
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 4. Add data
 </p>
 <p class = "tutorial-text">
@@ -109,7 +108,7 @@ learner.setRecordLimit(5)
 </code>
 </pre>
 </p>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 5. Respond to outputs
 </p>
 <p class = "tutorial-text">
@@ -127,14 +126,14 @@ learner.onOutput = (data)=> {
 });
 </code>
 </pre>
-<p class = "tutorial-text">
-- Web Audio Outputs (MaxiInstruments) -
+<p class = "tutorial-heading">
+Web Audio Outputs (MaxiInstruments)
 </p>
 <p class = "tutorial-text">
 We have a complimentry set of synthesisers and samplers, backed by AudioWorklets to reduce interference between the machine learning and the audio. They are designed to easily combine with Learner.js and <a href = "https://mimicproject.com/guides/maxi-instrument">you can learn about them</a>
 </p>
-<p class = "tutorial-text">
-- External Outputs -
+<p class = "tutorial-heading">
+External Outputs
 </p>
 <p class = "tutorial-text">
   You can use the examples below to output with MIDI control message or OSC messages to control music or visual programs locally (Max/MSP, Supercollider, openFrameworks, Processing, PD etc....)
@@ -155,7 +154,7 @@ We have a complimentry set of synthesisers and samplers, backed by AudioWorklets
 </ol>
 </ul>
 </p>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 6. Now be free and make amazing projects!
 </p>
 <p class = "tutorial-text">You can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>

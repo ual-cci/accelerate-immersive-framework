@@ -1,13 +1,11 @@
-<p class = "tutorial-text">
-MaxiInstruments
-</p>
+<h2>MaxiInstruments</h2>
 <p class = "tutorial-text">
 MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
 <p class = "tutorial-text">
 Previously, Chromium-based browsers (around Chrome 79) had a bug that may cause slight crackling in Audio Worklet based programs. However, we now believe this bug to be fixed (Chrome 80 onwards). If you are experiencing this issue, <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">you can follow the bug </a>and also download and run <a href ="https://www.google.com/chrome/canary/" >Canary (newer beta version of Chrome)</a> or <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">older versions of Chrome</a> to get better results.
 </p>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 1. Set up
 </p>
 <p class = "tutorial-text">
@@ -27,7 +25,7 @@ const maxiInstruments = new MaxiInstruments();
 </code>
 </pre>
 
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 2. Add the GUI
 </p>
 <p class = "tutorial-text">
@@ -38,7 +36,7 @@ Give the instruments the HTML element you want to attach the GUI to
 instruments.guiElement = document.getElementById("synths");
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 3. Load the modules
 </p>
 <p class = "tutorial-text">
@@ -53,7 +51,7 @@ instruments.loadModules().then(()=> {
 });
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 4. MaxiSynth
 </p>
 <p class = "tutorial-text">
@@ -86,7 +84,7 @@ instruments.synths[0].mapped = ["frequency", "frequency2"];
 <p class = "tutorial-text">
 The synth also has a Randomise button that will select random values for your selected parameters. This can help you find fun sounds when making your own mappings.
 </p>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 5. MaxiSampler
 </p>
 <p class = "tutorial-text">
@@ -108,7 +106,7 @@ Similarly to the MaxiSynth, you can then pick which parameters of the synth you 
 instruments.samplers[0].mapped = ["rate_0", "gain_1"];
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 6. Adding the Model
 </p>
 <p class = "tutorial-text">
@@ -120,7 +118,7 @@ You can now start mapping your chosen parameters to a given input using the Lear
 learner.addRegression(instruments.getNumMappedOutputs(), false);
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 7. Providing the input
 </p>
 <p class = "tutorial-text">
@@ -141,7 +139,7 @@ const whenYouReceiveNewInputs = (newInputs)=> {
 }
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 8. Responding to the output
 </p>
 <p class = "tutorial-text">
@@ -155,7 +153,7 @@ learner.onOutput = (data)=> {
 }
 </code>
 </pre>
-<p class = "tutorial-text">
+<p class = "tutorial-heading">
 9. Controlling the Instruments
 </p>
 <p class = "tutorial-text">
@@ -263,8 +261,9 @@ rnn.initialize().then(()=> {
 });
 	</code>
 </pre>
+<h2>Example Projects</h2>
 <p class = "tutorial-text">
-Here are some examples sequenced in various ways, all using Posenet as an input
+Here are some examples sequenced in various ways, mostly using body tracking as an input.
 <ul>
   <li><a href = "https://mimicproject.com/code/73d93516-e0de-a85c-5fc7-c6cc03f4666b">MIDI</a></li> This example allows you to play notes into the synth using an external MIDI instrument, whilst mapping the parameters to a different input. Note WebMidi is curently only supported in Chrome. You can connect to external devices or connect to your internal MIDI bus, <a href = "https://help.ableton.com/hc/en-us/articles/209774225-How-to-setup-a-virtual-MIDI-bus">this is a good resource for how to do that</a>. If you were generating notes in an another program (Max/MSP, Supercollider, PD), this would be a good way to trigger MaxiSynth. First refresh devices, then select your MIDI source from the dropdown.
   <li><a href = "https://mimicproject.com/code/d57c9d9b-284d-9ab3-8118-e7c33eafeeaf">Nexus Sequencer</a></li> This allows you use a one-shot sequencer to program a tune yourself, whilst mapping the parameters of the synths to one of the inputs.
