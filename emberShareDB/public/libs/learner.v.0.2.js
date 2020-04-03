@@ -269,7 +269,7 @@ class Learner {
       this.y[index] = val;
       if(this.onOutput)
       {
-		this.onOutput(this.y)
+		      this.onOutput(this.y)
       }
   }
 

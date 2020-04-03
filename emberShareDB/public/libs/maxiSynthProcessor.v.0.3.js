@@ -7,7 +7,7 @@ class MaxiSamplerProcessor {
     this.sampleRate = 44100;
     this.DAC = [0];
     this.dcoOut = 0;
-    this.dcfOut = 0;
+    //this.dcfOut = 0;
     this.samples = [];
     this.adsr = [];
     this.playHead = 0;
@@ -17,7 +17,7 @@ class MaxiSamplerProcessor {
       this.samples.push(new Maximilian.maxiSample());
       this.adsr.push(new Maximilian.maxiEnv());
     }
-    this.dcf = new Maximilian.maxiFilter();
+    //this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
     this.sequence = [];
   }
@@ -66,11 +66,6 @@ class MaxiSamplerProcessor {
       this.seqPtr++;
     }
     this.prevPlayHead = this.playHead;
-  }
-
-  remove(array, element) {
-    const index = array.indexOf(element);
-    array.splice(index, 1);
   }
 
   //CURRENTLY UNUSED STUBS
@@ -354,7 +349,7 @@ class MaxiSynthProcessor {
   removeReleased() {
     let toRemove = [];
     this.released.forEach((o, i)=>{
-      if(this.samplePtr > o.off)
+      if(this.samplePtr >= o.off)
       {
         //console.log("removing", o.f, o.off, this.samplePtr, i)
         toRemove.push(o);

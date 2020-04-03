@@ -7,6 +7,7 @@ This is a quick walkthrough of how to use Learner.js on the MIMIC platform to qu
 <p class = "tutorial-text">
 Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
 </p>
+
 <p class = "tutorial-text">
 If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way.
 </p>
@@ -74,7 +75,7 @@ The learner expects to receive examples that are paired input and output mapping
 <p class = "tutorial-text">
 It is important to note that one piece of code (below) serves two purposes.
 <ul>
-  <li>If you are <strong>recording</strong>, every time you add a new example the pairing is stored in the dataset.</li>
+  <li>If you are <strong>recording</strong>, every time you add a new example the pairing is stored in the dataset. To use the values of the Learner.js GUI (the regression sliders or classification dropdown) as output labels, you can call "learner.y"</li>
   <li>If you are <strong>running</strong>, just the input is used and given to the model, which then provides a new output based on the data it has seen.</li>
 </ul>
 </p>
@@ -83,7 +84,17 @@ Use the code below to add and array of inputs and an array of outputs.
 </p>
 <pre>
 <code>
-learner.newExample(x, y);
+const whenYouReceiveNewInputs = (newInputs)=> {
+  //Match inputs with output labels you have collected
+  learner.newExample(newInputs, outputs);
+}
+
+//OR//
+
+const whenYouReceiveNewInputs = (newInputs)=> {
+  //Use the current values of the GUI as output labels
+  learner.newExample(newInputs, learner.y);
+}
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -104,7 +115,7 @@ learner.setRecordLimit(5)
 <p class = "tutorial-text">
 Finally, you should specify a function the is called when an a new output value is available. Again this function serves two purposes with one piece of code.
 <ul>
-  <li>When you are  <strong>not running</strong>, this will be in response to the GUI (the dropdown or the sliders) changing. </li>
+  <li>When you are  <strong>not running</strong>, this will be in response to the GUI (the dropdown or the sliders) changing. You can save these in a variable to use later, or if you need to access them they are saved in the learner.y variable.</li>
   <li>If you are  <strong>running</strong>, this will be the models response to an input. </li>
 </ul>
 The function returns an array of output values. Obviously, you can do something more fun.
@@ -149,5 +160,6 @@ We have a complimentry set of synthesisers and samplers, backed by AudioWorklets
 </p>
 <p class = "tutorial-text">You can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
 </p>
-
+<p class = "tutorial-text">
+You can also see the source and instructions for running the library locally or in your own projects away from the MIMIC platform in <a href = "https://gitlab.doc.gold.ac.uk/MIMIC/learner-js">this repository</a>.
 </p>
