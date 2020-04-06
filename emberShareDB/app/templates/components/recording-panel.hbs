@@ -1,0 +1,28 @@
+<div class="tooltip">
+  <label class = "rec-checkbox" for="recordingCheckBox">Include Recording Button?</label>
+  {{input tabIndex = "0"
+    type="checkbox"
+    id='recordingCheckBox'
+    checked=isRecording
+    click=(action 'toggleRecording')}}
+  <span class="tooltiptext">Toggle Recording Button</span>
+</div>
+{{#if isRecording}}
+<div id = "possible-rec-node-list">
+  <select onchange={{action "onSelectNode" value="target.value"}}>
+    <option disabled selected> -- Pick a Node to Record -- </option>
+    {{#each possibleNodes as |node index|}}
+       <option value={{index}}>{{node.variable}}</option>
+    {{/each}}
+    <option value="none">Use My Own</option>
+  </select>
+  {{#if showUserInput}}
+  <span>
+  {{input role = "form" value=userNode
+  type="form-control" id="user-rec-input"
+  placeholder = "Type name of variable here"
+   focusOut=(action 'endEdittingUserNode')}}
+ </span>
+  {{/if}}
+</div>
+  {{/if}}
