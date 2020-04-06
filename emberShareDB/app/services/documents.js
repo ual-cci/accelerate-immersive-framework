@@ -208,6 +208,9 @@ export default Service.extend({
       }).catch((err)=>reject(err));
     });
   },
+  addRecording(src, options) {
+    return this.get('codeParser').insertRecording(src, options);
+  },
   getCombinedSource(docId, replaceAssets = false, mainText, savedVals)
   {
     return new RSVP.Promise((resolve, reject) => {

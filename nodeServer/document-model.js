@@ -27,7 +27,11 @@ var initDocAPI = function(server, app, db, collection, uri)
   mongoUri = uri;
   startAssetAPI(server, app);
   shareDBMongo = require('sharedb-mongo')(mongoUri);
-  shareDB = new ShareDB({db:shareDBMongo,disableDocAction: true,disableSpaceDelimitedActions: true});
+  shareDB = new ShareDB({
+    db:shareDBMongo,
+    disableDocAction: true,
+    disableSpaceDelimitedActions: true
+  });
   shareDBConnection = shareDB.connect();
 
   startDocAPI(app);

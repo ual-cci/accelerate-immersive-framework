@@ -767,6 +767,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .glyphicon.glyphicon-share,
+.glyphicon.glyphicon-record,
 .glyphicon.glyphicon-file,
 .glyphicon.glyphicon-download-alt,
 .glyphicon.glyphicon-fullscreen {
@@ -878,6 +879,8 @@ input[id="docName"]:-ms-input-placeholder {
   z-index: 2000;
 }
 
+
+
 .link-input {
   color:black;
 }
@@ -917,6 +920,20 @@ input[id="docName"]:-ms-input-placeholder {
   height:70px;
   background-color: lightgray;
   padding:10px;
+}
+
+#recording-panel-container {
+  height:70px;
+  background-color: lightgray;
+  padding:10px;
+}
+
+#user-rec-input {
+  width:60%;
+}
+
+#rec-checkbox {
+
 }
 
 .clear-text-btn {

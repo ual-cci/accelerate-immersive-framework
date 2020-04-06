@@ -112,12 +112,40 @@ export default Service.extend({
     }
     return newSrc;
   },
+  insertRecording(src, recordingOptions) {
+    let newSrc = src;
+    if(recordingOptions.isRecording)
+    {
+      newSrc = "";
+      const end = src.includes("</body>") ? "</body>" : "</head>"
+      const index = src.indexOf(end);
+      if(index > 0)
+      {
+        newSrc = newSrc + src.substring(0, index)
+        let node = recordingOptions.node.variable;
+        if(recordingOptions.node.library === "maximilian")
+        {
+          node = node + ".maxiAudioProcessor"
+        }
+        else if(recordingOptions.node.library === "MaxiInstruments")
+        {
+          node = node + ".node"
+        }
+        newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
+        "/libs/recorder-wrapper.js\"></script>";
+        newSrc = newSrc + "\n<script language=\"javascript\" type=\"text/javascript\">"
+        newSrc = newSrc + "\nconst onRecordLoad = ()=>{initRecorder(" + node + ")}"
+        newSrc = newSrc + "\n</script>\n"
+        newSrc = newSrc + src.substring(index)
+      }
+    }
+    console.log(newSrc)
+    return newSrc;
+  },
   insertChildren(src, children, assets) {
     let newSrc = "";
     const scripts = this.getScripts(src);
-    for(let i = 0; i < scripts.length; i++)
-    {
-      const script  = scripts[i];
+    scripts.forEach((script)=> {
       newSrc = newSrc + this.insertStyleSheets(script.preamble, children);
       let added = false;
       if(script.src.length == 0)
@@ -160,7 +188,7 @@ export default Service.extend({
         newSrc = newSrc + js;
       }
       newSrc = newSrc + this.insertStyleSheets(script.post, children);
-    }
+    })
     if(scripts.length == 0)
     {
       newSrc = this.insertStyleSheets(src, children);
@@ -173,6 +201,45 @@ export default Service.extend({
     const replace = "new Learner(\"" + docId + "\")";
     const newSrc = src.replace(toFind, replace);
     return newSrc;
+  },
+  getPossibleNodes(src) {
+    const scripts = this.getScripts(src);
+    let possibles = [];
+    for(let i = 0; i < scripts.length; i++)
+    {
+      const script  = scripts[i];
+      try {
+        walk.simple(acorn.parse(script.src), {
+          VariableDeclaration: (node) => {
+            node.declarations.forEach((dec)=> {
+              let name = dec.id.name;
+              if(!name)
+              {
+                name = script.src.substring(dec.id.start, dec.id.end);
+              }
+              const init = dec.init;
+              let exp = script.src.substring(dec.start, dec.end);
+              if(init.type === "NewExpression" && exp.includes("maxiAudio("))
+              {
+                possibles.push({library:"maximilian", variable:name})
+              }
+              else if(init.type === "NewExpression" && exp.includes("MaxiInstruments("))
+              {
+                possibles.push({library:"MaxiInstruments", variable:name})
+              }
+              else if(init.type === "NewExpression" && exp.includes("Node("))
+              {
+                possibles.push({library:"WebAudio", variable:name})
+              }
+            });
+          }
+        })
+      } catch(err) {
+        this.get('cs').log(err);
+      }
+    }
+    this.get('cs').log("possibles", possibles)
+    return possibles;
   },
   insertStatefullCallbacks(src, savedVals) {
     let newSrc = "";
@@ -187,7 +254,7 @@ export default Service.extend({
       newSrc = newSrc + script.preamble;
       let ops = [];
       let added = false;
-      this.get('cs').log("trying script", script.src);
+      //this.get('cs').log("trying script", script.src);
       try {
         walk.simple(acorn.parse(script.src), {
           VariableDeclaration: (node) => {
@@ -320,7 +387,7 @@ export default Service.extend({
       }
       newSrc = newSrc + script.post;
     }
-    this.get('cs').log("SOURCE",newSrc);
+    //this.get('cs').log("SOURCE",newSrc);
     return didEdit ? newSrc : src;
   },
   getScripts(source) {

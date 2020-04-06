@@ -44,6 +44,7 @@ export default Controller.extend({
   codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
+  showRecordingPanel:false,
   showAssets:false,
   showPreview:false,
   showSettings:false,
@@ -101,6 +102,7 @@ export default Controller.extend({
     this.set('tabs',[]);
     this.set('droppedOps',[]);
     this.set('children',[]);
+    this.set('recordingOptions', {isRecording:false})
     this.set('scrollPositions',{});
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
@@ -204,6 +206,7 @@ export default Controller.extend({
             this.set('wsAvailable', true);
             if(!this.get('fetchingDoc'))
             {
+              this.get('cs').log("selectRootDoc");
               this.selectRootDoc();
             }
           }
@@ -315,6 +318,9 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
+          // setInterval(()=> {
+          //   this.submitOp({p:["trig"], oi:true})
+          // }, 100)
         });
       });
     });
@@ -382,7 +388,7 @@ export default Controller.extend({
     editor.setOption("mode", lang);
   },
   didReceiveDoc: function() {
-    this.get('cs').log("isMobile", this.get('isMobile'));
+    this.get('cs').log("didReceiveDoc", this.get('isMobile'));
     document.getElementById("ace-container").style.visibility = this.get('isMobile') ? "hidden":"visible";
     return new RSVP.Promise((resolve, reject) => {
       this.set("iframeTitle", this.get('model').id)
@@ -490,18 +496,18 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    //this.get('cs').log("did receive op", ops, source)
+    this.get('cs').log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
-    //const editor = this.get('editor');
+    const editor = this.get('editor');
     if(!embed && ops.length > 0)
     {
       if(!source && ops[0].p[0] == "source")
       {
-        this.set('surpress', true);
+        // this.set('surpress', true);
         // this.get('cs').log("applying remote op")
-        // const deltas = this.get('codeParser').opTransform(ops, editor);
-        // editor.session.getDocument().applyDeltas(deltas);
-        this.set('surpress', false);
+        // this.get('opsPlayer').set('opsToApply', ops)
+        // this.get('opsPlayer').applyTransform(editor)
+        // this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
       {
@@ -687,6 +693,10 @@ export default Controller.extend({
           }
           else
           {
+            combined = this.get('documentService').addRecording(
+              combined,
+              this.get('recordingOptions')
+            );
             this.writeIframeContent(combined);
           }
         });
@@ -772,6 +782,7 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
+    this.get('cs').log("on session change")
     //this.get('cs').log("session change, surpress", surpress);
     if(!surpress && this.get('droppedOps').length == 0)
     {
@@ -788,6 +799,7 @@ export default Controller.extend({
       {
         const ops = this.get('codeParser').getOps(delta, editor);
         ops.forEach((op)=>{
+          this.get('cs').log("submitting op")
           this.submitOp(op);
         });
         if(isEmpty(doc.type))
@@ -1332,7 +1344,6 @@ export default Controller.extend({
                 isVideo:isVideo})
       this.toggleProperty('showPreview');
     },
-
     //SHOW AND HIDE MENUS
     togglePrivacy() {
       if(this.get('canEditDoc'))
@@ -1388,6 +1399,21 @@ export default Controller.extend({
     },
     toggleShowShare() {
       this.toggleProperty('showShare');
+    },
+    toggleShowRecordingPanel() {
+      this.get('documentService').getCombinedSource(
+        this.get('model.id'),
+        true, this.get('model.source'),
+        this.get('savedVals')
+      ).then((combined) => {
+        this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
+        console.log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
+        this.toggleProperty('showRecordingPanel');
+      });
+    },
+    onRecordingOptionsChanged(options) {
+      console.log("rec options", options)
+      this.set('recordingOptions', options)
     },
     toggleShowAssets() {
       this.toggleProperty('showAssets');

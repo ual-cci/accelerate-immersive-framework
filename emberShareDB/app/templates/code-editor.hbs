@@ -69,16 +69,16 @@
               <span class="tooltiptext">Show Document Settings</span>
             </div>
             <div class="tooltip">
-              {{#if showShare}}
-                {{#bs-button (html-attributes aria-label="hide Share")
+              {{#if showRecordingPanel}}
+                {{#bs-button (html-attributes aria-label="hide Recording")
                 class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up"
-                onClick=(action "toggleShowShare")}}{{/bs-button}}
+                onClick=(action "toggleShowRecordingPanel")}}{{/bs-button}}
               {{else}}
-                {{#bs-button (html-attributes aria-label="show share")
-                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-share"
-                onClick=(action "toggleShowShare")}}{{/bs-button}}
+                {{#bs-button (html-attributes aria-label="show Recording")
+                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-record"
+                onClick=(action "toggleShowRecordingPanel")}}{{/bs-button}}
               {{/if}}
-              <span class="tooltiptext">Share links</span>
+              <span class="tooltiptext">Recording Options</span>
             </div>
             <div class="tooltip col-2">
               {{download-button doc = parentData}}
@@ -107,6 +107,15 @@
   <div id = "share-container">
     <p>Editable Link : {{editLink}}</p>
     <p>Embed Link : {{embedLink}}</p>
+  </div>
+  {{/if}}
+  {{#if showRecordingPanel}}
+  <div id = "recording-panel-container">
+    {{recording-panel
+      possibleNodes = possibleRecordingNodes
+      isRecording = recordingOptions.isRecording
+      onOptionsChanged = (action "onRecordingOptionsChanged")
+    }}
   </div>
   {{/if}}
   {{#if showSettings}}
