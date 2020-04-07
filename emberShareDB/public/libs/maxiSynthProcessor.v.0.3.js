@@ -273,10 +273,10 @@ class MaxiSynthProcessor {
           {
             this.adsr[release].trigger = 0;
             const t =  this.getTriggeredForFreq(f);
-            let releaseTime = (this.samplePtr + (this.parameters.release.val / 1000 * this.sampleRate));
+            let releaseTime = this.samplePtr + ((this.parameters.release.val / 1000) * this.sampleRate);
             releaseTime = Math.round(releaseTime)
             this.released.push({f:f, o:release, off:releaseTime});
-            //console.log("releasing", f, release, t, releaseTime, this.samplePtr)
+            //console.log("releasing", this.parameters.release.val, releaseTime, this.samplePtr, this.sampleRate)
             this.remove(this.triggered, this.triggered[t]);
           }
         }
@@ -328,6 +328,7 @@ class MaxiSynthProcessor {
 
   tick(playHead, loopEnd) {
     this.playHead = playHead;
+    //console.log(playHead)
     if(this.playHead == 0 && this.prevPlayHead > 0)
     {
       this.handleLoop(loopEnd);
@@ -363,10 +364,7 @@ class MaxiSynthProcessor {
 
   onSample() {
     this.samplePtr++;
-    if(this.samplePtr % 3 == 0)
-    {
-      this.removeReleased();
-    }
+    this.removeReleased();
   }
 
   onStop() {
