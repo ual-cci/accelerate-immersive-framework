@@ -1,3 +1,214 @@
+ class ParameterWriter {
+  // From a RingBuffer, build an object that can enqueue a parameter change in
+  // the queue.
+  constructor(ringbuf) {
+    if (ringbuf.type() != "Uint8Array") {
+      throw "This class requires a ring buffer of Uint8Array";
+    }
+    const SIZE_ELEMENT = 5;
+    this.ringbuf = ringbuf;
+    this.mem = new ArrayBuffer(SIZE_ELEMENT);
+    this.array = new Uint8Array(this.mem);
+    this.view = new DataView(this.mem);
+  }
+  // Enqueue a parameter change for parameter of index `index`, with a new value
+  // of `value`.
+  // Returns true if enqueuing suceeded, false otherwise.
+  enqueue_change(index, value) {
+    const SIZE_ELEMENT = 5;
+    this.view.setUint8(0, index);
+    this.view.setFloat32(1, value);
+    if (this.ringbuf.available_write() < SIZE_ELEMENT) {
+      return false;
+    }
+    return this.ringbuf.push(this.array) == SIZE_ELEMENT;
+  }
+}
+
+class ParameterReader {
+  constructor(ringbuf) {
+    const SIZE_ELEMENT = 5;
+    this.ringbuf = ringbuf;
+    this.mem = new ArrayBuffer(SIZE_ELEMENT);
+    this.array = new Uint8Array(this.mem);
+    this.view = new DataView(this.mem);
+  }
+  dequeue_change(o) {
+    if (this.ringbuf.empty()) {
+      return false;
+    }
+    var rv = this.ringbuf.pop(this.array);
+    o.index = this.view.getUint8(0);
+    o.value = this.view.getFloat32(1);
+
+    return true;
+  }
+}
+
+class RingBuffer {
+  static getStorageForCapacity(capacity, type) {
+    if (!type.BYTES_PER_ELEMENT) {
+      throw "Pass in a ArrayBuffer subclass";
+    }
+    var bytes = 8 + (capacity + 1) * type.BYTES_PER_ELEMENT;
+    return new SharedArrayBuffer(bytes);
+  }
+  // `sab` is a SharedArrayBuffer with a capacity calculated by calling
+  // `getStorageForCapacity` with the desired capacity.
+  constructor(sab, type) {
+    if (!ArrayBuffer.__proto__.isPrototypeOf(type) &&
+      type.BYTES_PER_ELEMENT !== undefined) {
+      throw "Pass a concrete typed array class as second argument";
+    }
+
+    // Maximum usable size is 1<<32 - type.BYTES_PER_ELEMENT bytes in the ring
+    // buffer for this version, easily changeable.
+    // -4 for the write ptr (uint32_t offsets)
+    // -4 for the read ptr (uint32_t offsets)
+    // capacity counts the empty slot to distinguish between full and empty.
+    this._type = type;
+    this.capacity = (sab.byteLength - 8) / type.BYTES_PER_ELEMENT;
+    this.buf = sab;
+    this.write_ptr = new Uint32Array(this.buf, 0, 1);
+    this.read_ptr = new Uint32Array(this.buf, 4, 1);
+    this.storage = new type(this.buf, 8, this.capacity);
+  }
+  // Returns the type of the underlying ArrayBuffer for this RingBuffer. This
+  // allows implementing crude type checking.
+  type() {
+    return this._type.name;
+  }
+  // Push bytes to the ring buffer. `bytes` is an typed array of the same type
+  // as passed in the ctor, to be written to the queue.
+  // Returns the number of elements written to the queue.
+  push(elements) {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+
+    if ((wr + 1) % this._storage_capacity() == rd) {
+      // full
+      return 0;
+    }
+
+    let to_write = Math.min(this._available_write(rd, wr), elements.length);
+    let first_part = Math.min(this._storage_capacity() - wr, to_write);
+    let second_part = to_write - first_part;
+
+    this._copy(elements, 0, this.storage, wr, first_part);
+    this._copy(elements, first_part, this.storage, 0, second_part);
+
+    // publish the enqueued data to the other side
+    Atomics.store(
+      this.write_ptr,
+      0,
+      (wr + to_write) % this._storage_capacity()
+    );
+
+    return to_write;
+  }
+  // Read `elements.length` elements from the ring buffer. `elements` is a typed
+  // array of the same type as passed in the ctor.
+  // Returns the number of elements read from the queue, they are placed at the
+  // beginning of the array passed as parameter.
+  pop(elements) {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+
+    if (wr == rd) {
+      return 0;
+    }
+
+    let to_read = Math.min(this._available_read(rd, wr), elements.length);
+
+    let first_part = Math.min(this._storage_capacity() - rd, elements.length);
+    let second_part = to_read - first_part;
+
+    this._copy(this.storage, rd, elements, 0, first_part);
+    this._copy(this.storage, 0, elements, first_part, second_part);
+
+    Atomics.store(this.read_ptr, 0, (rd + to_read) % this._storage_capacity());
+
+    return to_read;
+  }
+
+  // True if the ring buffer is empty false otherwise. This can be late on the
+  // reader side: it can return true even if something has just been pushed.
+  empty() {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+
+    return wr == rd;
+  }
+
+  // True if the ring buffer is full, false otherwise. This can be late on the
+  // write side: it can return true when something has just been poped.
+  full() {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+
+    return (wr + 1) % this.capacity != rd;
+  }
+
+  // The usable capacity for the ring buffer: the number of elements that can be
+  // stored.
+  capacity() {
+    return this.capacity - 1;
+  }
+
+  // Number of elements available for reading. This can be late, and report less
+  // elements that is actually in the queue, when something has just been
+  // enqueued.
+  available_read() {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+    return this._available_read(rd, wr);
+  }
+
+  // Number of elements available for writing. This can be late, and report less
+  // elements that is actually available for writing, when something has just
+  // been dequeued.
+  available_write() {
+    var rd = Atomics.load(this.read_ptr, 0);
+    var wr = Atomics.load(this.write_ptr, 0);
+    return this._available_write(rd, wr);
+  }
+
+  // private methods //
+
+  // Number of elements available for reading, given a read and write pointer..
+  _available_read(rd, wr) {
+    if (wr > rd) {
+      return wr - rd;
+    } else {
+      return wr + this._storage_capacity() - rd;
+    }
+  }
+
+  // Number of elements available from writing, given a read and write pointer.
+  _available_write(rd, wr) {
+    let rv = rd - wr - 1;
+    if (wr >= rd) {
+      rv += this._storage_capacity();
+    }
+    return rv;
+  }
+
+  // The size of the storage for elements not accounting the space for the index.
+  _storage_capacity() {
+    return this.capacity;
+  }
+
+  // Copy `size` elements from `input`, starting at offset `offset_input`, to
+  // `output`, starting at offset `offset_output`.
+  _copy(input, offset_input, output, offset_output, size) {
+    for (var i = 0; i < size; i++) {
+      output[offset_output + i] = input[offset_input + i];
+    }
+  }
+}
+
+
+
 class MaxiInstruments {
 
   constructor() {
@@ -45,7 +256,8 @@ class MaxiInstruments {
         this.node,
         this.samplers.length,
         "sampler",
-      	this.audioContext
+      	this.audioContext,
+        this.paramWriter
       );
       if(this.guiElement !== undefined)
       {
@@ -62,7 +274,8 @@ class MaxiInstruments {
         this.node,
         this.synths.length,
         "synth",
-      	this.audioContext
+      	this.audioContext,
+        this.paramWriter
       );
       if(this.guiElement !== undefined)
       {
@@ -109,6 +322,15 @@ class MaxiInstruments {
           processorOptions: {}
         }
       );
+
+      let sab2 = RingBuffer.getStorageForCapacity(31, Uint8Array);
+      let rb2 = new RingBuffer(sab2, Uint8Array);
+      this.paramWriter = new ParameterWriter(rb2);
+      console.log(this.paramWriter)
+      this.node.port.postMessage({
+        type: "recv-param-queue",
+        data: sab2
+      });
       this.node.onprocessorerror = event => {
         console.log(`MaxiProcessor Error detected: ` + event.data);
       }
@@ -207,11 +429,13 @@ class MaxiInstruments {
 
 class MaxiInstrument {
 
-  constructor(node, index, instrument, audioContext) {
+  constructor(node, index, instrument, audioContext, paramWriter) {
     this.node = node;
     this.index = index;
     this.instrument = instrument;
     this.audioContext = audioContext;
+    this.paramWriter = paramWriter;
+    console.log(this.paramWriter)
     this.mapped = [];
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
@@ -223,13 +447,18 @@ class MaxiInstrument {
     }
   }
   noteon(freq = 1) {
-    this.node.port.postMessage({
-      noteon:{
-        instrument:this.instrument,
-        index:this.index,
-        val:freq
-      }
+    paramWriter.enqueue_change(0, {
+      instrument:this.instrument,
+      index:this.index,
+      val:freq
     });
+    // this.node.port.postMessage({
+    //   noteon:{
+    //     instrument:this.instrument,
+    //     index:this.index,
+    //     val:freq
+    //   }
+    // });
   }
 
   noteoff(freq = 1) {
@@ -344,17 +573,24 @@ class MaxiInstrument {
     else if (this.parameters[name])
     {
       this.parameters[name].val = val;
-      if(name == "poly")
+      console.log(this.paramWriter)
+      if(this.paramWriter !== undefined)
       {
-        console.log(name, val)
-      }
-      this.node.port.postMessage({
-        "parameters":{
+        console.log("setting parms")
+        this.paramWriter.enqueue_change(0, {
           instrument:this.instrument,
           index:this.index,
           val:this.parameters
-        }
-      });
+        });
+      }
+
+      // this.node.port.postMessage({
+      //   "parameters":{
+      //     instrument:this.instrument,
+      //     index:this.index,
+      //     val:this.parameters
+      //   }
+      // });
     }
   }
 
@@ -397,8 +633,8 @@ class MaxiInstrument {
 
 class MaxiSynth extends MaxiInstrument {
 
-  constructor(node, index, instrument, audioContext) {
-    super(node, index, instrument, audioContext);
+  constructor(node, index, instrument, audioContext, paramWriter) {
+    super(node, index, instrument, audioContext, paramWriter);
 
     this.parameters = {
       "gain":{scale:1, translate:0, val:1},
@@ -768,8 +1004,8 @@ class MaxiSynth extends MaxiInstrument {
 
 class MaxiSampler extends MaxiInstrument {
 
-   constructor(node, index, instrument, audioContext) {
-    super(node, index, instrument, audioContext);
+   constructor(node, index, instrument, audioContext, paramWriter) {
+    super(node, index, instrument, audioContext, paramWriter);
     const core = {
       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
       "rate":{scale:1, translate:0, min:0, max:4, val:1},
@@ -816,7 +1052,6 @@ class MaxiSampler extends MaxiInstrument {
         e.style.display = vis;
       }
     })
-
   }
 
   addGUI(element) {
