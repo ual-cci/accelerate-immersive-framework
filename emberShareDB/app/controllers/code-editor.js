@@ -1016,8 +1016,14 @@ export default Controller.extend({
       stats.edits = parseInt(stats.edits) + this.get('editCtr');
       const actions = [
         this.get('documentService').updateDoc(model.id, 'stats', stats),
-        this.get('documentService').updateDoc(model.id, 'lastEdited', new Date())
       ];
+      if(this.get('isOwner'))
+      {
+        actions.push(this.get('documentService').updateDoc(
+          model.id,
+          'lastEdited',
+          new Date()));
+      }
       Promise.all(actions).then(()=> {
         this.set('editCtr', 0);
         resolve();
@@ -1401,14 +1407,18 @@ export default Controller.extend({
       this.toggleProperty('showShare');
     },
     toggleShowRecordingPanel() {
-      this.get('documentService').getCombinedSource(
-        this.get('model.id'),
-        true, this.get('model.source'),
-        this.get('savedVals')
-      ).then((combined) => {
-        this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
-        console.log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
-        this.toggleProperty('showRecordingPanel');
+      this.updateSourceFromSession().then(()=> {
+        this.fetchChildren().then(()=> {
+          this.get('documentService').getCombinedSource(
+            this.get('model.id'),
+            true, this.get('model.source'),
+            this.get('savedVals')
+          ).then((combined) => {
+            this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
+            console.log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
+            this.toggleProperty('showRecordingPanel');
+          });
+        });
       });
     },
     onRecordingOptionsChanged(options) {

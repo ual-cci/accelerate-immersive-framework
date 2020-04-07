@@ -14,13 +14,25 @@ recorderLib.src = origin + '/libs/recorder.js';
 document.getElementsByTagName('head')[0].appendChild(recorderLib);
 const initRecorder = (node, element)=> {
   var recorder = new Recorder(node);
+  const container = document.createElement("div")
+  container.style.width = "97%";
+  container.style.height = "30px"
+  container.style["border"] = "5px solid black";
+  container.style["padding-top"]= "10px"
+  container.style["padding-bottom"]= "10px"
   const btn = document.createElement("BUTTON")
+  btn.style.width = "100px";
+  btn.style.height = "30px";
+  btn.style.margin = "auto"
+  btn.style.display = "block";
+  btn.style.top = "10px"
   btn.innerHTML = "Record";
   if(!element)
   {
     element = document.body;
   }
-  element.insertBefore(btn, element.firstChild);
+  container.appendChild(btn);
+  element.insertBefore(container, element.firstChild);
   btn.onclick = ()=> {
     if(recorder.recording)
     {

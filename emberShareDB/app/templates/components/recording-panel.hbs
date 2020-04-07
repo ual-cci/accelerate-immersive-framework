@@ -1,5 +1,5 @@
 <div class="tooltip">
-  <label class = "rec-checkbox" for="recordingCheckBox">Include Recording Button?</label>
+  <label class = "rec-checkbox" for="recordingCheckBox">Include Recording Button In Sketch?</label>
   {{input tabIndex = "0"
     type="checkbox"
     id='recordingCheckBox'
@@ -9,12 +9,12 @@
 </div>
 {{#if isRecording}}
 <div id = "possible-rec-node-list">
-  <select onchange={{action "onSelectNode" value="target.value"}}>
-    <option disabled selected> -- Pick a Node to Record -- </option>
+  <select id = "rec-select" onchange={{action "onSelectNode" value="target.value"}}>
+    <option disabled> -- Pick a Node to Record -- </option>
     {{#each possibleNodes as |node index|}}
        <option value={{index}}>{{node.variable}}</option>
     {{/each}}
-    <option value="none">Use My Own</option>
+    <option value="user">Provide My Own</option>
   </select>
   {{#if showUserInput}}
   <span>
