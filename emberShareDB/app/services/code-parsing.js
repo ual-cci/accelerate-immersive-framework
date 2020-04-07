@@ -131,15 +131,17 @@ export default Service.extend({
         {
           node = node + ".node"
         }
-        newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
-        "/libs/recorder-wrapper.js\"></script>";
-        newSrc = newSrc + "\n<script language=\"javascript\" type=\"text/javascript\">"
-        newSrc = newSrc + "\nconst onRecordLoad = ()=>{initRecorder(" + node + ")}"
-        newSrc = newSrc + "\n</script>\n"
+        if(node !== undefined)
+        {
+          newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
+          "/libs/recorder-wrapper.js\"></script>";
+          newSrc = newSrc + "\n<script language=\"javascript\" type=\"text/javascript\">"
+          newSrc = newSrc + "\nconst onRecordLoad = ()=>{initRecorder(" + node + ")}"
+          newSrc = newSrc + "\n</script>\n"
+        }
         newSrc = newSrc + src.substring(index)
       }
     }
-    console.log(newSrc)
     return newSrc;
   },
   insertChildren(src, children, assets) {
@@ -230,6 +232,18 @@ export default Service.extend({
               else if(init.type === "NewExpression" && exp.includes("Node("))
               {
                 possibles.push({library:"WebAudio", variable:name})
+              }
+              else if(init.type === "CallExpression" && init.callee.property !==undefined)
+              {
+                const webAudioFactories =
+                [
+                  "createOscillator", "createBufferSource", "createMediaElementSource",
+                  "createBiquadFilter", "createMediaStreamTrackSource", "createDelay",
+                  "createDynamicsCompressor", "createGain", "createPeriodicWave"
+                ];
+                if(webAudioFactories.some(e => e === init.callee.property.name)) {
+                  possibles.push({library:"WebAudio", variable:name})
+                }
               }
             });
           }
