@@ -31,7 +31,6 @@ export default Component.extend({
       isRecording:this.get("isRecording"),
       node:this.get("selectedNode")
     })
-
   },
   updateSelectedNode:function() {
     if(this.get('isRecording'))
@@ -76,6 +75,7 @@ export default Component.extend({
         this.set('selectedNode', node)
         this.updateOptions();
       }
+      this.set('showUserInput', this.get('selectedNode').index === this.get('possibleNodes').length + 1)
     },
     endEdittingUserNode() {
       this.userNodeSelected();

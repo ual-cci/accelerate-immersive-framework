@@ -1019,6 +1019,7 @@ export default Controller.extend({
       ];
       if(this.get('isOwner'))
       {
+        this.get('cs').log("updating lastEdited (i own this)")
         actions.push(this.get('documentService').updateDoc(
           model.id,
           'lastEdited',
