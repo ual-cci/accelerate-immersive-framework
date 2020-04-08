@@ -19,9 +19,15 @@
     this.view.setUint8(0, index);
     this.view.setFloat32(1, value);
     if (this.ringbuf.available_write() < SIZE_ELEMENT) {
+      //console.log("not enough available write")
       return false;
     }
-    return this.ringbuf.push(this.array) == SIZE_ELEMENT;
+    const written = this.ringbuf.push(this.array);
+    if(written != SIZE_ELEMENT)
+    {
+      //console.log(written)
+    }
+    return written == SIZE_ELEMENT;
   }
 }
 
@@ -217,6 +223,13 @@ class MaxiInstruments {
     this.synthProcessorName = 'maxi-synth-processor';
     this.version = "v.0.3";
     this.TICKS_PER_BEAT = 24;
+    this.NUM_SYNTHS = 6;
+    this.NUM_SYNTH_PARAMS = 18;
+    this.NUM_SAMPLERS = 6;
+    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.GLOBAL_OFFSET =
+      (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
+      (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
     let nexusUI = document.createElement('script');
     nexusUI.type = 'text/javascript';
     nexusUI.async = true;
@@ -294,11 +307,11 @@ class MaxiInstruments {
   }
 
   setLoop(val) {
-    this.setParam("loop", val - 1);
+    this.node.port.postMessage({loop: val - 1});
   }
 
   setLoopBeats(val) {
-    this.setParam("loop", (val * this.TICKS_PER_BEAT) - 1);
+    this.node.port.postMessage({loop: (val * this.TICKS_PER_BEAT) - 1});
   }
 
   setTempo(tempo) {
@@ -326,7 +339,7 @@ class MaxiInstruments {
       let sab2 = RingBuffer.getStorageForCapacity(31, Uint8Array);
       let rb2 = new RingBuffer(sab2, Uint8Array);
       this.paramWriter = new ParameterWriter(rb2);
-      console.log(this.paramWriter)
+      window.node = this.node;
       this.node.port.postMessage({
         type: "recv-param-queue",
         data: sab2
@@ -439,36 +452,19 @@ class MaxiInstrument {
     this.mapped = [];
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
+    this.NUM_SYNTHS = 6;
+    this.NUM_SYNTH_PARAMS = 18;
+    this.NUM_SAMPLERS = 6;
+    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.GLOBAL_OFFSET =
+      (this.NUM_SYNTHS * this.NUM_SYNTH_PARAMS) +
+      (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
     this.docId = "local";
     console.log(window)
     if(window.frameElement)
     {
       this.docid == window.frameElement.name
     }
-  }
-  noteon(freq = 1) {
-    paramWriter.enqueue_change(0, {
-      instrument:this.instrument,
-      index:this.index,
-      val:freq
-    });
-    // this.node.port.postMessage({
-    //   noteon:{
-    //     instrument:this.instrument,
-    //     index:this.index,
-    //     val:freq
-    //   }
-    // });
-  }
-
-  noteoff(freq = 1) {
-    this.node.port.postMessage({
-      noteoff:{
-        instrument:this.instrument,
-        index:this.index,
-        val:freq
-      }
-    });
   }
 
   setSequence(seq, instruments = [], muteDrums = false) {
@@ -559,17 +555,16 @@ class MaxiInstrument {
   }
 
   sendDefaultParam() {
-    this.node.port.postMessage({
-      "parameters":{
-        instrument:this.instrument,
-        index:this.index,
-        val:this.parameters
-      }
-    });
+    Object.keys(this.parameters).forEach((p, i)=> {
+      setTimeout(()=> {
+        this.setParam(p, this.parameters[p].val)
+      }, 20 * i);
+    })
   }
 
   setParam(name, val) {
     let param = this.node.parameters.get(name);
+    if(val <= 0) val = 0.01;
     if(param)
     {
       param.setValueAtTime(val, this.context.currentTime)
@@ -577,17 +572,6 @@ class MaxiInstrument {
     else if (this.parameters[name])
     {
       this.parameters[name].val = val;
-      console.log(this.paramWriter)
-      if(this.paramWriter !== undefined)
-      {
-        console.log("setting parms")
-        this.paramWriter.enqueue_change(0, {
-          instrument:this.instrument,
-          index:this.index,
-          val:this.parameters
-        });
-      }
-
       // this.node.port.postMessage({
       //   "parameters":{
       //     instrument:this.instrument,
@@ -595,6 +579,31 @@ class MaxiInstrument {
       //     val:this.parameters
       //   }
       // });
+
+        const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+        const paramIndex = Object.keys(this.parameters).indexOf(name);
+        const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
+        this.enqueue(index, val);
+    }
+  }
+
+  enqueue(index, val)
+  {
+    if(this.paramWriter !== undefined)
+    {
+      let success = this.paramWriter.enqueue_change(index, val);
+      this.retryEnqueue(success, index, val, 0)
+    }
+  }
+
+  retryEnqueue(success, index, val, ctr) {
+    if(!success && ctr < 20)
+    {
+      setTimeout(()=>{
+        //console.log("RETRY", index, val, ctr);
+        success = this.paramWriter.enqueue_change(index, val);
+        this.retryEnqueue(success, index, val, ctr + 1)
+      }, 30)
     }
   }
 
@@ -659,6 +668,16 @@ class MaxiSynth extends MaxiInstrument {
       "oscFn":{scale:1, translate:0, val:0},
     }
     this.sendDefaultParam();
+  }
+
+  noteon(freq = 1) {
+    const index = (this.index * this.NUM_SYNTH_PARAMS) + 16;
+    this.enqueue(index, freq);
+  }
+
+  noteoff(freq = 1) {
+    const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
+    this.enqueue(index, freq);
   }
 
   setOsc(osc) {
@@ -931,13 +950,15 @@ class MaxiSynth extends MaxiInstrument {
       if(index > 0)
       {
         const preset = presets[index];
-        Object.keys(preset.vals).forEach((key)=>{
-          const val = preset.vals[key];
-          if(this.outputGUI[key])
-          {
-            this.outputGUI[key].value = val;
-            this.onChange(val, key);
-          }
+        Object.keys(preset.vals).forEach((key, i)=>{
+          setTimeout(()=> {
+            const val = preset.vals[key];
+            if(this.outputGUI[key])
+            {
+              this.outputGUI[key].value = val;
+              this.onChange(val, key);
+            }
+          }, 10 * i);
         });
         this.saveParamValues();
       }
@@ -1029,6 +1050,18 @@ class MaxiSampler extends MaxiInstrument {
     }
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
+  }
+
+  noteon(freq = 1) {
+    const offset = this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+    const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + 16;
+    this.enqueue(index, freq);
+  }
+
+  noteoff(freq = 1) {
+    const offset = this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+    const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + 17;
+    this.enqueue(index, freq);
   }
 
   getFreq(n)

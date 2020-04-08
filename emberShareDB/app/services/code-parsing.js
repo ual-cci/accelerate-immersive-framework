@@ -114,14 +114,27 @@ export default Service.extend({
   },
   insertRecording(src, recordingOptions) {
     let newSrc = src;
-    if(recordingOptions.isRecording)
+    if(recordingOptions.isRecording && !isEmpty(recordingOptions.node.variable))
     {
       newSrc = "";
-      const end = src.includes("</body>") ? "</body>" : "</head>"
-      const index = src.indexOf(end);
-      if(index > 0)
+      const top = src.includes("<body>") ? "<body>" : "<head>"
+      let topIndex = src.indexOf(top);
+      if(topIndex > 0)
       {
-        newSrc = newSrc + src.substring(0, index)
+        topIndex += 6;
+        newSrc = newSrc + src.substring(0, topIndex);
+        newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
+      "/libs/recorder-wrapper.js\"></script>";
+      }
+      else
+      {
+        topIndex = 0;
+      }
+      const end = src.includes("</body>") ? "</body>" : "</head>"
+      let endIndex = src.indexOf(end);
+      if(endIndex > 0)
+      {
+        newSrc = newSrc + src.substring(topIndex, endIndex);
         let node = recordingOptions.node.variable;
         if(recordingOptions.node.library === "maximilian")
         {
@@ -131,17 +144,16 @@ export default Service.extend({
         {
           node = node + ".node"
         }
-        if(node !== undefined)
+        if(!isEmpty(node))
         {
-          newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
-          "/libs/recorder-wrapper.js\"></script>";
           newSrc = newSrc + "\n<script language=\"javascript\" type=\"text/javascript\">"
           newSrc = newSrc + "\nconst onRecordLoad = ()=>{initRecorder(" + node + ")}"
           newSrc = newSrc + "\n</script>\n"
         }
-        newSrc = newSrc + src.substring(index)
+        newSrc = newSrc + src.substring(endIndex)
       }
     }
+    this.get('cs').log(newSrc)
     return newSrc;
   },
   insertChildren(src, children, assets) {
@@ -221,28 +233,31 @@ export default Service.extend({
               }
               const init = dec.init;
               let exp = script.src.substring(dec.start, dec.end);
-              if(init.type === "NewExpression" && exp.includes("maxiAudio("))
+              if(!isEmpty(init))
               {
-                possibles.push({library:"maximilian", variable:name})
-              }
-              else if(init.type === "NewExpression" && exp.includes("MaxiInstruments("))
-              {
-                possibles.push({library:"MaxiInstruments", variable:name})
-              }
-              else if(init.type === "NewExpression" && exp.includes("Node("))
-              {
-                possibles.push({library:"WebAudio", variable:name})
-              }
-              else if(init.type === "CallExpression" && init.callee.property !==undefined)
-              {
-                const webAudioFactories =
-                [
-                  "createOscillator", "createBufferSource", "createMediaElementSource",
-                  "createBiquadFilter", "createMediaStreamTrackSource", "createDelay",
-                  "createDynamicsCompressor", "createGain", "createPeriodicWave"
-                ];
-                if(webAudioFactories.some(e => e === init.callee.property.name)) {
+                if(init.type === "NewExpression" && exp.includes("maxiAudio("))
+                {
+                  possibles.push({library:"maximilian", variable:name})
+                }
+                else if(init.type === "NewExpression" && exp.includes("MaxiInstruments("))
+                {
+                  possibles.push({library:"MaxiInstruments", variable:name})
+                }
+                else if(init.type === "NewExpression" && exp.includes("Node("))
+                {
                   possibles.push({library:"WebAudio", variable:name})
+                }
+                else if(init.type === "CallExpression" && init.callee.property !==undefined)
+                {
+                  const webAudioFactories =
+                  [
+                    "createOscillator", "createBufferSource", "createMediaElementSource",
+                    "createBiquadFilter", "createMediaStreamTrackSource", "createDelay",
+                    "createDynamicsCompressor", "createGain", "createPeriodicWave"
+                  ];
+                  if(webAudioFactories.some(e => e === init.callee.property.name)) {
+                    possibles.push({library:"WebAudio", variable:name})
+                  }
                 }
               }
             });
