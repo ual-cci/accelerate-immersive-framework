@@ -493,18 +493,22 @@ class MaxiInstrument {
       if(doAdd)
       {
         let start = n.start;
-        if(!start && n.quantizedStartStep !== undefined)
+        if(start === undefined
+           && n.quantizedStartStep !== undefined)
         {
           start = n.quantizedStartStep;
         }
         let end = n.end;
-        if(!end && n.quantizedEndStep !== undefined)
+        if(end === undefined)
         {
-          end = n.quantizedEndStep
-        }
-        else
-        {
-          end = start + 1;
+          if(n.quantizedEndStep !== undefined)
+          {
+            end = n.quantizedEndStep
+          }
+          else
+          {
+            end = start + 1;
+          }
         }
       	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul});
       	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});

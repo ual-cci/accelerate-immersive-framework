@@ -343,12 +343,12 @@ class MaxiSynthProcessor {
 
     //Find the oscillator to release for freq (for noteoff)
   getTriggeredForFreq(f) {
-    let osc = -1;
+    let osc;
     for(let i = 0; i < this.triggered.length; i++)
     {
       if(this.triggered[i].f == f)
       {
-        osc = i;
+        osc = this.triggered[i];
         break;
       }
     }
@@ -444,13 +444,14 @@ class MaxiSynthProcessor {
     //This will be -1 if no available oscillators
     if(o >= 0)
     {
-      //console.log("triggering", freq, o)
+      //
       this.adsr[o].setAttack(this.parameters.attack.val);
       this.adsr[o].setDecay(this.parameters.decay.val);
       this.adsr[o].setSustain(this.parameters.sustain.val);
       this.adsr[o].setRelease(this.parameters.release.val);
       this.triggered.push({o:o, f:freq});
       this.adsr[o].trigger = 1;
+      //console.log("triggering", freq, o);
     }
   }
 
@@ -483,11 +484,12 @@ class MaxiSynthProcessor {
           {
             this.adsr[release].trigger = 0;
             const t =  this.getTriggeredForFreq(f);
-            let releaseTime = (this.samplePtr + (this.parameters.release.val / 1000 * this.sampleRate));
+            let releaseTime = this.samplePtr +
+              ((this.parameters.release.val / 1000) * this.sampleRate);
             releaseTime = Math.round(releaseTime)
             this.released.push({f:f, o:release, off:releaseTime});
-            //console.log("releasing", f, release, t, releaseTime, this.samplePtr)
-            this.remove(this.triggered, this.triggered[t]);
+            //console.log("releasing", this.parameters.release.val, releaseTime, this.samplePtr, this.sampleRate)
+            this.remove(this.triggered, t);
           }
         }
         else if(this.triggered.length >= 2)
@@ -538,6 +540,7 @@ class MaxiSynthProcessor {
 
   tick(playHead, loopEnd) {
     this.playHead = playHead;
+    //console.log(playHead)
     if(this.playHead == 0 && this.prevPlayHead > 0)
     {
       this.handleLoop(loopEnd);
@@ -559,9 +562,11 @@ class MaxiSynthProcessor {
   removeReleased() {
     let toRemove = [];
     this.released.forEach((o, i)=>{
-      if(this.samplePtr >= o.off)
+      //Because of the way maxi adsr works, check envelope has actually
+      //finished releasing
+      if(this.samplePtr >= (o.off + 1) && o.lastVol < 0.00001)
       {
-        //console.log("removing", o.f, o.off, this.samplePtr, i)
+        //console.log("removing", o.off, o.lastVol)
         toRemove.push(o);
       }
     });
@@ -573,10 +578,7 @@ class MaxiSynthProcessor {
 
   onSample() {
     this.samplePtr++;
-    if(this.samplePtr % 3 == 0)
-    {
-      this.removeReleased();
-    }
+    this.removeReleased();
   }
 
   onStop() {
@@ -602,10 +604,12 @@ class MaxiSynthProcessor {
       for(let o of out)
       {
         const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
+        o.lastVol = envOut;
         const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
-        const ampOsc =  (lfoOut * this.parameters.lfoAmpMod.val)
+        const ampOsc =  ((lfoOut + 1 ) / 2) * this.parameters.lfoAmpMod.val;
         const normalise = poly ? this.dco.length : 2.0;
-        const ampMod = ((envOut) + (ampOsc * envOut)) / 3;
+        const ampMod = (envOut + (ampOsc * envOut)) / 3;
+        //const ampMod = envOut / 3;
         let f = poly ? o.f : o.o % 2 == 0 ? this.parameters.frequency.val : this.parameters.frequency2.val;
         f = f < 0 ? 0 : f;
         let osc;
