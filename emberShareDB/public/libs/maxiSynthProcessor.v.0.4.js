@@ -1,5 +1,215 @@
 import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
 //import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
+
+class ParameterWriter {
+ // From a RingBuffer, build an object that can enqueue a parameter change in
+ // the queue.
+ constructor(ringbuf) {
+   if (ringbuf.type() != "Uint8Array") {
+     throw "This class requires a ring buffer of Uint8Array";
+   }
+   const SIZE_ELEMENT = 5;
+   this.ringbuf = ringbuf;
+   this.mem = new ArrayBuffer(SIZE_ELEMENT);
+   this.array = new Uint8Array(this.mem);
+   this.view = new DataView(this.mem);
+ }
+ // Enqueue a parameter change for parameter of index `index`, with a new value
+ // of `value`.
+ // Returns true if enqueuing suceeded, false otherwise.
+ enqueue_change(index, value) {
+   const SIZE_ELEMENT = 5;
+   this.view.setUint8(0, index);
+   this.view.setFloat32(1, value);
+   if (this.ringbuf.available_write() < SIZE_ELEMENT) {
+     return false;
+   }
+   return this.ringbuf.push(this.array) == SIZE_ELEMENT;
+ }
+}
+
+class ParameterReader {
+ constructor(ringbuf) {
+   const SIZE_ELEMENT = 5;
+   this.ringbuf = ringbuf;
+   this.mem = new ArrayBuffer(SIZE_ELEMENT);
+   this.array = new Uint8Array(this.mem);
+   this.view = new DataView(this.mem);
+ }
+ dequeue_change(o) {
+   if (this.ringbuf.empty()) {
+     return false;
+   }
+   var rv = this.ringbuf.pop(this.array);
+   o.index = this.view.getUint8(0);
+   o.value = this.view.getFloat32(1);
+
+   return true;
+ }
+}
+
+class RingBuffer {
+ static getStorageForCapacity(capacity, type) {
+   if (!type.BYTES_PER_ELEMENT) {
+     throw "Pass in a ArrayBuffer subclass";
+   }
+   var bytes = 8 + (capacity + 1) * type.BYTES_PER_ELEMENT;
+   return new SharedArrayBuffer(bytes);
+ }
+ // `sab` is a SharedArrayBuffer with a capacity calculated by calling
+ // `getStorageForCapacity` with the desired capacity.
+ constructor(sab, type) {
+   if (!ArrayBuffer.__proto__.isPrototypeOf(type) &&
+     type.BYTES_PER_ELEMENT !== undefined) {
+     throw "Pass a concrete typed array class as second argument";
+   }
+
+   // Maximum usable size is 1<<32 - type.BYTES_PER_ELEMENT bytes in the ring
+   // buffer for this version, easily changeable.
+   // -4 for the write ptr (uint32_t offsets)
+   // -4 for the read ptr (uint32_t offsets)
+   // capacity counts the empty slot to distinguish between full and empty.
+   this._type = type;
+   this.capacity = (sab.byteLength - 8) / type.BYTES_PER_ELEMENT;
+   this.buf = sab;
+   this.write_ptr = new Uint32Array(this.buf, 0, 1);
+   this.read_ptr = new Uint32Array(this.buf, 4, 1);
+   this.storage = new type(this.buf, 8, this.capacity);
+ }
+ // Returns the type of the underlying ArrayBuffer for this RingBuffer. This
+ // allows implementing crude type checking.
+ type() {
+   return this._type.name;
+ }
+ // Push bytes to the ring buffer. `bytes` is an typed array of the same type
+ // as passed in the ctor, to be written to the queue.
+ // Returns the number of elements written to the queue.
+ push(elements) {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+
+   if ((wr + 1) % this._storage_capacity() == rd) {
+     // full
+     return 0;
+   }
+
+   let to_write = Math.min(this._available_write(rd, wr), elements.length);
+   let first_part = Math.min(this._storage_capacity() - wr, to_write);
+   let second_part = to_write - first_part;
+
+   this._copy(elements, 0, this.storage, wr, first_part);
+   this._copy(elements, first_part, this.storage, 0, second_part);
+
+   // publish the enqueued data to the other side
+   Atomics.store(
+     this.write_ptr,
+     0,
+     (wr + to_write) % this._storage_capacity()
+   );
+
+   return to_write;
+ }
+ // Read `elements.length` elements from the ring buffer. `elements` is a typed
+ // array of the same type as passed in the ctor.
+ // Returns the number of elements read from the queue, they are placed at the
+ // beginning of the array passed as parameter.
+ pop(elements) {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+
+   if (wr == rd) {
+     return 0;
+   }
+
+   let to_read = Math.min(this._available_read(rd, wr), elements.length);
+
+   let first_part = Math.min(this._storage_capacity() - rd, elements.length);
+   let second_part = to_read - first_part;
+
+   this._copy(this.storage, rd, elements, 0, first_part);
+   this._copy(this.storage, 0, elements, first_part, second_part);
+
+   Atomics.store(this.read_ptr, 0, (rd + to_read) % this._storage_capacity());
+
+   return to_read;
+ }
+
+ // True if the ring buffer is empty false otherwise. This can be late on the
+ // reader side: it can return true even if something has just been pushed.
+ empty() {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+
+   return wr == rd;
+ }
+
+ // True if the ring buffer is full, false otherwise. This can be late on the
+ // write side: it can return true when something has just been poped.
+ full() {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+
+   return (wr + 1) % this.capacity != rd;
+ }
+
+ // The usable capacity for the ring buffer: the number of elements that can be
+ // stored.
+ capacity() {
+   return this.capacity - 1;
+ }
+
+ // Number of elements available for reading. This can be late, and report less
+ // elements that is actually in the queue, when something has just been
+ // enqueued.
+ available_read() {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+   return this._available_read(rd, wr);
+ }
+
+ // Number of elements available for writing. This can be late, and report less
+ // elements that is actually available for writing, when something has just
+ // been dequeued.
+ available_write() {
+   var rd = Atomics.load(this.read_ptr, 0);
+   var wr = Atomics.load(this.write_ptr, 0);
+   return this._available_write(rd, wr);
+ }
+
+ // private methods //
+
+ // Number of elements available for reading, given a read and write pointer..
+ _available_read(rd, wr) {
+   if (wr > rd) {
+     return wr - rd;
+   } else {
+     return wr + this._storage_capacity() - rd;
+   }
+ }
+
+ // Number of elements available from writing, given a read and write pointer.
+ _available_write(rd, wr) {
+   let rv = rd - wr - 1;
+   if (wr >= rd) {
+     rv += this._storage_capacity();
+   }
+   return rv;
+ }
+
+ // The size of the storage for elements not accounting the space for the index.
+ _storage_capacity() {
+   return this.capacity;
+ }
+
+ // Copy `size` elements from `input`, starting at offset `offset_input`, to
+ // `output`, starting at offset `offset_output`.
+ _copy(input, offset_input, output, offset_output, size) {
+   for (var i = 0; i < size; i++) {
+     output[offset_output + i] = input[offset_input + i];
+   }
+ }
+}
+
 class MaxiSamplerProcessor {
    constructor() {
     //Max polyphony
@@ -20,6 +230,7 @@ class MaxiSamplerProcessor {
     //this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
     this.sequence = [];
+    this.parameters = {};
   }
 
   doTrig() {
@@ -38,7 +249,7 @@ class MaxiSamplerProcessor {
 
   //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
-    if(this.parameters)
+    if(this.paramsLoaded())
     {
       const f = nextCmd.f;
       if(nextCmd.cmd === "noteon")
@@ -72,9 +283,13 @@ class MaxiSamplerProcessor {
   onSample() {}
   onStop() {}
 
+  paramsLoaded() {
+    return Object.keys(this.parameters).length == 16;
+  }
+
   signal(parameters) {
     this.dcoOut = 0;
-    if(this.parameters)
+    if(this.paramsLoaded())
     {
       for(let i = 0; i < this.samples.length; i++)
       {
@@ -98,10 +313,6 @@ class MaxiSamplerProcessor {
     else {
     }
    	return this.dcoOut;
-  }
-
-  logGain(gain) {
-    return 0.0375 * Math.exp(gain * 0.465);
   }
 }
 
@@ -129,16 +340,17 @@ class MaxiSynthProcessor {
     this.sequence = [];
     this.playHead = 0;
     this.prevPlayHead = 0;
+    this.parameters = {};
   }
 
     //Find the oscillator to release for freq (for noteoff)
   getTriggeredForFreq(f) {
-    let osc = -1;
+    let osc;
     for(let i = 0; i < this.triggered.length; i++)
     {
       if(this.triggered[i].f == f)
       {
-        osc = i;
+        osc = this.triggered[i];
         break;
       }
     }
@@ -202,7 +414,7 @@ class MaxiSynthProcessor {
       {
         this.handleCmd({cmd:"noteon", f:freq});
       }
-      else if(this.parameters)
+      else if(this.paramsLoaded())
       {
         this.handleCmd({cmd:"noteon", f:this.parameters.frequency.val});
         this.handleCmd({cmd:"noteon", f:this.parameters.frequency2.val});
@@ -213,18 +425,21 @@ class MaxiSynthProcessor {
   //Only release if freq triggered
   externalNoteOff(freq)
   {
-    if(this.parameters.poly.val == 1)
+    if(this.paramsLoaded())
     {
-      const o = this.getOscToRelease(freq);
-      if(o >= 0)
+      if(this.parameters.poly.val == 1)
       {
-        this.handleCmd({cmd:"noteoff", f:freq});
+        const o = this.getOscToRelease(freq);
+        if(o >= 0)
+        {
+          this.handleCmd({cmd:"noteoff", f:freq});
+        }
       }
-    }
-	   else if(this.parameters)
-    {
-      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency.val});
-      this.handleCmd({cmd:"noteoff", f:this.parameters.frequency2.val});;
+       else
+      {
+        this.handleCmd({cmd:"noteoff", f:this.parameters.frequency.val});
+        this.handleCmd({cmd:"noteoff", f:this.parameters.frequency2.val});;
+      }
     }
   }
 
@@ -234,19 +449,20 @@ class MaxiSynthProcessor {
     //This will be -1 if no available oscillators
     if(o >= 0)
     {
-      //console.log("triggering", freq, o)
+      //
       this.adsr[o].setAttack(this.parameters.attack.val);
       this.adsr[o].setDecay(this.parameters.decay.val);
       this.adsr[o].setSustain(this.parameters.sustain.val);
       this.adsr[o].setRelease(this.parameters.release.val);
       this.triggered.push({o:o, f:freq});
       this.adsr[o].trigger = 1;
+      //console.log("triggering", freq, o);
     }
   }
 
   //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
-    if(this.parameters)
+    if(this.paramsLoaded())
     {
       const f = nextCmd.f;
       if(nextCmd.cmd === "noteon")
@@ -273,11 +489,12 @@ class MaxiSynthProcessor {
           {
             this.adsr[release].trigger = 0;
             const t =  this.getTriggeredForFreq(f);
-            let releaseTime = (this.samplePtr + (this.parameters.release.val / 1000 * this.sampleRate));
+            let releaseTime = this.samplePtr +
+              ((this.parameters.release.val / 1000) * this.sampleRate);
             releaseTime = Math.round(releaseTime)
             this.released.push({f:f, o:release, off:releaseTime});
-            //console.log("releasing", f, release, t, releaseTime, this.samplePtr)
-            this.remove(this.triggered, this.triggered[t]);
+            //console.log("releasing", this.parameters.release.val, releaseTime, this.samplePtr, this.sampleRate)
+            this.remove(this.triggered, t);
           }
         }
         else if(this.triggered.length >= 2)
@@ -312,7 +529,7 @@ class MaxiSynthProcessor {
     }
     this.midiPanic();
     //Restart loop
-    //console.log(this.samplePtr)
+    console.log(this.samplePtr)
     this.samplePtr = this.seqPtr = 0;
   }
 
@@ -328,6 +545,7 @@ class MaxiSynthProcessor {
 
   tick(playHead, loopEnd) {
     this.playHead = playHead;
+    //console.log(this.playHead, this.prevPlayHead )
     if(this.playHead == 0 && this.prevPlayHead > 0)
     {
       this.handleLoop(loopEnd);
@@ -349,9 +567,11 @@ class MaxiSynthProcessor {
   removeReleased() {
     let toRemove = [];
     this.released.forEach((o, i)=>{
-      if(this.samplePtr >= o.off)
+      //Because of the way maxi adsr works, check envelope has actually
+      //finished releasing
+      if(this.samplePtr >= (o.off + 1) && o.lastVol < 0.00001)
       {
-        //console.log("removing", o.f, o.off, this.samplePtr, i)
+        //console.log("removing", o.off, o.lastVol)
         toRemove.push(o);
       }
     });
@@ -363,10 +583,7 @@ class MaxiSynthProcessor {
 
   onSample() {
     this.samplePtr++;
-    if(this.samplePtr % 3 == 0)
-    {
-      this.removeReleased();
-    }
+    this.removeReleased();
   }
 
   onStop() {
@@ -379,8 +596,12 @@ class MaxiSynthProcessor {
     });
   }
 
+  paramsLoaded() {
+    return Object.keys(this.parameters).length == 16;
+  }
+
   signal() {
-    if(this.parameters)
+    if(this.paramsLoaded())
     {
       const poly = this.parameters.poly.val == 1;
 
@@ -392,10 +613,12 @@ class MaxiSynthProcessor {
       for(let o of out)
       {
         const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
+        o.lastVol = envOut;
         const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
-        const ampOsc =  (lfoOut * this.parameters.lfoAmpMod.val)
+        const ampOsc =  ((lfoOut + 1 ) / 2) * this.parameters.lfoAmpMod.val;
         const normalise = poly ? this.dco.length : 2.0;
-        const ampMod = ((envOut) + (ampOsc * envOut)) / 3;
+        const ampMod = (envOut + (ampOsc * envOut)) / 3;
+        //const ampMod = envOut / 3;
         let f = poly ? o.f : o.o % 2 == 0 ? this.parameters.frequency.val : this.parameters.frequency2.val;
         f = f < 0 ? 0 : f;
         let osc;
@@ -453,17 +676,7 @@ class MaxiSynthProcessor {
 
 class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
-      let core =  [
-        {
-          name: 'loop',
-          defaultValue: Number.MAX_SAFE_INTEGER
-        },
-        {
-          name: 'playHead',
-          defaultValue: 0.0
-        }
-      ];
-      return core;
+      return []
     }
 
    constructor(options) {
@@ -471,58 +684,70 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     //Max polyphony
     this.instruments = {synth:[], sampler:[]};
     this.TICKS_PER_BEAT = 24;
+    this.loopEnd = Number.MAX_SAFE_INTEGER;
     this.myClock = new Maximilian.maxiClock();
     this.myClock.setTempo(80);
     this.myClock.setTicksPerBeat(this.TICKS_PER_BEAT);
     this.isPlaying = true;
+    this.o = { index: 0, value: 0 };
     this.port.onmessage = (event) => {
+      if (event.data.type === "recv-param-queue") {
+        const b = new RingBuffer(event.data.data, Uint8Array);
+        this._param_reader = new ParameterReader(b);
+      }
       if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
+        console.log("seqeuence", data.val)
         this.instruments[data.instrument][data.index].sequence = data.val;
       }
-      else if(event.data.addSynth !== undefined)
+      if(event.data.addSynth !== undefined)
       {
         console.log("ADDING SYNTH");
         this.instruments["synth"].push(new MaxiSynthProcessor());
       }
-      else if(event.data.addSampler !== undefined)
+      if(event.data.addSampler !== undefined)
       {
         console.log("ADDING SAMPLER");
         this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
-      else if(event.data.noteon !== undefined)
+      if(event.data.noteon !== undefined)
       {
         const data = event.data.noteon;
         this.instruments[data.instrument][data.index].externalNoteOn(data.val);
       }
-      else if(event.data.noteoff !== undefined)
+      if(event.data.noteoff !== undefined)
       {
         const data = event.data.noteoff;
         this.instruments[data.instrument][data.index].externalNoteOff(data.val);
       }
-      else if(event.data.tempo !== undefined)
+      if(event.data.tempo !== undefined)
       {
 		    this.myClock.setTempo(event.data.tempo)
       }
-      else if(event.data.parameters !== undefined)
+      if(event.data.parameters !== undefined)
       {
 		    const data = event.data.parameters;
         this.instruments[data.instrument][data.index].parameters = data.val
       }
-      else if(event.data.audio !== undefined)
+      if(event.data.audio !== undefined)
       {
         const data = event.data.audio;
         const audioData = this.translateFloat32ArrayToBuffer(data.val.audioBlob);
+        console.log(data)
         this.instruments.sampler[data.index].samples[data.val.index].setSample(audioData);
       }
-      else if(event.data.togglePlaying !== undefined)
+      if(event.data.togglePlaying !== undefined)
       {
         this.toggleIsPlaying();
       }
-      else if(event.data.rewind !== undefined)
+      if(event.data.rewind !== undefined)
       {
         this.rewind();
+      }
+      if(event.data.loop !== undefined)
+      {
+        this.loopEnd = event.data.loop;
       }
     }
   }
@@ -563,19 +788,148 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.getInstruments().forEach((s)=> {
       s.onSample()
     })
+    this.handleClock();
+    this.handleRingBuf();
+  }
+
+  synthKey(index) {
+    switch (index) {
+      case 0:return "gain";
+      case 1:return "attack";
+      case 2:return "decay";
+      case 3:return "sustain";
+      case 4:return "release";
+      case 5:return "lfoFrequency";
+      case 6:return "lfoPitchMod";
+      case 7:return "lfoFilterMod";
+      case 8:return "lfoAmpMod";
+      case 9:return "adsrPitchMod";
+      case 10:return "cutoff";
+      case 11:return "Q";
+      case 12:return "frequency";
+      case 13:return "frequency2";
+      case 14:return "poly";
+      case 15:return "oscFn";
+    }
+  }
+
+  samplerKey(index) {
+    const p = index % 2 == 0 ? "gain" : "rate";
+    return p + "_" + Math.floor(index / 2);
+  }
+
+  handleRingBuf() {
+    let index, value;
+    const NUM_SYNTHS = 6;
+    const NUM_SYNTH_PARAMS = 18;
+    const NUM_SAMPLERS = 6;
+    const NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    if(this._param_reader !== undefined)
+    {
+      while(!this._param_reader.ringbuf.empty())
+      {
+        if(this._param_reader.dequeue_change(this.o))
+        {
+          //console.log("param change: ", this.o.index, this.o.value);
+          const i = this.o.index;
+          const v = this.o.value;
+
+          if(i < NUM_SYNTHS * NUM_SYNTH_PARAMS)
+          {
+            const index = i % NUM_SYNTH_PARAMS;
+            const synthIndex = Math.floor(i / NUM_SYNTH_PARAMS);
+            if(index < NUM_SYNTH_PARAMS - 2)
+            {
+              const key = this.synthKey(index)
+              if(this.instruments["synth"][synthIndex].parameters[key] === undefined)
+              {
+                this.instruments["synth"][synthIndex].parameters[key] = {};
+              }
+              this.instruments["synth"][synthIndex].parameters[key].val = v;
+            }
+            else
+            {
+              if(index == NUM_SYNTH_PARAMS - 2)
+              {
+                this.instruments["synth"][synthIndex].externalNoteOn(v);
+              }
+              else
+              {
+                this.instruments["synth"][synthIndex].externalNoteOff(v);
+              }
+            }
+          }
+          //Sampler param
+          else if (i < (NUM_SYNTHS * NUM_SYNTH_PARAMS) + (NUM_SAMPLERS * NUM_SAMPLER_PARAMS))
+          {
+            const index = (i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) % NUM_SAMPLER_PARAMS;
+            const samplerIndex = Math.floor((i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) / NUM_SAMPLER_PARAMS);
+            console.log(index, samplerIndex, i)
+            if(index < NUM_SAMPLER_PARAMS - 2)
+            {
+              const key = this.samplerKey(index)
+              if(this.instruments["sampler"][samplerIndex].parameters[key] === undefined)
+              {
+                this.instruments["sampler"][samplerIndex].parameters[key] = {};
+              }
+              this.instruments["sampler"][samplerIndex].parameters[key].val = v;
+            }
+            else
+            {
+              if(index == NUM_SAMPLER_PARAMS - 2)
+              {
+                this.instruments["sampler"][samplerIndex].externalNoteOn(v);
+              }
+              else
+              {
+                this.instruments["sampler"][samplerIndex].externalNoteOff(v);
+              }
+            }
+          }
+          //Global
+          else
+          {
+            const index = i - ((NUM_SYNTHS * NUM_SYNTH_PARAMS) + (NUM_SAMPLERS * NUM_SAMPLER_PARAMS))
+            console.log("GLOBAL", i, index)
+            switch(i) {
+              case 0:
+                this.instruments["synth"].push(new MaxiSynthProcessor());
+                break;
+              case 1:
+                this.instruments["samplers"].push(new MaxiSamplerProcessor());
+                break;
+              case 2:
+                this.myClock.setTempo(v)
+                break;
+              case 3:
+                this.toggleIsPlaying();
+                break;
+              case 4:
+                this.rewind();
+                break;
+              case 5:
+                this.loopEnd = v;
+                break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  handleClock() {
     if(this.myClock && this.isPlaying)
     {
       this.myClock.ticker();
       if(this.myClock.tick)
       {
-        const loopEnd = this.staticParameters.loop[0];
+        //console.log(this.myClock.playHead)
         const beatLength = 60 / this.myClock.bpm;
-        const loopInSamples = (loopEnd / 24) * beatLength * 44100;
+        const loopInSamples = (this.loopEnd / 24) * beatLength * 44100;
         this.getInstruments().forEach((s)=> {
           s.tick(this.myClock.playHead, loopInSamples);
         })
-        this.port.postMessage({playHead:this.myClock.playHead});
-        if(this.myClock.playHead >= loopEnd)
+        if(this.myClock.playHead >= this.loopEnd)
         {
           this.myClock.playHead = -1;
         }
@@ -585,7 +939,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters)
   {
-    this.staticParameters = parameters;
     const outputsLength = outputs.length;
     for (let outputId = 0; outputId < outputsLength; ++outputId) {
       let output = outputs[outputId];
