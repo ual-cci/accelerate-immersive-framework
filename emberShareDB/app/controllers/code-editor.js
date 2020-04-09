@@ -1042,7 +1042,7 @@ export default Controller.extend({
         this.get('opsPlayer').reset(doc.id);
         this.set('showConnectionWarning', false);
         this.set('droppedOps', []);
-        this.set('recordingOptions', null);
+        this.set('recordingOptions', {isRecording:false});
         this.writeIframeContent("");
         this.cleanUpShareDB();
         this.set('currentDoc', null);
