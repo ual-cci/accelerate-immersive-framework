@@ -564,7 +564,7 @@ class MaxiInstrument {
 
   setParam(name, val) {
     let param = this.node.parameters.get(name);
-    if(val <= 0) val = 0.01;
+    if(val < 0) val = 0.00;
     if(param)
     {
       param.setValueAtTime(val, this.context.currentTime)
