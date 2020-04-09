@@ -221,7 +221,7 @@ class MaxiInstruments {
     this.samplers = [];
     this.synths = [];
     this.synthProcessorName = 'maxi-synth-processor';
-    this.version = "v.0.3";
+    this.version = "v.0.4";
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
     this.NUM_SYNTH_PARAMS = 18;
