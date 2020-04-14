@@ -36,16 +36,29 @@ const initRecorder = (node)=> {
   const element = document.body;
   container.appendChild(btn);
   element.insertBefore(container, element.firstChild);
+  //console.log(node)
   try {
     recorder = new Recorder(node);
   } catch(err) {
     console.log(err);
+    window.node = node;
   }
+  let attemptedNode = node;
   btn.onclick = ()=> {
     if(recorder === undefined)
     {
-      recorder = new Recorder(window.node);
+      try {
+        recorder = new Recorder(attemptedNode);
+      } catch(err) {
+        console.log(err);
+        try {
+          recorder = new Recorder(window.node);
+        } catch(err) {
+          console.log(err);
+        }
+      }
     }
+
     if(recorder.recording)
     {
       recorder.stop();

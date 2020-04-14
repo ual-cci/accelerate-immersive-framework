@@ -854,7 +854,8 @@ export default Controller.extend({
       {
         for(let i = 1; i < e.data.length; i++)
         {
-          self.get('cs').logToScreen(JSON.parse(e.data[i]));
+          //console.log(e.data[i], JSON.parse(e.data[i]))
+          self.get('cs').logToScreen(e.data[i]);
         }
       }
     }
