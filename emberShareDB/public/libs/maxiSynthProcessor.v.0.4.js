@@ -616,8 +616,8 @@ class MaxiSynthProcessor {
         o.lastVol = envOut;
         const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
         const ampOsc =  ((lfoOut + 1 ) / 2) * this.parameters.lfoAmpMod.val;
-        const normalise = poly ? this.dco.length : 2.0;
-        const ampMod = (envOut + (ampOsc * envOut)) / 3;
+        const normalise = poly ? this.dco.length : 4.0;
+        const ampMod = (envOut + (ampOsc * envOut)) / normalise;
         //const ampMod = envOut / 3;
         let f = poly ? o.f : o.o % 2 == 0 ? this.parameters.frequency.val : this.parameters.frequency2.val;
         f = f < 0 ? 0 : f;
