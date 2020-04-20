@@ -7,6 +7,7 @@ import { bind } from '@ember/runloop';
 
 export default Service.extend({
   session: inject('session'),
+  uuid: inject(),
   store: inject(),
   cs:inject('console'),
   currentUserName:"",
@@ -14,6 +15,13 @@ export default Service.extend({
   bearerToken:"",
   currentDoc:"",
   ownedDocuments:null,
+  getSessionID() {
+    if(isEmpty(this.get("sessionID")))
+    {
+      this.set("sessionID", this.get("uuid").guid())
+    }
+    return this.get("sessionID")
+  },
   updateOwnedDocuments() {
     return new RSVP.Promise((resolve, reject) => {
       let currentUser = this.get('currentUserName');

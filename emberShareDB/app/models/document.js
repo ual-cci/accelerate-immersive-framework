@@ -14,7 +14,7 @@ export default DS.Model.extend({
   tags:DS.attr(),
   forkedFrom:DS.attr('string'),
   savedVals:DS.attr(),
-  newEval:DS.attr('string'),
+  newEval:DS.attr(),
   stats:DS.attr(),
   flags:DS.attr('number'),
   assetQuota:DS.attr('number'),

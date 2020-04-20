@@ -523,10 +523,19 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "newEval")
       {
-        //this.get('cs').log("did receive op", ops, source)
-        this.set('surpress', true);
-        document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
-        this.set('surpress', false);
+        if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
+        {
+          this.get('cs').log("executing", ops[0].oi.code)
+          this.set('surpress', true);
+          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+          this.set('surpress', false);
+        }
+        else
+        {
+          this.get('cs').log("matchin guuid, ignoring")
+        }
+        this.get('cs').log("did receive op", ops, source)
+
       }
       else if (!source && ops[0].p[0] == "children")
       {
@@ -693,7 +702,12 @@ export default Controller.extend({
           {
             this.flashSelectedText();
             document.getElementById("output-iframe").contentWindow.eval(combined);
-            this.get('documentService').updateDoc(model.id, 'newEval', combined)
+            const toSend = {
+              uuid:this.get('sessionAccount').getSessionID(),
+              timestamp:new Date(),
+              code:combined
+            }
+            this.get('documentService').updateDoc(model.id, 'newEval', toSend)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
@@ -854,11 +868,14 @@ export default Controller.extend({
       {
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
-        let code = e.data[0] + " = " + e.data[1];
-        self.get('documentService').updateDoc(self.model.id, 'newEval', code)
-        .catch((err)=>{
-          self.get('cs').log('error updating doc', err);
-        });
+        if(this.get('isCollaborative'))
+        {
+          let code = e.data[0] + " = " + e.data[1];
+          self.get('documentService').updateDoc(self.model.id, 'newEval', code)
+          .catch((err)=>{
+            self.get('cs').log('error updating doc', err);
+          });
+        }
         self.set('savedVals', savedVals);
         //this.get('cs').log(e.data[0], e.data[1])
       }
