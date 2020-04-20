@@ -532,7 +532,7 @@ export default Controller.extend({
         }
         else
         {
-          this.get('cs').log("matchin guuid, ignoring")
+          this.get('cs').log("matching guuid, ignoring")
         }
         this.get('cs').log("did receive op", ops, source)
 
@@ -674,8 +674,16 @@ export default Controller.extend({
         this.get('cs').log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        this.get('documentService').updateDoc(doc.id, "source", source)
-        .then(()=>resolve())
+        const toSend = {
+          uuid:this.get('sessionAccount').getSessionID(),
+          timestamp:new Date(),
+          code:""
+        }
+        const actions = [
+          this.get('documentService').updateDoc(doc.id, "newEval", toSend),
+          this.get('documentService').updateDoc(doc.id, "source", source),
+        ];
+        Promise.all(actions).then(()=>resolve())
         .catch((err)=>{
           this.get('cs').log("error updateSourceFromSession - updateDoc", err);
           reject(err);
@@ -707,6 +715,7 @@ export default Controller.extend({
               timestamp:new Date(),
               code:combined
             }
+            this.get('cs').log("NEW EVAL")
             this.get('documentService').updateDoc(model.id, 'newEval', toSend)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
