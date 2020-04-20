@@ -148,9 +148,14 @@
         <span class="tooltiptext">WARNING! Other users can edit your code</span>
       </div>
       <div class="tooltip">
-        <label class = "doc-checkbox" for="readOnlyCheckbox">DONT PLAY ON OPEN</label>
+        <label class = "doc-checkbox" for="playCheckbox">DONT PLAY ON OPEN</label>
         {{input tabIndex = "0" type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
         <span class="tooltiptext">Dont play on open</span>
+      </div>
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="colabCheckbox">COLLABORATIVE?</label>
+        {{input tabIndex = "0" type="checkbox" checked=isCollaborative click=(action 'toggleCollaborative')}}
+        <span class="tooltiptext">COLLABORATIVE EDITTING</span>
       </div>
       {{#if canEditDoc}}
         <div class="tooltip">

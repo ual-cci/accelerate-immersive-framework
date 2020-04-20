@@ -41,6 +41,7 @@ export default Controller.extend({
   showReadOnly:false,
   isOwner:false,
   autoRender:false,
+  isCollaborative:true,
   codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
@@ -318,9 +319,12 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
-          // setInterval(()=> {
-          //   this.submitOp({p:["trig"], oi:true})
-          // }, 100)
+          setInterval(()=> {
+            if(this.get("isCollaborative"))
+            {
+              //this.submitOp({p:["trig"], oi:true})
+            }
+          }, 200)
         });
       });
     });
@@ -496,18 +500,18 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    this.get('cs').log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
     const editor = this.get('editor');
-    if(!embed && ops.length > 0)
+    if(!embed && ops.length > 0 && this.get('isCollaborative'))
     {
       if(!source && ops[0].p[0] == "source")
       {
-        // this.set('surpress', true);
-        // this.get('cs').log("applying remote op")
-        // this.get('opsPlayer').set('opsToApply', ops)
-        // this.get('opsPlayer').applyTransform(editor)
-        // this.set('surpress', false);
+        this.get('cs').log("did receive op", ops, source)
+        this.set('surpress', true);
+        this.get('cs').log("applying remote op")
+        this.get('opsPlayer').set('opsToApply', ops)
+        this.get('opsPlayer').applyTransform(editor)
+        this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
       {
@@ -519,7 +523,10 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "newEval")
       {
+        //this.get('cs').log("did receive op", ops, source)
+        this.set('surpress', true);
         document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
+        this.set('surpress', false);
       }
       else if (!source && ops[0].p[0] == "children")
       {
@@ -847,6 +854,11 @@ export default Controller.extend({
       {
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
+        let code = e.data[0] + " = " + e.data[1];
+        self.get('documentService').updateDoc(self.model.id, 'newEval', code)
+        .catch((err)=>{
+          self.get('cs').log('error updating doc', err);
+        });
         self.set('savedVals', savedVals);
         //this.get('cs').log(e.data[0], e.data[1])
       }
@@ -1389,6 +1401,9 @@ export default Controller.extend({
     },
     toggleAutoRender() {
       this.toggleProperty('autoRender');
+    },
+    toggleCollaborative() {
+      this.toggleProperty('isCollaborative');
     },
     toggleShowSettings() {
       this.toggleProperty('showSettings');
