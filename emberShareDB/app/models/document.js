@@ -19,6 +19,7 @@ export default DS.Model.extend({
   flags:DS.attr('number'),
   assetQuota:DS.attr('number'),
   dontPlay:DS.attr('boolean'),
+  isCollaborative:DS.attr('boolean'),
   children:DS.attr(),
   parent:DS.attr('string'),
   type:DS.attr('string')

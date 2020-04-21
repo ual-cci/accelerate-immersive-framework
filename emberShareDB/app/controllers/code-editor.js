@@ -38,13 +38,12 @@ export default Controller.extend({
   codeTimer: null,
   isNotEdittingDocName:true,
   canEditDoc:false,
-  showReadOnly:false,
   isOwner:false,
   autoRender:false,
-  isCollaborative:true,
   codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
+  showReadOnly:false,
   showRecordingPanel:false,
   showAssets:false,
   showPreview:false,
@@ -71,6 +70,8 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
+  trigPollRate:200,
+  trigPoll:true,
 
   showHUD:true,
   hudMessage:"Loading...",
@@ -320,11 +321,11 @@ export default Controller.extend({
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
           setInterval(()=> {
-            if(this.get("isCollaborative"))
+            if(this.get("model.isCollaborative") && this.get("trigPoll"))
             {
-              //this.submitOp({p:["trig"], oi:true})
+              this.submitOp({p:["trig"], oi:true})
             }
-          }, 200)
+          }, this.get("trigPollRate"))
         });
       });
     });
@@ -502,7 +503,7 @@ export default Controller.extend({
   didReceiveOp: function (ops,source) {
     const embed = this.get('isEmbedded');
     const editor = this.get('editor');
-    if(!embed && ops.length > 0 && this.get('isCollaborative'))
+    if(!embed && ops.length > 0 && this.get('model.isCollaborative'))
     {
       if(!source && ops[0].p[0] == "source")
       {
@@ -674,6 +675,7 @@ export default Controller.extend({
         this.get('cs').log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
+        //WE ALSO SEND A EMPTY STRING AS NEWEVAL TO CLEAR IT OUT (BUG WITH PATCHING?)
         const toSend = {
           uuid:this.get('sessionAccount').getSessionID(),
           timestamp:new Date(),
@@ -877,14 +879,14 @@ export default Controller.extend({
       {
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
-        if(this.get('isCollaborative'))
-        {
-          let code = e.data[0] + " = " + e.data[1];
-          self.get('documentService').updateDoc(self.model.id, 'newEval', code)
-          .catch((err)=>{
-            self.get('cs').log('error updating doc', err);
-          });
-        }
+        // if(this.get('isCollaborative'))
+        // {
+        //   let code = e.data[0] + " = " + e.data[1];
+        //   self.get('documentService').updateDoc(self.model.id, 'newEval', code)
+        //   .catch((err)=>{
+        //     self.get('cs').log('error updating doc', err);
+        //   });
+        // }
         self.set('savedVals', savedVals);
         //this.get('cs').log(e.data[0], e.data[1])
       }
@@ -1429,7 +1431,15 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleCollaborative() {
-      this.toggleProperty('isCollaborative');
+      if(this.get('canEditDoc'))
+      {
+        let model = this.get('model');
+        model.set('isCollaborative', !model.get('isCollaborative'));
+        this.get('documentService').updateDoc(model.id, 'isCollaborative', model.get('isCollaborative'))
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
+      }
     },
     toggleShowSettings() {
       this.toggleProperty('showSettings');
