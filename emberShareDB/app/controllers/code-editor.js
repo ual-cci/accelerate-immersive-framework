@@ -320,12 +320,12 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
-          setInterval(()=> {
+          this.set('trigInterval', setInterval(()=> {
             if(this.get("model.isCollaborative") && this.get("trigPoll"))
             {
               this.submitOp({p:["trig"], oi:true})
             }
-          }, this.get("trigPollRate"))
+          }, this.get("trigPollRate")));
         });
       });
     });
@@ -1509,6 +1509,10 @@ export default Controller.extend({
         this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
+        if(!isEmpty(this.get("trigInterval")))
+        {
+          clearInterval(this.get("trigInterval"));
+        }
         if(this.get('wsAvailable'))
         {
           this.cleanUpConnections();
