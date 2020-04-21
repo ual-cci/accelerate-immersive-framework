@@ -1,0 +1,32 @@
+<p class = "tutorial-text">
+You are able to record and download audio directly from the MIMIC platform. We add in a Recording button at the top of your sketch, you click it to start, then get a file at the end when you stop.
+</p>
+<p class = "tutorial-text">
+<img style = "margin:auto;width:400px;display:block;" src = {{concat url "/images/rec-button.png"}}/>
+<figcaption style = "margin:auto;width:400px;display:block;text-align:center" src>ITS YOUR BUTTON</figcaption>
+</p>
+<p class = "tutorial-text">
+In order to do this, you simply have to tell us which Web Audio Node you want to record.
+</p>
+<p class = "tutorial-text">
+WAIT….WHATS A NODE?
+</p>
+<p class = "tutorial-text">
+<a href = "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" >Web Audio</a>, the technology that underpins most in browser music making, operates a graph structure. Here, various nodes are connected together, pushing audio signals from one to another. Eventually some are connected to an output and can be heard from speakers / headphones / boomboxes / phones placed upside-down in empty pint glasses.
+</p>
+<p class = "tutorial-text">
+Most of your favourite audio libraries will have one main output node that you can tap into to record the output coming from MIMIC. Or if you’re doing native Web Audio, you may have a mixer node of some sort.
+</p>
+<p class = "tutorial-text">
+We scour your code to try and identify variables that may contain nodes that you wish to record, and we give them to you in a list. These include the main audio engines of <a href = {{concat url "/guides/maximJS"}}>the maximilian.js</a> and <a hhref = {{concat url "/guides/maxi-instrument"}}>MaxiInstruments</a> libraries, and any native Web Audio constructors.
+</p>
+<p class = "tutorial-text">
+<img style = "margin:auto;width:600px;display:block;" src = {{concat url "/images/rec-dropdown.png"}}/>
+<figcaption style = "margin:auto;width:400px;display:block;text-align:center" src>Options, Options</figcaption>
+</p>
+<p class = "tutorial-text">
+If we’ve not found what you want, you can also provide the name of the variable manually. E.g. myMassiveDistortionNode3
+</p>
+<p class = "tutorial-text">
+Happy Recording!
+</p>

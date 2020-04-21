@@ -1,8 +1,10 @@
 import Component from '@ember/component';
 import { computed } from '@ember/object';
+import config from  '../config/environment';
 
 export default Component.extend({
   showUserInput:false,
+  url:config.localOrigin,
   didRender() {
     this._super(...arguments);
     if(!this.get('showUserInput'))

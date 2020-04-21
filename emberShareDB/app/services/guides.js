@@ -17,5 +17,8 @@ export default Service.extend({
       {title:"Musical Analysis",guides:[
         {id:"mmll",name:"Musical Machine Listening with MMLL.js", desc:"Machine listening is the attempt to make computers hear sound intelligently. The interest of the MIMIC project is in musical machine listening, that is, the computer understanding of musical audio signals, and the Musical Machine Listening Library introduced here (subsequently MMLL) is a javascript library to do just that, in the web browser. ",author:"Nick Collins"},
       ]},
+      {title:"The Platform",guides:[
+        {id:"recording",name:"In-Built Recording in MIMIC", desc:"How to record yourself in the MIMIC platform (and WTF are nodes?).",author:"Louis McCallum"},
+      ]},
   ]})
 });

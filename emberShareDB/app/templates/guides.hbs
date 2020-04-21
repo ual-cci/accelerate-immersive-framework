@@ -22,6 +22,9 @@
 {{#if isMaxiInstruments}}
 {{maxiinstrument-guide}}
 {{/if}}
+{{#if isRecording}}
+{{recording-guide}}
+{{/if}}
 </div>
 {{else}}
 <div id = "tutorial-container">
@@ -30,14 +33,13 @@
 <p class = "tutorial-text">
 Each guide below uses a MIMIC library to demonstrate how to use machine intelligence to make music in the browser
 </p>
-
-  {{#each model as |group index|}}
-    <h1>{{group.title}}</h1>
-    <div class = "row">
-    {{#each group.guides as |guide|}}
-      {{guide-tile onClick = (action 'onClick' guide) guide = guide index = index}}
-    {{/each}}
-  </div>
+{{#each model as |group index|}}
+  <h1>{{group.title}}</h1>
+  <div class = "row">
+  {{#each group.guides as |guide|}}
+    {{guide-tile onClick = (action 'onClick' guide) guide = guide index = index}}
   {{/each}}
+</div>
+{{/each}}
 </div>
 {{/if}}
