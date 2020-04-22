@@ -457,21 +457,28 @@ function startDocAPI(app)
       else
       {
         let patched = req.body.data.attributes;
-        console.log("Patching candidates", patched);
+        //console.log("Patching candidates", patched);
         const current = doc.data;
         let actions = [];
-        for (var key in current) {
+        const BLACK_LIST = ["source", "documentId"]
+        for (var key in patched) {
             if (current.hasOwnProperty(key) && patched.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
                   //DONT UPDATE THE SOURCE OR THE DOCUMENT ID
-                  if(key !== "source" && key !== "documentId")
+                  if(!BLACK_LIST.includes(key))
                   {
                     console.log("PATCHING", key, patched[key])
                     const op = {p:[key], oi:patched[key]};
                     actions.push(submitOp(docId, op));
                   }
                 }
+            }
+            else
+            {
+              console.log("PATCHING NEW FIELD", key, patched[key])
+              const op = {p:[key], oi:patched[key]};
+              actions.push(submitOp(docId, op));
             }
         }
         if(actions.length > 0)
@@ -685,6 +692,7 @@ function createDoc(attr) {
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,
+            isCollaborative:false,
             children:[],
             parent:attr.parent,
             type:attr.parent ? null : "html",

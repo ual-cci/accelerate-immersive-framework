@@ -14,11 +14,12 @@ export default DS.Model.extend({
   tags:DS.attr(),
   forkedFrom:DS.attr('string'),
   savedVals:DS.attr(),
-  newEval:DS.attr('string'),
+  newEval:DS.attr(),
   stats:DS.attr(),
   flags:DS.attr('number'),
   assetQuota:DS.attr('number'),
   dontPlay:DS.attr('boolean'),
+  isCollaborative:DS.attr('boolean'),
   children:DS.attr(),
   parent:DS.attr('string'),
   type:DS.attr('string')

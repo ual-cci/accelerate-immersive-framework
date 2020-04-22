@@ -38,12 +38,12 @@ export default Controller.extend({
   codeTimer: null,
   isNotEdittingDocName:true,
   canEditDoc:false,
-  showReadOnly:false,
   isOwner:false,
   autoRender:false,
   codeTimerRefresh:500,
   collapsed: true,
   showShare:false,
+  showReadOnly:false,
   showRecordingPanel:false,
   showAssets:false,
   showPreview:false,
@@ -70,6 +70,8 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
+  trigPollRate:200,
+  trigPoll:true,
 
   showHUD:true,
   hudMessage:"Loading...",
@@ -318,9 +320,12 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
-          // setInterval(()=> {
-          //   this.submitOp({p:["trig"], oi:true})
-          // }, 100)
+          this.set('trigInterval', setInterval(()=> {
+            if(this.get("model.isCollaborative") && this.get("trigPoll"))
+            {
+              this.submitOp({p:["trig"], oi:true})
+            }
+          }, this.get("trigPollRate")));
         });
       });
     });
@@ -496,18 +501,18 @@ export default Controller.extend({
     })
   },
   didReceiveOp: function (ops,source) {
-    this.get('cs').log("did receive op", ops, source)
     const embed = this.get('isEmbedded');
     const editor = this.get('editor');
-    if(!embed && ops.length > 0)
+    if(!embed && ops.length > 0 && this.get('model.isCollaborative'))
     {
       if(!source && ops[0].p[0] == "source")
       {
-        // this.set('surpress', true);
-        // this.get('cs').log("applying remote op")
-        // this.get('opsPlayer').set('opsToApply', ops)
-        // this.get('opsPlayer').applyTransform(editor)
-        // this.set('surpress', false);
+        this.get('cs').log("did receive op", ops, source)
+        this.set('surpress', true);
+        this.get('cs').log("applying remote op")
+        this.get('opsPlayer').set('opsToApply', ops)
+        this.get('opsPlayer').applyTransform(editor)
+        this.set('surpress', false);
       }
       else if (ops[0].p[0] == "assets")
       {
@@ -519,7 +524,19 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] == "newEval")
       {
-        document.getElementById("output-iframe").contentWindow.eval(ops[0].oi);
+        if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
+        {
+          this.get('cs').log("executing", ops[0].oi.code)
+          this.set('surpress', true);
+          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+          this.set('surpress', false);
+        }
+        else
+        {
+          this.get('cs').log("matching guuid, ignoring")
+        }
+        this.get('cs').log("did receive op", ops, source)
+
       }
       else if (!source && ops[0].p[0] == "children")
       {
@@ -658,8 +675,17 @@ export default Controller.extend({
         this.get('cs').log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        this.get('documentService').updateDoc(doc.id, "source", source)
-        .then(()=>resolve())
+        //WE ALSO SEND A EMPTY STRING AS NEWEVAL TO CLEAR IT OUT (BUG WITH PATCHING?)
+        const toSend = {
+          uuid:this.get('sessionAccount').getSessionID(),
+          timestamp:new Date(),
+          code:""
+        }
+        const actions = [
+          this.get('documentService').updateDoc(doc.id, "newEval", toSend),
+          this.get('documentService').updateDoc(doc.id, "source", source),
+        ];
+        Promise.all(actions).then(()=>resolve())
         .catch((err)=>{
           this.get('cs').log("error updateSourceFromSession - updateDoc", err);
           reject(err);
@@ -686,7 +712,13 @@ export default Controller.extend({
           {
             this.flashSelectedText();
             document.getElementById("output-iframe").contentWindow.eval(combined);
-            this.get('documentService').updateDoc(model.id, 'newEval', combined)
+            const toSend = {
+              uuid:this.get('sessionAccount').getSessionID(),
+              timestamp:new Date(),
+              code:combined
+            }
+            this.get('cs').log("NEW EVAL")
+            this.get('documentService').updateDoc(model.id, 'newEval', toSend)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
@@ -847,6 +879,14 @@ export default Controller.extend({
       {
         let savedVals = self.get('savedVals');
         savedVals[e.data[0]] = e.data[1];
+        // if(this.get('isCollaborative'))
+        // {
+        //   let code = e.data[0] + " = " + e.data[1];
+        //   self.get('documentService').updateDoc(self.model.id, 'newEval', code)
+        //   .catch((err)=>{
+        //     self.get('cs').log('error updating doc', err);
+        //   });
+        // }
         self.set('savedVals', savedVals);
         //this.get('cs').log(e.data[0], e.data[1])
       }
@@ -1390,6 +1430,17 @@ export default Controller.extend({
     toggleAutoRender() {
       this.toggleProperty('autoRender');
     },
+    toggleCollaborative() {
+      if(this.get('canEditDoc'))
+      {
+        let model = this.get('model');
+        model.set('isCollaborative', !model.get('isCollaborative'));
+        this.get('documentService').updateDoc(model.id, 'isCollaborative', model.get('isCollaborative'))
+        .catch((err)=>{
+          this.get('cs').log('error updating doc', err);
+        });
+      }
+    },
     toggleShowSettings() {
       this.toggleProperty('showSettings');
     },
@@ -1458,6 +1509,10 @@ export default Controller.extend({
         this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
+        if(!isEmpty(this.get("trigInterval")))
+        {
+          clearInterval(this.get("trigInterval"));
+        }
         if(this.get('wsAvailable'))
         {
           this.cleanUpConnections();
