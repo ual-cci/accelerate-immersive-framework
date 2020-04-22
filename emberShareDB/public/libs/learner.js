@@ -30,6 +30,18 @@ class Learner {
   }
 
   addGUI(p) {
+    let origin = document.location.origin
+    if(origin.includes("file"))
+    {
+      origin = "http://127.0.0.1:4200"
+    }
+    let head = document.getElementsByTagName('HEAD')[0];
+    let link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = origin + '/libs/learner.css';
+    head.appendChild(link);
+
     let parent = document.body;
     if(p)
     {

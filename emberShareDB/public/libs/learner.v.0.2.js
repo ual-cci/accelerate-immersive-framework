@@ -48,6 +48,12 @@ class Learner {
     }
     script.src = origin + '/libs/localforage.min.js';
     document.getElementsByTagName('head')[0].appendChild(script);
+    let head = document.getElementsByTagName('HEAD')[0];
+    let link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = origin + '/libs/learner.css';
+    head.appendChild(link);
   }
 
   addGUI(p) {
@@ -74,9 +80,10 @@ class Learner {
     cell = row.insertCell();
     const countDown = document.createElement('span')
     countDown.id = "countdown-span";
+    countDown.classList.add("learner-label");
     cell.appendChild(countDown);
 
-	   row = table.insertRow();
+	  row = table.insertRow();
     cell = row.insertCell();
     let trainBtn = document.createElement("BUTTON");
     trainBtn.id = "train-btn";
@@ -117,6 +124,7 @@ class Learner {
     cell = row.insertCell();
     let datalog = document.createElement('span')
     datalog.id = "datalog";
+    datalog.classList.add("learner-label");
     cell.appendChild(datalog);
 
     this.outputLabel = document.createElement("span");

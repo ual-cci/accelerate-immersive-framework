@@ -1,0 +1,32 @@
+
+.learner-label {
+  font-size: 12px;
+}
+
+span{
+  width:100%;
+  text-align:center;
+  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', Roboto, Arial, Sans-serif;
+  margin-top:30px;
+}
+
+button:hover {
+  color:black;
+}
+
+button {
+  background-color:#4D43EB;
+  border:none;
+  border-radius:3px;
+  height:25px;
+  color:white;
+  width:150px;
+  height:30px;
+}
+
+table {
+  background-color:#D8D8D8;
+  border-radius:10px;
+  margin:5px;
+  padding:5px;
+}

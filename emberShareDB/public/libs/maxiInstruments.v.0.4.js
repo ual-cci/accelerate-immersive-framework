@@ -230,6 +230,7 @@ class MaxiInstruments {
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
+    var head = document.getElementsByTagName('HEAD')[0];
     let nexusUI = document.createElement('script');
     nexusUI.type = 'text/javascript';
     nexusUI.async = true;
@@ -242,7 +243,12 @@ class MaxiInstruments {
       origin = "http://127.0.0.1:4200"
     }
     nexusUI.src = origin + '/libs/nexusUI.js';
-    document.getElementsByTagName('head')[0].appendChild(nexusUI);
+    head.appendChild(nexusUI);
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = origin + '/libs/maxiInstruments.css';
+    head.appendChild(link);
   }
 
   getSynthName() {
@@ -695,17 +701,20 @@ class MaxiSynth extends MaxiInstrument {
   addGUI(element) {
     const rowLength = 4;
     const table = document.createElement("TABLE");
+    table.classList.add("maxi-table")
     let row = table.insertRow();
     element.appendChild(table);
-    table.style.border = "1px solid black"
 
     const title = document.createElement('p');
     title.innerHTML = "MaxiSynth";
-    title.style.fontSize = "10pt";
-    title.style.margin = "3pt";
+    title.classList.add("title-label")
 
     const randomButton = document.createElement("BUTTON");
+    randomButton.classList.add("random-btn")
+    randomButton.classList.add("maxi-btn")
     randomButton.innerHTML = "Randomise"
+    randomButton.style.width = "70px";
+
     randomButton.onclick = ()=>{
       this.randomise();
     }
@@ -717,6 +726,8 @@ class MaxiSynth extends MaxiInstrument {
       option.text = osc;
       oscillatorSelector.appendChild(option);
     });
+    oscillatorSelector.classList.add("maxi-selector")
+
     oscillatorSelector.onchange = ()=> {
       const index = parseInt(oscillatorSelector.selectedIndex);
       this.onGUIChange(index, Object.keys(this.parameters).length - 1);
@@ -945,6 +956,8 @@ class MaxiSynth extends MaxiInstrument {
       option.text = preset.title;
       presetSelector.appendChild(option);
     });
+    presetSelector.classList.add("maxi-selector")
+    presetSelector.style["margin-left"] = "35px";
     presetSelector.onchange = ()=> {
       const index = parseInt(presetSelector.selectedIndex);
       if(index > 0)
@@ -973,7 +986,7 @@ class MaxiSynth extends MaxiInstrument {
     cell.colSpan = "2"
     cell.appendChild(presetSelector);
     cell = row.insertCell();
-    cell.appendChild(printParamsButton);
+    //cell.appendChild(printParamsButton);
 
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
@@ -986,7 +999,6 @@ class MaxiSynth extends MaxiInstrument {
         }
         cell = row.insertCell();
         cell.classList.add("cell_" + p);
-        cell.style.border = "1px solid black";
         let val = this.parameters[p].val;
         val = (val - this.parameters[p].translate) / this.parameters[p].scale;
         const slider = document.createElement('input');
@@ -1001,10 +1013,8 @@ class MaxiSynth extends MaxiInstrument {
         }
         cell.appendChild(slider);
         const label = document.createElement('p');
+        label.classList.add("param-label")
         label.innerHTML = p;
-        label.style.width = "100px";
-        label.style.fontSize = "8pt";
-        label.style.margin = "2px";
         cell.appendChild(label);
       }
 
@@ -1092,23 +1102,28 @@ class MaxiSampler extends MaxiInstrument {
   }
 
   addGUI(element) {
+    const table = document.createElement("TABLE");
+    table.classList.add("maxi-table")
+    element.appendChild(table);
+    let row;
     const rowLength = 4;
+    row = table.insertRow();
+    let cell = row.insertCell();
     const title = document.createElement('p');
     title.innerHTML = "MaxiSampler";
-    title.style.fontSize = "10pt";
-    title.style.margin = "3pt";
-    element.appendChild(title);
+    title.classList.add("title-label");
+    cell.appendChild(title);
+    cell = row.insertCell();
     const changeGroupButton = document.createElement("BUTTON");
     changeGroupButton.innerHTML = "View Samples 5-8";
+    changeGroupButton.classList.add("maxi-btn")
     changeGroupButton.id = "changeGroupButton";
     changeGroupButton.onclick = ()=>{
       this.toggleGroup();
     }
-    element.appendChild(changeGroupButton);
-    const table = document.createElement("TABLE");
-    element.appendChild(table);
-    let row;
-    table.style.border = "1px solid black"
+    cell.appendChild(changeGroupButton);
+
+
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
       let p = Object.keys(this.parameters)[i];
@@ -1116,9 +1131,8 @@ class MaxiSampler extends MaxiInstrument {
       {
         row = table.insertRow();
       }
-      const cell = row.insertCell();
+      cell = row.insertCell();
       cell.classList.add("cell_" + p);
-      cell.style.border = "1px solid black";
       let val = this.parameters[p].val;
       val = (val - this.parameters[p].translate) / this.parameters[p].scale;
       const slider = document.createElement('input');
@@ -1134,9 +1148,7 @@ class MaxiSampler extends MaxiInstrument {
       cell.appendChild(slider);
       const label = document.createElement('p');
       label.innerHTML = p;
-      label.style.width = "100px";
-      label.style.fontSize = "8pt";
-      label.style.margin = "2px";
+      label.classList.add("param-label");
       cell.appendChild(label);
     }
     this.loadParamValues();
