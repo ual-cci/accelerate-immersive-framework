@@ -63,11 +63,13 @@ class Learner {
       parent = p;
     }
     //parent.style.display = "none";
-
+    this.mainContainer = document.createElement('div');
+    this.mainContainer.id = "learner-container";
+    parent.appendChild(this.mainContainer)
     this.selectorContainer = document.createElement('div');
-    parent.appendChild(this.selectorContainer)
+    this.mainContainer.appendChild(this.selectorContainer)
    	const table = document.createElement("TABLE");
-    parent.appendChild(table)
+    this.mainContainer.appendChild(table)
     let row = table.insertRow();
     let cell = row.insertCell();
     let recBtn = document.createElement("BUTTON");
@@ -130,6 +132,7 @@ class Learner {
     this.outputLabel = document.createElement("span");
     this.outputLabel.innerHTML = "Select your outputs"
     this.outputLabel.style.display = "none";
+    this.outputLabel.classList.add("learner-label");
     this.selectorContainer.appendChild(this.outputLabel);
     this.randomiseBtn = document.createElement("BUTTON");
     this.randomiseBtn.onclick = ()=>{
@@ -203,11 +206,18 @@ class Learner {
       var selectList = document.createElement("select");
       this.randomiseBtn.style.display = "none";
       selectList.id = "dropdown";
+      var label = document.createElement("p");
+      label.innerHTML = "Class:"
+      label.id = "class-label"
       this.y.push(0);
       selectList.oninput = ()=> {
         this.y[0] = parseInt(selectList.selectedIndex);
-        this.onOutput(this.y)
+        if(this.onOutput !== undefined)
+        {
+          this.onOutput(this.y)
+        }
       }
+      container.appendChild(label);
       container.appendChild(selectList);
       for (let i = 0; i < n; i++)
       {

@@ -682,10 +682,11 @@ export default Controller.extend({
           code:""
         }
         const actions = [
-          this.get('documentService').updateDoc(doc.id, "newEval", toSend),
           this.get('documentService').updateDoc(doc.id, "source", source),
+          this.get('documentService').updateDoc(doc.id, "newEval", toSend)
         ];
-        Promise.all(actions).then(()=>resolve())
+        Promise.all(actions)
+        .then(()=>resolve())
         .catch((err)=>{
           this.get('cs').log("error updateSourceFromSession - updateDoc", err);
           reject(err);
