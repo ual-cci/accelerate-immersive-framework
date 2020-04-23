@@ -2029,3 +2029,27 @@ $footer-grey:#303030;
 .codeMirrorMarked {
   background-color: red;
 }
+
+.cursor-label {
+  background-color:blue;
+  opacity:0.7;
+  font-size:8px;
+  position:absolute;
+  text-overflow: ellipsis;
+  max-width: 50px;
+  height:10px;
+  overflow: hidden;
+  white-space:nowrap;
+}
+
+.cursor-line {
+  border-left-style:solid;
+  border-left-width:2px;
+  border-left-color:blue;
+}
+
+.cursor-container {
+  padding:0;
+  z-index: 100;
+  position:absolute;
+}

@@ -513,19 +513,18 @@ export default Controller.extend({
     console.log("cursorCoords",cursorCoords)
     const h = cursorCoords.bottom - cursorCoords.top;
     const container = document.createElement('span');
-    const label = document.createElement('span')
-    label.innerHTML = op.owner
-    label.style["background-color"] = "rgba(0,0,255,0.7)"
-    label.top = `${(h)}px`;
-    label.style["font-size"] = "8px"
-    const cursorElement = document.createElement('span');
-    cursorElement.style.borderLeftStyle = 'solid';
-    cursorElement.style.borderLeftWidth = '2px';
-    cursorElement.style.borderLeftColor = 'blue';
     container.style.height = `${(h)}px`;
-    container.style.padding = 0;
-    container.style.zIndex = 100;
-    container.appendChild(cursorElement);
+
+    container.classList.add("cursor-container");
+    const label = document.createElement('span')
+    label.classList.add("cursor-label");
+    label.style.top = `${(h)}px`;
+    label.innerHTML = op.owner;
+
+    const line = document.createElement('span');
+    line.classList.add("cursor-line");
+
+    container.appendChild(line);
     container.appendChild(label);
     const updated = this.get('cursors')
     updated[op.owner]= cm.setBookmark(cursorPos, { widget: container });
@@ -559,6 +558,10 @@ export default Controller.extend({
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           this.get('cs').log("executing", ops[0].oi.code)
+          if(!isEmpty(ops[0].oi.pos))
+          {
+            this.flashSelectedText(ops[0].oi.pos)
+          }
           this.set('surpress', true);
           document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
           this.set('surpress', false);
@@ -704,7 +707,6 @@ export default Controller.extend({
       if(!isEmpty(doc) && this.get('droppedOps').length == 0)
       {
         const source = this.get('editor').getValue();
-        this.get('cs').log(this.get('editor'))
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
         //WE ALSO SEND A EMPTY STRING AS NEWEVAL TO CLEAR IT OUT (BUG WITH PATCHING?)
@@ -743,14 +745,15 @@ export default Controller.extend({
           this.get('cs').clear();
           if(selection)
           {
-            this.flashSelectedText();
+            const pos = this.flashSelectedText();
+            this.get('cs').log("NEW EVAL", pos)
             document.getElementById("output-iframe").contentWindow.eval(combined);
             const toSend = {
               uuid:this.get('sessionAccount').getSessionID(),
               timestamp:new Date(),
-              code:combined
+              code:combined,
+              pos:pos
             }
-            this.get('cs').log("NEW EVAL")
             this.get('documentService').updateDoc(model.id, 'newEval', toSend)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
@@ -809,22 +812,31 @@ export default Controller.extend({
     //     autoInput.style["border-style"] = "none"
     // }, 250);
   },
-  flashSelectedText: function() {
+  flashSelectedText: function(pos) {
     const editor = this.get('editor');
     let start = editor.getCursor(true);
     let end = editor.getCursor(false);
-    if(start.line == end.line && start.ch == end.ch)
+    if(isEmpty(pos))
     {
-      this.get('cs').log("flash, single line");
-      start = {line:start.line, ch:0};
-      end = {line:end.line, ch:editor.getLine(end.line).length};
-      this.get('cs').log("flash", start, end);
+      if(start.line == end.line && start.ch == end.ch)
+      {
+        this.get('cs').log("flash, single line");
+        start = {line:start.line, ch:0};
+        end = {line:end.line, ch:editor.getLine(end.line).length};
+        this.get('cs').log("flash", start, end);
+      }
+    }
+    else
+    {
+      start = pos.start;
+      end = pos.end;
     }
     this.get('cs').log("flash", start, end);
     const marker = editor.getDoc().markText(start, end, {"className":"codeMirrorMarked"});
     setTimeout(()=> {
       marker.clear();
     }, 500);
+    return {start:start, end:end}
   },
   onCodingFinished: function() {
     if(this.get('autoRender'))
