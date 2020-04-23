@@ -11,6 +11,7 @@ export default Service.extend({
   store:inject('store'),
   cs:inject('console'),
   assetService:inject('assets'),
+  sessionAccount:inject('session-account'),
   library:inject(),
   script:"",
   savedVals:null,
@@ -532,6 +533,8 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.text.join('\n');
     op['si'] =  str;
+    op.owner = this.get('sessionAccount').currentUserName;
+    op.cursor = editor.doc.getCursor();
     //this.get('cs').log("delta op", op);
     return op
   },
@@ -541,6 +544,8 @@ export default Service.extend({
     op.p = ['source', start];
     const str = delta.removed.join('\n');
     op['sd'] =  str;
+    op.owner = this.get('sessionAccount').currentUserName;
+    op.cursor = editor.doc.getCursor();
     //this.get('cs').log("delta op", op);
     return op
   },

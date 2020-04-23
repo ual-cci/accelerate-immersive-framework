@@ -159,8 +159,11 @@ export default Component.extend({
       this.onChange(cm, change);
       clearTimeout(waiting);
       waiting = setTimeout(updateHints, 500);
+      //this.newCursor();
+
     })
     this.set('codemirror', editor);
+
     this.onReady(editor);
-  }
+  },
 });

@@ -103,6 +103,7 @@ export default Controller.extend({
     this._super();
     this.set('tabs',[]);
     this.set('droppedOps',[]);
+    this.set('cursors', {});
     this.set('children',[]);
     this.set('recordingOptions', {isRecording:false})
     this.set('scrollPositions',{});
@@ -500,6 +501,36 @@ export default Controller.extend({
       }
     })
   },
+  newCursor(op) {
+    const prev = this.get('cursors')[op.owner];
+    if(!isEmpty(prev))
+    {
+      prev.clear();
+    }
+    const cursorPos = op.cursor;
+    const cm = this.get('editor');
+    const cursorCoords = cm.cursorCoords(cursorPos);
+    console.log("cursorCoords",cursorCoords)
+    const h = cursorCoords.bottom - cursorCoords.top;
+    const container = document.createElement('span');
+    const label = document.createElement('span')
+    label.innerHTML = op.owner
+    label.style["background-color"] = "rgba(0,0,255,0.7)"
+    label.top = `${(h)}px`;
+    label.style["font-size"] = "8px"
+    const cursorElement = document.createElement('span');
+    cursorElement.style.borderLeftStyle = 'solid';
+    cursorElement.style.borderLeftWidth = '2px';
+    cursorElement.style.borderLeftColor = 'blue';
+    container.style.height = `${(h)}px`;
+    container.style.padding = 0;
+    container.style.zIndex = 100;
+    container.appendChild(cursorElement);
+    container.appendChild(label);
+    const updated = this.get('cursors')
+    updated[op.owner]= cm.setBookmark(cursorPos, { widget: container });
+    this.set('cursors', updated);
+  },
   didReceiveOp: function (ops,source) {
     const embed = this.get('isEmbedded');
     const editor = this.get('editor');
@@ -513,6 +544,7 @@ export default Controller.extend({
         this.get('opsPlayer').set('opsToApply', ops)
         this.get('opsPlayer').applyTransform(editor)
         this.set('surpress', false);
+        this.newCursor(ops[0]);
       }
       else if (ops[0].p[0] == "assets")
       {

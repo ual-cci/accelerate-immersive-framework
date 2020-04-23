@@ -1,5 +1,5 @@
-//import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
-import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
+import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
+//import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
 
 class ParameterWriter {
  // From a RingBuffer, build an object that can enqueue a parameter change in
