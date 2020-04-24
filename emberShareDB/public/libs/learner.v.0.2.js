@@ -103,6 +103,7 @@ class Learner {
       this.run();
     };
     runBtn.innerHTML = "Run";
+    runBtn.disabled = true;
     cell.appendChild(runBtn);
 
     row = table.insertRow();
@@ -241,8 +242,12 @@ class Learner {
   updateButtons() {
     const run = document.getElementById("run-btn");
     const rec = document.getElementById("rec-btn");
+    const train = document.getElementById("train-btn");
     run.innerHTML = this.running ? "Stop" : "Run"
     rec.innerHTML = this.recording ? "Stop" : "Record"
+    rec.disabled = this.running;
+    run.disabled = this.recording;
+    train.disabled = this.recording || this.running;
     if(this.onUpdateState)
     {
       this.onUpdateState();
@@ -280,15 +285,15 @@ class Learner {
 
   updateOutput(index, val)
   {
-      if(this.gui)
-      {
-        this.outputGUI[index].value = val;
-      }
-      this.y[index] = val;
-      if(this.onOutput)
-      {
-		      this.onOutput(this.y)
-      }
+    if(this.gui)
+    {
+      this.outputGUI[index].value = val;
+    }
+    this.y[index] = val;
+    if(this.onOutput)
+    {
+	    this.onOutput(this.y)
+    }
   }
 
   setWorker(url) {
@@ -363,7 +368,7 @@ class Learner {
       }
       else if(this.recLimit > 0)
       {
-		this.limitRecord();
+		    this.limitRecord();
       }
       this.updateButtons();
       const run = document.getElementById("run-btn");

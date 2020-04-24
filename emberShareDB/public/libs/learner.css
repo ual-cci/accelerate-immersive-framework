@@ -49,6 +49,13 @@ button {
   margin-bottom: 4px;
 }
 
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
+
 table {
   background-color:#D8D8D8;
   border-radius:10px;

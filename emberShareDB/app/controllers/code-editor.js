@@ -70,7 +70,7 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
-  trigPollRate:200,
+  trigPollRate:400,
   trigPoll:true,
 
   showHUD:true,
