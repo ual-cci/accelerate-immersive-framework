@@ -155,7 +155,32 @@ External Outputs
 </ul>
 </p>
 <p class = "tutorial-heading">
-6. Now be free and make amazing projects!
+6. Downloading and Loading Datasets
+</p>
+<p class = "tutorial-text">
+You may wish to save your dataset to your local machine, or upload your current dataset to our servers, so that anyone who runs your project can train a model using your dataset. Luckily, you can do that.
+</p>
+<p class = "tutorial-text">
+First you have to download the data. Run the code below and you will get a .json file with all your lovely data.
+</p>
+<pre>
+<code>
+  learner.downloadTrainingData();
+</code>
+</pre>
+<p class = "tutorial-text">
+You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data
+</p>
+<pre>
+<code>
+  const learner = new Learner();
+  learner.onLoad = ()=>{
+    learner.loadTrainingData("myfile.json")
+  }
+</code>
+</pre>
+<p class = "tutorial-heading">
+7. Now be free and make amazing projects!
 </p>
 <p class = "tutorial-text">You can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
 </p>
