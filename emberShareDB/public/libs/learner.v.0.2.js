@@ -40,6 +40,9 @@ class Learner {
         }
         this.updateRows();
       });
+      if(this.onLoad !== undefined) {
+        this.onLoad();
+      }
     };
     let origin = document.location.origin
     if(origin.includes("file"))
@@ -405,7 +408,7 @@ class Learner {
 
   clear() {
     this.store.setItem(this.DATASET_KEY,[]).then(()=> {
-		this.updateRows();
+		    this.updateRows();
     });
   }
 
@@ -526,4 +529,36 @@ class Learner {
 	}
 	return worker;
   }
+
+
+  loadTrainingData(url) {
+    this.clear();
+    fetch(url)
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      this.temp = data;
+      this.save();
+    });
+    //set as temp
+    //save
+  }
+
+  downloadTrainingData() {
+    learner.trainingData().then((res)=>{
+      learner.downloadObjectAsJson(res, "myLearnerData")
+    });
+  }
+
+  downloadObjectAsJson(exportObj, exportName){
+   var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+   var downloadAnchorNode = document.createElement('a');
+   downloadAnchorNode.setAttribute("href",     dataStr);
+   downloadAnchorNode.setAttribute("download", exportName + ".json");
+   document.body.appendChild(downloadAnchorNode); // required for firefox
+   downloadAnchorNode.click();
+   downloadAnchorNode.remove();
+ }
+
 }

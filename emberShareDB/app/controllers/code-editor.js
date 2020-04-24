@@ -107,6 +107,7 @@ export default Controller.extend({
     this.set('children',[]);
     this.set('recordingOptions', {isRecording:false})
     this.set('scrollPositions',{});
+    this.hijackConsoleOutput();
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {
