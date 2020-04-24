@@ -1,12 +1,12 @@
 let recorderLib = document.createElement('script');
 recorderLib.type = 'text/javascript';
 recorderLib.async = true;
-let btn;
+let btn, label;
 recorderLib.onload = function(){
   try {
     onRecordLoad()
   } catch (err) {
-    console.log(err)
+    setError(err);
   }
 };
 let origin = document.location.origin
@@ -17,30 +17,42 @@ if(origin.includes("file"))
 recorderLib.src = origin + '/libs/recorder.js';
 document.getElementsByTagName('head')[0].appendChild(recorderLib);
 
+const setError = (err)=> {
+  //label.innerHTML = err;
+}
+
 const initRecorder = (node)=> {
   let recorder;
   console.log("recorderLib onload!");
   const container = document.createElement("div")
-  container.style.width = "97%";
-  container.style.height = "30px"
-  container.style["border"] = "5px solid black";
-  container.style["padding-top"]= "10px"
-  container.style["padding-bottom"]= "10px"
+  container.style.width = "72px";
+  container.style.height = "72px"
+  container.style["border-radius"] = "36px"
+  container.style["border"] = "5px solid red";
+  container.style.margin = "5px";
   btn = document.createElement("BUTTON")
-  btn.style.width = "100px";
-  btn.style.height = "30px";
-  btn.style.margin = "auto"
-  btn.style.display = "block";
+  btn.style.width = "64px";
+  btn.style.height = "64px";
   btn.style.top = "10px"
+  btn.style.color = "white";
+  btn.style["margin-left"] = btn.style["margin-right"] = "auto";
+  btn.style["margin-top"] = "4px";
+  btn.style.display = "block";
   btn.innerHTML = "Record";
+  btn.style["background-color"] = "red";
+  btn.style["border-radius"] = "32px";
   const element = document.body;
   container.appendChild(btn);
+
+  label = document.createElement('span');
+
+  container.appendChild(label);
   element.insertBefore(container, element.firstChild);
   //console.log(node)
   try {
     recorder = new Recorder(node);
   } catch(err) {
-    console.log(err);
+    setError(err);
     window.node = node;
   }
   let attemptedNode = node;
@@ -50,11 +62,11 @@ const initRecorder = (node)=> {
       try {
         recorder = new Recorder(attemptedNode);
       } catch(err) {
-        console.log(err);
+        setError(err);
         try {
           recorder = new Recorder(window.node);
         } catch(err) {
-          console.log(err);
+          setError(err);
         }
       }
     }

@@ -24,18 +24,18 @@
   margin:3px;
 }
 
-span{
+span {
   width:100%;
   text-align:center;
   font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', Roboto, Arial, Sans-serif;
   margin-top:30px;
 }
 
-button:hover {
+.learner-btn:hover {
   color:black;
 }
 
-button {
+.learner-btn {
   background-color:#4D43EB;
   border:none;
   border-radius:3px;
@@ -49,8 +49,8 @@ button {
   margin-bottom: 4px;
 }
 
-button:disabled,
-button[disabled]{
+.learner-btn:disabled,
+.learner-btn[disabled]{
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #666666;

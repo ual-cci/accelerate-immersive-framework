@@ -73,6 +73,7 @@ class Learner {
     let row = table.insertRow();
     let cell = row.insertCell();
     let recBtn = document.createElement("BUTTON");
+    recBtn.classList.add("learner-btn")
     recBtn.id = "rec-btn";
     recBtn.onclick = ()=>{
       this.record();
@@ -89,6 +90,7 @@ class Learner {
     cell = row.insertCell();
     let trainBtn = document.createElement("BUTTON");
     trainBtn.id = "train-btn";
+    trainBtn.classList.add("learner-btn")
     trainBtn.onclick = ()=>{
       this.train();
     };
@@ -103,12 +105,14 @@ class Learner {
       this.run();
     };
     runBtn.innerHTML = "Run";
+    runBtn.classList.add("learner-btn")
     runBtn.disabled = true;
     cell.appendChild(runBtn);
 
     row = table.insertRow();
     cell = row.insertCell();
     let deleteLastBtn = document.createElement("BUTTON");
+    deleteLastBtn.classList.add("learner-btn")
     deleteLastBtn.onclick = ()=>{
       this.deleteLastRound();
     };
@@ -117,6 +121,7 @@ class Learner {
 
     cell = row.insertCell();
     let deleteBtn = document.createElement("BUTTON");
+    deleteBtn.classList.add("learner-btn");
     deleteBtn.onclick = ()=>{
       this.clear();
     };
@@ -136,6 +141,7 @@ class Learner {
     this.outputLabel.classList.add("learner-label");
     this.selectorContainer.appendChild(this.outputLabel);
     this.randomiseBtn = document.createElement("BUTTON");
+    this.randomiseBtn.classList.add("learner-btn")
     this.randomiseBtn.onclick = ()=>{
       this.randomise();
     };
