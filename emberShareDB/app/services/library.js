@@ -15,6 +15,7 @@ export default Service.extend({
     {title:"RapidLib", id:"rapidlib", url:"rapidLib.js"},
     {title:"Learner.js", id:"learner", url:"learner.js"},
     {title:"Maxi Instrument", id:"maxiinstrument", url:"maxiInstruments.js"},
+    {title:"MIMIC Samples", id:"mimicSamples", url:"mimicSamples.js"},
   ]}),
   url(id) {
     let url = ""

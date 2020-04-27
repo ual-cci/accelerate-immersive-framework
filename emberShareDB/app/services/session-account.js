@@ -4,7 +4,6 @@ import { isEmpty } from '@ember/utils';
 import config from  '../config/environment';
 import { bind } from '@ember/runloop';
 
-
 export default Service.extend({
   session: inject('session'),
   uuid: inject(),
