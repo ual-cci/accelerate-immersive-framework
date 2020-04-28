@@ -47,6 +47,7 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       const username = this.get('currentUserName');
       const token = this.get('bearerToken');
+      this.get('cs').log("getUserFromName")
       $.ajax({
           type: "GET",
           url: config.serverHost + "/accounts",
@@ -57,13 +58,14 @@ export default Service.extend({
           this.set("currentUserId", res.data.attr.accountId);
           resolve(res);
         })).catch(bind((err) => {
+          this.get('cs').log(err)
           reject(err);
         }));
     });
   },
   loadCurrentUser() {
     return new RSVP.Promise((resolve, reject) => {
-      //this.get('cs').log(this.get('session.data'))
+      this.get('cs').log(this.get('session.data'))
       const currentUserName = this.get('session.data.authenticated.user_id');
       this.set('bearerToken', this.get('session.data.authenticated.access_token'));
       if (!isEmpty(currentUserName)) {

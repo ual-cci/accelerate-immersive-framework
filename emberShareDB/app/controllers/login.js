@@ -41,8 +41,8 @@ export default Controller.extend({
         this.get('cs').log("authenticated", response);
         this.set('loginErrorMessage', "authenticated");
       }).catch((err) => {
-        console.log(err);
-        this.set('loginErrorMessage', err.error_description);
+        console.log("authentication failed", err);
+        this.set('loginErrorMessage', "authentication failed");
       });
     },
     createNewUser() {
