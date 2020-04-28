@@ -42,6 +42,9 @@ export default Controller.extend({
   isRecording:computed('model', function() {
     return this.get('model').id == "recording"
   }),
+  isColab:computed('model', function() {
+    return this.get('model').id == "colab"
+  }),
   actions: {
     onClick(guide) {
       this.transitionToRoute('guides', guide.id)

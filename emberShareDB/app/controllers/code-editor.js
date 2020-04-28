@@ -322,12 +322,12 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
-          this.set('trigInterval', setInterval(()=> {
-            if(this.get("model.isCollaborative") && this.get("trigPoll"))
-            {
-              this.submitOp({p:["trig"], oi:true})
-            }
-          }, this.get("trigPollRate")));
+          if(this.get("model.isCollaborative") && this.get("trigPoll"))
+          {
+            this.set('trigInterval', setInterval(()=> {
+                this.submitOp({p:["trig"], oi:true})
+            }, this.get("trigPollRate")));
+          }
         });
       });
     });
@@ -503,15 +503,22 @@ export default Controller.extend({
     })
   },
   newCursor(op) {
-    const prev = this.get('cursors')[op.owner];
+    const toUpdate = this.get('cursors')
+    const prev = toUpdate[op.owner];
+    const colours =["#ED3D05","#FFCE00","#0ED779","#F79994","#4D42EB"];
     if(!isEmpty(prev))
     {
-      prev.clear();
+      prev.marker.clear();
     }
+    else
+    {
+      toUpdate[op.owner] = {colour:colours[Math.floor(Math.random()*5)]}
+      this.get('cs').log(toUpdate[op.owner].colour)
+    }
+
     const cursorPos = op.cursor;
     const cm = this.get('editor');
     const cursorCoords = cm.cursorCoords(cursorPos);
-    console.log("cursorCoords",cursorCoords)
     const h = cursorCoords.bottom - cursorCoords.top;
     const container = document.createElement('span');
     container.style.height = `${(h)}px`;
@@ -519,17 +526,19 @@ export default Controller.extend({
     container.classList.add("cursor-container");
     const label = document.createElement('span')
     label.classList.add("cursor-label");
+    label.style.backgroundColor = toUpdate[op.owner].colour;
+
     label.style.top = `${(h)}px`;
     label.innerHTML = op.owner;
 
     const line = document.createElement('span');
     line.classList.add("cursor-line");
-
+    line.style.borderLeftColor = toUpdate[op.owner].colour;
     container.appendChild(line);
     container.appendChild(label);
-    const updated = this.get('cursors')
-    updated[op.owner]= cm.setBookmark(cursorPos, { widget: container });
-    this.set('cursors', updated);
+
+    toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container });
+    this.set('cursors', toUpdate);
   },
   didReceiveOp: function (ops,source) {
     const embed = this.get('isEmbedded');
@@ -940,7 +949,6 @@ export default Controller.extend({
       {
         for(let i = 1; i < e.data.length; i++)
         {
-          //console.log(e.data[i], JSON.parse(e.data[i]))
           self.get('cs').logToScreen(e.data[i]);
         }
       }
@@ -1515,14 +1523,14 @@ export default Controller.extend({
             this.get('savedVals')
           ).then((combined) => {
             this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
-            console.log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
+            this.get('cs').log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
             this.toggleProperty('showRecordingPanel');
           });
         });
       });
     },
     onRecordingOptionsChanged(options) {
-      console.log("rec options", options)
+      this.get('cs').log("rec options", options)
       this.set('recordingOptions', options)
     },
     toggleShowAssets() {

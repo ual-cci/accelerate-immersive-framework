@@ -19,6 +19,7 @@ export default Service.extend({
       ]},
       {title:"The Platform",guides:[
         {id:"recording",name:"In-Built Recording in MIMIC", desc:"How to record yourself in the MIMIC platform (and WTF are nodes?).",author:"Louis McCallum"},
+        {id:"colab",name:"Collaborative Coding on MIMIC", desc:"MIMIC allows for both collaborative and remote coding (great for teaching!). Learn how",author:"Louis McCallum"},
       ]},
   ]})
 });

@@ -1,4 +1,7 @@
 <div id = "main-login-container" class = "limited-width-container">
+  {{#if loginErrorMessage}}
+    <p class = "login-message-label">{{loginErrorMessage}}</p>
+  {{/if}}
 <form {{action 'authenticate' on='submit'}}>
   <ui class="list-group">
     <li class="list-group-item">
@@ -11,10 +14,11 @@
     </li>
   </ui>
   <p><button class = "login-btn" type="submit">Login</button></p>
-  {{#if loginErrorMessage}}
-    <p>{{loginErrorMessage}}</p>
-  {{/if}}
+
 </form>
+{{#if registerMessage}}
+  <p class = "login-message-label">{{registerMessage}}</p>
+{{/if}}
 <form {{action 'createNewUser' on='submit'}}>
   <ui class="list-group">
     <li class="list-group-item">
@@ -36,9 +40,7 @@
     </li>
   </ui>
     <p><button class = "login-btn" type="submit">Create New User</button></p>
-  {{#if registerMessage}}
-    <p>{{registerMessage}}</p>
-  {{/if}}
+
 </form>
 <form {{action 'resetPassword' on='submit'}}>
   <ui class="list-group">
