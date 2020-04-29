@@ -73,7 +73,8 @@ export default Controller.extend({
   iframeTitle:"title",
   trigPollRate:400,
   trigPoll:true,
-
+  trigFlip:0,
+  
   showHUD:true,
   hudMessage:"Loading...",
 
@@ -521,10 +522,11 @@ export default Controller.extend({
     const cm = this.get('editor');
     const cursorCoords = cm.cursorCoords(cursorPos);
     const h = cursorCoords.bottom - cursorCoords.top;
+
     const container = document.createElement('span');
     container.style.height = `${(h)}px`;
-
     container.classList.add("cursor-container");
+
     const label = document.createElement('span')
     label.classList.add("cursor-label");
     label.style.backgroundColor = toUpdate[op.owner].colour;
@@ -535,6 +537,7 @@ export default Controller.extend({
     const line = document.createElement('span');
     line.classList.add("cursor-line");
     line.style.borderLeftColor = toUpdate[op.owner].colour;
+
     container.appendChild(line);
     container.appendChild(label);
 
@@ -546,19 +549,19 @@ export default Controller.extend({
     const editor = this.get('editor');
     if(!embed && ops.length > 0 && this.get('model.isCollaborative'))
     {
-      if(!source && ops[0].p[0] == "source")
+      if(!source && ops[0].p[0] === "source")
       {
         this.get('cs').log("did receive op", ops, source)
+
         this.set('surpress', true);
-        //this.get('cs').log("applying remote op")
         this.get('opsPlayer').set('opsToApply', ops)
         let prevHistory = editor.doc.getHistory();
-        //this.get('cs').log("before history", prevHistory)
         this.get('opsPlayer').applyTransform(editor)
         let afterHistory = editor.doc.getHistory();
+        //WE REMOVE ANY NEW ITEMS FROM THE UNDO HISTORY AS THEY DID NOT
+        //COME FROM THE LOCAL EDITOR
         afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
         editor.doc.setHistory(afterHistory);
-        //this.get('cs').log("after history", editor.doc.getHistory())
         this.set('surpress', false);
         this.newCursor(ops[0]);
       }
@@ -570,10 +573,12 @@ export default Controller.extend({
         // this.get('cs').log("didReceiveOp", "preloadAssets")
         // this.preloadAssets();
       }
-      else if (!source && ops[0].p[0] == "newEval")
+      else if (!source && ops[0].p[0] === "newEval")
       {
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
+          this.get('cs').log("did receive op", ops, source)
+
           this.get('cs').log("executing", ops[0].oi.code)
           if(!isEmpty(ops[0].oi.pos))
           {
@@ -622,12 +627,12 @@ export default Controller.extend({
         {
           sharedDBDoc.submitOp(op, (err) => {
             //this.get('cs').log("callback", err)
-            if(err)
+            if(!isEmpty(err) && op.p[0] !== "trig")
             {
               droppedOps.push(op);
               this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
               this.set('showConnectionWarning', true);
-              this.get('cs').log("error submitting op (ws)")
+              this.get('cs').log("error submitting op (ws)", op)
               reject(err);
               return;
             }
@@ -640,19 +645,27 @@ export default Controller.extend({
         }
         catch (err)
         {
-          droppedOps.push(op);
-          if(isEmpty(this.get('model.parent')))
+          if(op.p[0] !== "trig")
           {
-            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
+            droppedOps.push(op);
+            if(isEmpty(this.get('model.parent')))
+            {
+              this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
+            }
+            else
+            {
+              this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
+            }
+
+            this.set('showConnectionWarning', true);
+
+            this.get('cs').log("error submitting op (ws)",err)
+            reject(err);
           }
           else
           {
-            this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
+            resolve()
           }
-
-          this.set('showConnectionWarning', true);
-          this.get('cs').log("error submitting op (ws)",err)
-          reject(err);
         }
       }
       else
@@ -729,7 +742,7 @@ export default Controller.extend({
         //WE ALSO SEND A EMPTY STRING AS NEWEVAL TO CLEAR IT OUT (BUG WITH PATCHING?)
         const toSend = {
           uuid:this.get('sessionAccount').getSessionID(),
-          timestamp:new Date(),
+          flip:this.get("trigFlip"),
           code:""
         }
         const actions = [
@@ -767,10 +780,11 @@ export default Controller.extend({
             document.getElementById("output-iframe").contentWindow.eval(combined);
             const toSend = {
               uuid:this.get('sessionAccount').getSessionID(),
-              timestamp:new Date(),
+              flip:this.get('trigFlip'),
               code:combined,
               pos:pos
             }
+            this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
             this.get('documentService').updateDoc(model.id, 'newEval', toSend)
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);

@@ -27,10 +27,22 @@ var initDocAPI = function(server, app, db, collection, uri)
   mongoUri = uri;
   startAssetAPI(server, app);
   shareDBMongo = require('sharedb-mongo')(mongoUri);
+  const redis = require("redis");
+  const client = redis.createClient(
+  '6379',
+  '34.65.153.182',
+  {
+    'auth_pass': 'KLtfv4Gufdk2',
+    'return_buffers': true
+  }
+).on('error', (err) => console.error('ERR:REDIS:', err));
+
+  var redisPubsub = require('sharedb-redis-pubsub')({client: client});
   shareDB = new ShareDB({
     db:shareDBMongo,
     disableDocAction: true,
-    disableSpaceDelimitedActions: true
+    disableSpaceDelimitedActions: true,
+    pubsub: redisPubsub
   });
   shareDBConnection = shareDB.connect();
 
