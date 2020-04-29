@@ -21,11 +21,52 @@ export default Component.extend({
       matchBrackets: true,
       autoCloseTags: true,
       autocomplete:true,
+      shiftDown:false,
+      evalDown:false,
       gutters: ["CodeMirror-lint-markers"],
       //hintOptions:{hint:this.get("suggestCompletions")}
     });
+    editor.on("keydown", (cm, event)=> {
+      this.get('cs').log("KEY", event.keyCode);
+      //17 = ctrl, 16 = shift, apple cmd = 224 | 91 | 93,
+      if (!cm.state.completionActive
+        && !cm.options.readOnly)
+      {
+        if(event.keyCode == 16)
+        {
+          this.set('shiftDown', true)
+        }
+        if(event.keyCode == 17 ||
+          event.keyCode == 224 ||
+          event.keyCode == 91 ||
+          event.keyCode == 93)
+        {
+          this.set('evalDown', true)
+        }
+        if(this.get('evalDown') && this.get('shiftDown'))
+        {
+          this.onReevaluate();
+        }
+      }
+    });
     editor.on("keyup", (cm, event) => {
         //console.log("KEY", event.keyCode);
+        if (!cm.state.completionActive
+          && !cm.options.readOnly)
+        {
+          if(event.keyCode == 16)
+          {
+            this.set('shiftDown', false)
+          }
+          if(event.keyCode == 17 ||
+            event.keyCode == 224 ||
+            event.keyCode == 91 ||
+            event.keyCode == 93)
+          {
+            this.set('evalDown', false)
+          }
+        }
+
         if (!cm.state.completionActive
           && !cm.options.readOnly
           && event.keyCode > 31
@@ -68,9 +109,14 @@ export default Component.extend({
         let elements = document.getElementsByClassName("CodeMirror");
         elements[0].style.fontSize = this.get("fontSize")+"pt";
       },
-      "Shift-Enter": (cm)=>  {
-        this.onReevaluate();
-      },
+      // "Shift-Cmd": (cm)=>  {
+      //   this.get('cs').log("shift-cmd")
+      //   this.onReevaluate();
+      // },
+      // "Shift-Ctrl": (cm)=>  {
+      //   this.get('cs').log("shift-Ctrl")
+      //   this.onReevaluate();
+      // },
       "Cmd-/": (cm)=>  {
         cm.toggleComment();
         console.log("COMMENT");
