@@ -72,6 +72,8 @@ export default Controller.extend({
   isMobile:false,
   iframeTitle:"title",
   trigPollRate:400,
+  //This turns on the low rate poll we used before for multiple instances
+  //Its abit hacky and isn't necessary whilst we're using Redis
   trigPoll:false,
   trigFlip:0,
 
@@ -745,6 +747,7 @@ export default Controller.extend({
           flip:this.get("trigFlip"),
           code:""
         }
+        this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
         const actions = [
           this.get('documentService').updateDoc(doc.id, "source", source),
           this.get('documentService').updateDoc(doc.id, "newEval", toSend)
