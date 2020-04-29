@@ -72,9 +72,9 @@ export default Controller.extend({
   isMobile:false,
   iframeTitle:"title",
   trigPollRate:400,
-  trigPoll:true,
+  trigPoll:false,
   trigFlip:0,
-  
+
   showHUD:true,
   hudMessage:"Loading...",
 

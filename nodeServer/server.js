@@ -100,7 +100,11 @@ function startServer()
   const PORT = process.env.PORT || config.serverPort;
   server.listen(PORT);
   userAPI.initUserAPI(app, mongoUserUri);
-  docAPI.initDocAPI(server, app, contentDBName, contentCollectionName, mongoContentUri);
+  docAPI.initDocAPI(
+    server, app,
+    contentDBName, contentCollectionName, mongoContentUri,
+    config.redis_port, config.redis_ip, config.redis_key
+  );
   console.log('server set up');
 }
 

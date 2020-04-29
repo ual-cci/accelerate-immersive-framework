@@ -19,7 +19,11 @@ const http = require("http")
 let documentMongo;
 const MAX_FILES_PER_DOC = 100000000;
 
-var initDocAPI = function(server, app, db, collection, uri)
+var initDocAPI = function(
+  server, app,
+  db, collection, uri,
+  redis_port, redis_ip, redis_key
+)
 {
   contentDBName = db;
   contentCollectionName = collection;
@@ -29,13 +33,10 @@ var initDocAPI = function(server, app, db, collection, uri)
   shareDBMongo = require('sharedb-mongo')(mongoUri);
   const redis = require("redis");
   const client = redis.createClient(
-  '6379',
-  '34.65.153.182',
-  {
-    'auth_pass': 'KLtfv4Gufdk2',
+    redis_port,redis_ip, {
+    'auth_pass': redis_key,
     'return_buffers': true
-  }
-).on('error', (err) => console.error('ERR:REDIS:', err));
+  }).on('error', (err) => console.error('ERR:REDIS:', err));
 
   var redisPubsub = require('sharedb-redis-pubsub')({client: client});
   shareDB = new ShareDB({
