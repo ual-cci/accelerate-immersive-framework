@@ -9,6 +9,8 @@ export default Component.extend({
   autocomplete: inject('autocomplete'),
   fontSize:14,
   cs: inject('console'),
+  shiftDown:false,
+  evalDown:false,
   didInsertElement() {
     this._super(...arguments);
     const myTextArea = this.element.querySelector("#code-mirror-container");
@@ -21,10 +23,8 @@ export default Component.extend({
       matchBrackets: true,
       autoCloseTags: true,
       autocomplete:true,
-      shiftDown:false,
-      evalDown:false,
-      gutters: ["CodeMirror-lint-markers"],
-      //hintOptions:{hint:this.get("suggestCompletions")}
+      foldGutter: true,
+      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
     editor.on("keydown", (cm, event)=> {
       this.get('cs').log("KEY", event.keyCode);

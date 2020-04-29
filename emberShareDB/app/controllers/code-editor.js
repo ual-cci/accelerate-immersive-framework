@@ -763,7 +763,7 @@ export default Controller.extend({
           if(selection)
           {
             const pos = this.flashSelectedText();
-            this.get('cs').log("NEW EVAL", pos)
+            this.get('cs').log("NEW EVAL", combined)
             document.getElementById("output-iframe").contentWindow.eval(combined);
             const toSend = {
               uuid:this.get('sessionAccount').getSessionID(),
