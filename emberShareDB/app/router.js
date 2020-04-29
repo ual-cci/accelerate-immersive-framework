@@ -9,7 +9,7 @@ const Router = EmberRouter.extend(GoogleAnalyticsRoute, {
 
 Router.map(function() {
   this.route('login');
-  this.route('code-editor', { path: '/code/:documentId' });
+  this.route('code-editor', { path: '/code/:document_id' });
   this.route('documents', { path: '/d/:search/:page/:sort' });
   this.route('password-reset');
   this.route('about');

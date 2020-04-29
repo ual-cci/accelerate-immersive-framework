@@ -10,6 +10,7 @@ export default Controller.extend({
   store: inject(),
   validateRegistration: function() {
     return new RSVP.Promise((resolve, reject) => {
+      this.clearFeedback();
       let { newUsername, newUserPassword, newUserPasswordAgain } =
       this.getProperties('newUsername', 'newUserEmail', 'newUserPassword', 'newUserPasswordAgain');
       if(!newUsername || !newUserPassword || !newUserPasswordAgain)
@@ -27,15 +28,19 @@ export default Controller.extend({
           reject("username must be one word (no spaces) and not contain !*'();:@&=+$,/?#[]")
         }
       });
-
       resolve();
     });
+  },
+  clearFeedback() {
+    this.set('loginErrorMessage', "");
+    this.set('registerMessage', "");
   },
   actions: {
     invalidateSession() {
       this.get('session').invalidate();
     },
     authenticate() {
+      this.clearFeedback();
       let { identification, password } = this.getProperties('identification', 'password');
       this.get('session').authenticate('authenticator:oauth2', identification, password).then((response) => {
         this.get('cs').log("authenticated", response);
@@ -46,6 +51,7 @@ export default Controller.extend({
       });
     },
     createNewUser() {
+      this.clearFeedback();
       let { newUsername, newUserEmail, newUserPassword, newUserPasswordAgain } =
       this.getProperties('newUsername', 'newUserEmail', 'newUserPassword', 'newUserPasswordAgain');
       this.get('cs').log(newUsername, newUserEmail, newUserPassword, newUserPasswordAgain);
@@ -69,8 +75,8 @@ export default Controller.extend({
         this.set('registerMessage', 'Error:' + err);
       });
     },
-    resetPassword()
-    {
+    resetPassword() {
+      this.clearFeedback();
       let username = this.get('resetUsername');
       this.get('passwordReset').requestReset(username).then(() => {
         this.get('cs').log("password reset");

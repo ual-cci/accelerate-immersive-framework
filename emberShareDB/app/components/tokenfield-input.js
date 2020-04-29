@@ -5,6 +5,7 @@ import { isNone, isEmpty } from '@ember/utils';
 import { schedule } from '@ember/runloop';
 import { A } from '@ember/array';
 import { notEmpty } from '@ember/object/computed';
+import jQuery from 'jquery';
 
 export const KEYCODE = {
     ENTER: 13,

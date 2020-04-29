@@ -8,6 +8,7 @@ import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
+import jQuery from 'jquery';
 
 export default Controller.extend({
   //Query Params
@@ -549,9 +550,15 @@ export default Controller.extend({
       {
         this.get('cs').log("did receive op", ops, source)
         this.set('surpress', true);
-        this.get('cs').log("applying remote op")
+        //this.get('cs').log("applying remote op")
         this.get('opsPlayer').set('opsToApply', ops)
+        let prevHistory = editor.doc.getHistory();
+        //this.get('cs').log("before history", prevHistory)
         this.get('opsPlayer').applyTransform(editor)
+        let afterHistory = editor.doc.getHistory();
+        afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
+        editor.doc.setHistory(afterHistory);
+        //this.get('cs').log("after history", editor.doc.getHistory())
         this.set('surpress', false);
         this.newCursor(ops[0]);
       }
@@ -869,11 +876,14 @@ export default Controller.extend({
   onSessionChange:function(delta) {
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
-    this.get('cs').log("on session change")
+    const editor = this.get('editor');
+    this.get('cs').log("on session change", delta)
+    this.get('cs').log("history", editor.doc.getHistory())
     //this.get('cs').log("session change, surpress", surpress);
-    if(!surpress && this.get('droppedOps').length == 0)
+    if(!surpress
+      && delta[0].origin !== "playback"
+      && this.get('droppedOps').length == 0)
     {
-      const editor = this.get('editor');
       this.incrementProperty('editCtr');
 
       if(!this.get('opsPlayer').atHead())

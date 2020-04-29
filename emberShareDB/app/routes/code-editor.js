@@ -11,7 +11,7 @@ export default Route.extend({
     }
   },
   model: function(params) {
-    return this.get('store').findRecord('document', params.documentId);
+    return this.get('store').findRecord('document', params.document_id);
   },
   setupController: function(controller, model){
     this._super(controller, model);
