@@ -169,14 +169,16 @@ First you have to download the data. Run the code below and you will get a .json
 </code>
 </pre>
 <p class = "tutorial-text">
-You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data
+You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data. See below how you pass the function to the Learner constructor, in which you load the data, then when that is done, train().
 </p>
 <pre>
 <code>
-  const learner = new Learner();
-  learner.onLoad = ()=>{
-    learner.loadTrainingData("myfile.json")
-  }
+const learner = new Learner(
+{onLoad:()=>{
+  learner.loadTrainingData("data.json").then(()=> {
+    learner.train()
+  })
+}})
 </code>
 </pre>
 <p class = "tutorial-heading">
