@@ -6,12 +6,29 @@ try {
   importScripts(url);
 }
 const rapidLib = RapidLib();
-const myClassification = new rapidLib.Classification();
+let myClassification = new rapidLib.Classification();
+function setOptions() {
+  if(myRegression !== undefined)
+  {
+    console.log("setting options")
+    if(options.k !== undefined)
+    {
+      myRegression.setK(options.k)
+    }
+  }
+}
 self.addEventListener('message', function(e) {
   if(e.data.action == "train") {
     //Respond to train msg
-    myClassification.train(e.data.data);
+    rapidLib = RapidLib();
+    myClassification = new rapidLib.Regression();
+    setOptions()
     self.postMessage("trainingend");
+  }
+  if(e.data.action == "options") {
+    //Respond to train msg
+    let options = e.data.data
+    setOptions()
   }
   if(e.data.action == "run") {
     //Respond to run msg

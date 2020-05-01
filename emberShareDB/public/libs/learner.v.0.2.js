@@ -1,11 +1,18 @@
 class Learner {
 
-  constructor(docId) {
+  constructor(options) {
+    let docId;
+    if(options !== undefined)
+    {
+      docId = options.docId
+    }
     if(docId === undefined)
     {
       docId = window.frameElement.name;
     }
+    this.USE_WORKER = true;
     this.outputGUI = [];
+    this.modelOptions = {};
     this.classifier = true;
     this.recordingRound = 0;
     this.recording = false;
@@ -40,8 +47,8 @@ class Learner {
         }
         this.updateRows();
       });
-      if(this.onLoad !== undefined) {
-        this.onLoad();
+      if(options.onLoad !== undefined) {
+        options.onLoad();
       }
     };
     let origin = document.location.origin
@@ -157,18 +164,36 @@ class Learner {
     this.updateRows();
   }
 
+  newRegression() {
+    this.rapidLib = RapidLib();
+    this.myModel = new this.rapidLib.Regression();
+  }
+
+  newClassifier() {
+    this.rapidLib = RapidLib();
+    this.myModel = new this.rapidLib.Classification();
+  }
+
   addRegression(
       n,
       gui = true
       )
    {
-     let origin = document.location.origin
-     if(origin.includes("file"))
-     {
-       origin = "http://127.0.0.1:4200"
-     }
-     const workerUrl = origin + "/libs/regressionWorker.js"
-      this.setWorker(workerUrl)
+      let origin = document.location.origin
+      if(origin.includes("file"))
+      {
+        origin = "http://127.0.0.1:4200"
+      }
+      const workerUrl = origin + "/libs/regressionWorker.js"
+      if(this.USE_WORKER)
+      {
+        this.setWorker(workerUrl)
+      }
+      else
+      {
+        this.newRegression();
+      }
+
       this.classifier = false;
       this.numOutputs = n;
       this.gui = gui;
@@ -206,7 +231,14 @@ class Learner {
       origin = "http://127.0.0.1:4200"
     }
     const workerUrl = origin + "/libs/classificationWorker.js"
-    this.setWorker(workerUrl)
+    if(this.USE_WORKER)
+    {
+      this.setWorker(workerUrl)
+    }
+    else
+    {
+      this.newClassifier();
+    }
     this.classifier = true;
     this.numOutputs = 1;
     this.gui = gui;
@@ -288,7 +320,15 @@ class Learner {
     else if(this.running)
     {
       //RUN
-      this.myWorker.postMessage({action:"run",data:input});
+      if(this.USE_WORKER)
+      {
+        this.myWorker.postMessage({action:"run",data:input});
+      }
+      else
+      {
+        let data = this.myModel.run(input)
+        this.runEnd(data);
+      }
     }
   }
 
@@ -305,25 +345,46 @@ class Learner {
     }
   }
 
+  setModelOptions(options) {
+    this.modelOptions = options;
+    if(this.USE_WORKER)
+    {
+      if(this.myWorker !== undefined)
+      {
+        this.myWorker.postMessage({action:"options",data:this.modelOptions});
+      }
+    }
+    else
+    {
+      if(this.modelOptions.numEpochs !== undefined)
+      {
+        this.myModel.setNumEpochs(this.modelOptions.numEpochs)
+      }
+      if(this.modelOptions.numHiddenNodes !== undefined)
+      {
+        this.myModel.setNumHiddenNodes(this.modelOptions.numHiddenNodes)
+      }
+      if(this.modelOptions.numHiddenLayers !== undefined)
+      {
+        this.myModel.setNumHiddenLayers(this.modelOptions.numHiddenLayers)
+      }
+      if(this.modelOptions.k !== undefined)
+      {
+        this.myModel.setK(this.modelOptions.k)
+      }
+    }
+  }
+
   setWorker(url) {
     this.myWorker = this.createWorker(url);
     this.myWorker.onmessage = (event)=>{
       if(event.data == "trainingend")
       {
-        this.disableButtons(false);
-        this.run()
+        this.trainingEnd()
       }
-      else if(this.onOutput)
+      else
       {
-        for(let i = 0; i < this.numOutputs; i++)
-        {
-          if(this.gui)
-          {
-            this.outputGUI[i].value = event.data[i];
-          }
-          this.y[i] = event.data[i];
-        }
-        this.onOutput(this.y);
+        this.runEnd(event.data)
       }
     }
   }
@@ -331,18 +392,47 @@ class Learner {
   train() {
     if(!this.running && ! this.recording)
     {
+      //this.setModelOptions(this.modelOptions);
       this.disableButtons(true);
       this.trainingData().then((t)=> {
         this.updateRows();
-        this.myWorker.postMessage({action:"train",data:t});
+        if(this.USE_WORKER)
+        {
+          this.myWorker.postMessage({action:"train",data:t});
+        }
+        else
+        {
+          this.myModel.train(t);
+          this.trainingEnd();
+        }
       });
     }
+  }
+
+  trainingEnd() {
+    this.disableButtons(false);
+    this.run()
   }
 
   run() {
     this.recording = false;
     this.running = !this.running;
     this.updateButtons();
+  }
+
+  runEnd(data) {
+    if(this.onOutput !== undefined)
+    {
+      for(let i = 0; i < this.numOutputs; i++)
+      {
+        if(this.gui)
+        {
+          this.outputGUI[i].value = data;
+        }
+        this.y[i] = data;
+      }
+      this.onOutput(this.y);
+    }
   }
 
   limitRecord() {
@@ -373,6 +463,7 @@ class Learner {
       this.recording = !this.recording;
       if(!this.recording)
       {
+        this.newRecordingRound();
         this.save();
       }
       else if(this.recLimit > 0)
@@ -407,9 +498,13 @@ class Learner {
   }
 
   clear() {
-    this.store.setItem(this.DATASET_KEY,[]).then(()=> {
-		    this.updateRows();
-    });
+    return new Promise((resolve, reject)=> {
+      this.store.setItem(this.DATASET_KEY,[]).then(()=> {
+          this.updateRows();
+          resolve();
+      });
+    })
+
   }
 
   randomise() {
@@ -457,7 +552,6 @@ class Learner {
         dataset = dataset.concat(this.temp);
         this.temp = [];
         this.store.setItem(this.DATASET_KEY, dataset).then(()=> {
-          this.newRecordingRound();
           this.updateRows();
           resolve();
         });
@@ -506,6 +600,36 @@ class Learner {
     });
   }
 
+
+  loadTrainingData(url) {
+    return new Promise((resolve, reject)=> {
+      this.clear().then(()=>{
+        console.log("fetching loaded data")
+        fetch(url)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          this.temp = data;
+          this.save().then(()=> {
+            console.log("saving loaded data")
+            resolve();
+          });
+        });
+      })
+    })
+  }
+
+  downloadTrainingData() {
+    return new Promise((resolve, reject)=> {
+      learner.trainingData().then((res)=>{
+        learner.downloadObjectAsJson(res, "myLearnerData")
+        resolve();
+      });
+    });
+  }
+
+
   createWorker (workerUrl) {
 	var worker = null;
 	try {
@@ -530,26 +654,6 @@ class Learner {
 	return worker;
   }
 
-
-  loadTrainingData(url) {
-    this.clear();
-    fetch(url)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      this.temp = data;
-      this.save();
-    });
-    //set as temp
-    //save
-  }
-
-  downloadTrainingData() {
-    learner.trainingData().then((res)=>{
-      learner.downloadObjectAsJson(res, "myLearnerData")
-    });
-  }
 
   downloadObjectAsJson(exportObj, exportName){
    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));

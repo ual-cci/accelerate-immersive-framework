@@ -36,7 +36,7 @@ var initDocAPI = function(
       disableDocAction: true,
       disableSpaceDelimitedActions: true,
   }
-  if(redis !== undefined) {
+  if(redisConfig !== undefined) {
     const redis = require("redis");
     const client = redis.createClient(
       redisConfig.redis_port,redisConfig.redis_ip, {

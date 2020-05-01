@@ -71,7 +71,7 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
-  trigPollRate:400,
+  trigPollRate:1000,
   //This turns on the low rate poll we used before for multiple instances
   //Its abit hacky and isn't necessary whilst we're using Redis
   trigPoll:false,
@@ -326,10 +326,19 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
+          const doc = this.get('currentDoc');
           if(this.get("model.isCollaborative") && this.get("trigPoll"))
           {
             this.set('trigInterval', setInterval(()=> {
-                this.submitOp({p:["trig"], oi:true})
+                //this.submitOp({p:["trig"], oi:true})
+                this.submitOp({p:["source", 0], si:"test"})
+                const toSend = {
+                  uuid:this.get('sessionAccount').getSessionID(),
+                  flip:this.get("trigFlip"),
+                  code:"var thisProgram = \"a test\""
+                }
+                this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
+                this.get('documentService').updateDoc(doc.id, "newEval", toSend)
             }, this.get("trigPollRate")));
           }
         });
@@ -587,7 +596,10 @@ export default Controller.extend({
             this.flashSelectedText(ops[0].oi.pos)
           }
           this.set('surpress', true);
-          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+          if(this.get("doPlay"))
+          {
+            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+          }
           this.set('surpress', false);
         }
         else

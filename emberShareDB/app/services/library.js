@@ -13,8 +13,8 @@ export default Service.extend({
     {title:"EvoLib", id:"evolib", url:"evolib.js"},
     {title:"Chrome Auto Player", id:"chromeplayer", url:"chrome-player.js"},
     {title:"RapidLib", id:"rapidlib", url:"rapidLib.js"},
-    {title:"Learner.js", id:"learner", url:"learner.js"},
-    {title:"Maxi Instrument", id:"maxiinstrument", url:"maxiInstruments.js"},
+    {title:"Learner.js", id:"learner", url:"learner.v.0.2.js"},
+    {title:"Maxi Instrument", id:"maxiinstrument", url:"maxiInstruments.v.0.4.js"},
     {title:"MIMIC Samples", id:"mimicSamples", url:"mimicSamples.js"},
   ]}),
   url(id) {
