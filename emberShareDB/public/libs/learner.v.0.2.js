@@ -315,7 +315,7 @@ class Learner {
     if(this.recording)
     {
       //ADD TO DATASET
-      this.addRow(input, y);
+      this.addRow(JSON.parse(JSON.stringify(input)), JSON.parse(JSON.stringify(y)));
     }
     else if(this.running)
     {
@@ -392,7 +392,6 @@ class Learner {
   train() {
     if(!this.running && ! this.recording)
     {
-      //this.setModelOptions(this.modelOptions);
       this.disableButtons(true);
       this.trainingData().then((t)=> {
         this.updateRows();
@@ -540,8 +539,9 @@ class Learner {
   }
 
   addRow(newInputs, newOutputs) {
-    this.temp.push({input:newInputs,
-                    output:newOutputs,
+
+    this.temp.push({input:JSON.parse(JSON.stringify(newInputs)),
+                    output:JSON.parse(JSON.stringify(newOutputs)),
                     recordingRound:this.recordingRound});
     this.updateRows();
   }
@@ -592,7 +592,8 @@ class Learner {
         this.store.getItem(this.DATASET_KEY).then((dataset)=> {
           let trainingData = [];
           dataset.forEach((line)=> {
-            trainingData.push({input:line.input, output:line.output});
+            let l = {input:line.input, output:line.output};
+            trainingData.push(l);
           });
           resolve(trainingData);
         });

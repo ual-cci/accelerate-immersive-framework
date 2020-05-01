@@ -5,24 +5,30 @@ try {
   let url = "http://localhost:4200/libs/rapidLib.js"
   importScripts(url);
 }
-const rapidLib = RapidLib();
-let myClassification = new rapidLib.Classification();
+var options = {}
+var rapidLib = RapidLib();
+var myClassification = new rapidLib.Classification();
 function setOptions() {
-  if(myRegression !== undefined)
+  if(myClassification !== undefined)
   {
     console.log("setting options")
     if(options.k !== undefined)
     {
-      myRegression.setK(options.k)
+      myClassification.setK(options.k)
     }
   }
 }
 self.addEventListener('message', function(e) {
   if(e.data.action == "train") {
     //Respond to train msg
-    rapidLib = RapidLib();
-    myClassification = new rapidLib.Regression();
-    setOptions()
+    if(myClassification !== undefined)
+    {
+      console.log("training")
+      rapidLib = RapidLib();
+      myClassification = new rapidLib.Classification();
+      setOptions()
+      myClassification.train(e.data.data);
+    }
     self.postMessage("trainingend");
   }
   if(e.data.action == "options") {
