@@ -27,7 +27,7 @@ export default Component.extend({
       gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
     editor.on("keydown", (cm, event)=> {
-      this.get('cs').log("KEY", event.keyCode);
+      //this.get('cs').log("KEY", event.keyCode);
       //17 = ctrl, 16 = shift, apple cmd = 224 | 91 | 93,
       if (!cm.state.completionActive
         && !cm.options.readOnly)
@@ -45,7 +45,7 @@ export default Component.extend({
         }
         if(this.get('evalDown') && this.get('shiftDown'))
         {
-          this.onReevaluate();
+          //this.onReevaluate();
         }
       }
     });
@@ -109,14 +109,14 @@ export default Component.extend({
         let elements = document.getElementsByClassName("CodeMirror");
         elements[0].style.fontSize = this.get("fontSize")+"pt";
       },
-      // "Shift-Cmd": (cm)=>  {
-      //   this.get('cs').log("shift-cmd")
-      //   this.onReevaluate();
-      // },
-      // "Shift-Ctrl": (cm)=>  {
-      //   this.get('cs').log("shift-Ctrl")
-      //   this.onReevaluate();
-      // },
+      "Cmd-Enter": (cm)=>  {
+        this.get('cs').log("shift-cmd")
+        this.onReevaluate();
+      },
+      "Ctrl-Enter": (cm)=>  {
+        this.get('cs').log("shift-Ctrl")
+        this.onReevaluate();
+      },
       "Cmd-/": (cm)=>  {
         cm.toggleComment();
         console.log("COMMENT");

@@ -539,7 +539,6 @@ class Learner {
   }
 
   addRow(newInputs, newOutputs) {
-
     this.temp.push({input:JSON.parse(JSON.stringify(newInputs)),
                     output:JSON.parse(JSON.stringify(newOutputs)),
                     recordingRound:this.recordingRound});

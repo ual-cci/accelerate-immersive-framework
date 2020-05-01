@@ -338,7 +338,8 @@ export default Controller.extend({
                   code:"var thisProgram = \"a test\""
                 }
                 this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
-                this.get('documentService').updateDoc(doc.id, "newEval", toSend)
+                this.submitOp({p:["newEval"],oi:toSend})
+                //this.get('documentService').updateDoc(doc.id, "newEval", toSend)
             }, this.get("trigPollRate")));
           }
         });
@@ -762,7 +763,7 @@ export default Controller.extend({
         this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
         const actions = [
           this.get('documentService').updateDoc(doc.id, "source", source),
-          this.get('documentService').updateDoc(doc.id, "newEval", toSend)
+          this.submitOp({p:["newEval"],oi:toSend})
         ];
         Promise.all(actions)
         .then(()=>resolve())
@@ -800,7 +801,7 @@ export default Controller.extend({
               pos:pos
             }
             this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
-            this.get('documentService').updateDoc(model.id, 'newEval', toSend)
+            this.submitOp({p:["newEval"],oi:toSend})
             .catch((err)=>{
               this.get('cs').log('error updating doc', err);
             });
