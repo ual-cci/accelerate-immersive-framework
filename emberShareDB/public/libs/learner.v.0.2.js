@@ -311,7 +311,16 @@ class Learner {
     this.recLimit = val;
   }
 
+  isTypedArray(x) {
+    return (ArrayBuffer.isView(x) &&
+        Object.prototype.toString.call(x) !== "[object DataView]");
+  }
+
   newExample(input, y) {
+    if(this.isTypedArray(input))
+    {
+      input = Array.prototype.slice.call(input);
+    }
     if(this.recording)
     {
       //ADD TO DATASET
