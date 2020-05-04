@@ -3,14 +3,14 @@
 This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools.
 </p>
 <p class = "tutorial-text">
-Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control is what!
+Learner.js provides an interface that allows you to easily record in examples of input and output pairings into a dataset that is saved locally in your browser. You can then train a model to respond with new outputs when you provide new inputs. Building from the smarts of <a href = "https://www.doc.gold.ac.uk/eavi/rapidmixapi.com/index.php/documentation/javascript-documentation/">RapidLib</a>, we take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control with what!
 </p>
 
 <p class = "tutorial-text">
 If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way.
 </p>
 <p class = "tutorial-text">
-You can also find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
+You can also find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a> here.
 </p>
 
 <p class = "tutorial-heading">
@@ -63,6 +63,28 @@ For classification (discrete states), use the code below specifying the number o
 <pre>
 <code>
 learner.addClassification(4)
+</code>
+</pre>
+<p class = "tutorial-text">
+You can also adjust a few parameters of your models by passing an options object. For Regression models, RapidLib uses a Neural Network and the three available parameters to this are below. If you don't know what these mean, don't worry, the defaults will do you fine.
+</p>
+<pre>
+<code>
+learner.setModelOptions({
+  numEpochs:1000, //defaults to 500
+  numHiddenLayers:1, //defaults to 1
+  numHiddenNodes:16 //defaults to 1
+})
+</code>
+</pre>
+<p class = "tutorial-text">
+For Classification, RapidLib uses a K Nearest Neighbour Model and the only parameter is the eponymous K.
+</p>
+<pre>
+<code>
+learner.setModelOptions({
+  k:5 //defaults to 1
+})
 </code>
 </pre>
 <p class = "tutorial-heading">
@@ -173,8 +195,7 @@ You can then upload this file as an asset to your project and load in the data w
 </p>
 <pre>
 <code>
-const learner = new Learner(
-{onLoad:()=>{
+const learner = new Learner({onLoad:()=>{
   learner.loadTrainingData("data.json").then(()=> {
     learner.train()
   })

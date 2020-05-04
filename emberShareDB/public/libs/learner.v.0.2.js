@@ -317,6 +317,7 @@ class Learner {
   }
 
   newExample(input, y) {
+    //Convert to Array if TypedArray
     if(this.isTypedArray(input))
     {
       input = Array.prototype.slice.call(input);
