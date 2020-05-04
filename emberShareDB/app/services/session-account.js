@@ -54,7 +54,7 @@ export default Service.extend({
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data:{username:username}
         }).then(bind((res) => {
-          console.log("USERID", res.data.attr.accountId)
+          this.get('cs').log("USERID", res.data.attr.accountId)
           this.set("currentUserId", res.data.attr.accountId);
           resolve(res);
         })).catch(bind((err) => {

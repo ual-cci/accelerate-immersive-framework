@@ -763,7 +763,6 @@ export default Controller.extend({
         this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
         const actions = [
           this.get('documentService').updateDoc(doc.id, "source", source),
-          this.submitOp({p:["newEval"],oi:toSend})
         ];
         Promise.all(actions)
         .then(()=>resolve())

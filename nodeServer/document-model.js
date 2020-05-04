@@ -36,7 +36,8 @@ var initDocAPI = function(
       disableDocAction: true,
       disableSpaceDelimitedActions: true,
   }
-  if(redisConfig !== undefined) {
+  if(redisConfig.redis_key !== undefined) {
+    console.log("adding redis pubsub")
     const redis = require("redis");
     const client = redis.createClient(
       redisConfig.redis_port,redisConfig.redis_ip, {
@@ -297,7 +298,7 @@ function startWebSockets(server)
           // No point reporting this error, as it happens often and is harmless.
           return
       }
-    
+
     })
 
     try {
