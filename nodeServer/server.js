@@ -51,6 +51,7 @@ function startServer()
 
   let mongoContentUri = "";
   let mongoUserUri = "";
+  let redis;
   console.log("NODE_ENV", process.env.NODE_ENV)
   if(process.env.NODE_ENV === "local" || process.env.NODE_ENV == "test")
   {
@@ -94,20 +95,18 @@ function startServer()
     uri = uri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
     mongoContentUri = uri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
     mongoUserUri = uri + "/" + oauthDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
+
+    redis = {};
+    redis.redis_port = config.redis_port;
+    redis.redis_ip = config.redis_ip;
+    redis.redis_key = config.redis_key;
+
   }
 
   var server = http.createServer(app);
   const PORT = process.env.PORT || config.serverPort;
   server.listen(PORT);
   userAPI.initUserAPI(app, mongoUserUri);
-
-  let redis;
-  if(process.env.NODE_ENV === production)
-  {
-    redis.redis_port = config.redis_port
-    redis.redis_ip = config.redis_ip;
-    redis.redis_key = config.redis_key
-  }
 
   docAPI.initDocAPI(
     server, app,

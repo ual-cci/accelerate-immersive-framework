@@ -1,6 +1,6 @@
 const ShareDB = require('sharedb');
 const WebSocket = require('ws');
-const WebSocketJSONStream = require('websocket-json-stream');
+const WebSocketJSONStream = require('@teamwork/websocket-json-stream')
 const mongo = require('mongodb');
 const multiparty = require('connect-multiparty')();
 const fs = require('fs');
@@ -292,6 +292,13 @@ function startWebSockets(server)
     ws.on('message', function incoming(data) {
       console.log('server weboscket message',data);
     });
+    stream.on('error', error => {
+      if (error.message.startsWith('WebSocket is not open')) {
+          // No point reporting this error, as it happens often and is harmless.
+          return
+      }
+    
+    })
 
     try {
       shareDB.listen(stream);

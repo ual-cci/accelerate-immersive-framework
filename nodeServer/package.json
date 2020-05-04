@@ -9,6 +9,7 @@
   "author": "Louis McCallum",
   "license": "MIT",
   "dependencies": {
+    "@teamwork/websocket-json-stream": "^2.0.0",
     "bcrypt": "^3.0.8",
     "body-parser": "^1.19.0",
     "chai": "^4.2.0",
