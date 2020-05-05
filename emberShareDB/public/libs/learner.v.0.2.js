@@ -394,7 +394,7 @@ class Learner {
       }
       else
       {
-        this.runEnd(event.data)
+        this.runEnd(event.data[0])
       }
     }
   }
