@@ -597,10 +597,7 @@ export default Controller.extend({
             this.flashSelectedText(ops[0].oi.pos)
           }
           this.set('surpress', true);
-          if(this.get("doPlay"))
-          {
-            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
-          }
+          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
           this.set('surpress', false);
         }
         else
