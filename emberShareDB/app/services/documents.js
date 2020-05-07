@@ -188,6 +188,18 @@ export default Service.extend({
         }));
     });
   },
+  getSource(docId){
+    return new RSVP.Promise((resolve, reject) => {
+      $.ajax({
+        type: "GET",
+        url: config.serverHost + "/source/" + docId,
+      }).then(bind((res) => {
+        resolve(res)
+      })).catch(bind((err) => {
+        reject(err);
+      }));
+    });
+  },
   getChildren(childrenIds) {
     return new RSVP.Promise((resolve, reject) => {
       if(childrenIds.length == 0)
@@ -197,7 +209,8 @@ export default Service.extend({
       }
       let fetch = (docId) => {
         return new RSVP.Promise((res, rej) => {
-          this.get('store').findRecord('document', docId).then((doc)=>res(doc)).catch((err)=>rej(err));
+          this.get('store').findRecord('document',docId)
+          .then((doc)=>res(doc)).catch((err)=>rej(err));
         })
       }
       let actions = childrenIds.map(fetch);

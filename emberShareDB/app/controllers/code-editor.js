@@ -71,11 +71,10 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
-  trigPollRate:1000,
-  //This turns on the low rate poll we used before for multiple instances
-  //Its abit hacky and isn't necessary whilst we're using Redis
-  trigPoll:false,
-  trigFlip:0,
+  updateSourceRate:30000,
+  updateSourceOnInterval:true,
+  updateSourceInterval:undefined,
+  evalPtr:0,
 
   showHUD:true,
   hudMessage:"Loading...",
@@ -111,7 +110,9 @@ export default Controller.extend({
     this.set('children',[]);
     this.set('recordingOptions', {isRecording:false})
     this.set('scrollPositions',{});
-    this.hijackConsoleOutput();
+    // console.log("hijacking console")
+    // this.hijackConsoleOutput();
+
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {
@@ -327,20 +328,11 @@ export default Controller.extend({
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
           const doc = this.get('currentDoc');
-          if(this.get("model.isCollaborative") && this.get("trigPoll"))
-          {
-            this.set('trigInterval', setInterval(()=> {
-                //this.submitOp({p:["trig"], oi:true})
-                this.submitOp({p:["source", 0], si:"test"})
-                const toSend = {
-                  uuid:this.get('sessionAccount').getSessionID(),
-                  flip:this.get("trigFlip"),
-                  code:"var thisProgram = \"a test\""
-                }
-                this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
-                this.submitOp({p:["newEval"],oi:toSend})
-                //this.get('documentService').updateDoc(doc.id, "newEval", toSend)
-            }, this.get("trigPollRate")));
+          if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
+            this.get('cs').log("setting update source interval")
+            this.set('updateSourceInterval', setInterval(()=>{
+              this.updateSessionFromSource();
+            }, this.get('updateSourceRate')));
           }
         });
       });
@@ -579,33 +571,46 @@ export default Controller.extend({
       }
       else if (ops[0].p[0] == "assets")
       {
-        // this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-        //   toChange.set('assets',ops[0].oi);
-        // });
-        // this.get('cs').log("didReceiveOp", "preloadAssets")
-        // this.preloadAssets();
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi);
+        });
+        this.get('cs').log("didReceiveOp", "preloadAssets")
+        this.preloadAssets();
       }
-      else if (!source && ops[0].p[0] === "newEval")
+      else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
-          this.get('cs').log("did receive op", ops, source)
+          //this.get('cs').log("did receive op", ops, source)
+          let doFlash = false;
+          if(isEmpty(this.get('prevEvalReceived')) ||
+             !isEmpty(this.get('prevEvalReceived')) && !isEmpty(ops[0].od))
+          {
+            if(new Date().getTime() - ops[0].oi.date < 5000)
+            {
+              this.set('surpress', true);
+              try {
+                console.log("executing", ops[0].oi.code)
+                this.set('prevEvalReceived', ops[0].oi.code)
+                doFlash = true;
+                document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+              } catch (err) {
+                doFlash = false;
+                console.log("error evaluating received code", err);
+              }
+              this.set('surpress', false);
+            }
+          }
 
-          this.get('cs').log("executing", ops[0].oi.code)
-          if(!isEmpty(ops[0].oi.pos))
+          if(doFlash && !isEmpty(ops[0].oi.pos))
           {
             this.flashSelectedText(ops[0].oi.pos)
           }
-          this.set('surpress', true);
-          document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
-          this.set('surpress', false);
         }
         else
         {
           this.get('cs').log("matching guuid, ignoring")
         }
-        this.get('cs').log("did receive op", ops, source)
-
       }
       else if (!source && ops[0].p[0] == "children")
       {
@@ -743,6 +748,24 @@ export default Controller.extend({
     }
     return selection;
   },
+  //A check to see if we have drifted or lost ops, resyncs if necessary
+  updateSessionFromSource: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('currentDoc');
+      this.get('documentService').getSource(doc.id).then((serverSource)=>{
+        const localSource = this.get('editor').getValue();
+        if(serverSource !== localSource)
+        {
+          this.set("surpress", true);
+          this.get('cs').log("setting editor to", serverSource)
+          const scrollPos = this.get('editor').getCursor(true);
+          this.get('editor.doc').setValue(serverSource)
+          this.get('editor').scrollIntoView(scrollPos);
+          this.set("surpress", true);
+        }
+      })
+    });
+  },
   updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
@@ -751,13 +774,6 @@ export default Controller.extend({
         const source = this.get('editor').getValue();
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        //WE ALSO SEND A EMPTY STRING AS NEWEVAL TO CLEAR IT OUT (BUG WITH PATCHING?)
-        const toSend = {
-          uuid:this.get('sessionAccount').getSessionID(),
-          flip:this.get("trigFlip"),
-          code:""
-        }
-        this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
         const actions = [
           this.get('documentService').updateDoc(doc.id, "source", source),
         ];
@@ -789,18 +805,33 @@ export default Controller.extend({
           {
             const pos = this.flashSelectedText();
             this.get('cs').log("NEW EVAL", combined)
-            document.getElementById("output-iframe").contentWindow.eval(combined);
-            const toSend = {
-              uuid:this.get('sessionAccount').getSessionID(),
-              flip:this.get('trigFlip'),
-              code:combined,
-              pos:pos
+            let doSend = true;
+            try {
+              document.getElementById("output-iframe").contentWindow.eval(combined);
+            } catch (err) {
+              console.log("ERROR EVAL", err);
+              doSend = false;
             }
-            this.set('trigFlip', this.get('trigFlip') == 0 ? 1 : 0);
-            this.submitOp({p:["newEval"],oi:toSend})
-            .catch((err)=>{
-              this.get('cs').log('error updating doc', err);
-            });
+            if(doSend)
+            {
+              const toSend = {
+                uuid:this.get('sessionAccount').getSessionID(),
+                date:new Date().getTime(),
+                code:combined,
+                pos:pos
+              }
+              console.log("sending op", toSend)
+              this.set('evalPtr', this.get('evalPtr') + 1);
+              let op = {p:["newEval"], oi:toSend}
+              if(!isEmpty(this.get('prevEval')))
+              {
+                op.od = this.get('prevEval')
+              }
+              this.submitOp(op).catch((err)=>{
+                this.get('cs').log('error updating doc', err);
+              });
+              this.set('prevEval', toSend);
+            }
           }
           else
           {
@@ -903,9 +934,8 @@ export default Controller.extend({
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
     const editor = this.get('editor');
-    this.get('cs').log("on session change", delta)
-    this.get('cs').log("history", editor.doc.getHistory())
-    //this.get('cs').log("session change, surpress", surpress);
+
+    this.get('cs').log("session change, surpress", surpress);
     if(!surpress
       && delta[0].origin !== "playback"
       && this.get('droppedOps').length == 0)
@@ -1217,22 +1247,26 @@ export default Controller.extend({
     }, 100));
   },
   hijackConsoleOutput: function() {
+
     (()=>{
-        // var oldLog = this.get('cs').log;
-        // this.get('cs').log = (msg) => {
-        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
-        //     oldLog.apply(console, arguments);
-        // };
-        // var oldWarn = console.warn;
-        // console.warn = (msg) => {
-        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
-        //     oldWarn.apply(console, arguments);
-        // };
-        // var oldError = console.error;
-        // console.error = (msg) => {
-        //     this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
-        //     oldError.apply(console, arguments);
-        // };
+        let oldLog = this.get('cs').log
+        this.get('cs').log = (msg) => {
+          if(config.debugConsole) {
+            this.set("consoleOutput", this.get('consoleOutput') + "\n" + JSON.stringify(msg));
+            console.log(msg)
+          }
+        };
+        var oldWarn = console.warn;
+        console.warn = (msg) => {
+            this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+            console.warn(msg)
+        };
+        var oldError = console.error;
+        console.error = (msg) => {
+          console.log("ERRRERERER")
+            this.set("consoleOutput", this.get('consoleOutput') + "\n" + msg);
+            console.error(msg)
+        };
     })();
   },
   updatePlayButton: function() {
@@ -1599,9 +1633,9 @@ export default Controller.extend({
         this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
-        if(!isEmpty(this.get("trigInterval")))
+        if(!isEmpty(this.get("updateSourceInterval")))
         {
-          clearInterval(this.get("trigInterval"));
+          clearInterval(this.get("updateSourceInterval"));
         }
         if(this.get('wsAvailable'))
         {
