@@ -853,11 +853,15 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(index < NUM_SYNTH_PARAMS - 2)
             {
               const key = this.synthKey(index)
-              if(this.instruments["synth"][synthIndex].parameters[key] === undefined)
+              const synth = this.instruments["synth"][synthIndex];
+              if(synth !== undefined)
               {
-                this.instruments["synth"][synthIndex].parameters[key] = {};
+                if(synth.parameters[key] === undefined)
+                {
+                  synth.parameters[key] = {};
+                }
+                synth.parameters[key].val = v;
               }
-              this.instruments["synth"][synthIndex].parameters[key].val = v;
             }
             else
             {
@@ -882,11 +886,16 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(index < NUM_SAMPLER_PARAMS - 2)
             {
               const key = this.samplerKey(index)
-              if(this.instruments["sampler"][samplerIndex].parameters[key] === undefined)
+              const sampler = this.instruments["sampler"][samplerIndex];
+              if(sampler !== undefined)
               {
-                this.instruments["sampler"][samplerIndex].parameters[key] = {};
+                if(sampler.parameters[key] === undefined)
+                {
+                  sampler.parameters[key] = {};
+                }
+                sampler.parameters[key].val = v;
               }
-              this.instruments["sampler"][samplerIndex].parameters[key].val = v;
+
             }
             else
             {
