@@ -1,3 +1,5 @@
+//From Paul Adenot https://github.com/padenot/ringbuf.js
+
  class ParameterWriter {
   // From a RingBuffer, build an object that can enqueue a parameter change in
   // the queue.
@@ -454,7 +456,6 @@ class MaxiInstrument {
     this.instrument = instrument;
     this.audioContext = audioContext;
     this.paramWriter = paramWriter;
-    console.log(this.paramWriter)
     this.mapped = [];
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
@@ -466,7 +467,6 @@ class MaxiInstrument {
       (this.NUM_SYNTHS * this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
     this.docId = "local";
-    console.log(window)
     if(window.frameElement)
     {
       this.docid == window.frameElement.name
@@ -512,13 +512,14 @@ class MaxiInstrument {
             end = start + 1;
           }
         }
-      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul});
+      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul, v:n.velocity});
       	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});
       }
     });
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
+
     this.node.port.postMessage({
       sequence:{
         instrument:this.instrument,
@@ -676,12 +677,18 @@ class MaxiSynth extends MaxiInstrument {
     this.sendDefaultParam();
   }
 
-  noteon(freq = 1) {
-    const index = (this.index * this.NUM_SYNTH_PARAMS) + 16;
-    this.enqueue(index, freq);
+  noteon(freq = 60, vel = 127) {
+    //console.log("instrument note on", freq, vel)
+    this.node.port.postMessage({
+      noteon:{
+        instrument:"synth",
+        index:this.index,
+        val:{f:freq, v:vel}
+      }
+    });
   }
 
-  noteoff(freq = 1) {
+  noteoff(freq = 60) {
     const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
     this.enqueue(index, freq);
   }
@@ -1062,13 +1069,17 @@ class MaxiSampler extends MaxiInstrument {
     this.sendDefaultParam();
   }
 
-  noteon(freq = 1) {
-    const offset = this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
-    const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + 16;
-    this.enqueue(index, freq);
+  noteon(freq = 440, vel = 127) {
+    this.node.port.postMessage({
+      noteon:{
+        instrument:"sampler",
+        index:this.index,
+        val:{f:freq, v:vel}
+      }
+    });
   }
 
-  noteoff(freq = 1) {
+  noteoff(freq = 440) {
     const offset = this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
     const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + 17;
     this.enqueue(index, freq);

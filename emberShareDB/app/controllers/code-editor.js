@@ -581,7 +581,8 @@ export default Controller.extend({
       {
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
-          //this.get('cs').log("did receive op", ops, source)
+          //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
+          //AND THOSE THAT DIDNT HAPPEN IN THE LAST 5 SECS
           let doFlash = false;
           if(isEmpty(this.get('prevEvalReceived')) ||
              !isEmpty(this.get('prevEvalReceived')) && !isEmpty(ops[0].od))
@@ -1674,7 +1675,10 @@ export default Controller.extend({
       let overlay = document.querySelector('#output-iframe');
       overlay.style["pointer-events"] = "auto";
       let playback = document.querySelector('#playback-container');
-      playback.style["pointer-events"] = "auto";
+      if(!isEmpty(playback))
+      {
+        playback.style["pointer-events"] = "auto";
+      }
     },
     mouseMove(e) {
       if(this.get('isDragging'))

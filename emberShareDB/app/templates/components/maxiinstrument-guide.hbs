@@ -157,19 +157,20 @@ learner.onOutput = (data)=> {
 9. Controlling the Instruments
 </p>
 <p class = "tutorial-text">
-Both samplers and synths respond to simple noteon, noteoff commands. If you are using controlling the frequency of your synth externally, you should also provide a frequency.
+Both samplers and synths respond to simple noteon, noteoff commands. If you are using controlling the frequency of your synth externally, you should also provide a frequency. Second velocity argument is optional.
 </p>
 <pre>
 <code>
-instruments.synths[0].noteon(440);
+instruments.synths[0].noteon(440, 127);
 instruments.synths[0].noteoff(440);
 </code>
 </pre>
 <p class = "tutorial-text">
-For samplers, noteoffs are not necessary and you provide the index of the sample you wish to trigger. For eaxmple, the code below would trigger the sample in the third slot of the first sampler. You only require a noteon for samplers as they are one-shot.
+For samplers, noteoffs are not necessary and you provide the index of the sample you wish to trigger. For eaxmple, the code below would trigger the sample in the third slot of the first sampler. You only require a noteon for samplers as they are one-shot. Second velocity argument is optional.
 </p>
 <pre>
 <code>
+instruments.samplers[0].noteon(2, 60);
 instruments.samplers[0].noteon(2);
 </code>
 </pre>
@@ -189,21 +190,21 @@ instruments.rewind(); //Reset clock to 0
 </code>
 </pre>
 <p class = "tutorial-text">
-You can then define sequences in terms of note ons and noteoff in ticks, and set them to a specific synth or sampler. Samplers are oneshot so only require a start.
+You can then define sequences in terms of note ons and noteoff in ticks, and set them to a specific synth or sampler. Samplers are oneshot so only require a start. Velocity is optional.
 </p>
 <pre>
 	<code>
 const synthSeq = {
   notes:[
-    {pitch:60, start:0, end:12},
-    {pitch:67, start:49, end:72},
+    {pitch:60, start:0, end:12, velocity:127},
+    {pitch:67, start:49, end:72, velocity:60},
   ],
 };
 instruments.synths[0].setSequence(synthSeq);
 
 const samplerSeq = {
   notes:[
-    {pitch:0, start:0},
+    {pitch:0, start:0, velocity:127},
     {pitch:1, start:49},
   ],
 };
