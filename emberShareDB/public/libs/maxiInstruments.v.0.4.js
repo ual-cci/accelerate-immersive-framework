@@ -359,7 +359,11 @@ class MaxiInstruments {
         console.log(`MaxiProcessor state change detected: ` + audioWorkletNode.processorState);
       }
       this.node.port.onmessage = event => {
-        //this.onTick(event.data.playHead);
+        if(this.onTick !== undefined && event.data.playHead !== undefined)
+        {
+          this.onTick(event.data.playHead);
+        }
+
       };
       this.node.port.onmessageerror = event => {
         console.log(`Error message from port: ` + event.data);

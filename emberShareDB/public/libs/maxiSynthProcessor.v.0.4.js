@@ -951,6 +951,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         const loopInSamples = (this.loopEnd / 24) * beatLength * 44100;
         this.getInstruments().forEach((s)=> {
           s.tick(this.myClock.playHead, loopInSamples);
+          this.port.postMessage({"playHead":this.myClock.playHead})
         })
         if(this.myClock.playHead >= this.loopEnd)
         {
