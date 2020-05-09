@@ -327,7 +327,7 @@ class MaxiSamplerProcessor {
 class MaxiSynthProcessor {
 
   constructor() {
-    const voices = 8;
+    const voices = 12;
     this.sampleRate = 44100;
     this.DAC = [0];
     this.dcoOut = 0;
@@ -398,7 +398,7 @@ class MaxiSynthProcessor {
     let inUse = this.triggered.concat(this.released).map(a => a.o);
     if(inUse.length >= this.dco.length)
     {
-      console.log("all oscs in use, popping release early", inUse.length);
+      //console.log("all oscs in use, popping release early", inUse.length);
       this.released.shift();
       inUse = this.triggered.concat(this.released).map(a => a.o);
     }
@@ -964,7 +964,10 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
           s.tick(this.myClock.playHead, loopInSamples);
         })
         //this.port.postMessage({"playHead":this.myClock.playHead})
-        this.paramWriter.enqueue_change(0, this.myClock.playHead);
+        if(this.paramWriter !== undefined)
+        {
+          this.paramWriter.enqueue_change(0, this.myClock.playHead);
+        }
         if(this.myClock.playHead >= this.loopEnd)
         {
           this.myClock.playHead = -1;
