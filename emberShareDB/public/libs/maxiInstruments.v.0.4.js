@@ -222,6 +222,7 @@ class MaxiInstruments {
   constructor() {
     this.samplers = [];
     this.synths = [];
+    this.sendTick = false;
     this.synthProcessorName = 'maxi-synth-processor';
     this.version = "v.0.4";
     this.TICKS_PER_BEAT = 24;
@@ -359,11 +360,28 @@ class MaxiInstruments {
         console.log(`MaxiProcessor state change detected: ` + audioWorkletNode.processorState);
       }
       this.node.port.onmessage = event => {
-        if(this.onTick !== undefined && event.data.playHead !== undefined)
+        if (event.data.type === "recv-param-queue")
         {
-          this.onTick(event.data.playHead);
+          const b = new RingBuffer(event.data.data, Uint8Array);
+          this._param_reader = new ParameterReader(b);
+          this.o = { index: 0, value: 0 };
+          setInterval(()=> {
+            if(this._param_reader !== undefined)
+            {
+              while(!this._param_reader.ringbuf.empty())
+              {
+                if(this._param_reader.dequeue_change(this.o))
+                {
+                  const v = this.o.value;
+                  if(this.onTick !== undefined)
+                  {
+                    this.onTick(v);
+                  }
+                }
+              }
+            }
+          }, 10)
         }
-
       };
       this.node.port.onmessageerror = event => {
         console.log(`Error message from port: ` + event.data);
@@ -448,6 +466,14 @@ class MaxiInstruments {
   rewind() {
     console.log("REWIND")
     this.node.port.postMessage({rewind:true});
+  }
+
+  setOnTick(onTick) {
+    this.onTick = onTick;
+    if(!this.sendTick) {
+      this.sendTick = true;
+      this.node.port.postMessage({sendTick:true});
+    }
   }
 
 }

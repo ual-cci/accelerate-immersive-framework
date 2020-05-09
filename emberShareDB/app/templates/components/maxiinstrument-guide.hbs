@@ -190,13 +190,13 @@ instruments.rewind(); //Reset clock to 0
 </code>
 </pre>
 <p class = "tutorial-text">
-The MaxiInstruments object also has a callback called onTick(), wich is called on every tick of the clock. As the callback is being executed on the main thread, it does not have any of the advantages of the separate audio thread where the clock resides, as such may be effected by interuptions. It relies on the messaging system between threads and whilst reasonably reliable, it is not advised to use this for time critical actions and it is not guaranteed to be sample accurately in sync with events being triggered on the audio thread.
+The MaxiInstruments object also has a callback called onTick(), called on every tick of the clock. As the callback is being executed on the main thread, it does not have any of the advantages of the separate audio thread where the clock resides, as such may be effected by interruptions. It relies on the messaging system between threads and whilst reasonably reliable, it is not advised to use this for time critical actions and it is not guaranteed to be sample-accurately-in-sync with events being triggered on the audio thread.
 </p>
 <pre>
 <code>
-instruments.onTick = (playHead)=>{
+instruments.setOnTick((playHead)=>{
   console.log(playHead)
-}
+})
 </code>
 </pre>
 <p class = "tutorial-text">

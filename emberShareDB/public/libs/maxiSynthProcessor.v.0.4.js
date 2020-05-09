@@ -234,6 +234,7 @@ class MaxiSamplerProcessor {
     this.seqPtr = 0;
     this.sequence = [];
     this.parameters = {};
+
   }
 
   doTrig() {
@@ -702,10 +703,21 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.myClock.setTicksPerBeat(this.TICKS_PER_BEAT);
     this.isPlaying = true;
     this.o = { index: 0, value: 0 };
+
     this.port.onmessage = (event) => {
       if (event.data.type === "recv-param-queue") {
         const b = new RingBuffer(event.data.data, Uint8Array);
         this._param_reader = new ParameterReader(b);
+      }
+      if(event.data.sendTick !== undefined) {
+        console.log("setting tick shared buffer")
+        let sab2 = RingBuffer.getStorageForCapacity(31, Uint8Array);
+        let rb2 = new RingBuffer(sab2, Uint8Array);
+        this.paramWriter = new ParameterWriter(rb2);
+        this.port.postMessage({
+          type: "recv-param-queue",
+          data: sab2
+        });
       }
       if(event.data.sequence !== undefined)
       {
@@ -946,13 +958,13 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       this.myClock.ticker();
       if(this.myClock.tick)
       {
-        //console.log(this.myClock.playHead)
         const beatLength = 60 / this.myClock.bpm;
         const loopInSamples = (this.loopEnd / 24) * beatLength * 44100;
         this.getInstruments().forEach((s)=> {
           s.tick(this.myClock.playHead, loopInSamples);
-          this.port.postMessage({"playHead":this.myClock.playHead})
         })
+        //this.port.postMessage({"playHead":this.myClock.playHead})
+        this.paramWriter.enqueue_change(0, this.myClock.playHead);
         if(this.myClock.playHead >= this.loopEnd)
         {
           this.myClock.playHead = -1;
