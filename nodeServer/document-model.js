@@ -111,7 +111,7 @@ function startAssetAPI(server, app)
             {
               quota = 0;
             }
-            console.log("doc.data.assetQuota", quota, quota + size);
+            //console.log("doc.data.assetQuota", quota, quota + size);
             if(quota + size > MAX_FILES_PER_DOC)
             {
               res.status(400)
@@ -291,7 +291,7 @@ function startWebSockets(server)
   wss.on('connection', (ws, req) => {
     var stream = new WebSocketJSONStream(ws);
     ws.on('message', function incoming(data) {
-      console.log('server weboscket message',data);
+      //console.log('server weboscket message',data);
     });
     stream.on('error', error => {
       if (error.message.startsWith('WebSocket is not open')) {
@@ -355,7 +355,7 @@ function startDocAPI(app)
   const PAGE_SIZE = 20;
   app.get('/documents', (req,res) => {
 
-    console.log("fetching docs",req.query.filter);
+    //console.log("fetching docs",req.query.filter);
 
     const term = req.query.filter.search;
     const page = req.query.filter.page;
@@ -408,7 +408,7 @@ function startDocAPI(app)
       }
       else
       {
-        console.log("found " + results.length + " docs");
+        //console.log("found " + results.length + " docs");
         var fn = (doc) => {
           return {attributes:doc.data,id:doc.data.documentId,type:"document"}
         }
@@ -419,7 +419,7 @@ function startDocAPI(app)
 
   app.delete('/documents/:id', app.oauth.authenticate(), (req, res) => {
     var doc = shareDBConnection.get(contentCollectionName, req.params.id);
-    console.log("delete doc called",  req.params.id)
+    //console.log("delete doc called",  req.params.id)
     doc.fetch(function(err) {
       if (err || !doc.data) {
         res.status(404).send("database error making document");
@@ -444,7 +444,7 @@ function startDocAPI(app)
       }
       else
       {
-        console.log("sending",doc.data["source"]);
+        //console.log("sending",doc.data["source"]);
         res.header("Content-Type", "application/javascript; charset=UTF-8");
         res.header("Cache-Control", "no-store");
         res.status(200).send(doc.data["source"]);
@@ -490,7 +490,7 @@ function startDocAPI(app)
                   //DONT UPDATE THE SOURCE OR THE DOCUMENT ID
                   if(!BLACK_LIST.includes(key))
                   {
-                    console.log("PATCHING", key, patched[key])
+                    //console.log("PATCHING", key, patched[key])
                     const op = {p:[key], oi:patched[key]};
                     actions.push(submitOp(docId, op));
                   }
@@ -498,7 +498,7 @@ function startDocAPI(app)
             }
             else
             {
-              console.log("PATCHING NEW FIELD", key, patched[key])
+              //console.log("PATCHING NEW FIELD", key, patched[key])
               const op = {p:[key], oi:patched[key]};
               actions.push(submitOp(docId, op));
             }
@@ -525,7 +525,7 @@ function startDocAPI(app)
   });
 
   app.get('/documents/ops/:id', app.oauth.authenticate(),(req,res) => {
-    console.log("fetching ops for", contentCollectionName, req.params.id);
+    //console.log("fetching ops for", contentCollectionName, req.params.id);
     const callback = function (err, results) {
       res.status(200).send({data:results});
     };
@@ -537,7 +537,7 @@ function startDocAPI(app)
   });
 
   app.post('/documents', app.oauth.authenticate(), (req,res) => {
-    console.log("POST document", req.body.data.attributes)
+    //console.log("POST document", req.body.data.attributes)
     let attr = req.body.data.attributes;
     createDoc(attr)
     .then(function(doc) {
@@ -554,12 +554,11 @@ function startDocAPI(app)
   });
 
   app.post('/library', app.oauth.authenticate(), (req, res)=> {
-    console.log(req.body)
+    //console.log(req.body)
     let lib = req.body.data.lib;
     let documentId = req.body.data.documentId;
     let doc = shareDBConnection.get(contentCollectionName, documentId);
     doc.fetch(function(err) {
-      console.log("fetched doc")
       if (err || !doc.data) {
         console.log("error making doc");
         res.status(404).send("database error making document" + err);
@@ -583,7 +582,7 @@ function startDocAPI(app)
 //FUNCTIONS
 
 function submitOp(docId, op) {
-  console.log("submitting op", docId, op);
+  //console.log("submitting op", docId, op);
   return new Promise((resolve, reject) => {
     if(op.p)
     {
@@ -617,7 +616,7 @@ function submitOp(docId, op) {
         }
         else
         {
-          console.log("success submitting op");
+          //console.log("success submitting op");
           resolve();
           return;
         }
@@ -645,12 +644,12 @@ function libraryURL(id) {
       url = lib.url
     }
   })
-  console.log("matched lib", url)
+  //console.log("matched lib", url)
   return url;
 }
 
 function insertLibrary(lib, source) {
-  console.log('inserting library', lib, source)
+  //console.log('inserting library', lib, source)
   let insertAfter = "<head>"
   let searchIndex = source.indexOf(insertAfter);
   let index = 0;

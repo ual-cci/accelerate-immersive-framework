@@ -75,6 +75,7 @@ export default Controller.extend({
   updateSourceOnInterval:true,
   updateSourceInterval:undefined,
   evalPtr:0,
+  highContrast:false,
 
   showHUD:true,
   hudMessage:"Loading...",
@@ -1666,6 +1667,7 @@ export default Controller.extend({
         {
           this.cleanUpConnections();
         }
+        this.set('highContrast', false);
         const logo = document.getElementById("main-logo");
         logo.style.display = "block";
         const log = document.getElementById("login-container");
@@ -1752,7 +1754,7 @@ export default Controller.extend({
       else
       {
         this.get('editor').refresh();
-        document.getElementById("ace-container").style.opacity = 0.93
+        document.getElementById("ace-container").style.opacity = 0.95
       }
     },
     renderCode() {
