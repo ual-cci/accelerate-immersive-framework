@@ -95,19 +95,14 @@ export default Component.extend({
     editor.setOption("extraKeys", {
       "Ctrl-Space": "autocomplete",
       "Cmd-\=": (cm)=> {
-        this.incrementProperty("fontSize");
         let elements = document.getElementsByClassName("CodeMirror");
-        elements[0].style.fontSize = this.get("fontSize")+"pt";
+        const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
+        elements[0].style.fontSize = (currentFontSize + 1) + "pt";
       },
       "Cmd--": (cm)=>  {
-        let newFont = this.get('fontSize') - 1;
-        if(newFont < 1)
-        {
-          newFont = 1;
-        }
-        this.set("fontSize", newFont);
         let elements = document.getElementsByClassName("CodeMirror");
-        elements[0].style.fontSize = this.get("fontSize")+"pt";
+        const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
+        elements[0].style.fontSize = (currentFontSize - 1) + "pt";
       },
       "Cmd-Enter": (cm)=>  {
         this.get('cs').log("shift-cmd")
@@ -200,6 +195,8 @@ export default Component.extend({
     }
 
     setTimeout(updateHints, 100);
+
+
 
     editor.on('changes', (cm, change)=> {
       this.onChange(cm, change);

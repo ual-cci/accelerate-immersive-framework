@@ -177,6 +177,10 @@ export default Controller.extend({
       }
       const nav = document.getElementById("mimic-navbar");
       nav.style.display = embed ? "none" : "block";
+      const logo = document.getElementById("main-logo");
+      logo.style.display = "none";
+      const log = document.getElementById("login-container");
+      log.style.top = "20px";
       const footer = document.getElementById("mimic-footer");
       footer.style.display = embed ? "none" : "block"
       const container = document.getElementById("main-site-container");
@@ -1105,6 +1109,10 @@ export default Controller.extend({
     if(!isEmpty(editor))
     {
       editor.refresh();
+      if(this.get('highContrast'))
+      {
+        this.setAllCodeWhite();
+      }
     }
   },
   skipOp:function(prev, rewind = false) {
@@ -1318,11 +1326,25 @@ export default Controller.extend({
       }
     }, 200)
   },
+  setAllCodeWhite() {
+    document.querySelectorAll('#ace-container').forEach(
+      el => el.querySelectorAll('span').forEach(
+        el => el.style.color = 'white'
+      )
+    );
+  },
   actions: {
 
     //codemirror
     onEditorReady(editor) {
       this.set('editor', editor);
+      let elements = document.getElementsByClassName("CodeMirror");
+      elements[0].style.fontSize = "12pt";
+      this.get('editor').on('scroll', (cm)=> {
+        if(this.get('highContrast')) {
+          this.setAllCodeWhite()
+        }
+      })
       this.begin();
     },
     onSessionChange(cm, change) {
@@ -1642,6 +1664,10 @@ export default Controller.extend({
         {
           this.cleanUpConnections();
         }
+        const logo = document.getElementById("main-logo");
+        logo.style.display = "block";
+        const log = document.getElementById("login-container");
+        log.style.top = "115px";
         this.get('cs').log('cleaned up');
         //this.removeWindowListener();
       }
@@ -1715,6 +1741,18 @@ export default Controller.extend({
       this.toggleProperty('doPlay')
       this.updatePlayButton();
     },
+    toggleHighContrast() {
+      this.toggleProperty('highContrast')
+      if(this.get('highContrast')) {
+        this.setAllCodeWhite()
+        document.getElementById("ace-container").style.opacity = 1.0
+      }
+      else
+      {
+        this.get('editor').refresh();
+        document.getElementById("ace-container").style.opacity = 0.93
+      }
+    },
     renderCode() {
       this.updateIFrame();
     },
@@ -1746,10 +1784,17 @@ export default Controller.extend({
       this.pauseOps();
     },
     zoomOut() {
-      this.zoomOut();
+      let elements = document.getElementsByClassName("CodeMirror");
+      const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
+      elements[0].style.fontSize = (currentFontSize - 1) + "pt";
+
+
+
     },
     zoomIn() {
-      this.zoomIn();
+      let elements = document.getElementsByClassName("CodeMirror");
+      const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
+      elements[0].style.fontSize = (currentFontSize + 1) + "pt";
     },
 
     //TABS

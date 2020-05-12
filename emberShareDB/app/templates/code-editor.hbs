@@ -1,4 +1,4 @@
-<div>
+<div id = "document-container">
   <header>
   <div id = "code-header-container" class = "limited-width-container">
   <h4><span>{{feedbackMessage}}</span></h4>
@@ -274,7 +274,7 @@
             <div></div>
             {{else}}
             <div id = "playback-container">
-              <p class = "side-menu-label">code</p>
+              <!-- <p class = "side-menu-label">code</p> -->
               <div class="tooltip">
                 <span class="tooltiptext">Play / Pause program</span>
               {{#bs-button
@@ -285,23 +285,37 @@
                 onClick=(action "playOrPause") }}
               {{/bs-button}}
             </div>
-              {{ops-player
+              <!-- {{ops-player
                 onSkip = (action 'skipOp')
                 onPlay = (action 'playOps')
                 onRewind = (action 'rewindOps')
                 onPause = (action 'pauseOps')
                 isPlaying = isPlayingOps
-              }}
-              <!-- {{#bs-button
-                class = "clear-btn"
-                icon="glyphicon glyphicon-zoom-in"
-                onClick=(action "zoomIn")}}
-              {{/bs-button}}
-              {{#bs-button
-                class = "clear-btn"
-                icon="glyphicon glyphicon-zoom-out"
-                onClick=(action "zoomOut")}}
-              {{/bs-button}} -->
+              }} -->
+              <div class="tooltip">
+                <span class="tooltiptext">Bigger Font</span>
+                {{#bs-button
+                  class = "clear-btn"
+                  icon="glyphicon glyphicon-zoom-in"
+                  onClick=(action "zoomIn")}}
+                {{/bs-button}}
+              </div>
+              <div class="tooltip">
+                <span class="tooltiptext">Smaller Font</span>
+                {{#bs-button
+                  class = "clear-btn"
+                  icon="glyphicon glyphicon-zoom-out"
+                  onClick=(action "zoomOut")}}
+                {{/bs-button}}
+              </div>
+              <div class="tooltip">
+                <span class="tooltiptext">Toggle Contrast</span>
+                {{#bs-button
+                  class = "clear-btn"
+                  icon="glyphicon glyphicon-text-background"
+                  onClick=(action "toggleHighContrast")}}
+                {{/bs-button}}
+              </div>
             </div>
             {{/if}}
             {{/if}}

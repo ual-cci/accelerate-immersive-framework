@@ -683,14 +683,12 @@ input[id="docName"]:-ms-input-placeholder {
 #ace-container {
   top: 0;
   right: 0;
-  opacity:0.98;
+  opacity:0.95;
   z-index: 10;
   width: 70vw;
   position: absolute;
   padding-left: 2em;
-  height: 100%;
   overflow-x: hidden;
-  overflow-y: scroll;
 }
 
 .ace_editor {
@@ -753,7 +751,7 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: rgba(100,100,100,0.6);
   top: 30px;
   left: -13px;
-  height:250px;
+  height:130px;
   width: 40px;
   z-index: 15;
 }
@@ -795,8 +793,7 @@ input[id="docName"]:-ms-input-placeholder {
   clear: right;
 }
 
-.clear-btn
-{
+.clear-btn {
   width:40px;
   border:none;
   border-radius: 0px;
@@ -1164,7 +1161,7 @@ input[id="docName"]:-ms-input-placeholder {
   height: auto;
 }
 
-.main-logo {
+#main-logo {
   width:250px;
   height:auto;
   background-position: center center;
@@ -2012,6 +2009,7 @@ $footer-grey:#303030;
 .CodeMirror {
   height:80vh;
 }
+
 
 .lint-error {
   font-family: arial;
