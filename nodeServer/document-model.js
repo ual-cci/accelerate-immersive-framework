@@ -36,7 +36,7 @@ var initDocAPI = function(
       disableDocAction: true,
       disableSpaceDelimitedActions: true,
   }
-  if(redisConfig.redis_key !== undefined) {
+  if(redisConfig !== undefined) {
     console.log("adding redis pubsub")
     const redis = require("redis");
     const client = redis.createClient(

@@ -196,8 +196,6 @@ export default Component.extend({
 
     setTimeout(updateHints, 100);
 
-
-
     editor.on('changes', (cm, change)=> {
       this.onChange(cm, change);
       clearTimeout(waiting);

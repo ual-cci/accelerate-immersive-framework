@@ -333,6 +333,7 @@ export default Controller.extend({
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
           const doc = this.get('currentDoc');
+          this.set('model.isCollaborative', false);
           if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
             this.get('cs').log("setting update source interval")
             this.set('updateSourceInterval', setInterval(()=>{
