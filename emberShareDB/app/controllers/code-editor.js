@@ -939,7 +939,9 @@ export default Controller.extend({
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
     const editor = this.get('editor');
-
+    if(this.get('highContrast')) {
+      this.setAllCodeWhite()
+    }
     this.get('cs').log("session change, surpress", surpress);
     if(!surpress
       && delta[0].origin !== "playback"
@@ -1784,14 +1786,19 @@ export default Controller.extend({
       this.pauseOps();
     },
     zoomOut() {
+      this.get('editor').refresh()
+      if(this.get('highContrast')) {
+        this.setAllCodeWhite()
+      }
       let elements = document.getElementsByClassName("CodeMirror");
       const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
       elements[0].style.fontSize = (currentFontSize - 1) + "pt";
-
-
-
     },
     zoomIn() {
+      this.get('editor').refresh()
+      if(this.get('highContrast')) {
+        this.setAllCodeWhite()
+      }
       let elements = document.getElementsByClassName("CodeMirror");
       const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
       elements[0].style.fontSize = (currentFontSize + 1) + "pt";
