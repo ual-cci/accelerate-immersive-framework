@@ -859,27 +859,38 @@ export default Controller.extend({
       const cd = viewer.contentDocument;
       if(!isEmpty(cd))
       {
-        cd.open();
+        const parent = document.getElementById("output-container");
+        const newIframe = document.createElement('iframe');
+        newIframe.setAttribute("id", "output-iframe");
+        newIframe.setAttribute("title", "output-iframe");
+        newIframe.setAttribute("name", this.get("iframeTitle"));
+        parent.appendChild(newIframe);
+        const newCd = newIframe.contentDocument;
+        newCd.open();
         try {
-          //this.get('cs').log("writing src", src);
-          cd.write(src);
+          newCd.write(src);
         }
         catch (err)
         {
           this.get('cs').log("error running code", err);
         }
-        cd.close();
-        //Have to do a hard reload on pause to kill processes e.g. Audio
-        if(src == "")
-        {
-          const parent = document.getElementById("output-container");
+        newCd.close();
+
+        const delay = src == "" ? 0 : 10;
+        viewer.setAttribute("id", "output-iframe-gone");
+        setTimeout(()=> {
+          cd.open();
+          try {
+            cd.write("");
+          }
+          catch (err)
+          {
+            this.get('cs').log("error running code", err);
+          }
+          cd.close();
           viewer.parentNode.removeChild(viewer);
-          const newIframe = document.createElement('iframe');
-          newIframe.setAttribute("id", "output-iframe");
-          newIframe.setAttribute("title", "output-iframe");
-          newIframe.setAttribute("name", this.get("iframeTitle"));
-          parent.appendChild(newIframe);
-        }
+        }, delay)
+
       }
     }
   },
@@ -923,7 +934,7 @@ export default Controller.extend({
     if(this.get('autoRender'))
     {
       this.flashAutoRender();
-      this.writeIframeContent("");
+      //this.writeIframeContent("");
       this.updateIFrame();
     }
     this.set('codeTimer', null);
