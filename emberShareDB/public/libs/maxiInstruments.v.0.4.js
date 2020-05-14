@@ -1,4 +1,5 @@
 //From Paul Adenot https://github.com/padenot/ringbuf.js
+
 class RingBuffer {
   static getStorageForCapacity(capacity, type) {
     if (!type.BYTES_PER_ELEMENT) {
@@ -275,12 +276,9 @@ class MaxiInstruments {
       	this.audioContext,
         (index, val, send = true)=>{
           this.globalParameters[index] = val;
-          if(this.paramWriter !== undefined)
+          if(this.paramWriter !== undefined && send)
           {
-            if(send)
-            {
-              this.paramWriter.enqueue(this.globalParameters);
-            }
+            this.paramWriter.enqueue(this.globalParameters);
           }
         }
       );
@@ -304,12 +302,9 @@ class MaxiInstruments {
       	this.audioContext,
         (index, val, send = true)=>{
           this.globalParameters[index] = val;
-          if(this.paramWriter !== undefined)
+          if(this.paramWriter !== undefined && send)
           {
-            if(send)
-            {
-              this.enqueue();
-            }
+            this.enqueue();
           }
         }
       );
@@ -500,7 +495,6 @@ class MaxiInstruments {
       this.node.port.postMessage({sendTick:true});
     }
   }
-
 }
 
 class MaxiInstrument {
@@ -544,6 +538,27 @@ class MaxiInstrument {
         instrument:this.instrument,
         index:this.index,
         val:(val * this.TICKS_PER_BEAT) - 1
+      }
+    });
+  }
+
+  noteon(freq = 60, vel = 127) {
+    console.log("instrument note on", this.instrument, this.index, freq, vel)
+    this.node.port.postMessage({
+      noteon:{
+        instrument:this.instrument,
+        index:this.index,
+        val:{f:freq, v:vel}
+      }
+    });
+  }
+
+  noteoff(freq = 60) {
+    this.node.port.postMessage({
+      noteoff:{
+        instrument:this.instrument,
+        index:this.index,
+        val:freq
       }
     });
   }
@@ -930,27 +945,6 @@ class MaxiSynth extends MaxiInstrument {
     this.sendDefaultParam();
   }
 
-  noteon(freq = 60, vel = 127) {
-    //console.log("instrument note on", freq, vel)
-    this.node.port.postMessage({
-      noteon:{
-        instrument:"synth",
-        index:this.index,
-        val:{f:freq, v:vel}
-      }
-    });
-  }
-
-  noteoff(freq = 60) {
-    this.node.port.postMessage({
-      noteoff:{
-        instrument:"synth",
-        index:this.index,
-        val:freq
-      }
-    });
-  }
-
   setOsc(osc) {
     this.setParam("oscFn", osc);
   }
@@ -964,7 +958,7 @@ class MaxiSynth extends MaxiInstrument {
   }
 
   preset(index) {
-    if(index > 0)
+    if(index > 0 && index < this.presets.length)
     {
       const preset = this.presets[index];
       Object.keys(preset.vals).forEach((key, i)=>{
@@ -1125,16 +1119,6 @@ class MaxiSampler extends MaxiInstrument {
     }
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
-  }
-
-  noteon(freq = 440, vel = 127) {
-    this.node.port.postMessage({
-      noteon:{
-        instrument:"sampler",
-        index:this.index,
-        val:{f:freq, v:vel}
-      }
-    });
   }
 
   getFreq(n)
