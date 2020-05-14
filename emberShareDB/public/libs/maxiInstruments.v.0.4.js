@@ -273,7 +273,7 @@ class MaxiInstruments {
         this.samplers.length,
         "sampler",
       	this.audioContext,
-        (index, val, send)=>{
+        (index, val, send = true)=>{
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined)
           {
@@ -302,7 +302,7 @@ class MaxiInstruments {
         this.synths.length,
         "synth",
       	this.audioContext,
-        (index, val, send)=>{
+        (index, val, send = true)=>{
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined)
           {
@@ -330,7 +330,7 @@ class MaxiInstruments {
   retryEnqueue(success, ctr) {
     if(!success && ctr < 20) {
       setTimeout(()=>{
-        console.log("retry", ctr)
+        //console.log("retry", ctr)
         success = this.paramWriter.enqueue(this.globalParameters);
         this.retryEnqueue(success, ctr + 1)
       }, 30)
@@ -943,7 +943,7 @@ class MaxiSynth extends MaxiInstrument {
 
   noteoff(freq = 60) {
     const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
-    this.enqueue(index, freq);
+    this.onParamUpdate(index, freq, true)
   }
 
   setOsc(osc) {
@@ -1130,12 +1130,6 @@ class MaxiSampler extends MaxiInstrument {
         val:{f:freq, v:vel}
       }
     });
-  }
-
-  noteoff(freq = 440) {
-    const offset = this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
-    const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + 17;
-    this.enqueue(index, freq);
   }
 
   getFreq(n)
