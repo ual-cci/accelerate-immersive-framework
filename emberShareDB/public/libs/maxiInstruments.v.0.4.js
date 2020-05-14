@@ -265,18 +265,22 @@ class MaxiInstruments {
   }
 
   addSampler() {
+    let sampler;
     if (this.audioContext !== undefined) {
       this.node.port.postMessage({addSampler:true});
-      let sampler = new MaxiSampler(
+      sampler = new MaxiSampler(
         this.node,
         this.samplers.length,
         "sampler",
       	this.audioContext,
-        (index, val)=>{
+        (index, val, send)=>{
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined)
           {
-            this.paramWriter.enqueue(this.globalParameters);
+            if(send)
+            {
+              this.paramWriter.enqueue(this.globalParameters);
+            }
           }
         }
       );
@@ -286,21 +290,26 @@ class MaxiInstruments {
       }
       this.samplers.push(sampler);
     }
+    return sampler;
   }
 
   addSynth() {
+    let synth;
     if(this.audioContext !== undefined) {
       this.node.port.postMessage({addSynth:true});
-      let synth = new MaxiSynth(
+      synth = new MaxiSynth(
         this.node,
         this.synths.length,
         "synth",
       	this.audioContext,
-        (index, val)=>{
+        (index, val, send)=>{
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined)
           {
-            this.paramWriter.enqueue(this.globalParameters);
+            if(send)
+            {
+              this.paramWriter.enqueue(this.globalParameters);
+            }
           }
         }
       );
@@ -310,6 +319,7 @@ class MaxiInstruments {
       }
       this.synths.push(synth);
     }
+    return synth;
   }
 
   setParam(name, val) {
@@ -624,14 +634,10 @@ class MaxiInstrument {
     if(this.parameters[name])
     {
       this.parameters[name].val = val
-      console.log("setting param", name, val)
       const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
       const paramIndex = Object.keys(this.parameters).indexOf(name);
       const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
-      if(send) {
-        console.log("sending param")
-        this.onParamUpdate(index, val)
-      }
+      this.onParamUpdate(index, val, send)
     }
   }
 
@@ -695,6 +701,7 @@ class MaxiSynth extends MaxiInstrument {
       "poly":{scale:1, translate:0, val:1},
       "oscFn":{scale:1, translate:0, val:0},
     }
+
     this.presets = [
       {title:"--presets--"},
       {title:"Peep",

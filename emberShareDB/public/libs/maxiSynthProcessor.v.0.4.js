@@ -270,7 +270,6 @@ class MaxiSamplerProcessor {
   }
 
   tick() {
-    console.log("tick", this.playHead)
     if(this.playHead >= this.loopTicks)
     {
       this.handleLoop();
@@ -707,7 +706,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         this._param_reader = new ArrayReader(b);
       }
       if(event.data.sendTick !== undefined) {
-        console.log("setting tick shared buffer")
         let sab2 = RingBuffer.getStorageForCapacity(31, Float32Array);
         let rb2 = new RingBuffer(sab2, Float32Array);
         this.loopWriter = new ArrayWriter(rb2);
@@ -806,7 +804,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
   }
 
   toggleIsPlaying() {
-    console.log("PAUSE/PLAY")
     this.isPlaying = !this.isPlaying;
     if(!this.isPlaying)
     {
