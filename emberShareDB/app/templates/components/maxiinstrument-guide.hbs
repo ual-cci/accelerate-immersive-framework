@@ -58,11 +58,11 @@ instruments.loadModules().then(()=> {
 MaxiSynth is a simple subtractive synthesiser.
 </p>
 <p class = "tutorial-text">
-Use the code below to add one synth, with the synths being stored in the instrument object’s .synth property. You can add as many as you like, depending on how much your set up can handle. Each will have its own GUI.
+Use the code below to add one synth, with the synths being stored in the instrument object’s .synth property. You can add up to 8, depending on how much your set up can handle. Each will have its own GUI. The constructor returns the synth, you can also access it from instruments.synths[0].
 </p>
 <pre>
 <code>
-instruments.addSynth();
+const syn = instruments.addSynth();
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -70,7 +70,7 @@ You can either have a two tone synthesiser where the frequency of each oscillato
 </p>
 <pre>
 <code>
-instruments.synths[0].useFreqSliders(true);
+syn.useFreqSliders(true);
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -78,7 +78,7 @@ You can then pick which parameters of the synth you can like to be controlled by
 </p>
 <pre>
 <code>
-instruments.synths[0].mapped = ["frequency", "frequency2"];
+syn.mapped = ["frequency", "frequency2"];
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -88,14 +88,19 @@ The synth also has a Randomise button that will select random values for your se
 5. MaxiSampler
 </p>
 <p class = "tutorial-text">
-Add a sampler using the code below. Similarly to the MaxiSynth, you can have as many samplers you want (each can hold 8 samples). They are stored in the instrument object’s samplers property. Each will have its own GUI, showing the controls for 4 samples at a time.
+Add a sampler using the code below. Similarly to the MaxiSynth, you can have up to 8 samplers (each can hold 8 samples). They are stored in the instrument object’s samplers property. Each will have its own GUI, showing the controls for 4 samples at a time.
 </p>
+<pre>
+<code>
+const sam = instruments.addSampler();
+</code>
+</pre>
 <p class = "tutorial-text">
 Load each sample by passing the url and an index (of the 8 slots) to store the sample.
 </p>
 <pre>
 <code>
-instruments.samplers[0].loadSample("909.wav", 0);
+sam.loadSample("909.wav", 0);
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -103,7 +108,7 @@ Similarly to the MaxiSynth, you can then pick which parameters of the synth you 
 </p>
 <pre>
 <code>
-instruments.samplers[0].mapped = ["rate_0", "gain_1"];
+sam.mapped = ["rate_0", "gain_1"];
 </code>
 </pre>
 <p class = "tutorial-heading">
@@ -161,8 +166,8 @@ Both samplers and synths respond to simple noteon, noteoff commands. If you are 
 </p>
 <pre>
 <code>
-instruments.synths[0].noteon(440, 127);
-instruments.synths[0].noteoff(440);
+syn.noteon(440, 127);
+syn.noteoff(440);
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -170,8 +175,8 @@ For samplers, noteoffs are not necessary and you provide the index of the sample
 </p>
 <pre>
 <code>
-instruments.samplers[0].noteon(2, 60);
-instruments.samplers[0].noteon(2);
+sam.noteon(2, 60);
+sam.noteon(2);
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -183,19 +188,24 @@ The MaxiInstruments object has a global clock where you can specify a tempo (bpm
 <pre>
 <code>
 instruments.setTempo(80);
-instruments.setLoop(96); //4 Beats
+instruments.setLoop(96); //4 Beats, set all instruments
 instruments.setLoopBeats(4); //Equivalent in beats
+syn.setLoop(96); //Or set individual loops for each instrument
+syn.setLoopBeats(4); //Equivalent in beats
 instruments.playPause(); //Toggle playback
 instruments.rewind(); //Reset clock to 0
 </code>
 </pre>
 <p class = "tutorial-text">
-The MaxiInstruments object also has a callback called onTick(), called on every tick of the clock. As the callback is being executed on the main thread, it does not have any of the advantages of the separate audio thread where the clock resides, as such may be effected by interruptions. It relies on the messaging system between threads and whilst reasonably reliable, it is not advised to use this for time critical actions and it is not guaranteed to be sample-accurately-in-sync with events being triggered on the audio thread.
+The MaxiInstruments object also has a callback called onTick(), called on every tick of the clock, return the playHead for each instrument. If you have the same loop for all instruments, you only need to care about the first item in this array, if not the playheads are returned in the order they were added.
+</p>
+<p class = "tutorial-text">
+As the callback is being executed on the main thread, it does not have any of the advantages of the separate audio thread where the clock resides, as such may be effected by interruptions. It relies on the messaging system between threads and whilst reasonably reliable, it is not advised to use this for time critical actions and it is not guaranteed to be sample-accurately-in-sync with events being triggered on the audio thread.
 </p>
 <pre>
 <code>
-instruments.setOnTick((playHead)=>{
-  console.log(playHead)
+instruments.setOnTick((playHeads)=>{
+  console.log(playHeads)
 })
 </code>
 </pre>
@@ -210,7 +220,7 @@ const synthSeq = {
     {pitch:67, start:49, end:72, velocity:60},
   ],
 };
-instruments.synths[0].setSequence(synthSeq);
+syn.setSequence(synthSeq);
 
 const samplerSeq = {
   notes:[
@@ -218,7 +228,7 @@ const samplerSeq = {
     {pitch:1, start:49},
   ],
 };
-instruments.samplers[0].setSequence(samplerSeq);
+sam.setSequence(samplerSeq);
 	</code>
 </pre>
 <p class = "tutorial-text">
@@ -267,7 +277,7 @@ rnn.initialize().then(()=> {
     instruments.setLoop(loop)
 
     //Set the note sequence
-    instruments.synths[0].setSequence(newSeq);
+    syn.setSequence(newSeq);
   });
 });
 	</code>

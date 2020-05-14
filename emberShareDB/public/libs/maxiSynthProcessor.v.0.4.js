@@ -1,5 +1,5 @@
-//import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
-import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
+import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js"
+//import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
 
 //From Paul Adenot https://github.com/padenot/ringbuf.js
 
@@ -814,7 +814,9 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
   }
 
   rewind() {
-    this.myClock.playHead = -1;
+    this.getInstruments().forEach((s)=> {
+      s.playHead = 0;
+    });
   }
 
   onSample() {
