@@ -394,7 +394,7 @@ class Learner {
       }
       else
       {
-        this.runEnd(event.data[0])
+        this.runEnd(event.data)
       }
     }
   }
@@ -436,9 +436,9 @@ class Learner {
       {
         if(this.gui)
         {
-          this.outputGUI[i].value = data;
+          this.outputGUI[i].value = data[i];
         }
-        this.y[i] = data;
+        this.y[i] = data[i];
       }
       this.onOutput(this.y);
     }
