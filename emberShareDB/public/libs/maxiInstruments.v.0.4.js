@@ -1,58 +1,4 @@
 //From Paul Adenot https://github.com/padenot/ringbuf.js
-
- class ParameterWriter {
-  // From a RingBuffer, build an object that can enqueue a parameter change in
-  // the queue.
-  constructor(ringbuf) {
-    if (ringbuf.type() != "Uint8Array") {
-      throw "This class requires a ring buffer of Uint8Array";
-    }
-    const SIZE_ELEMENT = 5;
-    this.ringbuf = ringbuf;
-    this.mem = new ArrayBuffer(SIZE_ELEMENT);
-    this.array = new Uint8Array(this.mem);
-    this.view = new DataView(this.mem);
-  }
-  // Enqueue a parameter change for parameter of index `index`, with a new value
-  // of `value`.
-  // Returns true if enqueuing suceeded, false otherwise.
-  enqueue_change(index, value) {
-    const SIZE_ELEMENT = 5;
-    this.view.setUint8(0, index);
-    this.view.setFloat32(1, value);
-    if (this.ringbuf.available_write() < SIZE_ELEMENT) {
-      //console.log("not enough available write")
-      return false;
-    }
-    const written = this.ringbuf.push(this.array);
-    if(written != SIZE_ELEMENT)
-    {
-      //console.log(written)
-    }
-    return written == SIZE_ELEMENT;
-  }
-}
-
-class ParameterReader {
-  constructor(ringbuf) {
-    const SIZE_ELEMENT = 5;
-    this.ringbuf = ringbuf;
-    this.mem = new ArrayBuffer(SIZE_ELEMENT);
-    this.array = new Uint8Array(this.mem);
-    this.view = new DataView(this.mem);
-  }
-  dequeue_change(o) {
-    if (this.ringbuf.empty()) {
-      return false;
-    }
-    var rv = this.ringbuf.pop(this.array);
-    o.index = this.view.getUint8(0);
-    o.value = this.view.getFloat32(1);
-
-    return true;
-  }
-}
-
 class RingBuffer {
   static getStorageForCapacity(capacity, type) {
     if (!type.BYTES_PER_ELEMENT) {
@@ -90,9 +36,9 @@ class RingBuffer {
   // as passed in the ctor, to be written to the queue.
   // Returns the number of elements written to the queue.
   push(elements) {
+
     var rd = Atomics.load(this.read_ptr, 0);
     var wr = Atomics.load(this.write_ptr, 0);
-
     if ((wr + 1) % this._storage_capacity() == rd) {
       // full
       return 0;
@@ -121,7 +67,6 @@ class RingBuffer {
   pop(elements) {
     var rd = Atomics.load(this.read_ptr, 0);
     var wr = Atomics.load(this.write_ptr, 0);
-
     if (wr == rd) {
       return 0;
     }
@@ -215,12 +160,60 @@ class RingBuffer {
   }
 }
 
+class ArrayWriter {
+  // From a RingBuffer, build an object that can enqueue enqueue audio in a ring
+  // buffer.
+  constructor(ringbuf) {
+    if (ringbuf.type() != "Float32Array") {
+      throw "This class requires a ring buffer of Float32Array";
+    }
+    this.ringbuf = ringbuf;
+  }
+  // Enqueue a buffer of interleaved audio into the ring buffer.
+  // Returns the number of samples that have been successfuly written to the
+  // queue. `buf` is not written to during this call, so the samples that
+  // haven't been written to the queue are still available.
+  enqueue(buf) {
+    return this.ringbuf.push(buf);
+  }
+  // Query the free space in the ring buffer. This is the amount of samples that
+  // can be queued, with a guarantee of success.
+  available_write() {
+    return this.ringbuf.available_write();
+  }
+}
+
+class ArrayReader {
+  constructor(ringbuf) {
+    if (ringbuf.type() != "Float32Array") {
+      throw "This class requires a ring buffer of Float32Array";
+    }
+    this.ringbuf = ringbuf;
+  }
+  // Attempt to dequeue at most `buf.length` samples from the queue. This
+  // returns the number of samples dequeued. If greater than 0, the samples are
+  // at the beginning of `buf`
+  dequeue(buf) {
+    if (this.ringbuf.empty()) {
+      return false;
+    }
+    return this.ringbuf.pop(buf);
+  }
+  // Query the occupied space in the queue. This is the amount of samples that
+  // can be read with a guarantee of success.
+  available_read() {
+    return this.ringbuf.available_read();
+  }
+}
+
 
 
 class MaxiInstruments {
 
   constructor() {
     this.samplers = [];
+    this.globalParameters = new Float32Array(256);
+    this.loops = new Float32Array(16);
     this.synths = [];
     this.sendTick = false;
     this.synthProcessorName = 'maxi-synth-processor';
@@ -279,7 +272,13 @@ class MaxiInstruments {
         this.samplers.length,
         "sampler",
       	this.audioContext,
-        this.paramWriter
+        (index, val)=>{
+          this.globalParameters[index] = val;
+          if(this.paramWriter !== undefined)
+          {
+            this.paramWriter.enqueue(this.globalParameters);
+          }
+        }
       );
       if(this.guiElement !== undefined)
       {
@@ -297,7 +296,13 @@ class MaxiInstruments {
         this.synths.length,
         "synth",
       	this.audioContext,
-        this.paramWriter
+        (index, val)=>{
+          this.globalParameters[index] = val;
+          if(this.paramWriter !== undefined)
+          {
+            this.paramWriter.enqueue(this.globalParameters);
+          }
+        }
       );
       if(this.guiElement !== undefined)
       {
@@ -316,11 +321,11 @@ class MaxiInstruments {
   }
 
   setLoop(val) {
-    this.node.port.postMessage({loop: val - 1});
+    this.node.port.postMessage({loopAll: val - 1});
   }
 
   setLoopBeats(val) {
-    this.node.port.postMessage({loop: (val * this.TICKS_PER_BEAT) - 1});
+    this.node.port.postMessage({loopAll: (val * this.TICKS_PER_BEAT) - 1});
   }
 
   setTempo(tempo) {
@@ -344,14 +349,14 @@ class MaxiInstruments {
           processorOptions: {}
         }
       );
-
-      let sab2 = RingBuffer.getStorageForCapacity(31, Uint8Array);
-      let rb2 = new RingBuffer(sab2, Uint8Array);
-      this.paramWriter = new ParameterWriter(rb2);
       window.node = this.node;
+
+      let sab3 = RingBuffer.getStorageForCapacity(256, Float32Array);
+      let rb3 = new RingBuffer(sab3, Float32Array);
+      this.paramWriter = new ArrayWriter(rb3);
       this.node.port.postMessage({
         type: "recv-param-queue",
-        data: sab2
+        data: sab3
       });
       this.node.onprocessorerror = event => {
         console.log(`MaxiProcessor Error detected: ` + event.data);
@@ -360,23 +365,18 @@ class MaxiInstruments {
         console.log(`MaxiProcessor state change detected: ` + audioWorkletNode.processorState);
       }
       this.node.port.onmessage = event => {
-        if (event.data.type === "recv-param-queue")
+        if (event.data.type === "recv-loop-queue")
         {
-          const b = new RingBuffer(event.data.data, Uint8Array);
-          this._param_reader = new ParameterReader(b);
-          this.o = { index: 0, value: 0 };
+          const b = new RingBuffer(event.data.data, Float32Array);
+          this.loopReader = new ArrayReader(b);
           setInterval(()=> {
-            if(this._param_reader !== undefined)
+            if(this.loopReader !== undefined)
             {
-              while(!this._param_reader.ringbuf.empty())
+              if(this.loopReader.dequeue(this.loops))
               {
-                if(this._param_reader.dequeue_change(this.o))
+                if(this.onTick !== undefined)
                 {
-                  const v = this.o.value;
-                  if(this.onTick !== undefined)
-                  {
-                    this.onTick(v);
-                  }
+                  this.onTick(this.loops);
                 }
               }
             }
@@ -480,12 +480,12 @@ class MaxiInstruments {
 
 class MaxiInstrument {
 
-  constructor(node, index, instrument, audioContext, paramWriter) {
+  constructor(node, index, instrument, audioContext, onParamUpdate) {
     this.node = node;
     this.index = index;
     this.instrument = instrument;
     this.audioContext = audioContext;
-    this.paramWriter = paramWriter;
+    this.onParamUpdate = onParamUpdate;
     this.mapped = [];
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
@@ -501,6 +501,26 @@ class MaxiInstrument {
     {
       this.docid == window.frameElement.name
     }
+  }
+
+  setLoop(val) {
+    this.node.port.postMessage({
+      loop:{
+        instrument:this.instrument,
+        index:this.index,
+        val:val
+      }
+    });
+  }
+
+  setLoopBeats(val) {
+    this.node.port.postMessage({
+      loop:{
+        instrument:this.instrument,
+        index:this.index,
+        val:(val * this.TICKS_PER_BEAT) - 1
+      }
+    });
   }
 
   setSequence(seq, instruments = [], muteDrums = false) {
@@ -592,55 +612,26 @@ class MaxiInstrument {
   }
 
   sendDefaultParam() {
-    Object.keys(this.parameters).forEach((p, i)=> {
-      setTimeout(()=> {
-        this.setParam(p, this.parameters[p].val)
-      }, 20 * i);
+    const keys = Object.keys(this.parameters);
+    keys.forEach((p, i)=> {
+      const send = i < keys.length - 1 ? false : true;
+      this.setParam(p, this.parameters[p].val, send)
     })
   }
 
-  setParam(name, val) {
-    let param = this.node.parameters.get(name);
+  setParam(name, val, send = true) {
     if(val < 0) val = 0.00;
-    if(param)
+    if(this.parameters[name])
     {
-      param.setValueAtTime(val, this.context.currentTime)
-    }
-    else if (this.parameters[name])
-    {
-      this.parameters[name].val = val;
-      // this.node.port.postMessage({
-      //   "parameters":{
-      //     instrument:this.instrument,
-      //     index:this.index,
-      //     val:this.parameters
-      //   }
-      // });
-
-        const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
-        const paramIndex = Object.keys(this.parameters).indexOf(name);
-        const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
-        this.enqueue(index, val);
-    }
-  }
-
-  enqueue(index, val)
-  {
-    if(this.paramWriter !== undefined)
-    {
-      let success = this.paramWriter.enqueue_change(index, val);
-      this.retryEnqueue(success, index, val, 0)
-    }
-  }
-
-  retryEnqueue(success, index, val, ctr) {
-    if(!success && ctr < 20)
-    {
-      setTimeout(()=>{
-        //console.log("RETRY", index, val, ctr);
-        success = this.paramWriter.enqueue_change(index, val);
-        this.retryEnqueue(success, index, val, ctr + 1)
-      }, 30)
+      this.parameters[name].val = val
+      console.log("setting param", name, val)
+      const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+      const paramIndex = Object.keys(this.parameters).indexOf(name);
+      const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
+      if(send) {
+        console.log("sending param")
+        this.onParamUpdate(index, val)
+      }
     }
   }
 
@@ -683,8 +674,8 @@ class MaxiInstrument {
 
 class MaxiSynth extends MaxiInstrument {
 
-  constructor(node, index, instrument, audioContext, paramWriter) {
-    super(node, index, instrument, audioContext, paramWriter);
+  constructor(node, index, instrument, audioContext, onParamUpdate) {
+    super(node, index, instrument, audioContext, onParamUpdate);
 
     this.parameters = {
       "gain":{scale:1, translate:0, val:1},
@@ -704,86 +695,7 @@ class MaxiSynth extends MaxiInstrument {
       "poly":{scale:1, translate:0, val:1},
       "oscFn":{scale:1, translate:0, val:0},
     }
-    this.sendDefaultParam();
-  }
-
-  noteon(freq = 60, vel = 127) {
-    //console.log("instrument note on", freq, vel)
-    this.node.port.postMessage({
-      noteon:{
-        instrument:"synth",
-        index:this.index,
-        val:{f:freq, v:vel}
-      }
-    });
-  }
-
-  noteoff(freq = 60) {
-    const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
-    this.enqueue(index, freq);
-  }
-
-  setOsc(osc) {
-    this.setParam("oscFn", osc);
-  }
-
-  getParamKey() {
-    return this.docId + "_synth_" + this.index;
-  }
-
-  getFreq(n) {
-    return Nexus.mtof(n);
-  }
-
-  addGUI(element) {
-    const rowLength = 4;
-    const table = document.createElement("TABLE");
-    table.classList.add("maxi-table")
-    let row = table.insertRow();
-    element.appendChild(table);
-
-    const title = document.createElement('p');
-    title.innerHTML = "MaxiSynth";
-    title.classList.add("title-label")
-
-    const randomButton = document.createElement("BUTTON");
-    randomButton.classList.add("random-btn")
-    randomButton.classList.add("maxi-btn")
-    randomButton.innerHTML = "Randomise"
-    randomButton.style.width = "70px";
-
-    randomButton.onclick = ()=>{
-      this.randomise();
-    }
-
-    const oscillatorSelector = document.createElement("select");
-    ["sin", "tri", "saw", "noise"].forEach((osc, i)=> {
-      const option = document.createElement("option");
-      option.value = i;
-      option.text = osc;
-      oscillatorSelector.appendChild(option);
-    });
-    oscillatorSelector.classList.add("maxi-selector")
-
-    oscillatorSelector.onchange = ()=> {
-      const index = parseInt(oscillatorSelector.selectedIndex);
-      this.onGUIChange(index, Object.keys(this.parameters).length - 1);
-    }
-    this.outputGUI.oscFn = oscillatorSelector;
-
-    const printParamsButton = document.createElement("BUTTON");
-    printParamsButton.innerHTML = "Dump"
-    printParamsButton.onclick = ()=>{
-      let str = "vals:{\n";
-      const vals = this.getParamValues();
-      Object.keys(vals).forEach((key)=>{
-		str += "\t" + key + ":" + vals[key] + ",\n"
-      });
-      str += "}"
-      console.log(str)
-    }
-
-    const presets = [
+    this.presets = [
       {title:"--presets--"},
       {title:"Peep",
        vals:{
@@ -823,7 +735,7 @@ class MaxiSynth extends MaxiInstrument {
           adsrFilterMod:1,
           cutoff:1,
           Q:1,
-    	}
+      }
       },
       {title:"Snare",
         vals:{
@@ -866,7 +778,7 @@ class MaxiSynth extends MaxiInstrument {
         }
       },
       {title:"Strings",
-      	vals:{
+        vals:{
             oscFn:2,
             frequency:0.44,
             frequency2:0.22,
@@ -926,7 +838,7 @@ class MaxiSynth extends MaxiInstrument {
         }
       },
       {title:"Fairground",
-      	vals:{
+        vals:{
           oscFn:0,
           frequency:0.44,
           frequency2:0.22,
@@ -963,7 +875,7 @@ class MaxiSynth extends MaxiInstrument {
           adsrFilterMod:1,
           cutoff:1,
           Q:0.5
-      	},
+        },
       },
       {title:"Skep",
       vals:{
@@ -983,11 +895,107 @@ class MaxiSynth extends MaxiInstrument {
         adsrFilterMod:0,
         cutoff:0.86,
         Q:0.25
-      	}
+        }
       }
     ];
+    this.sendDefaultParam();
+  }
+
+  noteon(freq = 60, vel = 127) {
+    //console.log("instrument note on", freq, vel)
+    this.node.port.postMessage({
+      noteon:{
+        instrument:"synth",
+        index:this.index,
+        val:{f:freq, v:vel}
+      }
+    });
+  }
+
+  noteoff(freq = 60) {
+    const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
+    this.enqueue(index, freq);
+  }
+
+  setOsc(osc) {
+    this.setParam("oscFn", osc);
+  }
+
+  getParamKey() {
+    return this.docId + "_synth_" + this.index;
+  }
+
+  getFreq(n) {
+    return Nexus.mtof(n);
+  }
+
+  preset(index) {
+    if(index > 0)
+    {
+      const preset = this.presets[index];
+      Object.keys(preset.vals).forEach((key, i)=>{
+        const val = preset.vals[key];
+        if(this.outputGUI[key])
+        {
+          this.outputGUI[key].value = val;
+          this.onChange(val, key);
+        }
+      });
+      this.saveParamValues();
+    }
+  }
+
+  addGUI(element) {
+    const rowLength = 4;
+    const table = document.createElement("TABLE");
+    table.classList.add("maxi-table")
+    let row = table.insertRow();
+    element.appendChild(table);
+
+    const title = document.createElement('p');
+    title.innerHTML = "MaxiSynth";
+    title.classList.add("title-label")
+
+    const randomButton = document.createElement("BUTTON");
+    randomButton.classList.add("random-btn")
+    randomButton.classList.add("maxi-btn")
+    randomButton.innerHTML = "Randomise"
+    randomButton.style.width = "70px";
+
+    randomButton.onclick = ()=>{
+      this.randomise();
+    }
+
+    const oscillatorSelector = document.createElement("select");
+    ["sin", "tri", "saw", "noise"].forEach((osc, i)=> {
+      const option = document.createElement("option");
+      option.value = i;
+      option.text = osc;
+      oscillatorSelector.appendChild(option);
+    });
+    oscillatorSelector.classList.add("maxi-selector")
+
+    oscillatorSelector.onchange = ()=> {
+      const index = parseInt(oscillatorSelector.selectedIndex);
+      this.onGUIChange(index, Object.keys(this.parameters).length - 1);
+    }
+    this.outputGUI.oscFn = oscillatorSelector;
+
+    const printParamsButton = document.createElement("BUTTON");
+    printParamsButton.innerHTML = "Dump"
+    printParamsButton.onclick = ()=>{
+      let str = "vals:{\n";
+      const vals = this.getParamValues();
+      Object.keys(vals).forEach((key)=>{
+		str += "\t" + key + ":" + vals[key] + ",\n"
+      });
+      str += "}"
+      console.log(str)
+    }
+
+
     const presetSelector = document.createElement("select");
-    presets.forEach((preset)=> {
+    this.presets.forEach((preset)=> {
       const option = document.createElement("option");
       option.value = 0;
       option.text = preset.title;
@@ -997,21 +1005,7 @@ class MaxiSynth extends MaxiInstrument {
     presetSelector.style["margin-left"] = "35px";
     presetSelector.onchange = ()=> {
       const index = parseInt(presetSelector.selectedIndex);
-      if(index > 0)
-      {
-        const preset = presets[index];
-        Object.keys(preset.vals).forEach((key, i)=>{
-          setTimeout(()=> {
-            const val = preset.vals[key];
-            if(this.outputGUI[key])
-            {
-              this.outputGUI[key].value = val;
-              this.onChange(val, key);
-            }
-          }, 10 * i);
-        });
-        this.saveParamValues();
-      }
+      this.preset(index);
     }
 
     let cell = row.insertCell();
@@ -1076,8 +1070,8 @@ class MaxiSynth extends MaxiInstrument {
 
 class MaxiSampler extends MaxiInstrument {
 
-   constructor(node, index, instrument, audioContext, paramWriter) {
-    super(node, index, instrument, audioContext, paramWriter);
+   constructor(node, index, instrument, audioContext, onParamUpdate) {
+    super(node, index, instrument, audioContext, onParamUpdate);
     const core = {
       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
       "rate":{scale:1, translate:0, min:0, max:4, val:1},
