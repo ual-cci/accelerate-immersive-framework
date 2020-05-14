@@ -942,8 +942,13 @@ class MaxiSynth extends MaxiInstrument {
   }
 
   noteoff(freq = 60) {
-    const index = (this.index * this.NUM_SYNTH_PARAMS) + 17;
-    this.onParamUpdate(index, freq, true)
+    this.node.port.postMessage({
+      noteoff:{
+        instrument:"synth",
+        index:this.index,
+        val:freq
+      }
+    });
   }
 
   setOsc(osc) {
