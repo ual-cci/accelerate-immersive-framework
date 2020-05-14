@@ -308,7 +308,7 @@ class MaxiInstruments {
           {
             if(send)
             {
-              this.paramWriter.enqueue(this.globalParameters);
+              this.enqueue();
             }
           }
         }
@@ -320,6 +320,21 @@ class MaxiInstruments {
       this.synths.push(synth);
     }
     return synth;
+  }
+
+  enqueue() {
+      let success = this.paramWriter.enqueue(this.globalParameters);
+      this.retryEnqueue(success, 0)
+  }
+
+  retryEnqueue(success, ctr) {
+    if(!success && ctr < 20) {
+      setTimeout(()=>{
+        console.log("retry", ctr)
+        success = this.paramWriter.enqueue(this.globalParameters);
+        this.retryEnqueue(success, ctr + 1)
+      }, 30)
+    }
   }
 
   setParam(name, val) {
@@ -572,14 +587,19 @@ class MaxiInstrument {
             end = start + 1;
           }
         }
-      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul, v:n.velocity});
+        let v = 127;
+        if(Object.keys(n).includes("velocity"))
+        {
+          v = n.velocity;
+        }
+      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul, v:v});
       	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});
       }
     });
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
-
+    console.log(toAdd)
     this.node.port.postMessage({
       sequence:{
         instrument:this.instrument,
@@ -600,9 +620,9 @@ class MaxiInstrument {
     this.onChange(val, this.mapped[index]);
   }
 
-  onChange(val, key) {
+  onChange(val, key, send = true) {
     const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
-    this.setParam(key, scaled);
+    this.setParam(key, scaled, send);
   }
 
   randomise() {
@@ -624,7 +644,7 @@ class MaxiInstrument {
   sendDefaultParam() {
     const keys = Object.keys(this.parameters);
     keys.forEach((p, i)=> {
-      const send = i < keys.length - 1 ? false : true;
+      const send = i <= keys.length - 1
       this.setParam(p, this.parameters[p].val, send)
     })
   }
@@ -658,12 +678,14 @@ class MaxiInstrument {
     const vals = JSON.parse(window.localStorage.getItem(key))
     if(vals)
     {
-      Object.keys(vals).forEach((key)=>{
+      const keys = Object.keys(vals);
+      keys.forEach((key, i)=>{
         const val = parseFloat(vals[key]);
         if(this.outputGUI[key])
         {
+          const send = i >= keys.length - 1;
           this.outputGUI[key].value = val;
-          this.onChange(val, key);
+          this.onChange(val, key, send);
         }
       });
     }
