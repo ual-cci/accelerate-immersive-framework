@@ -113,7 +113,7 @@ export default Controller.extend({
     this.set('scrollPositions',{});
     // console.log("hijacking console")
     // this.hijackConsoleOutput();
-
+    this.set('colabMode', config.colabMode)
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {
@@ -332,8 +332,10 @@ export default Controller.extend({
           }
           this.set('doPlay',!this.doPlayOnLoad());
           this.updatePlayButton();
+          if(config.colabMode === false) {
+            this.set('model.isCollaborative', false);
+          }
           const doc = this.get('currentDoc');
-          //this.set('model.isCollaborative', false);
           if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
             this.get('cs').log("setting update source interval")
             this.set('updateSourceInterval', setInterval(()=>{

@@ -152,11 +152,13 @@
         {{input tabIndex = "0" type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
         <span class="tooltiptext">Dont play on open</span>
       </div>
+      {{#if colabMode}}
       <div class="tooltip">
         <label class = "doc-checkbox" for="colabCheckbox">COLLABORATIVE?</label>
         {{input tabIndex = "0" type="checkbox" checked=model.isCollaborative click=(action 'toggleCollaborative')}}
         <span class="tooltiptext">COLLABORATIVE EDITTING</span>
       </div>
+      {{/if}}
       {{#if canEditDoc}}
         <div class="tooltip">
           <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
