@@ -466,8 +466,10 @@ class MaxiSynthProcessor {
         if(this.parameters.poly.val == 1)
         {
           const t = this.getTriggeredForFreq(f);
-          this.release(t);
-          this.remove(this.triggered, t);
+          if(t !== undefined) {
+            this.release(t);
+            this.remove(this.triggered, t);
+          }
         }
         else
         {
@@ -602,9 +604,7 @@ class MaxiSynthProcessor {
       const oscFn = this.getOscFn(this.parameters.oscFn.val);
       this.dcoOut = 0;
       const out = this.triggered.concat(this.released);
-      // if(this.samplePtr % 1000 == 0) {
-      //   //console.log(this.triggered.length, this.released.length)
-      // }
+
       for(let o of out)
       {
         const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
@@ -616,6 +616,20 @@ class MaxiSynthProcessor {
         //const ampMod = envOut / 3;
 
         let f = o.f;
+        if(!poly)
+        {
+          if(o.o % 2 == 0)
+          {
+            f = this.parameters.frequency.val
+          }
+          else
+          {
+            f = this.parameters.frequency2.val
+          }
+        }
+        // if(this.samplePtr % 1000 == 0) {
+        //   console.log(o.o, f, poly)
+        // }
         //f = f < 0 ? 0 : f;
         let osc;
         if(oscFn === "noise")
@@ -633,7 +647,7 @@ class MaxiSynthProcessor {
       //Filter
 
       let filterEnv = 1;
-      const filterOsc = lfoOut * this.parameters.lfoFilterMod.val;
+      const filterOsc = ((lfoOut + 1)/2) * this.parameters.lfoFilterMod.val;
       let cutoff = this.parameters.cutoff.val;
       cutoff = (cutoff * filterEnv) + filterOsc;
       if (cutoff > 2000) {

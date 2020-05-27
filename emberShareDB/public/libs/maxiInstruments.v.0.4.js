@@ -518,7 +518,7 @@ class MaxiInstrument {
     this.docId = "local";
     if(window.frameElement)
     {
-      this.docid == window.frameElement.name
+      this.docId = window.frameElement.name
     }
   }
 
@@ -564,13 +564,27 @@ class MaxiInstrument {
   }
 
   setSequence(seq, instruments = [], muteDrums = false) {
-    const notes = seq.notes;
+    let notes = seq.notes;
    	let toAdd = [];
     let mul = 1;
     if(seq.quantizationInfo)
     {
 		  mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
     }
+    let newNotes = [];
+    for(let i = 0; i < notes.length; i++) {
+      const n = notes[i];
+      if(Array.isArray(n.pitch)) {
+        n.pitch.forEach((p)=> {
+          let newNote = JSON.parse(JSON.stringify(n));
+          newNote.pitch = p;
+          newNotes.push(newNote)
+        });
+        notes.splice(i, 1);
+        --i;
+      }
+    }
+    notes = notes.concat(newNotes)
     notes.forEach((n)=> {
       let doAdd = true;
       if(instruments.length > 0)

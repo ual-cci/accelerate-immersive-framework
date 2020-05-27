@@ -21,6 +21,7 @@ Router.map(function() {
   this.route('inputs');
   this.route('outputs');
   this.route('people');
+  this.route('nime2020');
 });
 
 export default Router;
