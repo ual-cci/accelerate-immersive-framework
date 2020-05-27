@@ -82,7 +82,6 @@ class Learner {
     this.mainContainer.appendChild(table)
     let row = table.insertRow();
     let cell = row.insertCell();
-    cell.colSpan = 2;
     let recBtn = document.createElement("BUTTON");
     recBtn.classList.add("learner-btn")
     recBtn.id = "rec-btn";
@@ -92,7 +91,6 @@ class Learner {
     recBtn.innerHTML = "Record";
     cell.appendChild(recBtn);
     cell = row.insertCell();
-    cell.colSpan = 2;
     const countDown = document.createElement('span')
     countDown.id = "countdown-span";
     countDown.classList.add("learner-label");
@@ -100,7 +98,6 @@ class Learner {
 
 	  row = table.insertRow();
     cell = row.insertCell();
-    cell.colSpan = 2;
     let trainBtn = document.createElement("BUTTON");
     trainBtn.id = "train-btn";
     trainBtn.classList.add("learner-btn")
@@ -112,7 +109,6 @@ class Learner {
 
     row = table.insertRow();
     cell = row.insertCell();
-    cell.colSpan = 2;
     let runBtn = document.createElement("BUTTON");
     runBtn.id = "run-btn";
     runBtn.onclick = ()=>{
@@ -125,40 +121,25 @@ class Learner {
 
     row = table.insertRow();
     cell = row.insertCell();
-    cell.colSpan = 1;
     let deleteLastBtn = document.createElement("BUTTON");
     deleteLastBtn.classList.add("learner-btn")
-    deleteLastBtn.classList.add("learner-btn-3");
     deleteLastBtn.onclick = ()=>{
       this.deleteLastRound();
     };
-    deleteLastBtn.innerHTML = "Clear Prev";
+    deleteLastBtn.innerHTML = "Delete Last Round";
     cell.appendChild(deleteLastBtn);
 
-    let deleteBtn = document.createElement("BUTTON");
     cell = row.insertCell();
-    cell.colSpan = 1;
+    let deleteBtn = document.createElement("BUTTON");
     deleteBtn.classList.add("learner-btn");
-    deleteBtn.classList.add("learner-btn-3");
     deleteBtn.onclick = ()=>{
       this.clear();
     };
-    deleteBtn.innerHTML = "Clear All";
+    deleteBtn.innerHTML = "Clear";
     cell.appendChild(deleteBtn);
-
-    cell = row.insertCell();
-    cell.colSpan = 2;
-    let saveBtn = document.createElement("BUTTON");
-    saveBtn.classList.add("learner-btn");
-    saveBtn.onclick = ()=>{
-      this.downloadTrainingData();
-    };
-    saveBtn.innerHTML = "Download Data";
-    cell.appendChild(saveBtn);
 
     row = table.insertRow();
     cell = row.insertCell();
-    cell.colSpan = 2;
     let datalog = document.createElement('span')
     datalog.id = "datalog";
     datalog.classList.add("learner-label");

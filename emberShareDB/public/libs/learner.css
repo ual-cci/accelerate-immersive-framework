@@ -35,6 +35,10 @@ span {
   color:black;
 }
 
+.learner-btn-3 {
+  width:70px !important;
+}
+
 .learner-btn {
   background-color:#4D43EB;
   border:none;
