@@ -4,7 +4,7 @@ export default Controller.extend({
   examples:computed(()=>{return [
     {title:"External", docs:[
       //OSC
-      {docid:"247e4538-0366-b735-9052-0e875a96a140",desc:"As you cannot OSC directly form a browser, this connects to a local Node.js program via webosckets then forwards the data out via OSC, where you can do with it what you will."},
+      {docid:"247e4538-0366-b735-9052-0e875a96a140",desc:"As you cannot OSC directly from a browser, this connects to a local Node.js program via webosckets then forwards the data out via OSC, where you can do with it what you will."},
       //MIDI
       {docid:"034ea170-483e-229a-f0e2-837d76c721c0",desc:"This uses WebMidi to send the output values as control changes. Note WebMidi is curently only supported in Chrome. You can send to external devices or connect to your internal MIDI bus. First refresh devices, select your output device and channel from the dropdown"},
     ]},
