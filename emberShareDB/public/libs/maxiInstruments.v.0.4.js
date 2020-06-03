@@ -543,7 +543,7 @@ class MaxiInstrument {
   }
 
   noteon(freq = 60, vel = 127) {
-    console.log("instrument note on", this.instrument, this.index, freq, vel)
+    //console.log("instrument note on", this.instrument, this.index, freq, vel)
     this.node.port.postMessage({
       noteon:{
         instrument:this.instrument,
