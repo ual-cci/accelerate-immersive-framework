@@ -10,6 +10,10 @@ class Learner {
     {
       docId = window.frameElement.name;
     }
+    if(docId === undefined)
+    {
+      docId = "local";
+    }
     this.USE_WORKER = true;
     this.outputGUI = [];
     this.modelOptions = {};
@@ -18,15 +22,16 @@ class Learner {
     this.recording = false;
     this.running = false;
     this.temp = [];
+    this.streamBuffers = [];
     this.y = [];
     this.numOutputs = 1;
     this.gui = false;
     this.recLimit = 0;
     this.countIn = 0;
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.onload = ()=>{
+    let storageScript = document.createElement('script');
+    storageScript.type = 'text/javascript';
+    storageScript.async = true;
+    storageScript.onload = ()=>{
       this.DATASET_KEY = "dataset";
       this.REC_KEY = "recordingRound";
       this.store = localforage.createInstance({name: docId});
@@ -56,14 +61,29 @@ class Learner {
     {
       origin = "."
     }
-    script.src = origin + '/libs/localforage.min.js';
-    document.getElementsByTagName('head')[0].appendChild(script);
+    storageScript.src = origin + '/libs/localforage.min.js';
+    document.getElementsByTagName('head')[0].appendChild(storageScript);
+
+    this.onRapidLoad = [];
+    let rapidLib = document.createElement('script');
+    rapidLib.type = 'text/javascript';
+    rapidLib.async = true;
+    rapidLib.onload = ()=>{
+      console.log("rapidlib loaded")
+      this.onRapidLoad.forEach((f)=>{
+        f()
+      });
+    }
+    rapidLib.src = origin + '/libs/rapidLib.js';
+    document.getElementsByTagName('head')[0].appendChild(rapidLib);
+
     let head = document.getElementsByTagName('HEAD')[0];
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = origin + '/libs/learner.css';
     head.appendChild(link);
+
   }
 
   addGUI(p) {
@@ -195,7 +215,8 @@ class Learner {
 
   addRegression(
       n,
-      gui = true
+      gui = true,
+      smoothOutput = 0
       )
    {
       let origin = document.location.origin
@@ -236,13 +257,15 @@ class Learner {
             this.onOutput(this.y);
           }
           container.appendChild(slider);
+          this.addStream(smoothOutput);
         }
       }
   }
 
   addClassifier(
       n,
-      gui = true)
+      gui = true,
+      smoothOutput = 0)
   {
     let origin = document.location.origin
     if(origin.includes("file"))
@@ -288,6 +311,23 @@ class Learner {
           selectList.appendChild(option);
       }
       this.outputGUI.push(selectList);
+      this.addStream(smoothOutput)
+    }
+  }
+
+  addStream(w)
+  {
+    try {
+      if(w > 0)
+      {
+        if(this.rapidLib === undefined)
+        {
+          this.rapidLib = RapidLib();
+        }
+        this.streamBuffers.push(new this.rapidLib.StreamBuffer(w))
+      }
+    } catch (err) {
+      this.onRapidLoad.push(()=>{this.addStream(w)})
     }
   }
 
@@ -453,11 +493,21 @@ class Learner {
     {
       for(let i = 0; i < this.numOutputs; i++)
       {
+        let output = data[i];
+        if(this.streamBuffers[i] !== undefined)
+        {
+          this.streamBuffers[i].push(output)
+          output = this.streamBuffers[i].mean();
+          if(this.classifier)
+          {
+            output = Math.round(output);
+          }
+        }
         if(this.gui)
         {
-          this.outputGUI[i].value = data[i];
+          this.outputGUI[i].value = output;
         }
-        this.y[i] = data[i];
+        this.y[i] = output;
       }
       this.onOutput(this.y);
     }

@@ -1822,13 +1822,16 @@ export default Controller.extend({
 
     //TABS
     newTab(docId) {
-      this.get('cs').log('new tab', docId);
-      this.fetchChildren().then(()=>{
-        const children = this.get('model').children;
-        const newChild = children[children.length-1]
-        this.resetScrollPositions();
-        //this.newDocSelected(newChild);
-      });
+      if(this.get('canEditDoc'))
+      {
+        this.get('cs').log('new tab', docId);
+        this.fetchChildren().then(()=>{
+          const children = this.get('model').children;
+          const newChild = children[children.length-1]
+          this.resetScrollPositions();
+          //this.newDocSelected(newChild);
+        });
+      }
     },
     tabSelected(docId) {
       this.get('cs').log('tab selected', docId);

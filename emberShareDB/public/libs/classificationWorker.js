@@ -14,7 +14,7 @@ function setOptions() {
     console.log("setting options")
     if(options.k !== undefined)
     {
-      myClassification.setK(options.k)
+      myClassification.setK(0, options.k)
     }
   }
 }
@@ -26,6 +26,7 @@ self.addEventListener('message', function(e) {
       console.log("training")
       rapidLib = RapidLib();
       myClassification = new rapidLib.Classification();
+      myClassification.train(e.data.data);
       setOptions()
       myClassification.train(e.data.data);
     }

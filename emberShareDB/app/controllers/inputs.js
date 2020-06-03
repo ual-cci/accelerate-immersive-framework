@@ -7,14 +7,16 @@ export default Controller.extend({
       {docid:"3738a892-330f-15ae-673e-5cb38f25a8e8",desc:"Just the bare minimum recording mouse X and Y"},
     ]},
     {title:"Audio",docs:[
-      //Chromagram
-      {docid:"9be12ec5-4a2b-b4d8-b041-3e589ebaef5f",desc:"A Chromagram example based on Mick Grierson's original code. This splits audio into 12 different classes, closely related to the pitches in equal tempered scales."},
+      //MFCCs
+      {docid:"6b8d12a6-9310-1f20-b506-6bb697e6c8de",desc:"Combining MMLL and maximilian.js to get MFCCs, a great timbral feature for classifying audio."},
       //Audio features
       {docid:"c339340d-bd82-f0e1-5929-edb9a206b319",desc:"An example of using Nick Collins MMLL.js library to get a range of audio features from either the microphone or audio file. Features include spectral percentile, sensory dissonance and brightness (spectral centroid)"},
       //Chords
       {docid:"db87ed04-9d7a-5cfc-a218-dd9cc9580929",desc:"An example of using Nick Collins MMLL.js library to get a chords and tempo from either the microphone or audio file. Chords are recorded every time they change, along with the time interval since the last change."},
       //pitch
       {docid:"41a3320b-d2d1-983a-05db-8f9f6ce8d693",desc:"An example of using Nick Collins MMLL.js library to get a pitch and tempo from either the microphone or audio file. Pitch is recorded on each beat."},
+      //Chromagram
+      {docid:"9be12ec5-4a2b-b4d8-b041-3e589ebaef5f",desc:"A Chromagram example based on Mick Grierson's original code. This splits audio into 12 different classes, closely related to the pitches in equal tempered scales."},
       //Speech to Text
       {docid:"9f28c6b2-eb52-141c-a447-472f2e9e2669",desc:"Using the native in browser speech to text. Each time you speak, the text is transcribed, encoded into a vector and inputted into the dataset / model"},
     ]},
