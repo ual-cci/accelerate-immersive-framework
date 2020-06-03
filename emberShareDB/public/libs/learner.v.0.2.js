@@ -257,8 +257,11 @@ class Learner {
             this.onOutput(this.y);
           }
           container.appendChild(slider);
-          this.addStream(smoothOutput);
         }
+      }
+      for(let i = 0; i < n; i++)
+      {
+        this.addStream(smoothOutput);
       }
   }
 
