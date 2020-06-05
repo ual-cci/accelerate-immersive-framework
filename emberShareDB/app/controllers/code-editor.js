@@ -168,6 +168,10 @@ export default Controller.extend({
         document.getElementById("output-container").style["border-top-width"]=0;
         document.getElementById("output-container").style["border-bottom-width"]=0;
         document.getElementById("output-container").style["border"]="none";
+        document.getElementById("output-container").style["width"]="100%";
+        document.getElementById("output-container").style["height"]="100%";
+        document.getElementById("output-container").style["top"]="0px";
+        document.getElementById("output-container").style["left"]="0px";
         document.getElementById("main-site-container").style.padding="0px"
         document.getElementById("main-site-container").style.border="none"
       }
