@@ -360,6 +360,7 @@
           }}
           </div>
       </div>
+      <!-- if this is in the main-output-container, strange things happen with anchor links in chrome ¯\_(ツ)_/¯ -->
       <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
         <iframe title = "output-frame" id = "output-iframe" srcdoc = "" frameBorder="0" name = {{iframeTitle}}></iframe>
       </div>

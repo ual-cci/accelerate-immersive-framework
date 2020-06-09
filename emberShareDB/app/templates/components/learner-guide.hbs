@@ -183,20 +183,15 @@ External Outputs
 You may wish to save your dataset to your local machine, or upload your current dataset to our servers, so that anyone who runs your project can train a model using your dataset. Luckily, you can do that.
 </p>
 <p class = "tutorial-text">
-First you have to download the data. Run the code below and you will get a .json file with all your lovely data.
+First you have to download the data. Just hit the "Download Data" button on the GUI and you will get a .json file with all your lovely data.
 </p>
-<pre>
-<code>
-  learner.downloadTrainingData();
-</code>
-</pre>
 <p class = "tutorial-text">
 You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data. See below how you pass the function to the Learner constructor, in which you load the data, then when that is done, train().
 </p>
 <pre>
 <code>
 const learner = new Learner({onLoad:()=>{
-  learner.loadTrainingData("data.json").then(()=> {
+  learner.loadTrainingData("myLearnerData.json").then(()=> {
     learner.train()
   })
 }})
@@ -208,5 +203,5 @@ const learner = new Learner({onLoad:()=>{
 <p class = "tutorial-text">You can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
 </p>
 <p class = "tutorial-text">
-You can also see the source and instructions for running the library locally or in your own projects away from the MIMIC platform in <a href = "https://gitlab.doc.gold.ac.uk/MIMIC/learner-js">this repository</a>.
+You can also see the source and instructions for running the library locally or in your own projects away from the MIMIC platform in <a href = "https://github.com/Louismac/learnerjs">this repository</a>.
 </p>

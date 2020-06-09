@@ -37,9 +37,10 @@ export default Controller.extend({
       //Microbit
       {docid:"f7686716-7c64-c87c-b413-07fb8828fafc",desc:"Connect to a BBC Micro:bit using WebBLE. Records accelerometer values. Code modified from https://github.com/antefact/microBit.js. Visit here to download firmware to upload onto your microbit"},
     ]},
-    {title:"MIDI", docs:[
+    {title:"External", docs:[
       //Microbit
       {docid:"9f017abd-11ea-8d49-6e4f-6b16061cff5b",desc:"Record MIDI CC values into a dataset"},
+      {docid:"10fe5752-913e-71d8-3fd4-0ec0f0b9f4f3",desc:"Record values sent over OSC (via websockets) into a dataset"},
     ]},
     {title:"Text", docs:[
       //Sentiment
