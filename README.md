@@ -104,7 +104,7 @@ You need to ssh into the appropriate server, for details contact admin (Louis or
 ### Frontend
 ```
 cd emberShareDB
-ember build —environment development 
+./deployDev.sh
 ```
 
 ### Backend 
