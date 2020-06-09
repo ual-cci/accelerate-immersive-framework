@@ -1037,14 +1037,32 @@ export default Controller.extend({
         self.set('savedVals', savedVals);
         //this.get('cs').log(e.data[0], e.data[1])
       }
-      else if(e.data[0] == "console")
+      else if(e.data[0] === "console")
       {
         for(let i = 1; i < e.data.length; i++)
         {
           self.get('cs').logToScreen(e.data[i]);
         }
       }
+      else if (e.data[0] === "fl_stats")
+      {
+        self.get('documentService').updateDoc(self.get('model.id'), 'stats',e.data).then(()=>{
+          self.printFl(self);
+        })
+      }
     }
+  },
+  printFl:function(self) {
+    self.get('opsPlayer').loadOps().then((ops)=>{
+      ops.forEach((op)=> {
+        if(op.op !== undefined)
+        {
+          if(op.op[0].p[0] === "stats" && op.op[0].oi[0] === "fl_stats") {
+              self.get('cs').log(op.op[0].oi[1])
+          }
+        }
+      })
+    });
   },
   update:function() {
     this.set('consoleOutput', this.get('cs').output);

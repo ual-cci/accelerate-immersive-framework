@@ -482,13 +482,13 @@ function startDocAPI(app)
         //console.log("Patching candidates", patched);
         const current = doc.data;
         let actions = [];
-        const BLACK_LIST = ["source", "documentId"]
+        const IGNORE_LIST = ["source", "documentId"]
         for (var key in patched) {
             if (current.hasOwnProperty(key) && patched.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
                 {
                   //DONT UPDATE THE SOURCE OR THE DOCUMENT ID
-                  if(!BLACK_LIST.includes(key))
+                  if(!IGNORE_LIST.includes(key))
                   {
                     //console.log("PATCHING", key, patched[key])
                     const op = {p:[key], oi:patched[key]};
