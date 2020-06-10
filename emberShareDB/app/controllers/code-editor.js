@@ -1629,6 +1629,7 @@ export default Controller.extend({
     },
     toggleShowSettings() {
       this.toggleProperty('showSettings');
+      document.getElementById("output-container").style.top = this.get('showSettings') ? "255px" : "220px";
     },
     toggleLibraryDropdown(){
       document.getElementById("myDropdown").classList.toggle("show");
@@ -1657,9 +1658,11 @@ export default Controller.extend({
             this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
             this.get('cs').log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
             this.toggleProperty('showRecordingPanel');
+            document.getElementById("output-container").style.top = this.get('showRecordingPanel') ? "290px" : "220px";
           });
         });
       });
+
     },
     onRecordingOptionsChanged(options) {
       this.get('cs').log("rec options", options)
@@ -1668,6 +1671,7 @@ export default Controller.extend({
     toggleShowAssets() {
       this.toggleProperty('showAssets');
       this.get('cs').log(this.get('showAssets'))
+      document.getElementById("output-container").style.top = this.get('showAssets') ? "300px" : "220px";
     },
     enterFullscreen() {
       var target = document.getElementById("main-code-container");
