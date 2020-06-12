@@ -37,14 +37,14 @@ var initDocAPI = function(
       disableSpaceDelimitedActions: true,
   }
   if(redisConfig !== undefined) {
-    console.log("adding redis pubsub")
-    const redis = require("redis");
-    const client = redis.createClient(
-      redisConfig.redis_port,redisConfig.redis_ip, {
-      'auth_pass': redisConfig.redis_key,
-      'return_buffers': true
-    }).on('error', (err) => console.error('ERR:REDIS:', err));
-    shareDBOptions.pubsub = require('sharedb-redis-pubsub')({client: client});
+    // console.log("adding redis pubsub")
+    // const redis = require("redis");
+    // const client = redis.createClient(
+    //   redisConfig.redis_port,redisConfig.redis_ip, {
+    //   'auth_pass': redisConfig.redis_key,
+    //   'return_buffers': true
+    // }).on('error', (err) => console.error('ERR:REDIS:', err));
+    // shareDBOptions.pubsub = require('sharedb-redis-pubsub')({client: client});
   }
   shareDB = new ShareDB(shareDBOptions);
   shareDBConnection = shareDB.connect();

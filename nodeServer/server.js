@@ -96,10 +96,10 @@ function startServer()
     mongoContentUri = uri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
     mongoUserUri = uri + "/" + oauthDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
 
-    redis = {};
-    redis.redis_port = config.redis_port;
-    redis.redis_ip = config.redis_ip;
-    redis.redis_key = config.redis_key;
+    // redis = {};
+    // redis.redis_port = config.redis_port;
+    // redis.redis_ip = config.redis_ip;
+    // redis.redis_key = config.redis_key;
 
   }
 
