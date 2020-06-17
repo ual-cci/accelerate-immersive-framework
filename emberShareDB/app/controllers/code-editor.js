@@ -114,6 +114,7 @@ export default Controller.extend({
     // console.log("hijacking console")
     // this.hijackConsoleOutput();
     this.set('colabMode', config.colabMode)
+    this.get('cs').log("colabMode", this.get('colabMode'))
     this.get('resizeService').on('didResize', event => {
       if(!this.get('leftCodeEditor'))
       {
