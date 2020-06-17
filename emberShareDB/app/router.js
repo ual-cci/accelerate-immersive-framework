@@ -22,6 +22,8 @@ Router.map(function() {
   this.route('outputs');
   this.route('people');
   this.route('nime2020');
+  this.route('futurelearn');
+  this.route('crash-course');
 });
 
 export default Router;
