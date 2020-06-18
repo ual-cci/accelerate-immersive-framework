@@ -237,6 +237,11 @@ class Learner {
       this.classifier = false;
       this.numOutputs = n;
       this.gui = gui;
+      for(let i = 0; i < n; i++)
+      {
+        this.y.push(0);
+        this.addStream(smoothOutput);
+      }
       if(gui)
       {
         let container = this.selectorContainer;
@@ -251,17 +256,12 @@ class Learner {
           slider.value = 0;
           slider.step = 0.01;
           this.outputGUI.push(slider);
-          this.y.push(0);
           slider.oninput = ()=>{
             this.y[i] = parseFloat(slider.value);
             this.onOutput(this.y);
           }
           container.appendChild(slider);
         }
-      }
-      for(let i = 0; i < n; i++)
-      {
-        this.addStream(smoothOutput);
       }
   }
 
@@ -287,6 +287,7 @@ class Learner {
     this.classifier = true;
     this.numOutputs = 1;
     this.gui = gui;
+    this.y.push(0);
     if(gui)
     {
       let container = this.selectorContainer;;
@@ -296,7 +297,6 @@ class Learner {
       var label = document.createElement("p");
       label.innerHTML = "Class:"
       label.id = "class-label"
-      this.y.push(0);
       selectList.oninput = ()=> {
         this.y[0] = parseInt(selectList.selectedIndex);
         if(this.onOutput !== undefined)
@@ -314,8 +314,8 @@ class Learner {
           selectList.appendChild(option);
       }
       this.outputGUI.push(selectList);
-      this.addStream(smoothOutput)
     }
+    this.addStream(smoothOutput)
   }
 
   addStream(w)
@@ -383,6 +383,20 @@ class Learner {
     if(this.isTypedArray(input))
     {
       input = Array.prototype.slice.call(input);
+    }
+    for(let i = 0; i < input.length; i++)
+    {
+      if(!input[i])
+      {
+        input[i] = 0;
+      }
+    }
+    for(let i = 0; i < y.length; i++)
+    {
+      if(!y[i])
+      {
+        y[i] = 0;
+      }
     }
     if(this.recording)
     {
