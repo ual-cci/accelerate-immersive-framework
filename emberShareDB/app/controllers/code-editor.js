@@ -1675,7 +1675,7 @@ export default Controller.extend({
       document.getElementById("output-container").style.top = this.get('showAssets') ? "300px" : "220px";
     },
     enterFullscreen() {
-      var target = document.getElementById("main-code-container");
+      var target = document.getElementById("output-container");
       if (target.requestFullscreen) {
         target.requestFullscreen();
       } else if (target.msRequestFullscreen) {
