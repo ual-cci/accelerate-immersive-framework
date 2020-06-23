@@ -592,6 +592,7 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
+        this.get('cs').log(ops[0], new Date().getTime() - ops[0].oi.date, isEmpty(ops[0].od), ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
