@@ -563,8 +563,7 @@ class MaxiInstrument {
     });
   }
 
-  setSequence(seq, instruments = [], muteDrums = false) {
-    let notes = seq.notes;
+  setSequence(notes, instruments = [], muteDrums = false) {
    	let toAdd = [];
     let mul = 1;
     if(seq.quantizationInfo)
@@ -574,6 +573,24 @@ class MaxiInstrument {
     let newNotes = [];
     for(let i = 0; i < notes.length; i++) {
       const n = notes[i];
+      if(n.p !== undefined) {
+        n.pitch = n.p;
+      }
+      if(n.s !== undefined) {
+        n.start = n.s;
+      }
+      if(n.e !== undefined) {
+        n.end = n.e;
+      }
+      if(n.l !== undefined) {
+        n.length = n.l;
+      }
+      if(n.v !== undefined) {
+        n.velocity = n.v;
+      }
+      if(n.f !== undefined) {
+        n.freq = n.f;
+      }
       if(Array.isArray(n.pitch)) {
         n.pitch.forEach((p)=> {
           let newNote = JSON.parse(JSON.stringify(n));
@@ -611,6 +628,10 @@ class MaxiInstrument {
           {
             end = n.quantizedEndStep
           }
+          else if(n.length !== undefined)
+          {
+            end = start + n.length;
+          }
           else
           {
             end = start + 1;
@@ -621,8 +642,13 @@ class MaxiInstrument {
         {
           v = n.velocity;
         }
-      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul, v:v});
-      	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});
+        var f = n.freq;
+        if(f === undefined && n.pitch !== undefined)
+        {
+          f = this.getFreq(n.pitch)
+        }
+      	toAdd.push({cmd:"noteon", f:f, t:start * mul, v:v});
+      	toAdd.push({cmd:"noteoff", f:f, t:end * mul});
       }
     });
     toAdd.sort((a, b)=> {
