@@ -566,6 +566,10 @@ class MaxiInstrument {
   setSequence(notes, instruments = [], muteDrums = false) {
    	let toAdd = [];
     let mul = 1;
+    //backwards compat
+    if(notes.notes !== undefined) {
+      notes = notes.notes;
+    }
     if(seq.quantizationInfo)
     {
 		  mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
@@ -706,7 +710,14 @@ class MaxiInstrument {
 
   setParam(name, val, send = true) {
     if(val < 0) val = 0.00;
-    if(this.parameters[name])
+    const scaled = (val - this.parameters[name].translate) / this.parameters[name].scale;
+    console.log("setParam", name, val, scaled, this.outputGUI)
+
+    if(this.outputGUI[name] !== undefined)
+    {
+      this.outputGUI[name].value = scaled;
+    }
+    if(this.parameters[name] !== undefined)
     {
       this.parameters[name].val = val
       const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
