@@ -291,6 +291,10 @@ class MaxiSamplerProcessor {
     return Object.keys(this.parameters).length == 16;
   }
 
+  pan(chan) {
+    return 1;
+  }
+
   signal(parameters) {
     this.dcoOut = 0;
     if(this.paramsLoaded())
@@ -524,7 +528,7 @@ class MaxiSynthProcessor {
       this.released[i].off = this.released[i].off % this.loopSamples;
       //console.log("wrapping round", this.released[i].off, this.released[i].f)
     }
-    this.midiPanic();
+    this.releaseAll();
     //Restart loop
     //console.log(this.samplePtr)
     this.samplePtr = this.seqPtr = this.playHead = 0;
@@ -592,9 +596,21 @@ class MaxiSynthProcessor {
   }
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 16;
+    return Object.keys(this.parameters).length == 17;
   }
 
+  pan(chan) {
+    var pan = 1;
+    if(this.paramsLoaded()) {
+      if(chan == 0)
+      {
+        pan = 2 - pan;
+      }
+    }
+    return pan;
+  }
+
+  //Call signal once then mix in process loop
   signal() {
     if(this.paramsLoaded())
     {
@@ -627,9 +643,7 @@ class MaxiSynthProcessor {
             f = this.parameters.frequency2.val
           }
         }
-        // if(this.samplePtr % 1000 == 0) {
-        //   console.log(o.o, f, poly)
-        // }
+
         //f = f < 0 ? 0 : f;
         let osc;
         if(oscFn === "noise")
@@ -641,9 +655,10 @@ class MaxiSynthProcessor {
           osc = this.dco[o.o][oscFn](f + pitchMod);
           //osc = this.dco[o.o][oscFn](f);
         }
-        this.dcoOut += (osc * ampMod * this.parameters.gain.val * o.v);
-      }
 
+        this.dcoOut += (osc * ampMod * this.parameters.gain.val * o.v);
+        //this.dcoOut += (osc * pan)
+      }
       //Filter
 
       let filterEnv = 1;
@@ -833,21 +848,22 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
   synthKey(index) {
     switch (index) {
       case 0:return "gain";
-      case 1:return "attack";
-      case 2:return "decay";
-      case 3:return "sustain";
-      case 4:return "release";
-      case 5:return "lfoFrequency";
-      case 6:return "lfoPitchMod";
-      case 7:return "lfoFilterMod";
-      case 8:return "lfoAmpMod";
-      case 9:return "adsrPitchMod";
-      case 10:return "cutoff";
-      case 11:return "Q";
-      case 12:return "frequency";
-      case 13:return "frequency2";
-      case 14:return "poly";
-      case 15:return "oscFn";
+      case 1:return "pan";
+      case 2:return "attack";
+      case 3:return "decay";
+      case 4:return "sustain";
+      case 5:return "release";
+      case 6:return "lfoFrequency";
+      case 7:return "lfoPitchMod";
+      case 8:return "lfoFilterMod";
+      case 9:return "lfoAmpMod";
+      case 10:return "adsrPitchMod";
+      case 11:return "cutoff";
+      case 12:return "Q";
+      case 13:return "frequency";
+      case 14:return "frequency2";
+      case 15:return "poly";
+      case 16:return "oscFn";
     }
   }
 
@@ -862,7 +878,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       if(this._param_reader.dequeue(this.output))
       {
         const NUM_SYNTHS = 6;
-        const NUM_SYNTH_PARAMS = 18;
+        const NUM_SYNTH_PARAMS = 17;
         const NUM_SAMPLERS = 6;
         const NUM_SAMPLER_PARAMS = (2 * 8) + 2;
         this.output.forEach((v, i)=> {
@@ -873,7 +889,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(synth !== undefined)
             {
               const index = i % NUM_SYNTH_PARAMS;
-              if(index < NUM_SYNTH_PARAMS - 2)
+              if(index < NUM_SYNTH_PARAMS)
               {
                 const key = this.synthKey(index)
                 if(synth.parameters[key] === undefined)
@@ -884,16 +900,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
               }
               else
               {
-                if(index == NUM_SYNTH_PARAMS - 2)
-                {
-                  //console.log("external note on", v)
-                  //this.instruments["synth"][synthIndex].externalNoteOn(v);
-                }
-                else
-                {
-                  //console.log("external note off", v)
-                  //synth.externalNoteOff(v);
-                }
+
               }
             }
           }
@@ -941,31 +948,32 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters)
   {
-    const outputsLength = outputs.length;
-    for (let outputId = 0; outputId < outputsLength; ++outputId) {
-      let output = outputs[outputId];
-
-      for (let channel = 0; channel < output.length; ++channel) {
-        let outputChannel;
-
-        if (this.DAC === undefined || this.DAC.length === 0) {
-          outputChannel = output[channel];
-        } else {
-          if (this.DAC[channel] === undefined)
-            break;
-          else {
-            if (output[this.DAC[channel]] !== undefined) {
-              outputChannel = output[this.DAC[channel]];
-            } else {
-              continue;
-            }
+    for(let o = 0; o < outputs.length; o++)
+    {
+      let output = outputs[o];
+      var sig = new Array(this.getInstruments().length).fill(new Array(128).fill(0));
+      for (let channel = 0; channel < output.length; ++channel)
+      {
+        const outputChannel = output[channel];
+        //console.log(outputs.length, output.length, outputChannel.length)
+        if(channel == 0) {
+          for (let sample = 0; sample < outputChannel.length; ++sample)
+          {
+            this.onSample();
+            this.getInstruments().forEach((s, i)=> {
+              sig[i][sample]= s.signal()
+              outputChannel[sample] += sig[i][sample] * s.pan(channel % 2)
+            });
           }
         }
-        for (let i = 0; i < 128; ++i) {
-          this.onSample();
-          this.getInstruments().forEach((s)=> {
-            outputChannel[i] += s.signal();
-          });
+        else {
+          for (let sample = 0; sample < outputChannel.length; ++sample)
+          {
+            this.getInstruments().forEach((s, i)=> {
+              outputChannel[sample] += sig[i][sample] * s.pan(channel % 2)
+              //outputChannel[sample] = 0;
+            });
+          }
         }
       }
     }

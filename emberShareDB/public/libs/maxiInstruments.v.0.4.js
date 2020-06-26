@@ -362,13 +362,20 @@ class MaxiInstruments {
 
   createNode() {
     return new Promise((resolve, reject)=> {
+      this.audioContext.destination.channelInterpretation='discrete';
+      this.audioContext.destination.channelCountMode='explicit';
+      this.audioContext.destination.channelCount=this.audioContext.destination.maxChannelCount
+
      this.node = new AudioWorkletNode(
         this.audioContext,
         this.synthProcessorName,
         {
-          processorOptions: {}
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+          outputChannelCount: [this.audioContext.destination.maxChannelCount]
         }
       );
+      console.log("node",this.node)
       window.node = this.node;
 
       let sab3 = RingBuffer.getStorageForCapacity(256, Float32Array);
@@ -407,6 +414,10 @@ class MaxiInstruments {
         console.log(`Error message from port: ` + event.data);
       };
       this.node.connect(this.audioContext.destination);
+      this.node.channelInterpretation='discrete';
+      this.node.channelCountMode='explicit';
+      this.node.channelCount=this.audioContext.destination.maxChannelCount;
+      console.log(this.node, this.audioContext.destination);
       resolve()
     });
   }
@@ -671,7 +682,7 @@ class MaxiInstrument {
   onGUIChange(val, index) {
     const key = Object.keys(this.parameters)[index];
     this.onChange(val, key);
-    this.saveParamValues();
+
   }
 
   onMLChange(val, index) {
@@ -682,6 +693,10 @@ class MaxiInstrument {
   onChange(val, key, send = true) {
     const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
     this.setParam(key, scaled, send);
+    if(send)
+    {
+      this.saveParamValues();
+    }
   }
 
   randomise() {
@@ -708,10 +723,15 @@ class MaxiInstrument {
     })
   }
 
+  setParams(vals) {
+    vals.forEach((pair, i)=>{
+      this.setParam(pair[0], pair[1], i == vals.length - 1);
+    })
+  }
+
   setParam(name, val, send = true) {
     if(val < 0) val = 0.00;
     const scaled = (val - this.parameters[name].translate) / this.parameters[name].scale;
-    console.log("setParam", name, val, scaled, this.outputGUI)
 
     if(this.outputGUI[name] !== undefined)
     {
@@ -723,6 +743,7 @@ class MaxiInstrument {
       const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
       const paramIndex = Object.keys(this.parameters).indexOf(name);
       const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
+      console.log(name,index,scaled,send)
       this.onParamUpdate(index, val, send)
     }
   }
@@ -773,6 +794,7 @@ class MaxiSynth extends MaxiInstrument {
 
     this.parameters = {
       "gain":{scale:1, translate:0, val:1},
+      "pan":{scale:2, translate:0, val:0},
       "attack":{scale:1500, translate:0, val:1000},
       "decay":{scale:1500, translate:0, val:1000},
       "sustain":{scale:1, translate:0, val:1},
@@ -1061,14 +1083,20 @@ class MaxiSynth extends MaxiInstrument {
     this.outputGUI.oscFn = oscillatorSelector;
 
     const printParamsButton = document.createElement("BUTTON");
-    printParamsButton.innerHTML = "Dump"
+    printParamsButton.innerHTML = "Print"
+    printParamsButton.classList.add("maxi-btn")
+    printParamsButton.style.margin = "auto";
+    printParamsButton.style.display = "block";
+    printParamsButton.style.width = "70px";
     printParamsButton.onclick = ()=>{
-      let str = "vals:{\n";
+      let str = "synth.setParams([\n";
       const vals = this.getParamValues();
       Object.keys(vals).forEach((key)=>{
-		str += "\t" + key + ":" + vals[key] + ",\n"
+        const val = vals[key];
+        const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
+		     str += "\t[\"" + key + "\"," + scaled + "],\n"
       });
-      str += "}"
+      str += "]"
       console.log(str)
     }
 
@@ -1093,21 +1121,23 @@ class MaxiSynth extends MaxiInstrument {
     cell.appendChild(randomButton);
     cell.appendChild(oscillatorSelector);
     cell = row.insertCell();
-    cell.colSpan = "2"
+    //cell.colSpan = "2"
     cell.appendChild(presetSelector);
     cell = row.insertCell();
-    //cell.appendChild(printParamsButton);
-
+    cell.appendChild(printParamsButton);
+    var ignore = ["poly", "oscFn"];
+    var cellCtr = 0;
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
       let p = Object.keys(this.parameters)[i];
-      if(p !== "oscFn" && p !== "poly")
+      if(!ignore.includes(p))
       {
-        if(i % rowLength === 0)
+        if(cellCtr % rowLength === 0)
         {
           row = table.insertRow();
         }
         cell = row.insertCell();
+        cellCtr++;
         cell.classList.add("cell_" + p);
         let val = this.parameters[p].val;
         val = (val - this.parameters[p].translate) / this.parameters[p].scale;

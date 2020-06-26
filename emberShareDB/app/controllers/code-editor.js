@@ -1673,7 +1673,7 @@ export default Controller.extend({
     toggleShowAssets() {
       this.toggleProperty('showAssets');
       this.get('cs').log(this.get('showAssets'))
-      document.getElementById("output-container").style.top = this.get('showAssets') ? "300px" : "220px";
+      document.getElementById("output-container").style.top = this.get('showAssets') ? "320px" : "220px";
     },
     enterFullscreen() {
       var target = document.getElementById("output-container");
