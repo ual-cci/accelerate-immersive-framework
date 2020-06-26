@@ -470,10 +470,11 @@ export default Service.extend({
           const fileType = assets[i].fileType;
           let asset = this.get('store').peekRecord('asset',fileId);
 
-          this.get('cs').log("replaceAssets",fileType)
+          this.get('cs').log("replaceAssets",assets[i].size)
 
           //If file is media replace with base64
-          if(this.get('assetService').isMedia(fileType))
+          if(this.get('assetService').isMedia(fileType) &&
+             !this.get('assetService').isTooBig(assets[i].size))
           {
             if(!isEmpty(asset))
             {

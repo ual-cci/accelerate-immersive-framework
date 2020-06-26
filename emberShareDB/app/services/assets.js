@@ -30,12 +30,18 @@ export default Service.extend({
     fileType.includes("image") ||
     fileType.includes("video"))
   },
+  //Dont base64 big files
+  isTooBig: function(fileSize)
+  {
+    return fileSize > 1800000;
+  },
   fetchAsset: async function(asset, docId) {
     return new RSVP.Promise((resolve, reject) => {
       const fileId = asset.fileId;
       const fileName = asset.name;
       const fileType = asset.fileType;
       const inStoreAsset = this.get('store').peekRecord('asset',fileId);
+      this.get('cs').log("asset", asset)
       if(!isEmpty(inStoreAsset) && !isEmpty(inStoreAsset.b64data))
       {
           this.get('cs').log("asset already preloaded:"+fileId);
@@ -54,6 +60,7 @@ export default Service.extend({
               id:fileId,
               type:"asset",
               attributes:{
+                size:asset.size,
                 fileId:fileId,
                 name:fileName,
                 b64data:this._b64e(xhr.responseText),
