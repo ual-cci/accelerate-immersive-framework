@@ -856,6 +856,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         const NUM_SAMPLERS = 6;
         const NUM_SAMPLER_PARAMS = this.paramKeys["sampler"].length;
         this.output.forEach((v, i)=> {
+          //Synth Param
           if(i < NUM_SYNTHS * NUM_SYNTH_PARAMS)
           {
             const synthIndex = Math.floor(i / NUM_SYNTH_PARAMS);
@@ -931,7 +932,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters)
   {
-    //
     for(let o = 0; o < outputs.length; o++)
     {
       let output = outputs[o];
@@ -957,7 +957,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         }
         else
         {
-          for (let s = 0; s < 128; s++)
+          for (let s = 0; s < outputChannel.length; s++)
           {
             outputChannel[s] = multiChannelBlock[channel][s];
           }
