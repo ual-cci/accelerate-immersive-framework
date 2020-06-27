@@ -221,9 +221,11 @@ class MaxiInstruments {
     this.version = "v.0.4";
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 17;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = (3 * 8);
+    this.NUM_SYNTH_PARAMS = Object.keys(MaxiSynth.parameters()).length;
+    this.NUM_SAMPLER_PARAMS = Object.keys(MaxiSampler.parameters()).length;
+    // this.NUM_SYNTH_PARAMS = 17;
+    // this.NUM_SAMPLER_PARAMS = 24;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
@@ -507,7 +509,6 @@ class MaxiInstruments {
   }
 
   rewind() {
-    console.log("REWIND")
     this.node.port.postMessage({rewind:true});
   }
 
@@ -532,9 +533,11 @@ class MaxiInstrument {
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 17;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = 3 * 8;
+    this.NUM_SYNTH_PARAMS = Object.keys(MaxiSynth.parameters()).length;
+    this.NUM_SAMPLER_PARAMS = Object.keys(MaxiSampler.parameters()).length;
+    // this.NUM_SYNTH_PARAMS = 17;
+    // this.NUM_SAMPLER_PARAMS = 24;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS * this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
