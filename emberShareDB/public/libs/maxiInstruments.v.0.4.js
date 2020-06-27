@@ -287,6 +287,13 @@ class MaxiInstruments {
         sampler.addGUI(this.guiElement);
       }
       this.samplers.push(sampler);
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"sampler",
+          index:this.samplers.length,
+          val:Object.keys(sampler.parameters)
+        }
+      });
     }
     return sampler;
   }
@@ -313,6 +320,13 @@ class MaxiInstruments {
         synth.addGUI(this.guiElement);
       }
       this.synths.push(synth);
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"synth",
+          index:this.synths.length,
+          val:Object.keys(synth.parameters)
+        }
+      });
     }
     return synth;
   }
@@ -1188,12 +1202,12 @@ class MaxiSampler extends MaxiInstrument {
     this.group = 1;
     this.parameters = {};
     const keys = Object.keys(core);
-    for(let i = 0; i < this.voices; i++)
-    {
-      for(let j = 0; j < keys.length; j++) {
+    for(let j = 0; j < keys.length; j++) {
+      for(let i = 0; i < this.voices; i++)
+      {
         const key = keys[j]+"_"+i;
         this.parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
-      };
+      }
     }
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
@@ -1247,7 +1261,6 @@ class MaxiSampler extends MaxiInstrument {
       this.toggleGroup();
     }
     cell.appendChild(changeGroupButton);
-
 
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {

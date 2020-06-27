@@ -258,7 +258,6 @@ class MaxiSamplerProcessor {
       const v = nextCmd.v !== undefined ? nextCmd.v : 127;
       if(nextCmd.cmd === "noteon")
       {
-        console.log(this.parameters['pan_0'].val);
         this.samples[f].trigger();
         this.velocities[f] = v/127;
       }
@@ -314,6 +313,9 @@ class MaxiSamplerProcessor {
           let l = 1 - p;
           let sig = s.playOnce(rate) * gain * this.velocities[i];
           //let gain = i == 0 ? 1:0;
+          // if(this.samplePtr % 1000 == 0) {
+          //   console.log(l, r)
+          // }
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;
         }
@@ -665,9 +667,7 @@ class MaxiSynthProcessor {
       this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
       var r = this.parameters.pan.val;
       var l = 1 - this.parameters.pan.val;
-      if(this.samplePtr % 1000 == 0) {
-        console.log(l, r)
-      }
+
       return [this.dcfOut * l, this.dcfOut * r];
     }
 	else {
@@ -703,32 +703,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
    constructor(options) {
     super();
     //Max polyphony
-    this.samplerKeys = [];
-    for(let i = 0; i < 8; i++)
-    {
-      this.samplerKeys.push("gain_"+i)
-      this.samplerKeys.push("rate_"+i)
-      this.samplerKeys.push("pan_"+i)
-    }
-    this.synthKeys = [
-      "gain",
-      "pan",
-      "attack",
-      "decay",
-      "sustain",
-      "release",
-      "lfoFrequency",
-      "lfoPitchMod",
-      "lfoFilterMod",
-      "lfoAmpMod",
-      "adsrPitchMod",
-      "cutoff",
-      "Q",
-      "frequency",
-      "frequency2",
-      "poly",
-      "oscFn"
-    ]
+    this.paramKeys = {};
     this.instruments = {synth:[], sampler:[]};
     this.TICKS_PER_BEAT = 24;
     this.loopSamples = Number.MAX_SAFE_INTEGER;
@@ -757,8 +732,12 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
-        console.log("seqeuence", data.instrument, data.val)
         this.instruments[data.instrument][data.index].sequence = data.val;
+      }
+      if(event.data.paramKeys !== undefined)
+      {
+        const data = event.data.paramKeys;
+        this.paramKeys[data.instrument] = data.val;
       }
       if(event.data.addSynth !== undefined)
       {
@@ -795,7 +774,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
         const data = event.data.audio;
         const audioData = this.translateFloat32ArrayToBuffer(data.val.audioBlob);
         this.instruments.sampler[data.index].samples[data.val.index].setSample(audioData);
-        console.log("received audio")
       }
       if(event.data.togglePlaying !== undefined)
       {
@@ -868,14 +846,15 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
   }
 
   handleRingBuf() {
-    if(this._param_reader !== undefined)
+    if(this._param_reader !== undefined &&
+    this.paramKeys["synth"] !== undefined && this.paramKeys["sampler"] !== undefined)
     {
       if(this._param_reader.dequeue(this.output))
       {
         const NUM_SYNTHS = 6;
-        const NUM_SYNTH_PARAMS = this.synthKeys.length;
+        const NUM_SYNTH_PARAMS = this.paramKeys["synth"].length;
         const NUM_SAMPLERS = 6;
-        const NUM_SAMPLER_PARAMS = this.samplerKeys.length;
+        const NUM_SAMPLER_PARAMS = this.paramKeys["sampler"].length;
         this.output.forEach((v, i)=> {
           if(i < NUM_SYNTHS * NUM_SYNTH_PARAMS)
           {
@@ -886,7 +865,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
               const index = i % NUM_SYNTH_PARAMS;
               if(index < NUM_SYNTH_PARAMS)
               {
-                const key = this.synthKeys[index];
+                const key = this.paramKeys["synth"][index];
                 if(synth.parameters[key] === undefined)
                 {
                   synth.parameters[key] = {};
@@ -906,7 +885,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
               const index = (i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) % NUM_SAMPLER_PARAMS;
               if(index < NUM_SAMPLER_PARAMS)
               {
-                const key = this.samplerKeys[index]
+                const key = this.paramKeys["sampler"][index]
                 if(sampler.parameters[key] === undefined)
                 {
                   sampler.parameters[key] = {};
