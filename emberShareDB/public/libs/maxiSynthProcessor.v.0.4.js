@@ -288,7 +288,7 @@ class MaxiSamplerProcessor {
   onStop() {}
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 24;
+    return this.parameters !== undefined;
   }
 
   signal() {
@@ -383,15 +383,17 @@ class MaxiSynthProcessor {
   }
 
   isFreqTriggered(f) {
-    if(this.parameters.poly.val == 1)
+    if(this.paramsLoaded())
     {
-      return this.triggered.map(a => a.f).includes(f);
+      if(this.parameters.poly.val == 1)
+      {
+        return this.triggered.map(a => a.f).includes(f);
+      }
+      else
+      {
+        return this.triggered.length > 0;
+      }
     }
-    else
-    {
-      return this.triggered.length > 0;
-    }
-
   }
 
   //Get next available oscillator
@@ -488,9 +490,13 @@ class MaxiSynthProcessor {
   }
 
   release(t) {
+    let releaseTime = 1;
+    if(this.paramsLoaded())
+    {
+      releaseTime = this.samplePtr +
+        ((this.parameters.release.val / 1000) * this.sampleRate);
+    }
     this.adsr[t.o].trigger = 0;
-    let releaseTime = this.samplePtr +
-      ((this.parameters.release.val / 1000) * this.sampleRate);
     releaseTime = Math.round(releaseTime)
     this.released.push({f:t.f, o:t.o, off:releaseTime, v:t.v});
 
@@ -510,18 +516,20 @@ class MaxiSynthProcessor {
 
   triggerNoteOn(freq, vel = 127)
   {
-    const o = this.getAvailableOsc();
-    //This will be -1 if no available oscillators
-    if(o >= 0)
-    {
-      //
-      this.adsr[o].setAttack(this.parameters.attack.val);
-      this.adsr[o].setDecay(this.parameters.decay.val);
-      this.adsr[o].setSustain(this.parameters.sustain.val);
-      this.adsr[o].setRelease(this.parameters.release.val);
-      this.triggered.push({o:o, f:freq, v:vel/127});
-      this.adsr[o].trigger = 1;
-      //console.log("triggering", freq, o);
+    if(this.paramsLoaded()) {
+      const o = this.getAvailableOsc();
+      //This will be -1 if no available oscillators
+      if(o >= 0)
+      {
+        //
+        this.adsr[o].setAttack(this.parameters.attack.val);
+        this.adsr[o].setDecay(this.parameters.decay.val);
+        this.adsr[o].setSustain(this.parameters.sustain.val);
+        this.adsr[o].setRelease(this.parameters.release.val);
+        this.triggered.push({o:o, f:freq, v:vel/127});
+        this.adsr[o].trigger = 1;
+        //console.log("triggering", freq, o);
+      }
     }
   }
 
@@ -600,7 +608,7 @@ class MaxiSynthProcessor {
   }
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 17;
+    return this.parameters !== undefined
   }
 
   //Call signal once then mix in process loop
@@ -741,18 +749,15 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       }
       if(event.data.addSynth !== undefined)
       {
-        //console.log("ADDING SYNTH");
         this.instruments["synth"].push(new MaxiSynthProcessor());
       }
       if(event.data.addSampler !== undefined)
       {
-        //console.log("ADDING SAMPLER");
         this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
       if(event.data.noteon !== undefined)
       {
         const data = event.data.noteon;
-        //console.log("received noteon", data.instrument, data.index, data.val)
         this.instruments[data.instrument][data.index].externalNoteOn(data.val);
       }
       if(event.data.noteoff !== undefined)

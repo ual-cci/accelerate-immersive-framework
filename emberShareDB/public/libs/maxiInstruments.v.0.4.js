@@ -287,13 +287,6 @@ class MaxiInstruments {
         sampler.addGUI(this.guiElement);
       }
       this.samplers.push(sampler);
-      this.node.port.postMessage({
-        paramKeys:{
-          instrument:"sampler",
-          index:this.samplers.length,
-          val:Object.keys(sampler.parameters)
-        }
-      });
     }
     return sampler;
   }
@@ -320,13 +313,6 @@ class MaxiInstruments {
         synth.addGUI(this.guiElement);
       }
       this.synths.push(synth);
-      this.node.port.postMessage({
-        paramKeys:{
-          instrument:"synth",
-          index:this.synths.length,
-          val:Object.keys(synth.parameters)
-        }
-      });
     }
     return synth;
   }
@@ -430,6 +416,20 @@ class MaxiInstruments {
       this.node.channelInterpretation='discrete';
       this.node.channelCountMode='explicit';
       this.node.channelCount=this.audioContext.destination.maxChannelCount;
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"synth",
+          index:0,
+          val:Object.keys(MaxiSynth.parameters())
+        }
+      });
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"sampler",
+          index:0,
+          val:Object.keys(MaxiSampler.parameters())
+        }
+      });
       resolve()
     });
   }
@@ -799,29 +799,31 @@ class MaxiInstrument {
 
 class MaxiSynth extends MaxiInstrument {
 
+  static parameters() {
+    return {
+          "gain":{scale:1, translate:0, val:1},
+          "pan":{scale:1, translate:0, val:0.5},
+          "attack":{scale:1500, translate:0, val:1000},
+          "decay":{scale:1500, translate:0, val:1000},
+          "sustain":{scale:1, translate:0, val:1},
+          "release":{scale:1500, translate:0, val:1000},
+          "lfoFrequency":{scale:10, translate:0, val:0},
+          "lfoPitchMod":{scale:100, translate:0, val:1},
+          "lfoFilterMod":{scale:8000, translate:0, val:1},
+          "lfoAmpMod":{scale:1, translate:0, val:0},
+          "adsrPitchMod":{scale:100, translate:0, val:1},
+          "cutoff":{scale:3000, translate:40, val:2000},
+          "Q":{scale:2, translate:0, val:1},
+          "frequency":{scale:1000, translate:0, val:440},
+          "frequency2":{scale:1000, translate:0, val:440},
+          "poly":{scale:1, translate:0, val:1},
+          "oscFn":{scale:1, translate:0, val:0},
+        }
+  }
+
   constructor(node, index, instrument, audioContext, onParamUpdate) {
     super(node, index, instrument, audioContext, onParamUpdate);
-
-    this.parameters = {
-      "gain":{scale:1, translate:0, val:1},
-      "pan":{scale:1, translate:0, val:0.5},
-      "attack":{scale:1500, translate:0, val:1000},
-      "decay":{scale:1500, translate:0, val:1000},
-      "sustain":{scale:1, translate:0, val:1},
-      "release":{scale:1500, translate:0, val:1000},
-      "lfoFrequency":{scale:10, translate:0, val:0},
-      "lfoPitchMod":{scale:100, translate:0, val:1},
-      "lfoFilterMod":{scale:8000, translate:0, val:1},
-      "lfoAmpMod":{scale:1, translate:0, val:0},
-      "adsrPitchMod":{scale:100, translate:0, val:1},
-      "cutoff":{scale:3000, translate:40, val:2000},
-      "Q":{scale:2, translate:0, val:1},
-      "frequency":{scale:1000, translate:0, val:440},
-      "frequency2":{scale:1000, translate:0, val:440},
-      "poly":{scale:1, translate:0, val:1},
-      "oscFn":{scale:1, translate:0, val:0},
-    }
-
+    this.parameters = MaxiSynth.parameters();
     this.presets = [
       {title:"--presets--"},
       {title:"Peep",
@@ -1188,27 +1190,31 @@ class MaxiSynth extends MaxiInstrument {
 }
 
 class MaxiSampler extends MaxiInstrument {
+   static parameters() {
+     const core = {
+       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
+       "rate":{scale:1, translate:0, min:0, max:4, val:1},
+       "pan":{scale:1, translate:0, min:0, max:1, val:0.5}
+       // "end":{scale:1, translate:0, min:0, max:1, val:1},
+       // "start":{scale:1, translate:0, min:0, max:1, val:0}
+     };
+     let voices = 8;
+     let parameters = {};
+     const keys = Object.keys(core);
+     for(let j = 0; j < keys.length; j++) {
+       for(let i = 0; i < voices; i++)
+       {
+         const key = keys[j]+"_"+i;
+         parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
+       }
+     }
+     return parameters;
+   }
 
    constructor(node, index, instrument, audioContext, onParamUpdate) {
     super(node, index, instrument, audioContext, onParamUpdate);
-    const core = {
-      "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
-      "rate":{scale:1, translate:0, min:0, max:4, val:1},
-      "pan":{scale:1, translate:0, min:0, max:1, val:0.5}
-      // "end":{scale:1, translate:0, min:0, max:1, val:1},
-      // "start":{scale:1, translate:0, min:0, max:1, val:0}
-    };
     this.voices = 8;
-    this.group = 1;
-    this.parameters = {};
-    const keys = Object.keys(core);
-    for(let j = 0; j < keys.length; j++) {
-      for(let i = 0; i < this.voices; i++)
-      {
-        const key = keys[j]+"_"+i;
-        this.parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
-      }
-    }
+    this.parameters = MaxiSampler.parameters();
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
   }
@@ -1294,14 +1300,12 @@ class MaxiSampler extends MaxiInstrument {
   }
 
   loadSample(url, index) {
-    console.log("loadSamples", this.index);
     if (this.audioContext !== undefined) {
       this.loadSampleToArray(index, url)
     } else throw "Audio Context is not initialised!";
   }
 
   sendAudioArray(sampleWorkletObjectName, float32Array) {
-    console.log("sendAudioArray");
     if (float32Array !== undefined && this.node !== undefined) {
       this.node.port.postMessage({
         audio:{
