@@ -599,17 +599,6 @@ class MaxiSynthProcessor {
     return Object.keys(this.parameters).length == 17;
   }
 
-  pan(chan) {
-    var pan = 1;
-    if(this.paramsLoaded()) {
-      if(chan == 0)
-      {
-        pan = 2 - pan;
-      }
-    }
-    return pan;
-  }
-
   //Call signal once then mix in process loop
   signal() {
     if(this.paramsLoaded())
@@ -672,7 +661,9 @@ class MaxiSynthProcessor {
         cutoff = 40;
       }
       this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
-      return this.dcfOut;
+      var l = this.parameters.pan.val;
+      var r = 1 - this.parameters.pan.val;
+      return [this.dcfOut * l, this.dcfOut * r];
     }
 	else {
       //console.log("just 0")
@@ -951,7 +942,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     for(let o = 0; o < outputs.length; o++)
     {
       let output = outputs[o];
-      var sig = new Array(this.getInstruments().length).fill(new Array(128).fill(0));
+      var sig = new Array(128).fill(0);
       for (let channel = 0; channel < output.length; ++channel)
       {
         const outputChannel = output[channel];
@@ -960,19 +951,16 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
           for (let sample = 0; sample < outputChannel.length; ++sample)
           {
             this.onSample();
-            this.getInstruments().forEach((s, i)=> {
-              sig[i][sample]= s.signal()
-              outputChannel[sample] += sig[i][sample] * s.pan(channel % 2)
+            this.getInstruments().forEach((s)=> {
+              sig[sample] = s.signal()
             });
+            outputChannel[sample] = sig[sample][channel];
           }
         }
         else {
           for (let sample = 0; sample < outputChannel.length; ++sample)
           {
-            this.getInstruments().forEach((s, i)=> {
-              outputChannel[sample] += sig[i][sample] * s.pan(channel % 2)
-              //outputChannel[sample] = 0;
-            });
+            outputChannel[sample] = sig[sample][channel]
           }
         }
       }

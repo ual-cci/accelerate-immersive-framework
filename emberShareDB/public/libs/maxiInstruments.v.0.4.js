@@ -375,7 +375,6 @@ class MaxiInstruments {
           outputChannelCount: [this.audioContext.destination.maxChannelCount]
         }
       );
-      console.log("node",this.node)
       window.node = this.node;
 
       let sab3 = RingBuffer.getStorageForCapacity(256, Float32Array);
@@ -417,7 +416,6 @@ class MaxiInstruments {
       this.node.channelInterpretation='discrete';
       this.node.channelCountMode='explicit';
       this.node.channelCount=this.audioContext.destination.maxChannelCount;
-      console.log(this.node, this.audioContext.destination);
       resolve()
     });
   }
@@ -669,7 +667,6 @@ class MaxiInstrument {
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
-    console.log(toAdd)
     this.node.port.postMessage({
       sequence:{
         instrument:this.instrument,
@@ -743,7 +740,6 @@ class MaxiInstrument {
       const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
       const paramIndex = Object.keys(this.parameters).indexOf(name);
       const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
-      console.log(name,index,scaled,send)
       this.onParamUpdate(index, val, send)
     }
   }
@@ -794,7 +790,7 @@ class MaxiSynth extends MaxiInstrument {
 
     this.parameters = {
       "gain":{scale:1, translate:0, val:1},
-      "pan":{scale:2, translate:0, val:0},
+      "pan":{scale:1, translate:0, val:0.5},
       "attack":{scale:1500, translate:0, val:1000},
       "decay":{scale:1500, translate:0, val:1000},
       "sustain":{scale:1, translate:0, val:1},
