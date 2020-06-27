@@ -221,9 +221,9 @@ class MaxiInstruments {
     this.version = "v.0.4";
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 18;
+    this.NUM_SYNTH_PARAMS = 17;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.NUM_SAMPLER_PARAMS = (3 * 8);
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
@@ -518,9 +518,9 @@ class MaxiInstrument {
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 18;
+    this.NUM_SYNTH_PARAMS = 17;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.NUM_SAMPLER_PARAMS = 3 * 8;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS * this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
@@ -1180,6 +1180,7 @@ class MaxiSampler extends MaxiInstrument {
     const core = {
       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
       "rate":{scale:1, translate:0, min:0, max:4, val:1},
+      "pan":{scale:1, translate:0, min:0, max:1, val:0.5}
       // "end":{scale:1, translate:0, min:0, max:1, val:1},
       // "start":{scale:1, translate:0, min:0, max:1, val:0}
     };
@@ -1213,7 +1214,7 @@ class MaxiSampler extends MaxiInstrument {
     const changeGroupButton = document.getElementById("changeGroupButton");
     const slots = this.group == 0 ? "5-8" : "1-4";
     changeGroupButton.innerHTML = "View Samples " + slots;
-    const indexes = [0,1,2,3].map(x => x + ((this.voices / 2) * this.group))
+    const indexes = [0, 1, 2, 3].map(x => x + ((this.voices / 2) * this.group))
     Object.keys(this.parameters).forEach((p)=> {
       let elem = document.getElementsByClassName("cell_" + p);
       const i = parseInt(p.split("_")[1])

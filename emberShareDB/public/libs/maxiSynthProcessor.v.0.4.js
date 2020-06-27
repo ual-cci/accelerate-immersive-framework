@@ -258,6 +258,7 @@ class MaxiSamplerProcessor {
       const v = nextCmd.v !== undefined ? nextCmd.v : 127;
       if(nextCmd.cmd === "noteon")
       {
+        console.log(this.parameters['pan_0'].val);
         this.samples[f].trigger();
         this.velocities[f] = v/127;
       }
@@ -288,15 +289,11 @@ class MaxiSamplerProcessor {
   onStop() {}
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 16;
+    return Object.keys(this.parameters).length == 24;
   }
 
-  pan(chan) {
-    return 1;
-  }
-
-  signal(parameters) {
-    this.dcoOut = 0;
+  signal() {
+    this.dcoOut = [0, 0];
     if(this.paramsLoaded())
     {
       for(let i = 0; i < this.samples.length; i++)
@@ -312,8 +309,13 @@ class MaxiSamplerProcessor {
           // let start = this.parameters['start_'+i].val;
           let rate = this.parameters['rate_'+i].val
           let gain = this.parameters['gain_' + i].val;
+          let p = this.parameters['pan_' + i].val;
+          let r = p;
+          let l = 1 - p;
+          let sig = s.playOnce(rate) * gain * this.velocities[i];
           //let gain = i == 0 ? 1:0;
-          this.dcoOut += s.playOnce(rate) * gain * this.velocities[i];
+          this.dcoOut[0] += sig * l;
+          this.dcoOut[1] += sig * r;
         }
         this.adsr[i].trigger = 0;
       }
@@ -661,8 +663,11 @@ class MaxiSynthProcessor {
         cutoff = 40;
       }
       this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
-      var l = this.parameters.pan.val;
-      var r = 1 - this.parameters.pan.val;
+      var r = this.parameters.pan.val;
+      var l = 1 - this.parameters.pan.val;
+      if(this.samplePtr % 1000 == 0) {
+        console.log(l, r)
+      }
       return [this.dcfOut * l, this.dcfOut * r];
     }
 	else {
@@ -698,6 +703,32 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
    constructor(options) {
     super();
     //Max polyphony
+    this.samplerKeys = [];
+    for(let i = 0; i < 8; i++)
+    {
+      this.samplerKeys.push("gain_"+i)
+      this.samplerKeys.push("rate_"+i)
+      this.samplerKeys.push("pan_"+i)
+    }
+    this.synthKeys = [
+      "gain",
+      "pan",
+      "attack",
+      "decay",
+      "sustain",
+      "release",
+      "lfoFrequency",
+      "lfoPitchMod",
+      "lfoFilterMod",
+      "lfoAmpMod",
+      "adsrPitchMod",
+      "cutoff",
+      "Q",
+      "frequency",
+      "frequency2",
+      "poly",
+      "oscFn"
+    ]
     this.instruments = {synth:[], sampler:[]};
     this.TICKS_PER_BEAT = 24;
     this.loopSamples = Number.MAX_SAFE_INTEGER;
@@ -726,7 +757,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
-        //console.log("seqeuence", data.val)
+        console.log("seqeuence", data.instrument, data.val)
         this.instruments[data.instrument][data.index].sequence = data.val;
       }
       if(event.data.addSynth !== undefined)
@@ -836,42 +867,15 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.handleRingBuf();
   }
 
-  synthKey(index) {
-    switch (index) {
-      case 0:return "gain";
-      case 1:return "pan";
-      case 2:return "attack";
-      case 3:return "decay";
-      case 4:return "sustain";
-      case 5:return "release";
-      case 6:return "lfoFrequency";
-      case 7:return "lfoPitchMod";
-      case 8:return "lfoFilterMod";
-      case 9:return "lfoAmpMod";
-      case 10:return "adsrPitchMod";
-      case 11:return "cutoff";
-      case 12:return "Q";
-      case 13:return "frequency";
-      case 14:return "frequency2";
-      case 15:return "poly";
-      case 16:return "oscFn";
-    }
-  }
-
-  samplerKey(index) {
-    const p = index % 2 == 0 ? "gain" : "rate";
-    return p + "_" + Math.floor(index / 2);
-  }
-
   handleRingBuf() {
     if(this._param_reader !== undefined)
     {
       if(this._param_reader.dequeue(this.output))
       {
         const NUM_SYNTHS = 6;
-        const NUM_SYNTH_PARAMS = 17;
+        const NUM_SYNTH_PARAMS = this.synthKeys.length;
         const NUM_SAMPLERS = 6;
-        const NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+        const NUM_SAMPLER_PARAMS = this.samplerKeys.length;
         this.output.forEach((v, i)=> {
           if(i < NUM_SYNTHS * NUM_SYNTH_PARAMS)
           {
@@ -882,17 +886,14 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
               const index = i % NUM_SYNTH_PARAMS;
               if(index < NUM_SYNTH_PARAMS)
               {
-                const key = this.synthKey(index)
+                const key = this.synthKeys[index];
                 if(synth.parameters[key] === undefined)
                 {
                   synth.parameters[key] = {};
                 }
                 synth.parameters[key].val = v;
               }
-              else
-              {
 
-              }
             }
           }
           //Sampler param
@@ -903,9 +904,9 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(sampler !== undefined)
             {
               const index = (i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) % NUM_SAMPLER_PARAMS;
-              if(index < NUM_SAMPLER_PARAMS - 2)
+              if(index < NUM_SAMPLER_PARAMS)
               {
-                const key = this.samplerKey(index)
+                const key = this.samplerKeys[index]
                 if(sampler.parameters[key] === undefined)
                 {
                   sampler.parameters[key] = {};
@@ -937,30 +938,49 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     }
   }
 
+  makeBlock(chan, block) {
+    let b = [];
+    for(let i = 0; i < chan; i++) {
+      let ar = [];
+      for(let j = 0; j < block; j ++) {
+        ar.push(0)
+      }
+      b.push(ar)
+    }
+    return b;
+  }
+
   process(inputs, outputs, parameters)
   {
+    //
     for(let o = 0; o < outputs.length; o++)
     {
       let output = outputs[o];
-      var sig = new Array(128).fill(0);
-      for (let channel = 0; channel < output.length; ++channel)
+      let multiChannelSample = new Array(output.length).fill(0);
+      let multiChannelBlock = this.makeBlock(output.length, output[0].length);
+      for (let channel = 0; channel < output.length; channel++)
       {
         const outputChannel = output[channel];
-        //console.log(outputs.length, output.length, outputChannel.length)
-        if(channel == 0) {
-          for (let sample = 0; sample < outputChannel.length; ++sample)
+        if(channel === 0)
+        {
+          for (let s = 0; s < outputChannel.length; s++)
           {
             this.onSample();
-            this.getInstruments().forEach((s)=> {
-              sig[sample] = s.signal()
+            this.getInstruments().forEach((inst, i)=> {
+              multiChannelSample = inst.signal();
+              for (let c = 0; c < multiChannelSample.length; c++)
+              {
+                multiChannelBlock[c][s] += multiChannelSample[c];
+              }
             });
-            outputChannel[sample] = sig[sample][channel];
+            outputChannel[s] = multiChannelBlock[channel][s];
           }
         }
-        else {
-          for (let sample = 0; sample < outputChannel.length; ++sample)
+        else
+        {
+          for (let s = 0; s < 128; s++)
           {
-            outputChannel[sample] = sig[sample][channel]
+            outputChannel[s] = multiChannelBlock[channel][s];
           }
         }
       }
