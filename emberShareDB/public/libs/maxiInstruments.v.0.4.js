@@ -589,12 +589,13 @@ class MaxiInstrument {
     });
   }
 
-  setSequence(notes, instruments = [], muteDrums = false) {
+  setSequence(seq, instruments = [], muteDrums = false) {
    	let toAdd = [];
     let mul = 1;
-    //backwards compat
-    if(notes.notes !== undefined) {
-      notes = notes.notes;
+    let notes = seq;
+    //backwards compat/magenta
+    if(seq.notes !== undefined) {
+      notes = seq.notes;
     }
     if(seq.quantizationInfo)
     {
