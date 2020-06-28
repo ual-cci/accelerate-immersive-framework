@@ -288,7 +288,7 @@ class MaxiSamplerProcessor {
   onStop() {}
 
   paramsLoaded() {
-    return this.parameters !== undefined;
+    return Object.keys(this.parameters).length > 0;
   }
 
   signal() {
@@ -450,7 +450,6 @@ class MaxiSynthProcessor {
     }
   }
 
-  //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
     if(this.paramsLoaded())
     {
@@ -608,7 +607,7 @@ class MaxiSynthProcessor {
   }
 
   paramsLoaded() {
-    return this.parameters !== undefined
+    return Object.keys(this.parameters).length > 0
   }
 
   //Call signal once then mix in process loop
@@ -769,11 +768,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       {
 		    this.myClock.setTempo(event.data.tempo)
       }
-      if(event.data.parameters !== undefined)
-      {
-		    const data = event.data.parameters;
-        this.instruments[data.instrument][data.index].parameters = data.val
-      }
       if(event.data.audio !== undefined)
       {
         const data = event.data.audio;
@@ -852,7 +846,8 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
 
   handleRingBuf() {
     if(this._param_reader !== undefined &&
-    this.paramKeys["synth"] !== undefined && this.paramKeys["sampler"] !== undefined)
+    this.paramKeys["synth"] !== undefined &&
+    this.paramKeys["sampler"] !== undefined)
     {
       if(this._param_reader.dequeue(this.output))
       {
@@ -878,7 +873,6 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
                 }
                 synth.parameters[key].val = v;
               }
-
             }
           }
           //Sampler param
