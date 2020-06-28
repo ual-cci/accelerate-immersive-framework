@@ -250,6 +250,9 @@ class MaxiSamplerProcessor {
   	this.handleCmd({cmd:"noteon", f:freq, v:vel});
   }
 
+  //Unused stub
+  externalNoteOff(freq) {}
+
   //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
     if(this.paramsLoaded())
