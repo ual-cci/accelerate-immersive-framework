@@ -117,10 +117,12 @@ sam.mapped = ["rate_0", "gain_1"];
 <p class = "tutorial-text">
 You can now start mapping your chosen parameters to a given input using the Learner.js library. More information about this can be found in this <a href = "https://mimicproject.com/guides/learner">guide</a>. The instruments will work out how many outputs you need, given the mapped parameters you have specified. The second argument of "false" tells Learner.js that you don't need an additional GUI for your regression model, because you have the GUI provided by the instrument.
 </p>
-
+<p class = "tutorial-text">
+The final argument (10), tells Learner.js to smooth the output over 10 frames.
+</p>
 <pre>
 <code>
-learner.addRegression(instruments.getNumMappedOutputs(), false);
+learner.addRegression(instruments.getNumMappedOutputs(), false, 10);
 </code>
 </pre>
 <p class = "tutorial-heading">
@@ -210,24 +212,34 @@ instruments.setOnTick((playHeads)=>{
 </code>
 </pre>
 <p class = "tutorial-text">
-You can then define sequences in terms of note ons and noteoff in ticks, and set them to a specific synth or sampler. Samplers are oneshot so only require a start. Velocity is optional.
+You can then define sequences in terms of noteons and noteoff in ticks, and set them to a specific synth or sampler.
+</p>
+<p class = "tutorial-text">
+Each note event is a Javascript object with some of the following properties. You can use the full name or just initial them.
+<ul>
+  <li>pitch or p: MIDI pitch of the note. For Samplers, this is the index of the particular sample. Can be a single value or array of values</li>
+  <li>freq or f: Frequency in Hz (an alternative to pitch). Can be a single value or array of values</li>
+  <li>start or s: Start in ticks</li>
+  <li>end or e: End in ticks</li>
+  <li>length or l: Length in ticks (an alternative to end)</li>
+  <li>velocity or v: Velocity (optional) (0-127)</li>
+</ul>
 </p>
 <pre>
 	<code>
-const synthSeq = {
-  notes:[
+const synthSeq = [
     {pitch:60, start:0, end:12, velocity:127},
-    {pitch:67, start:49, end:72, velocity:60},
-  ],
-};
+    {p:67, s:49, l:34, v:60},
+    {p:[67, 60, 70], s:49, l:34, v:60},
+    {freq:[440, 606, 2000], start:49, e:134},
+  ];
 syn.setSequence(synthSeq);
 
-const samplerSeq = {
-  notes:[
+const samplerSeq = [
     {pitch:0, start:0, velocity:127},
     {pitch:1, start:49},
+    {p:[1,2,3], s:49},
   ],
-};
 sam.setSequence(samplerSeq);
 	</code>
 </pre>

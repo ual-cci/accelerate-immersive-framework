@@ -631,6 +631,15 @@ class MaxiInstrument {
         notes.splice(i, 1);
         --i;
       }
+      if(Array.isArray(n.freq)) {
+        n.freq.forEach((f)=> {
+          let newNote = JSON.parse(JSON.stringify(n));
+          newNote.freq = f;
+          newNotes.push(newNote)
+        });
+        notes.splice(i, 1);
+        --i;
+      }
     }
     notes = notes.concat(newNotes)
     notes.forEach((n)=> {
