@@ -365,8 +365,18 @@ function startDocAPI(app)
     let searchTermOr = {};
     if(term.length > 1)
     {
-      const rg = {$regex : ".*"+term+".*", $options:"i"};
-      searchTermOr = { $or: [{name: rg},{tags: rg},{ownerId: rg},{owner: rg}]};
+      var and = []
+      var words = term.split(" ");
+      words.forEach((w)=> {
+        let or = [];
+        const rg = {$regex : ".*"+w+".*", $options:"i"};
+        or.push({name: rg});
+        or.push({tags: rg});
+        or.push({ownerId: rg});
+        or.push({owner: rg});
+        and.push({$or: or});
+      });
+      searchTermOr = { $and: and};
     }
 
     let s = {};

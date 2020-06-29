@@ -19,7 +19,7 @@ export default Component.extend({
   actions: {
     createDoc() {
       const src = this.get('documentService').getDefaultSource();
-      const data = {name:"New Project", isPrivate:true, source:src}
+      const data = {name:"New Project", isPrivate:false, source:src}
       this.get('documentService').makeNewDoc(data).then(() => {
           this.get('onCreateDoc')();
       });

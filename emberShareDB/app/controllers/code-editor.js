@@ -1136,6 +1136,12 @@ export default Controller.extend({
     const pos = this.get('scrollPositions')[this.get('currentDoc').id];
     this.get('editor').scrollIntoView(pos);
   },
+  /*
+  This is necessary as the output container has to have an abolsute position
+  otherwise when you use anchor links in Chrome, things get weird. This means when
+  we do stuff like drop downs or scroll bars appearing, the code container shifts
+  down appropirately but the output doesnt. We use this method to keep them in sync
+  */
   syncOutputContainer: function() {
     setTimeout(()=> {
       const ace = $("#ace-container");
