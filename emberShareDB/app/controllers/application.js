@@ -12,7 +12,7 @@ export default Controller.extend({
       this.transitionToRoute('documents'," ",0,"views");
     },
     transitionToExamplesRoute() {
-      this.transitionToRoute('examples');
+      this.transitionToRoute('examples', 'root');
     },
     transitionToInputsRoute() {
       this.transitionToRoute('inputs');
