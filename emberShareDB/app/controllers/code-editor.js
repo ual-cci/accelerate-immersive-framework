@@ -1137,11 +1137,14 @@ export default Controller.extend({
     this.get('editor').scrollIntoView(pos);
   },
   syncOutputContainer: function() {
-    const ace = $("#ace-container");
-    if(!isEmpty(ace))
-    {
-      document.getElementById("output-container").style.top = ace.offset().top + "px"
-    }
+    setTimeout(()=> {
+      const ace = $("#ace-container");
+      if(!isEmpty(ace))
+      {
+        document.getElementById("output-container").style.top = ace.offset().top + "px"
+      }
+    }, 50)
+
   },
   updateDragPos: function() {
     this.syncOutputContainer();
@@ -1689,10 +1692,30 @@ export default Controller.extend({
     toggleShowAssets() {
       this.toggleProperty('showAssets');
       this.get('cs').log(this.get('showAssets'))
-
+      this.syncOutputContainer();
     },
     enterFullscreen() {
-      var target = document.getElementById("output-container");
+      document.onfullscreenchange =  (event) => {
+        if (document.fullscreenElement) {
+          console.log(`Element: ${document.fullscreenElement.id} entered full-screen mode.`);
+          const o = document.getElementById("output-container");
+          o.style.left = "0px";
+          o.style.width = "100%";
+          o.style.height = "100%";
+          const m = document.getElementById("main-code-container");
+          m.style.height = "100%";
+        } else {
+          console.log('Leaving full-screen mode.');
+          const o = document.getElementById("output-container");
+          o.style.left = "8%";
+          o.style.width = "84%";
+          o.style.height = "80vh";
+          const m = document.getElementById("main-code-container");
+          m.style.height = "80vh";
+          this.syncOutputContainer();
+        }
+      };
+      var target = document.getElementById("fullscreen");
       if (target.requestFullscreen) {
         target.requestFullscreen();
       } else if (target.msRequestFullscreen) {
