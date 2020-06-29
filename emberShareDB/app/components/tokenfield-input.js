@@ -105,6 +105,7 @@ export default Component.extend({
     toggleInput() {
       this.toggleProperty('showInput')
       this.set('showDuplicateMessage', false);
+      this.inputToggled()
     },
 
     // Actions

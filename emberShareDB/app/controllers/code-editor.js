@@ -132,6 +132,7 @@ export default Controller.extend({
         {
           this.updateDragPos();
         }
+        this.syncOutputContainer();
       }
     });
 
@@ -482,6 +483,7 @@ export default Controller.extend({
     });
     this.get('cs').log("tabs", tabs);
     this.set('tabs', tabs);
+    this.syncOutputContainer();
   },
   fetchChildren: function() {
     this.get('cs').log("fetchChildren");
@@ -1134,7 +1136,15 @@ export default Controller.extend({
     const pos = this.get('scrollPositions')[this.get('currentDoc').id];
     this.get('editor').scrollIntoView(pos);
   },
+  syncOutputContainer: function() {
+    const ace = $("#ace-container");
+    if(!isEmpty(ace))
+    {
+      document.getElementById("output-container").style.top = ace.offset().top + "px"
+    }
+  },
   updateDragPos: function() {
+    this.syncOutputContainer();
     const codeW = parseInt(this.get('codeW').substring(0, this.get('codeW').length-2));
     const drag = document.getElementById('drag-container')
     if(!isEmpty(drag))
@@ -1424,6 +1434,12 @@ export default Controller.extend({
       this.get('cs').log("search tag", tag)
       this.transitionToRoute('documents', tag, 0, "views");
     },
+    syncOutputContainer() {
+      this.get('cs').log("syncOutputContainer")
+      setTimeout(()=> {
+        this.syncOutputContainer();
+      },50)
+    },
     doEditDocName() {
       if(this.get('canEditDoc'))
       {
@@ -1631,7 +1647,7 @@ export default Controller.extend({
     },
     toggleShowSettings() {
       this.toggleProperty('showSettings');
-      document.getElementById("output-container").style.top = this.get('showSettings') ? "255px" : "220px";
+      this.syncOutputContainer();
     },
     toggleLibraryDropdown(){
       document.getElementById("myDropdown").classList.toggle("show");
@@ -1660,7 +1676,7 @@ export default Controller.extend({
             this.set('possibleRecordingNodes', this.get('codeParser').getPossibleNodes(combined));
             this.get('cs').log('possibleRecordingNodes', this.get('possibleRecordingNodes'))
             this.toggleProperty('showRecordingPanel');
-            document.getElementById("output-container").style.top = this.get('showRecordingPanel') ? "290px" : "220px";
+            this.syncOutputContainer();
           });
         });
       });
@@ -1673,7 +1689,7 @@ export default Controller.extend({
     toggleShowAssets() {
       this.toggleProperty('showAssets');
       this.get('cs').log(this.get('showAssets'))
-      document.getElementById("output-container").style.top = this.get('showAssets') ? "320px" : "220px";
+
     },
     enterFullscreen() {
       var target = document.getElementById("output-container");
