@@ -16,7 +16,7 @@ Router.map(function() {
   this.route('terms');
   this.route('getting-started', { path: '/getting-started/:topic' });
   this.route('guides', { path: '/guides/:topic' });
-  this.route('examples');
+  this.route('examples', { path: '/examples/:topic' });
   this.route('api', {path:'/api/*endpoint'});
   this.route('inputs');
   this.route('outputs');

@@ -1,11 +1,58 @@
-
-<div id = "example-container" class = "row">
-  {{#each examples as |category index|}}
-    <h1>{{category.title}}</h1>
-    <div class = "row">
-    {{#each category.docs as |example|}}
-      {{example-tile onClick = (action 'onClick' example) example = example index = index}}
-    {{/each}}
+{{#if isExample}}
+  <div id = "example-text-container">
+    {{#if isMagnet}}
+    {{magnet-guide}}
+    {{/if}}
+    {{#if isBBcut}}
+    {{bbcut-guide}}
+    {{/if}}
+    {{#if isEvolib}}
+    {{evolib-example-guide}}
+    {{/if}}
+    {{#if isMario}}
+    {{mario-guide}}
+    {{/if}}
+    {{#if isMerk}}
+    {{merkgenta-guide}}
+    {{/if}}
+    {{#if isMarkov}}
+    {{markov-guide}}
+    {{/if}}
+    {{#if isAudiotrig}}
+    {{audio-classifier-guide}}
+    {{/if}}
+    {{#if isFace}}
+    {{face-synth-guide}}
+    {{/if}}
+    {{#if isRhythm}}
+    {{rhythm-remixer-guide}}
+    {{/if}}
+    {{#if isConceptular}}
+    {{conceptular-guide}}
+    {{/if}}
+    {{#if isSpec}}
+    {{spec-guide}}
+    {{/if}}
+    {{#if isLyric}}
+    {{lyric-guide}}
+    {{/if}}
   </div>
-  {{/each}}
-</div>
+{{else}}
+  <div id = "tutorial-container">
+  <h2>Examples</h2>
+  <h3>Fun Example projects</h3>
+  <p class = "tutorial-text">
+  Each guide below uses a MIMIC library to demonstrate how to use machine intelligence to make music in the browser
+  </p>
+  <div id = "example-container" class = "row">
+    {{#each model as |group index|}}
+      <h1>{{group.title}}</h1>
+      <div class = "row">
+      {{#each group.examples as |example|}}
+        {{example-tile onClick = (action 'onClick' example) example = example index = index}}
+      {{/each}}
+      </div>
+    {{/each}}
+    </div>
+  </div>
+{{/if}}
