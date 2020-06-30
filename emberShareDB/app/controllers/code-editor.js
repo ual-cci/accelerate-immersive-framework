@@ -1393,6 +1393,10 @@ export default Controller.extend({
       )
     );
   },
+  showProject() {
+    //this.transitionToRoute("code-editor", this.get("model.id"))
+    //this.transitionToRoute("about")
+  },
   actions: {
 
     //codemirror
@@ -1855,6 +1859,9 @@ export default Controller.extend({
     },
     showCode() {
       this.hideCode(false);
+    },
+    showProject() {
+      this.get('cs').log("showProject", this.get("model.id"))
     },
 
     //OP PLAYBACK

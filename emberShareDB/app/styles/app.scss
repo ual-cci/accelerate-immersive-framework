@@ -604,11 +604,10 @@ input[id="docName"]:-ms-input-placeholder {
   position: absolute;
   bottom:0;
   right:0;
-  width:210px;
+  width:310px;
   height: auto;
   background-color: rgba(0,0,0,0.8);
   z-index: 100;
-  text-align: center;
   padding-bottom: 10px;
   padding-top: 10px;
   padding-right: 10px;
@@ -625,8 +624,28 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: inherit;
 }
 
+.embedded-link:hover:focus {
+  background-color: white;
+}
+
+.embedded-link {
+  position: relative;
+  bottom:8%;
+  left:79vw;
+  border-style: solid;
+  font-weight: 500;
+  border-color: white;
+  border-radius: 4px;
+  color:white;
+  border-width: 1px;
+  font-size: 9pt;
+  padding-top:1px;
+  padding-bottom:1px;
+  padding-left:4px;
+  padding-right:4px;
+}
+
 .embedded-menu-button {
-  margin: 0 auto;
   width:80px !important;
   height:30px
 }
