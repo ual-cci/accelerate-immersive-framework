@@ -250,6 +250,9 @@ class MaxiSamplerProcessor {
   	this.handleCmd({cmd:"noteon", f:freq, v:vel});
   }
 
+  //Unused stub
+  externalNoteOff(freq) {}
+
   //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
     if(this.paramsLoaded())
@@ -288,11 +291,11 @@ class MaxiSamplerProcessor {
   onStop() {}
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 16;
+    return Object.keys(this.parameters).length > 0;
   }
 
-  signal(parameters) {
-    this.dcoOut = 0;
+  signal() {
+    this.dcoOut = [0, 0];
     if(this.paramsLoaded())
     {
       for(let i = 0; i < this.samples.length; i++)
@@ -308,8 +311,16 @@ class MaxiSamplerProcessor {
           // let start = this.parameters['start_'+i].val;
           let rate = this.parameters['rate_'+i].val
           let gain = this.parameters['gain_' + i].val;
+          let p = this.parameters['pan_' + i].val;
+          let r = p;
+          let l = 1 - p;
+          let sig = s.playOnce(rate) * gain * this.velocities[i];
           //let gain = i == 0 ? 1:0;
-          this.dcoOut += s.playOnce(rate) * gain * this.velocities[i];
+          // if(this.samplePtr % 1000 == 0) {
+          //   console.log(l, r)
+          // }
+          this.dcoOut[0] += sig * l;
+          this.dcoOut[1] += sig * r;
         }
         this.adsr[i].trigger = 0;
       }
@@ -375,15 +386,17 @@ class MaxiSynthProcessor {
   }
 
   isFreqTriggered(f) {
-    if(this.parameters.poly.val == 1)
+    if(this.paramsLoaded())
     {
-      return this.triggered.map(a => a.f).includes(f);
+      if(this.parameters.poly.val == 1)
+      {
+        return this.triggered.map(a => a.f).includes(f);
+      }
+      else
+      {
+        return this.triggered.length > 0;
+      }
     }
-    else
-    {
-      return this.triggered.length > 0;
-    }
-
   }
 
   //Get next available oscillator
@@ -440,7 +453,6 @@ class MaxiSynthProcessor {
     }
   }
 
-  //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
     if(this.paramsLoaded())
     {
@@ -466,8 +478,10 @@ class MaxiSynthProcessor {
         if(this.parameters.poly.val == 1)
         {
           const t = this.getTriggeredForFreq(f);
-          this.release(t);
-          this.remove(this.triggered, t);
+          if(t !== undefined) {
+            this.release(t);
+            this.remove(this.triggered, t);
+          }
         }
         else
         {
@@ -478,9 +492,13 @@ class MaxiSynthProcessor {
   }
 
   release(t) {
+    let releaseTime = 1;
+    if(this.paramsLoaded())
+    {
+      releaseTime = this.samplePtr +
+        ((this.parameters.release.val / 1000) * this.sampleRate);
+    }
     this.adsr[t.o].trigger = 0;
-    let releaseTime = this.samplePtr +
-      ((this.parameters.release.val / 1000) * this.sampleRate);
     releaseTime = Math.round(releaseTime)
     this.released.push({f:t.f, o:t.o, off:releaseTime, v:t.v});
 
@@ -500,18 +518,20 @@ class MaxiSynthProcessor {
 
   triggerNoteOn(freq, vel = 127)
   {
-    const o = this.getAvailableOsc();
-    //This will be -1 if no available oscillators
-    if(o >= 0)
-    {
-      //
-      this.adsr[o].setAttack(this.parameters.attack.val);
-      this.adsr[o].setDecay(this.parameters.decay.val);
-      this.adsr[o].setSustain(this.parameters.sustain.val);
-      this.adsr[o].setRelease(this.parameters.release.val);
-      this.triggered.push({o:o, f:freq, v:vel/127});
-      this.adsr[o].trigger = 1;
-      //console.log("triggering", freq, o);
+    if(this.paramsLoaded()) {
+      const o = this.getAvailableOsc();
+      //This will be -1 if no available oscillators
+      if(o >= 0)
+      {
+        //
+        this.adsr[o].setAttack(this.parameters.attack.val);
+        this.adsr[o].setDecay(this.parameters.decay.val);
+        this.adsr[o].setSustain(this.parameters.sustain.val);
+        this.adsr[o].setRelease(this.parameters.release.val);
+        this.triggered.push({o:o, f:freq, v:vel/127});
+        this.adsr[o].trigger = 1;
+        //console.log("triggering", freq, o);
+      }
     }
   }
 
@@ -522,7 +542,7 @@ class MaxiSynthProcessor {
       this.released[i].off = this.released[i].off % this.loopSamples;
       //console.log("wrapping round", this.released[i].off, this.released[i].f)
     }
-    this.midiPanic();
+    this.releaseAll();
     //Restart loop
     //console.log(this.samplePtr)
     this.samplePtr = this.seqPtr = this.playHead = 0;
@@ -590,9 +610,10 @@ class MaxiSynthProcessor {
   }
 
   paramsLoaded() {
-    return Object.keys(this.parameters).length == 16;
+    return Object.keys(this.parameters).length > 0
   }
 
+  //Call signal once then mix in process loop
   signal() {
     if(this.paramsLoaded())
     {
@@ -602,9 +623,7 @@ class MaxiSynthProcessor {
       const oscFn = this.getOscFn(this.parameters.oscFn.val);
       this.dcoOut = 0;
       const out = this.triggered.concat(this.released);
-      // if(this.samplePtr % 1000 == 0) {
-      //   //console.log(this.triggered.length, this.released.length)
-      // }
+
       for(let o of out)
       {
         const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
@@ -616,7 +635,19 @@ class MaxiSynthProcessor {
         //const ampMod = envOut / 3;
 
         let f = o.f;
-        f = f < 0 ? 0 : f;
+        if(!poly)
+        {
+          if(o.o % 2 == 0)
+          {
+            f = this.parameters.frequency.val
+          }
+          else
+          {
+            f = this.parameters.frequency2.val
+          }
+        }
+
+        //f = f < 0 ? 0 : f;
         let osc;
         if(oscFn === "noise")
         {
@@ -627,13 +658,14 @@ class MaxiSynthProcessor {
           osc = this.dco[o.o][oscFn](f + pitchMod);
           //osc = this.dco[o.o][oscFn](f);
         }
-        this.dcoOut += (osc * ampMod * this.parameters.gain.val * o.v);
-      }
 
+        this.dcoOut += (osc * ampMod * this.parameters.gain.val * o.v);
+        //this.dcoOut += (osc * pan)
+      }
       //Filter
 
       let filterEnv = 1;
-      const filterOsc = lfoOut * this.parameters.lfoFilterMod.val;
+      const filterOsc = ((lfoOut + 1)/2) * this.parameters.lfoFilterMod.val;
       let cutoff = this.parameters.cutoff.val;
       cutoff = (cutoff * filterEnv) + filterOsc;
       if (cutoff > 2000) {
@@ -643,7 +675,10 @@ class MaxiSynthProcessor {
         cutoff = 40;
       }
       this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
-      return this.dcfOut;
+      var r = this.parameters.pan.val;
+      var l = 1 - this.parameters.pan.val;
+
+      return [this.dcfOut * l, this.dcfOut * r];
     }
 	else {
       //console.log("just 0")
@@ -678,6 +713,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
    constructor(options) {
     super();
     //Max polyphony
+    this.paramKeys = {};
     this.instruments = {synth:[], sampler:[]};
     this.TICKS_PER_BEAT = 24;
     this.loopSamples = Number.MAX_SAFE_INTEGER;
@@ -706,23 +742,24 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
-        //console.log("seqeuence", data.val)
         this.instruments[data.instrument][data.index].sequence = data.val;
+      }
+      if(event.data.paramKeys !== undefined)
+      {
+        const data = event.data.paramKeys;
+        this.paramKeys[data.instrument] = data.val;
       }
       if(event.data.addSynth !== undefined)
       {
-        //console.log("ADDING SYNTH");
         this.instruments["synth"].push(new MaxiSynthProcessor());
       }
       if(event.data.addSampler !== undefined)
       {
-        //console.log("ADDING SAMPLER");
         this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
       if(event.data.noteon !== undefined)
       {
         const data = event.data.noteon;
-        //console.log("received noteon", data.instrument, data.index, data.val)
         this.instruments[data.instrument][data.index].externalNoteOn(data.val);
       }
       if(event.data.noteoff !== undefined)
@@ -734,17 +771,11 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       {
 		    this.myClock.setTempo(event.data.tempo)
       }
-      if(event.data.parameters !== undefined)
-      {
-		    const data = event.data.parameters;
-        this.instruments[data.instrument][data.index].parameters = data.val
-      }
       if(event.data.audio !== undefined)
       {
         const data = event.data.audio;
         const audioData = this.translateFloat32ArrayToBuffer(data.val.audioBlob);
         this.instruments.sampler[data.index].samples[data.val.index].setSample(audioData);
-        console.log("received audio")
       }
       if(event.data.togglePlaying !== undefined)
       {
@@ -816,42 +847,19 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.handleRingBuf();
   }
 
-  synthKey(index) {
-    switch (index) {
-      case 0:return "gain";
-      case 1:return "attack";
-      case 2:return "decay";
-      case 3:return "sustain";
-      case 4:return "release";
-      case 5:return "lfoFrequency";
-      case 6:return "lfoPitchMod";
-      case 7:return "lfoFilterMod";
-      case 8:return "lfoAmpMod";
-      case 9:return "adsrPitchMod";
-      case 10:return "cutoff";
-      case 11:return "Q";
-      case 12:return "frequency";
-      case 13:return "frequency2";
-      case 14:return "poly";
-      case 15:return "oscFn";
-    }
-  }
-
-  samplerKey(index) {
-    const p = index % 2 == 0 ? "gain" : "rate";
-    return p + "_" + Math.floor(index / 2);
-  }
-
   handleRingBuf() {
-    if(this._param_reader !== undefined)
+    if(this._param_reader !== undefined &&
+    this.paramKeys["synth"] !== undefined &&
+    this.paramKeys["sampler"] !== undefined)
     {
       if(this._param_reader.dequeue(this.output))
       {
         const NUM_SYNTHS = 6;
-        const NUM_SYNTH_PARAMS = 18;
+        const NUM_SYNTH_PARAMS = this.paramKeys["synth"].length;
         const NUM_SAMPLERS = 6;
-        const NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+        const NUM_SAMPLER_PARAMS = this.paramKeys["sampler"].length;
         this.output.forEach((v, i)=> {
+          //Synth Param
           if(i < NUM_SYNTHS * NUM_SYNTH_PARAMS)
           {
             const synthIndex = Math.floor(i / NUM_SYNTH_PARAMS);
@@ -859,27 +867,14 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(synth !== undefined)
             {
               const index = i % NUM_SYNTH_PARAMS;
-              if(index < NUM_SYNTH_PARAMS - 2)
+              if(index < NUM_SYNTH_PARAMS)
               {
-                const key = this.synthKey(index)
+                const key = this.paramKeys["synth"][index];
                 if(synth.parameters[key] === undefined)
                 {
                   synth.parameters[key] = {};
                 }
                 synth.parameters[key].val = v;
-              }
-              else
-              {
-                if(index == NUM_SYNTH_PARAMS - 2)
-                {
-                  //console.log("external note on", v)
-                  //this.instruments["synth"][synthIndex].externalNoteOn(v);
-                }
-                else
-                {
-                  //console.log("external note off", v)
-                  //synth.externalNoteOff(v);
-                }
               }
             }
           }
@@ -891,9 +886,9 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
             if(sampler !== undefined)
             {
               const index = (i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) % NUM_SAMPLER_PARAMS;
-              if(index < NUM_SAMPLER_PARAMS - 2)
+              if(index < NUM_SAMPLER_PARAMS)
               {
-                const key = this.samplerKey(index)
+                const key = this.paramKeys["sampler"][index]
                 if(sampler.parameters[key] === undefined)
                 {
                   sampler.parameters[key] = {};
@@ -925,33 +920,49 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     }
   }
 
+  makeBlock(chan, block) {
+    let b = [];
+    for(let i = 0; i < chan; i++) {
+      let ar = [];
+      for(let j = 0; j < block; j ++) {
+        ar.push(0)
+      }
+      b.push(ar)
+    }
+    return b;
+  }
+
   process(inputs, outputs, parameters)
   {
-    const outputsLength = outputs.length;
-    for (let outputId = 0; outputId < outputsLength; ++outputId) {
-      let output = outputs[outputId];
-
-      for (let channel = 0; channel < output.length; ++channel) {
-        let outputChannel;
-
-        if (this.DAC === undefined || this.DAC.length === 0) {
-          outputChannel = output[channel];
-        } else {
-          if (this.DAC[channel] === undefined)
-            break;
-          else {
-            if (output[this.DAC[channel]] !== undefined) {
-              outputChannel = output[this.DAC[channel]];
-            } else {
-              continue;
-            }
+    for(let o = 0; o < outputs.length; o++)
+    {
+      let output = outputs[o];
+      let multiChannelSample = new Array(output.length).fill(0);
+      let multiChannelBlock = this.makeBlock(output.length, output[0].length);
+      for (let channel = 0; channel < output.length; channel++)
+      {
+        const outputChannel = output[channel];
+        if(channel === 0)
+        {
+          for (let s = 0; s < outputChannel.length; s++)
+          {
+            this.onSample();
+            this.getInstruments().forEach((inst, i)=> {
+              multiChannelSample = inst.signal();
+              for (let c = 0; c < multiChannelSample.length; c++)
+              {
+                multiChannelBlock[c][s] += multiChannelSample[c];
+              }
+            });
+            outputChannel[s] = multiChannelBlock[channel][s];
           }
         }
-        for (let i = 0; i < 128; ++i) {
-          this.onSample();
-          this.getInstruments().forEach((s)=> {
-            outputChannel[i] += s.signal();
-          });
+        else
+        {
+          for (let s = 0; s < outputChannel.length; s++)
+          {
+            outputChannel[s] = multiChannelBlock[channel][s];
+          }
         }
       }
     }

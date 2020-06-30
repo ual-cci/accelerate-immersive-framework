@@ -1,3 +1,63 @@
 <h1>Remap the Magenta Generated Kit onto different sounds</h1>
+<p class = "tutorial-text">
+  We use Magenta's DrumVAE to generate rhythms and see how they can used in the context of Grime Music. Whilst the model is designed to follow the following standard drum classes, this project stands as a starting point for experiments with using less traditional instrumentation and mappings.
+</p>
+<p class = "tutorial-text">
+  As well as changing the mappings, we also experiment with squeezing the hihats from a two bar pattern into one bar. This gives the effect of both quick runs and drop outs stylistically relevant to the genre and shows how you can rework patterns generated from large generic models to fit more specific musical aims.
+</p>
+<p class = "tutorial-text">
+  You can play around with using different vocal samples for the drums in the sketch below. Or follow the instructions under the project if you want to add your own samples in.
+</p>
+<p class = "tutorial-text">
+  <ul>
+    <li>
+      36 - Kick
+    </li>
+    <li>
+      38 - Snare
+    </li>
+    <li>
+      42 - Closed Hi Hat
+    </li>
+    <li>
+      46 - Open Hi-Hat
+    </li>
+    <li>
+      45 - low tom
+    </li>
+    <li>
+      48 - mid tom
+    </li>
+    <li>
+      50 - hi tom
+    </li>
+    <li>
+      49 - crash
+    </li>
+    <li>
+       51 - ride
+    </li>
+  </ul>
+</p>
 
-{{embedded-project docId = "305ac2de-3362-6c8d-e04c-d5a1072cc1c5" width="250px" height="650px"}}
+{{embedded-project docId = "6b362e09-dd11-d5c8-8b42-4777b7779e97" width="250px" height="700px"}}
+<h2>Adding Your Own Samples</h2>
+<p class = "tutorial-text" style = "margin:20px;">
+  <ol>
+    <li class = "exercise-list-item">
+      We are now going to try and edit the code. Click the green "Open Project" button above, then fork this project by clicking the button in the banner over the code editor, you now have your own copy of this project you can edit.
+    </li>
+    <li class = "exercise-list-item">
+      Once you have your own version, you can upload some of your own samples to the project. In the main title header, select the file icon ("Add files to Use").
+    </li>
+    <li class = "exercise-list-item">
+      Open the "loadDrums" tab.
+    </li>
+    <li class = "exercise-list-item">
+      Near the top you will find a dictionary called "urls". This is a collection of names (on the left) and urls for samples (on the right). Add new name:url pairs to this dictionary and when you rerun the project, your samples should appear as options in the drop down menu.
+    </li>
+  </ol>
+</p>
+<p class = "tutorial-text">
+  This project is also a good point of reference if you want to combine Magenta with Tone.js.
+</p>

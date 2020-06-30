@@ -221,9 +221,11 @@ class MaxiInstruments {
     this.version = "v.0.5";
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 18;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.NUM_SYNTH_PARAMS = Object.keys(MaxiSynth.parameters()).length;
+    this.NUM_SAMPLER_PARAMS = Object.keys(MaxiSampler.parameters()).length;
+    // this.NUM_SYNTH_PARAMS = 17;
+    // this.NUM_SAMPLER_PARAMS = 24;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
@@ -362,11 +364,17 @@ class MaxiInstruments {
 
   createNode() {
     return new Promise((resolve, reject)=> {
+      this.audioContext.destination.channelInterpretation='discrete';
+      this.audioContext.destination.channelCountMode='explicit';
+      this.audioContext.destination.channelCount=this.audioContext.destination.maxChannelCount
+
      this.node = new AudioWorkletNode(
         this.audioContext,
         this.synthProcessorName,
         {
-          processorOptions: {}
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+          outputChannelCount: [this.audioContext.destination.maxChannelCount]
         }
       );
       window.node = this.node;
@@ -407,6 +415,23 @@ class MaxiInstruments {
         console.log(`Error message from port: ` + event.data);
       };
       this.node.connect(this.audioContext.destination);
+      this.node.channelInterpretation='discrete';
+      this.node.channelCountMode='explicit';
+      this.node.channelCount=this.audioContext.destination.maxChannelCount;
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"synth",
+          index:0,
+          val:Object.keys(MaxiSynth.parameters())
+        }
+      });
+      this.node.port.postMessage({
+        paramKeys:{
+          instrument:"sampler",
+          index:0,
+          val:Object.keys(MaxiSampler.parameters())
+        }
+      });
       resolve()
     });
   }
@@ -484,7 +509,6 @@ class MaxiInstruments {
   }
 
   rewind() {
-    console.log("REWIND")
     this.node.port.postMessage({rewind:true});
   }
 
@@ -509,16 +533,18 @@ class MaxiInstrument {
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
-    this.NUM_SYNTH_PARAMS = 18;
     this.NUM_SAMPLERS = 6;
-    this.NUM_SAMPLER_PARAMS = (2 * 8) + 2;
+    this.NUM_SYNTH_PARAMS = Object.keys(MaxiSynth.parameters()).length;
+    this.NUM_SAMPLER_PARAMS = Object.keys(MaxiSampler.parameters()).length;
+    // this.NUM_SYNTH_PARAMS = 17;
+    // this.NUM_SAMPLER_PARAMS = 24;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS * this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
     this.docId = "local";
     if(window.frameElement)
     {
-      this.docid == window.frameElement.name
+      this.docId = window.frameElement.name
     }
   }
 
@@ -543,7 +569,7 @@ class MaxiInstrument {
   }
 
   noteon(freq = 60, vel = 127) {
-    console.log("instrument note on", this.instrument, this.index, freq, vel)
+    //console.log("instrument note on", this.instrument, this.index, freq, vel)
     this.node.port.postMessage({
       noteon:{
         instrument:this.instrument,
@@ -564,13 +590,58 @@ class MaxiInstrument {
   }
 
   setSequence(seq, instruments = [], muteDrums = false) {
-    const notes = seq.notes;
    	let toAdd = [];
     let mul = 1;
+    let notes = seq;
+    //backwards compat/magenta
+    if(seq.notes !== undefined) {
+      notes = seq.notes;
+    }
     if(seq.quantizationInfo)
     {
 		  mul = this.TICKS_PER_BEAT / seq.quantizationInfo.stepsPerQuarter;
     }
+    let newNotes = [];
+    for(let i = 0; i < notes.length; i++) {
+      const n = notes[i];
+      if(n.p !== undefined) {
+        n.pitch = n.p;
+      }
+      if(n.s !== undefined) {
+        n.start = n.s;
+      }
+      if(n.e !== undefined) {
+        n.end = n.e;
+      }
+      if(n.l !== undefined) {
+        n.length = n.l;
+      }
+      if(n.v !== undefined) {
+        n.velocity = n.v;
+      }
+      if(n.f !== undefined) {
+        n.freq = n.f;
+      }
+      if(Array.isArray(n.pitch)) {
+        n.pitch.forEach((p)=> {
+          let newNote = JSON.parse(JSON.stringify(n));
+          newNote.pitch = p;
+          newNotes.push(newNote)
+        });
+        notes.splice(i, 1);
+        --i;
+      }
+      if(Array.isArray(n.freq)) {
+        n.freq.forEach((f)=> {
+          let newNote = JSON.parse(JSON.stringify(n));
+          newNote.freq = f;
+          newNotes.push(newNote)
+        });
+        notes.splice(i, 1);
+        --i;
+      }
+    }
+    notes = notes.concat(newNotes)
     notes.forEach((n)=> {
       let doAdd = true;
       if(instruments.length > 0)
@@ -597,6 +668,10 @@ class MaxiInstrument {
           {
             end = n.quantizedEndStep
           }
+          else if(n.length !== undefined)
+          {
+            end = start + n.length;
+          }
           else
           {
             end = start + 1;
@@ -607,14 +682,18 @@ class MaxiInstrument {
         {
           v = n.velocity;
         }
-      	toAdd.push({cmd:"noteon", f:this.getFreq(n.pitch), t:start * mul, v:v});
-      	toAdd.push({cmd:"noteoff", f:this.getFreq(n.pitch), t:end * mul});
+        var f = n.freq;
+        if(f === undefined && n.pitch !== undefined)
+        {
+          f = this.getFreq(n.pitch)
+        }
+      	toAdd.push({cmd:"noteon", f:f, t:start * mul, v:v});
+      	toAdd.push({cmd:"noteoff", f:f, t:end * mul});
       }
     });
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
-    console.log(toAdd)
     this.node.port.postMessage({
       sequence:{
         instrument:this.instrument,
@@ -627,7 +706,7 @@ class MaxiInstrument {
   onGUIChange(val, index) {
     const key = Object.keys(this.parameters)[index];
     this.onChange(val, key);
-    this.saveParamValues();
+
   }
 
   onMLChange(val, index) {
@@ -638,6 +717,10 @@ class MaxiInstrument {
   onChange(val, key, send = true) {
     const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
     this.setParam(key, scaled, send);
+    if(send)
+    {
+      this.saveParamValues();
+    }
   }
 
   randomise() {
@@ -664,9 +747,21 @@ class MaxiInstrument {
     })
   }
 
+  setParams(vals) {
+    vals.forEach((pair, i)=>{
+      this.setParam(pair[0], pair[1], i == vals.length - 1);
+    })
+  }
+
   setParam(name, val, send = true) {
     if(val < 0) val = 0.00;
-    if(this.parameters[name])
+    const scaled = (val - this.parameters[name].translate) / this.parameters[name].scale;
+
+    if(this.outputGUI[name] !== undefined)
+    {
+      this.outputGUI[name].value = scaled;
+    }
+    if(this.parameters[name] !== undefined)
     {
       this.parameters[name].val = val
       const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
@@ -717,28 +812,31 @@ class MaxiInstrument {
 
 class MaxiSynth extends MaxiInstrument {
 
+  static parameters() {
+    return {
+          "gain":{scale:1, translate:0, val:1},
+          "pan":{scale:1, translate:0, val:0.5},
+          "attack":{scale:1500, translate:0, val:1000},
+          "decay":{scale:1500, translate:0, val:1000},
+          "sustain":{scale:1, translate:0, val:1},
+          "release":{scale:1500, translate:0, val:1000},
+          "lfoFrequency":{scale:10, translate:0, val:0},
+          "lfoPitchMod":{scale:100, translate:0, val:1},
+          "lfoFilterMod":{scale:8000, translate:0, val:1},
+          "lfoAmpMod":{scale:1, translate:0, val:0},
+          "adsrPitchMod":{scale:100, translate:0, val:1},
+          "cutoff":{scale:3000, translate:40, val:2000},
+          "Q":{scale:2, translate:0, val:1},
+          "frequency":{scale:1000, translate:0, val:440},
+          "frequency2":{scale:1000, translate:0, val:440},
+          "poly":{scale:1, translate:0, val:1},
+          "oscFn":{scale:1, translate:0, val:0},
+        }
+  }
+
   constructor(node, index, instrument, audioContext, onParamUpdate) {
     super(node, index, instrument, audioContext, onParamUpdate);
-
-    this.parameters = {
-      "gain":{scale:1, translate:0, val:1},
-      "attack":{scale:1500, translate:0, val:1000},
-      "decay":{scale:1500, translate:0, val:1000},
-      "sustain":{scale:1, translate:0, val:1},
-      "release":{scale:1500, translate:0, val:1000},
-      "lfoFrequency":{scale:10, translate:0, val:0},
-      "lfoPitchMod":{scale:100, translate:0, val:1},
-      "lfoFilterMod":{scale:8000, translate:0, val:1},
-      "lfoAmpMod":{scale:1, translate:0, val:0},
-      "adsrPitchMod":{scale:100, translate:0, val:1},
-      "cutoff":{scale:3000, translate:40, val:2000},
-      "Q":{scale:2, translate:0, val:1},
-      "frequency":{scale:1000, translate:0, val:440},
-      "frequency2":{scale:1000, translate:0, val:440},
-      "poly":{scale:1, translate:0, val:1},
-      "oscFn":{scale:1, translate:0, val:0},
-    }
-
+    this.parameters = MaxiSynth.parameters();
     this.presets = [
       {title:"--presets--"},
       {title:"Peep",
@@ -1010,14 +1108,20 @@ class MaxiSynth extends MaxiInstrument {
     this.outputGUI.oscFn = oscillatorSelector;
 
     const printParamsButton = document.createElement("BUTTON");
-    printParamsButton.innerHTML = "Dump"
+    printParamsButton.innerHTML = "Print"
+    printParamsButton.classList.add("maxi-btn")
+    printParamsButton.style.margin = "auto";
+    printParamsButton.style.display = "block";
+    printParamsButton.style.width = "70px";
     printParamsButton.onclick = ()=>{
-      let str = "vals:{\n";
+      let str = "synth.setParams([\n";
       const vals = this.getParamValues();
       Object.keys(vals).forEach((key)=>{
-		str += "\t" + key + ":" + vals[key] + ",\n"
+        const val = vals[key];
+        const scaled = (this.parameters[key].scale * val) + this.parameters[key].translate;
+		     str += "\t[\"" + key + "\"," + scaled + "],\n"
       });
-      str += "}"
+      str += "]"
       console.log(str)
     }
 
@@ -1042,21 +1146,23 @@ class MaxiSynth extends MaxiInstrument {
     cell.appendChild(randomButton);
     cell.appendChild(oscillatorSelector);
     cell = row.insertCell();
-    cell.colSpan = "2"
+    //cell.colSpan = "2"
     cell.appendChild(presetSelector);
     cell = row.insertCell();
-    //cell.appendChild(printParamsButton);
-
+    cell.appendChild(printParamsButton);
+    var ignore = ["poly", "oscFn"];
+    var cellCtr = 0;
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
       let p = Object.keys(this.parameters)[i];
-      if(p !== "oscFn" && p !== "poly")
+      if(!ignore.includes(p))
       {
-        if(i % rowLength === 0)
+        if(cellCtr % rowLength === 0)
         {
           row = table.insertRow();
         }
         cell = row.insertCell();
+        cellCtr++;
         cell.classList.add("cell_" + p);
         let val = this.parameters[p].val;
         val = (val - this.parameters[p].translate) / this.parameters[p].scale;
@@ -1097,26 +1203,31 @@ class MaxiSynth extends MaxiInstrument {
 }
 
 class MaxiSampler extends MaxiInstrument {
+   static parameters() {
+     const core = {
+       "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
+       "rate":{scale:1, translate:0, min:0, max:4, val:1},
+       "pan":{scale:1, translate:0, min:0, max:1, val:0.5}
+       // "end":{scale:1, translate:0, min:0, max:1, val:1},
+       // "start":{scale:1, translate:0, min:0, max:1, val:0}
+     };
+     let voices = 8;
+     let parameters = {};
+     const keys = Object.keys(core);
+     for(let j = 0; j < keys.length; j++) {
+       for(let i = 0; i < voices; i++)
+       {
+         const key = keys[j]+"_"+i;
+         parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
+       }
+     }
+     return parameters;
+   }
 
    constructor(node, index, instrument, audioContext, onParamUpdate) {
     super(node, index, instrument, audioContext, onParamUpdate);
-    const core = {
-      "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
-      "rate":{scale:1, translate:0, min:0, max:4, val:1},
-      // "end":{scale:1, translate:0, min:0, max:1, val:1},
-      // "start":{scale:1, translate:0, min:0, max:1, val:0}
-    };
     this.voices = 8;
-    this.group = 1;
-    this.parameters = {};
-    const keys = Object.keys(core);
-    for(let i = 0; i < this.voices; i++)
-    {
-      for(let j = 0; j < keys.length; j++) {
-        const key = keys[j]+"_"+i;
-        this.parameters[key] = JSON.parse(JSON.stringify(core[keys[j]]))
-      };
-    }
+    this.parameters = MaxiSampler.parameters();
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     this.sendDefaultParam();
   }
@@ -1136,7 +1247,7 @@ class MaxiSampler extends MaxiInstrument {
     const changeGroupButton = document.getElementById("changeGroupButton");
     const slots = this.group == 0 ? "5-8" : "1-4";
     changeGroupButton.innerHTML = "View Samples " + slots;
-    const indexes = [0,1,2,3].map(x => x + ((this.voices / 2) * this.group))
+    const indexes = [0, 1, 2, 3].map(x => x + ((this.voices / 2) * this.group))
     Object.keys(this.parameters).forEach((p)=> {
       let elem = document.getElementsByClassName("cell_" + p);
       const i = parseInt(p.split("_")[1])
@@ -1170,7 +1281,6 @@ class MaxiSampler extends MaxiInstrument {
     }
     cell.appendChild(changeGroupButton);
 
-
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
       let p = Object.keys(this.parameters)[i];
@@ -1203,14 +1313,12 @@ class MaxiSampler extends MaxiInstrument {
   }
 
   loadSample(url, index) {
-    console.log("loadSamples", this.index);
     if (this.audioContext !== undefined) {
       this.loadSampleToArray(index, url)
     } else throw "Audio Context is not initialised!";
   }
 
   sendAudioArray(sampleWorkletObjectName, float32Array) {
-    console.log("sendAudioArray");
     if (float32Array !== undefined && this.node !== undefined) {
       this.node.port.postMessage({
         audio:{
