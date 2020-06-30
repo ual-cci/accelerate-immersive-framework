@@ -12,6 +12,7 @@
     <li class = "exercise-list-item">
       Have a play around with inserting different rhythms into the dataset and generating new ones. Currently, the format is each character is one 16th, with spaces acting as rests.
     </li>
+    <img  style = "width:auto;height:350px" class = "tutorial-img" src = {{concat url "mono-markov.png"}}/>
     <li class = "exercise-list-item">
       We are now going to try and edit the code. Click the green "Open Project" button above, then fork this project by clicking the button in the banner over the code editor, you now have your own copy of this project you can edit.
     </li>
@@ -26,8 +27,11 @@
         Next, we are going to make the drum machine polyphonic, and doing so will require us changing both the audio engine and the Markov model. Currently, each token in the model is one character, but we need to edit this so each token is a string (of variable length), delimited by a character.
        </p>
        <p>
-        Keep in your mind that going from monophonic to polyphonic musical sequences is <em>essentially the same as going from characters to words in text analysis.</em>
+        Keep in your mind that going from monophonic to polyphonic musical sequences is <em>essentially the same as going from characters to words in text analysis.</em>.
       </p>
+        <p> Below we see two simple polyphonic beats, where spaces delimit notes and hyphens (“-“) represent a rest (no drums). On the left is the sequence of characters, on the right is the respective musical score.
+      </p>
+      <img style = "width:auto;height:350px" class = "tutorial-img" src = {{concat url "poly-markov.png"}}/>
       <p>
        The method “setupGrams()” is where the dataset (stored as an array of string in the “pattern” variable), is analysed and turned into a Markov model. Currently, each token/gram is a substring of this, length of which is decided by the “order” variable.
      </p>
