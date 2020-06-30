@@ -630,6 +630,7 @@ input[id="docName"]:-ms-input-placeholder {
 }
 
 .embedded-link {
+  margin:20px;
   border-style: solid;
   font-weight: 500;
   border-color: $mimic-green;
@@ -638,7 +639,8 @@ input[id="docName"]:-ms-input-placeholder {
   border-width: 1px;
   font-size: 20pt;
   width:200px;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
   display: block;
   color:$mimic-green;
@@ -1707,7 +1709,7 @@ $footer-grey:#303030;
   width:90%;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 120px;
+  margin-bottom: 40px;
   max-width: 850px;
 }
 
