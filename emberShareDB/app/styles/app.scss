@@ -604,7 +604,7 @@ input[id="docName"]:-ms-input-placeholder {
   position: absolute;
   bottom:0;
   right:0;
-  width:310px;
+  width:210px;
   height: auto;
   background-color: rgba(0,0,0,0.8);
   z-index: 100;
@@ -624,25 +624,24 @@ input[id="docName"]:-ms-input-placeholder {
   background-color: inherit;
 }
 
-.embedded-link:hover:focus {
-  background-color: white;
+.embedded-link:hover {
+  color: $mimic-blue;
+  border-color: $mimic-blue;
 }
 
 .embedded-link {
-  position: relative;
-  bottom:8%;
-  left:79vw;
   border-style: solid;
   font-weight: 500;
-  border-color: white;
+  border-color: $mimic-green;
   border-radius: 4px;
-  color:white;
+  color:red;
   border-width: 1px;
-  font-size: 9pt;
-  padding-top:1px;
-  padding-bottom:1px;
-  padding-left:4px;
-  padding-right:4px;
+  font-size: 20pt;
+  width:200px;
+  margin: auto;
+  text-align: center;
+  display: block;
+  color:$mimic-green;
 }
 
 .embedded-menu-button {
