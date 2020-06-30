@@ -4,12 +4,13 @@ import { computed } from '@ember/object';
 export default Service.extend({
   examples:computed(()=>{return [
     {title:"Generative Music", examples:[
-      //mario
-      {id:"mario",docid:"a8baea19-711f-4e43-46ab-71e5212ed5db",desc:"What if AI finished the Mario theme song? Use Magenta's MusicRNN model to experiment with different continuations of the catchiest computer game music"},
-      //merk
-      {id:"merk", docid:"305ac2de-3362-6c8d-e04c-d5a1072cc1c5",desc:"A Remapping of Magenta's MusicVAE drum models from London, UK. We sample the latent space, squish the hihats and play around with the drum mappings to see what happens if we make things a little bit more grimey. "},
+
       //markov
       {id:"markov", docid:"5f827ca2-aae0-b755-e432-f815c00a482a",desc:"Quickly build your own generative drum models using keyboard input."},
+      //merk
+      {id:"merk", docid:"305ac2de-3362-6c8d-e04c-d5a1072cc1c5",desc:"A Remapping of Magenta's MusicVAE drum models from London, UK. We sample the latent space, squish the hihats and play around with the drum mappings to see what happens if we make things a little bit more grimey. "},
+      //mario
+      {id:"mario",docid:"a8baea19-711f-4e43-46ab-71e5212ed5db",desc:"What if AI finished the Mario theme song? Use Magenta's MusicRNN model to experiment with different continuations of the catchiest computer game music"},
     ]},
     {title:"User Input",examples:[
       //audio triggers
