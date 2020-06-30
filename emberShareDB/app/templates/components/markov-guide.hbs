@@ -1,3 +1,74 @@
 <h1>Learn about Markov Models with Drums</h1>
-
+<p class = "tutorial-text">
+  Markov chains model the probability of moving from one state to another state, for example, if it is sunny today, what is the probability it will reamin sunny, or rain the next day? Because of this, it is great for modelling and generating musical patterns if we think as each step in a score as moving from one state to another. A great place to get an intuition for Markov models is <a href = "https://setosa.io/ev/markov-chains/">here</a>.
+</p>
+<p class = "tutorial-text">
+  The project below is an example that allows you to build a corpus of drum rhythms (instead of text) and then generate new music from it.
+</p>
 {{embedded-project docId = "5f827ca2-aae0-b755-e432-f815c00a482a" width="250px" height="650px"}}
+<h2>Markov Model Experiments</h2>
+<p class = "tutorial-text" style = "margin:20px;">
+  <ol>
+    <li class = "exercise-list-item">
+      Have a play around with inserting different rhythms into the dataset and generating new ones. Currently, the format is each character is one 16th, with spaces acting as rests.
+    </li>
+    <li class = "exercise-list-item">
+      We are now going to try and edit the code. Click the green "Open Project" button above, then fork this project by clicking the button in the banner over the code editor, you now have your own copy of this project you can edit.
+    </li>
+    <li class = "exercise-list-item">
+      First, we are going to play around with the order of the Markov model. You can do this by going to the “Markov” tab and changing the variable “order” at the top. Rerun the project and see how different orders effects the drum beats you can generate. Also, this method will generate either sequences of 16, or until there are no more options for it to continue. You can edit this behaviour in the “markovIt()” function, trying different lengths. How does changing the order effect this behaviour?
+    </li>
+    <li class = "exercise-list-item">
+      The generated sequence is initialised using the first n-characters of the dataset. Update the “markovIt()” method to start the generated sequence with a random substring from the dataset. How does this effect the audio you can make?
+    </li>
+    <li class = "exercise-list-item">
+      <p>
+        Next, we are going to make the drum machine polyphonic, and doing so will require us changing both the audio engine and the Markov model. Currently, each token in the model is one character, but we need to edit this so each token is a string (of variable length), delimited by a character.
+       </p>
+       <p>
+        Keep in your mind that going from monophonic to polyphonic musical sequences is <em>essentially the same as going from characters to words in text analysis.</em>
+      </p>
+      <p>
+       The method “setupGrams()” is where the dataset (stored as an array of string in the “pattern” variable), is analysed and turned into a Markov model. Currently, each token/gram is a substring of this, length of which is decided by the “order” variable.
+     </p>
+      <p>
+      Edit this function so that the model works on strings separated by spaces as tokens (instead of a single character) as described above.
+      </p>
+       <p>
+      Hint: First you will need to split dataset string on spaces (“ “), see Javascript’s split(“ “) function. This is will give an array of tokens to iterate through to build your dataset. You can also use slice() to slice sections of arrays and join(“ “) to collapse arrays into strings, delimited by spaces.
+      </p>
+       <p>
+      String <a href = "https://www.w3schools.com/jsref/jsref_split.asp">split()</a> <br>
+      Array <a href = "https://www.w3schools.com/jsref/jsref_join.asp">join()</a><br>
+      Array <a href = "https://www.w3schools.com/jsref/jsref_slice_array.asp">slice()</a><br>
+      </p>
+       <p>
+      You will also need to update the “markovIt()” function (where new patterns are generated) to account for the new format.
+      </p>
+       <p>
+      Hint: Specifically, look at how the “result” string is built up (maybe use an array instead and join(“ “) back together at the end to return a string), and how the “currentGram” variable is updated after every new generation.
+      </p>
+    </li>
+       <li class = "exercise-list-item"><p>
+    Now we can update the audio engine to account for the new format of strings. The “loopPlayer()” function in the “Audio” tab is where this happens. The current pattern is stored in the “sequence” variable as a string, and at every step a pointer increments and looks at a different character.
+    </p>
+     <p>
+      Update the audio engine so that “sequence” is first converted to an array of strings, and instead of looking at one character to determine which drum to play, look at whether a particular character is present and play all that are. E.g. the token “ksoc” would play a kick, snare and both hihats on that step.
+      </p>
+      <p>
+      Hint:The Javascript string functions split() and includes() are your friends here. You’ll probably need to change the switch statement to multiple if statements.
+    </p>
+    <p>
+      String <a href = "https://www.w3schools.com/jsref/jsref_includes.asp">includes()</a><br>
+      </p>
+      <p>
+      OPTIONAL BONUS: Have you accounted for the order of characters in the tokens? Does this matter? If it does, can you make your sketch robust to this?
+    </p>
+    </li>
+    <li class = "exercise-list-item">
+      <p>
+        If you're done, or stuck you can check out the <a href = "https://mimicproject.com/code/67038206-8c17-876c-781a-b515cf93a013"> finished polyphonic project</a> here.
+      </p>
+    </li>
+  </ol>
+</p>
