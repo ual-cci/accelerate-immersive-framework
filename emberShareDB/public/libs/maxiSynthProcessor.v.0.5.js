@@ -262,12 +262,22 @@ class MaxiSamplerProcessor {
       const v = nextCmd.v !== undefined ? nextCmd.v : 127;
       if(nextCmd.cmd === "noteon")
       {
-        this.adsr[f].setAttack(0);
-        this.adsr[f].setDecay(1);
         this.adsr[f].setSustain(1);
         this.adsr[f].holdtime = 1;
-        // - 120
-        this.adsr[f].setRelease((this.samples[f].getLength() / 44100) * 1000);
+        let fullLength = this.samples[f].getLength();
+        let end = this.parameters['end_'+f].val * fullLength;
+        if(end == 0)
+        {
+          end = fullLength;
+        }
+        let start = this.parameters['start_'+f].val * fullLength;
+        let rate = this.parameters['rate_'+f].val;
+        start /= rate;
+        end /= rate;
+        let len = ((end-start) / 44100) * 1000;
+        this.adsr[f].setDecay(1);
+        this.adsr[f].setAttack(len * 0.25);
+        this.adsr[f].setRelease(len * 0.75);
         this.adsr[f].trigger = 1;
         this.samples[f].trigger();
         this.velocities[f] = v/127;
@@ -322,11 +332,12 @@ class MaxiSamplerProcessor {
           let rate = this.parameters['rate_'+i].val;
           start /= rate;
           end /= rate;
+          rate = 44100 / (end - start)
           let gain = this.parameters['gain_' + i].val;
           let p = this.parameters['pan_' + i].val;
           let r = p;
           let l = 1 - p;
-          let sig = s.play4(rate, 0, end) * this.velocities[i] * this.adsr[i].adsr(gain, this.adsr[i].trigger);
+          let sig = s.play(rate, start, end) * this.velocities[i] * this.adsr[i].adsr(gain, this.adsr[i].trigger);
           if(this.samplePtr % 10000 == 0) {
             console.log(start, end)
           }
@@ -735,7 +746,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     this.isPlaying = true;
     this.loops = new Float32Array(16);
     this.o = { index: 0, value: 0 };
-    this.output = new Float32Array(256);
+    this.output = new Float32Array(512);
     this.port.onmessage = (event) => {
       if (event.data.type === "recv-param-queue") {
         const b = new RingBuffer(event.data.data, Float32Array);

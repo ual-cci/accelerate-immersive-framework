@@ -379,7 +379,7 @@ class MaxiInstruments {
       );
       window.node = this.node;
 
-      let sab3 = RingBuffer.getStorageForCapacity(256, Float32Array);
+      let sab3 = RingBuffer.getStorageForCapacity(512, Float32Array);
       let rb3 = new RingBuffer(sab3, Float32Array);
       this.paramWriter = new ArrayWriter(rb3);
       this.node.port.postMessage({
