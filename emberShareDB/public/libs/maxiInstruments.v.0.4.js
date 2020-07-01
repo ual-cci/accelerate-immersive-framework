@@ -280,7 +280,7 @@ class MaxiInstruments {
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined && send)
           {
-            this.paramWriter.enqueue(this.globalParameters);
+            this.enqueue();
           }
         }
       );
@@ -740,11 +740,15 @@ class MaxiInstrument {
   }
 
   sendDefaultParam() {
-    const keys = Object.keys(this.parameters);
-    keys.forEach((p, i)=> {
-      const send = i <= keys.length - 1
-      this.setParam(p, this.parameters[p].val, send)
-    })
+    console.log("sendDefaultParam")
+    setTimeout(()=>{
+      const keys = Object.keys(this.parameters);
+      keys.forEach((p, i)=> {
+        const send = i == keys.length - 1
+        this.setParam(p, this.parameters[p].val, send)
+      })
+    }, 100)
+
   }
 
   setParams(vals) {
@@ -764,9 +768,10 @@ class MaxiInstrument {
     if(this.parameters[name] !== undefined)
     {
       this.parameters[name].val = val
-      const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+      let offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+      offset += this.instrument == "synth" ? (this.index * this.NUM_SYNTH_PARAMS) :  (this.index * this.NUM_SAMPLER_PARAMS)
       const paramIndex = Object.keys(this.parameters).indexOf(name);
-      const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
+      const index = offset + paramIndex;
       this.onParamUpdate(index, val, send)
     }
   }
