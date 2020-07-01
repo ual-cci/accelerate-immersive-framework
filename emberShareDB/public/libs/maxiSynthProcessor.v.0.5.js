@@ -220,12 +220,14 @@ class MaxiSamplerProcessor {
     this.samples = [];
     this.adsr = [];
     this.velocities = []
+    this.releaseTimes = [];
     this.playHead = 0;
     for(let i = 0; i < voices; i++)
     {
       this.samples.push(new Maximilian.maxiSample());
       this.adsr.push(new Maximilian.maxiEnv());
       this.velocities.push(1);
+      this.releaseTimes.push(-1);
     }
     //this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
@@ -262,8 +264,6 @@ class MaxiSamplerProcessor {
       const v = nextCmd.v !== undefined ? nextCmd.v : 127;
       if(nextCmd.cmd === "noteon")
       {
-        this.adsr[f].setSustain(1);
-        this.adsr[f].holdtime = 1;
         let fullLength = this.samples[f].getLength();
         let end = this.parameters['end_'+f].val * fullLength;
         if(end == 0)
@@ -274,19 +274,22 @@ class MaxiSamplerProcessor {
         let rate = this.parameters['rate_'+f].val;
         start /= rate;
         end /= rate;
-        let len = ((end-start) / 44100) * 1000;
+        let len = end - start;
+        this.releaseTimes[f] = this.samplePtr + len;
+        this.adsr[f].setSustain(1);
         this.adsr[f].setDecay(1);
-        this.adsr[f].setAttack(len * 0.25);
-        this.adsr[f].setRelease(len * 0.75);
+        this.adsr[f].setAttack(1);
+        this.adsr[f].setRelease(1);
         this.adsr[f].trigger = 1;
         this.samples[f].trigger();
-        this.velocities[f] = v/127;
+        this.velocities[f] = v / 127;
       }
     }
   }
 
   handleLoop() {
     this.seqPtr = this.samplePtr = this.playHead = 0;
+    console.log("loops")
   }
 
   tick() {
@@ -307,6 +310,13 @@ class MaxiSamplerProcessor {
   //CURRENTLY UNUSED STUBS
   onSample() {
     this.samplePtr++;
+    this.releaseTimes.forEach((r, i)=> {
+      if(this.samplePtr > r && r > 0) {
+        console.log("releasing", i)
+        this.adsr[i].trigger = 0;
+        this.releaseTimes[i] = -1;
+      }
+    })
   }
   onStop() {}
 
@@ -330,9 +340,16 @@ class MaxiSamplerProcessor {
           }
           let start = this.parameters['start_'+i].val * s.getLength();
           let rate = this.parameters['rate_'+i].val;
+          if(rate < 0.01) {
+            rate = 0.02;
+          }
           start /= rate;
           end /= rate;
+          if(end <= start) {
+            end = start + 1;
+          }
           rate = 44100 / (end - start)
+
           let gain = this.parameters['gain_' + i].val;
           let p = this.parameters['pan_' + i].val;
           let r = p;
@@ -344,7 +361,6 @@ class MaxiSamplerProcessor {
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;
         }
-        this.adsr[i].trigger = 0;
       }
     }
     else {
