@@ -1,4 +1,4 @@
-import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.4.js"
+import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
 
 //From Paul Adenot https://github.com/padenot/ringbuf.js
 
@@ -294,7 +294,7 @@ class MaxiSamplerProcessor {
     {
       this.handleLoop();
     }
-
+    //console.log(this.playHead, this.sequence)
     while(this.doTrig())
     {
       const nextCmd = this.sequence[this.seqPtr]
@@ -339,7 +339,7 @@ class MaxiSamplerProcessor {
           let l = 1 - p;
           let sig = s.play(rate, start, end) * this.velocities[i] * this.adsr[i].adsr(gain, this.adsr[i].trigger);
           if(this.samplePtr % 10000 == 0) {
-            console.log(start, end)
+            //console.log(start, end, rate, this.parameters['start_'+i].val, this.parameters['end_'+i].val, this.parameters['rate_'+i].val)
           }
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;
@@ -765,6 +765,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       {
         const data = event.data.sequence;
         this.instruments[data.instrument][data.index].sequence = data.val;
+        //console.log(data, this.instruments[data.instrument][data.index].sequence);
       }
       if(event.data.paramKeys !== undefined)
       {
@@ -773,10 +774,12 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       }
       if(event.data.addSynth !== undefined)
       {
+        //console.log("new synth")
         this.instruments["synth"].push(new MaxiSynthProcessor());
       }
       if(event.data.addSampler !== undefined)
       {
+        //console.log("new sampler")
         this.instruments["sampler"].push(new MaxiSamplerProcessor());
       }
       if(event.data.noteon !== undefined)
@@ -876,6 +879,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
     {
       if(this._param_reader.dequeue(this.output))
       {
+        //console.log("this.output", this.output)
         const NUM_SYNTHS = 6;
         const NUM_SYNTH_PARAMS = this.paramKeys["synth"].length;
         const NUM_SAMPLERS = 6;
@@ -905,6 +909,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
           {
             const samplerIndex = Math.floor((i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) / NUM_SAMPLER_PARAMS);
             const sampler = this.instruments["sampler"][samplerIndex];
+            //console.log(samplerIndex, sampler)
             if(sampler !== undefined)
             {
               const index = (i - (NUM_SYNTHS * NUM_SYNTH_PARAMS)) % NUM_SAMPLER_PARAMS;
@@ -915,6 +920,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
                 {
                   sampler.parameters[key] = {};
                 }
+                //console.log("adding from buf", key, samplerIndex, v, i, index);
                 sampler.parameters[key].val = v;
               }
             }

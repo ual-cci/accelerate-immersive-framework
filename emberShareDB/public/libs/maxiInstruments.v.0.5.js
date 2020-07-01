@@ -213,7 +213,7 @@ class MaxiInstruments {
 
   constructor() {
     this.samplers = [];
-    this.globalParameters = new Float32Array(256);
+    this.globalParameters = new Float32Array(512);
     this.loops = new Float32Array(16);
     this.synths = [];
     this.sendTick = false;
@@ -224,8 +224,6 @@ class MaxiInstruments {
     this.NUM_SAMPLERS = 6;
     this.NUM_SYNTH_PARAMS = Object.keys(MaxiSynth.parameters()).length;
     this.NUM_SAMPLER_PARAMS = Object.keys(MaxiSampler.parameters()).length;
-    // this.NUM_SYNTH_PARAMS = 17;
-    // this.NUM_SAMPLER_PARAMS = 24;
     this.GLOBAL_OFFSET =
       (this.NUM_SYNTHS *this.NUM_SYNTH_PARAMS) +
       (this.NUM_SAMPLERS * this.NUM_SAMPLER_PARAMS);
@@ -280,7 +278,8 @@ class MaxiInstruments {
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined && send)
           {
-            this.paramWriter.enqueue(this.globalParameters);
+            //console.log("enqueuing", this.globalParameters)
+            this.enqueue();
           }
         }
       );
@@ -740,11 +739,15 @@ class MaxiInstrument {
   }
 
   sendDefaultParam() {
-    const keys = Object.keys(this.parameters);
-    keys.forEach((p, i)=> {
-      const send = i <= keys.length - 1
-      this.setParam(p, this.parameters[p].val, send)
-    })
+    console.log("sendDefaultParam")
+    setTimeout(()=>{
+      const keys = Object.keys(this.parameters);
+      keys.forEach((p, i)=> {
+        const send = i == keys.length - 1
+        this.setParam(p, this.parameters[p].val, send)
+      })
+    }, 100)
+
   }
 
   setParams(vals) {
@@ -764,9 +767,11 @@ class MaxiInstrument {
     if(this.parameters[name] !== undefined)
     {
       this.parameters[name].val = val
-      const offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+      let offset = this.instrument == "synth" ? 0 : this.NUM_SYNTH_PARAMS * this.NUM_SYNTHS;
+      offset += this.instrument == "synth" ? (this.index * this.NUM_SYNTH_PARAMS) :  (this.index * this.NUM_SAMPLER_PARAMS)
       const paramIndex = Object.keys(this.parameters).indexOf(name);
-      const index = offset + (this.index * this.NUM_SYNTH_PARAMS) + paramIndex;
+      const index = offset + paramIndex;
+      //console.log(name, val, send, index, this.index, offset, this.index * this.NUM_SAMPLER_PARAMS)
       this.onParamUpdate(index, val, send)
     }
   }
@@ -1209,7 +1214,7 @@ class MaxiSampler extends MaxiInstrument {
        "rate":{scale:1, translate:0, min:0, max:4, val:1},
        "pan":{scale:1, translate:0, min:0, max:1, val:0.5},
        "end":{scale:1, translate:0, min:0, max:1, val:1},
-       "start":{scale:1, translate:0, min:0, max:1, val:0}
+       "start":{scale:1, translate:0, min:0, max:1, val:0.0}
      };
      let voices = 8;
      let parameters = {};
