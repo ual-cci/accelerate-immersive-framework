@@ -1,4 +1,4 @@
-import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.3.js"
+import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.4.js"
 
 //From Paul Adenot https://github.com/padenot/ringbuf.js
 
@@ -229,6 +229,7 @@ class MaxiSamplerProcessor {
     }
     //this.dcf = new Maximilian.maxiFilter();
     this.seqPtr = 0;
+    this.samplePtr = 0;
     this.sequence = [];
     this.parameters = {};
 
@@ -261,6 +262,13 @@ class MaxiSamplerProcessor {
       const v = nextCmd.v !== undefined ? nextCmd.v : 127;
       if(nextCmd.cmd === "noteon")
       {
+        this.adsr[f].setAttack(0);
+        this.adsr[f].setDecay(1);
+        this.adsr[f].setSustain(1);
+        this.adsr[f].holdtime = 1;
+        // - 120
+        this.adsr[f].setRelease((this.samples[f].getLength() / 44100) * 1000);
+        this.adsr[f].trigger = 1;
         this.samples[f].trigger();
         this.velocities[f] = v/127;
       }
@@ -268,7 +276,7 @@ class MaxiSamplerProcessor {
   }
 
   handleLoop() {
-    this.seqPtr = this.playHead = 0;
+    this.seqPtr = this.samplePtr = this.playHead = 0;
   }
 
   tick() {
@@ -287,7 +295,9 @@ class MaxiSamplerProcessor {
   }
 
   //CURRENTLY UNUSED STUBS
-  onSample() {}
+  onSample() {
+    this.samplePtr++;
+  }
   onStop() {}
 
   paramsLoaded() {
@@ -303,22 +313,23 @@ class MaxiSamplerProcessor {
         const s = this.samples[i];
         if(s.isReady())
         {
-          // let end = this.parameters['end_'+i].val;
-          // if(end == 0)
-          // {
-          //   end = s.getLength();
-          // }
-          // let start = this.parameters['start_'+i].val;
-          let rate = this.parameters['rate_'+i].val
+          let end = this.parameters['end_'+i].val * s.getLength();
+          if(end == 0)
+          {
+            end = s.getLength();
+          }
+          let start = this.parameters['start_'+i].val * s.getLength();
+          let rate = this.parameters['rate_'+i].val;
+          start /= rate;
+          end /= rate;
           let gain = this.parameters['gain_' + i].val;
           let p = this.parameters['pan_' + i].val;
           let r = p;
           let l = 1 - p;
-          let sig = s.playOnce(rate) * gain * this.velocities[i];
-          //let gain = i == 0 ? 1:0;
-          // if(this.samplePtr % 1000 == 0) {
-          //   console.log(l, r)
-          // }
+          let sig = s.play4(rate, 0, end) * this.velocities[i] * this.adsr[i].adsr(gain, this.adsr[i].trigger);
+          if(this.samplePtr % 10000 == 0) {
+            console.log(start, end)
+          }
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;
         }

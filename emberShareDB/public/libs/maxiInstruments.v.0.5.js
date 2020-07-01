@@ -1207,9 +1207,9 @@ class MaxiSampler extends MaxiInstrument {
      const core = {
        "gain":{scale:1, translate:0, min:0, max:1, val:0.5},
        "rate":{scale:1, translate:0, min:0, max:4, val:1},
-       "pan":{scale:1, translate:0, min:0, max:1, val:0.5}
-       // "end":{scale:1, translate:0, min:0, max:1, val:1},
-       // "start":{scale:1, translate:0, min:0, max:1, val:0}
+       "pan":{scale:1, translate:0, min:0, max:1, val:0.5},
+       "end":{scale:1, translate:0, min:0, max:1, val:1},
+       "start":{scale:1, translate:0, min:0, max:1, val:0}
      };
      let voices = 8;
      let parameters = {};
