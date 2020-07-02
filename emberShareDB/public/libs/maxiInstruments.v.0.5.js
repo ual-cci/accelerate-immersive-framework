@@ -832,6 +832,8 @@ class MaxiSynth extends MaxiInstrument {
           "adsrPitchMod":{scale:100, translate:0, val:1},
           "cutoff":{scale:3000, translate:40, val:2000},
           "Q":{scale:2, translate:0, val:1},
+          "wet":{scale:1, translate:0, val:0},
+          "roomSize":{scale:1.5, translate:0, val:0},
           "frequency":{scale:1000, translate:0, val:440},
           "frequency2":{scale:1000, translate:0, val:440},
           "poly":{scale:1, translate:0, val:1},
@@ -1195,14 +1197,15 @@ class MaxiSynth extends MaxiInstrument {
 
   useFreqSliders(useSliders) {
     this.setParam("poly", useSliders ? 0 : 1)
-    const vis = useSliders ? "visible" : "hidden"
+    //const vis = useSliders ? "visible" : "hidden"
+    const vis = useSliders ? "block" : "none"
     let elem = document.getElementsByClassName("cell_frequency");
     for (let e of elem) {
-      e.style.visibility = vis;
+      e.style.display = vis;
     };
     elem = document.getElementsByClassName("cell_frequency2");
     for (let e of elem) {
-      e.style.visibility = vis;
+      e.style.display = vis;
     };
   }
 }

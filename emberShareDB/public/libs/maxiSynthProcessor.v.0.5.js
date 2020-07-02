@@ -368,6 +368,7 @@ class MaxiSynthProcessor {
     this.adsr = [];
     this.triggered = [];
     this.released = [];
+    this.verb = new Maximilian.maxiFreeVerb()
     for(let i = 0; i < voices; i++)
     {
       this.dco.push(new Maximilian.maxiOsc());
@@ -699,11 +700,15 @@ class MaxiSynthProcessor {
       if (cutoff < 40) {
         cutoff = 40;
       }
-      this.dcfOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
+      this.dfcOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
+      var wet = this.parameters.wet.val;
+      var room = this.parameters.roomSize.val;
+      this.reverbOut = (this.verb.play(this.dfcOut, room, 0.1) * wet) + (this.dfcOut * (1 - wet))
+
       var r = this.parameters.pan.val;
       var l = 1 - this.parameters.pan.val;
 
-      return [this.dcfOut * l, this.dcfOut * r];
+      return [this.reverbOut * l, this.reverbOut * r];
     }
 	else {
       //console.log("just 0")
