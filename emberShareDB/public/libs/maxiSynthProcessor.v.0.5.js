@@ -702,8 +702,13 @@ class MaxiSynthProcessor {
       }
       this.dfcOut = this.dcf.lores(this.dcoOut, cutoff, this.parameters.Q.val);
       var wet = this.parameters.wet.val;
-      var room = this.parameters.roomSize.val;
-      this.reverbOut = (this.verb.play(this.dfcOut, room, 0.1) * wet) + (this.dfcOut * (1 - wet))
+      if(wet > 0.01) {
+        var room = this.parameters.roomSize.val;
+        this.reverbOut = (this.verb.play(this.dfcOut, room, 0.1) * wet) + (this.dfcOut * (1 - wet))
+      }
+      else {
+        this.reverbOut = this.dfcOut;
+      }
 
       var r = this.parameters.pan.val;
       var l = 1 - this.parameters.pan.val;
