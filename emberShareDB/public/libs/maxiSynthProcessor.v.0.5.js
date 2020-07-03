@@ -266,11 +266,11 @@ class MaxiSamplerProcessor {
       {
         let start = this.parameters['start_'+f].val;
         //this.releaseTimes[f] = this.samplePtr + len;
-        this.adsr[f].setSustain(1);
-        this.adsr[f].setDecay(1);
-        this.adsr[f].setAttack(1);
-        this.adsr[f].setRelease(1);
-        this.adsr[f].trigger = 1;
+        // this.adsr[f].setSustain(1);
+        // this.adsr[f].setDecay(1);
+        // this.adsr[f].setAttack(1);
+        // this.adsr[f].setRelease(1);
+        // this.adsr[f].trigger = 1;
         this.samples[f].setPosition(start);
         this.velocities[f] = v / 127;
       }
@@ -279,7 +279,6 @@ class MaxiSamplerProcessor {
 
   handleLoop() {
     this.seqPtr = this.samplePtr = this.playHead = 0;
-    console.log("loops")
   }
 
   tick() {
@@ -300,13 +299,12 @@ class MaxiSamplerProcessor {
   //CURRENTLY UNUSED STUBS
   onSample() {
     this.samplePtr++;
-    this.releaseTimes.forEach((r, i)=> {
-      if(this.samplePtr > r && r > 0) {
-        console.log("releasing", i)
-        this.adsr[i].trigger = 0;
-        this.releaseTimes[i] = -1;
-      }
-    })
+    // this.releaseTimes.forEach((r, i)=> {
+    //   if(this.samplePtr > r && r > 0) {
+    //     this.adsr[i].trigger = 0;
+    //     this.releaseTimes[i] = -1;
+    //   }
+    // })
   }
   onStop() {}
 
@@ -343,7 +341,7 @@ class MaxiSamplerProcessor {
           let l = 1 - p;
           let sig = s.playUntil(rate, end) * this.velocities[i];
           if(this.samplePtr % 10000 == 0) {
-            //console.log(start, end, rate, this.parameters['start_'+i].val, this.parameters['end_'+i].val, this.parameters['rate_'+i].val)
+  
           }
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;

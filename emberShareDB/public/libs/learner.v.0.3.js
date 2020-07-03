@@ -1,35 +1,61 @@
+/**
+   Class for the main Learner library
+ */
 class Learner {
+ /**
+  * Creates the main Learner Object
+  * @param {Object} options - options for initialisation
+    @param {string} options.modelName - Id used for storing data. You only need to provide this if you have two instances of Learner.js running, this name is used to distinguish the datasets.
+    @param {function} options.onLoad - Called after all the libraries have set up
+  * @example
+  * new Learner({
+  *   modelName:"classifier1"
+  *   onLoad:()=>{
+  *     console.log("I finished loading!")
+  *   }
+  * })
 
+  */
   constructor(options) {
-    let docId;
+    let modelName = "";
+    let docIdPrefix = window.frameElement.name;
+    let databaseName = "";
+    if(docIdPrefix === undefined)
+    {
+      docIdPrefix = "local";
+    }
     if(options !== undefined)
     {
-      docId = options.docId
+      modelName = options.modelName
     }
-    if(docId === undefined)
-    {
-      docId = window.frameElement.name;
-    }
+    databaseName = docIdPrefix + "_" + modelName;
     this.USE_WORKER = true;
     this.outputGUI = [];
     this.modelOptions = {};
     this.classifier = true;
     this.recordingRound = 0;
+    /** Is currently recording
+        @var {boolean} */
     this.recording = false;
+    /** Is currently running
+        @var {boolean} */
     this.running = false;
     this.temp = [];
+    this.streamBuffers = [];
+    /** The current output values (taken from GUI)
+        @var {Array} */
     this.y = [];
     this.numOutputs = 1;
     this.gui = false;
     this.recLimit = 0;
     this.countIn = 0;
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.onload = ()=>{
+    let storageScript = document.createElement('script');
+    storageScript.type = 'text/javascript';
+    storageScript.async = true;
+    storageScript.onload = ()=>{
       this.DATASET_KEY = "dataset";
       this.REC_KEY = "recordingRound";
-      this.store = localforage.createInstance({name: docId});
+      this.store = localforage.createInstance({name: databaseName});
       console.log("loaded localforage", this.store);
       this.store.getItem(this.DATASET_KEY).then((dataset)=> {
         if(!dataset)
@@ -56,16 +82,58 @@ class Learner {
     {
       origin = "."
     }
-    script.src = origin + '/libs/localforage.min.js';
-    document.getElementsByTagName('head')[0].appendChild(script);
+    storageScript.src = origin + '/libs/localforage.min.js';
+    document.getElementsByTagName('head')[0].appendChild(storageScript);
+
+    this.onRapidLoad = [];
+    let rapidLib = document.createElement('script');
+    rapidLib.type = 'text/javascript';
+    rapidLib.async = true;
+    rapidLib.onload = ()=>{
+      console.log("rapidlib loaded")
+      this.onRapidLoad.forEach((f)=>{
+        f()
+      });
+    }
+    rapidLib.src = origin + '/libs/rapidLib.js';
+    document.getElementsByTagName('head')[0].appendChild(rapidLib);
+
     let head = document.getElementsByTagName('HEAD')[0];
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = origin + '/libs/learner.css';
     head.appendChild(link);
-  }
+    /** Called whenever new output values are returned
+        This is either when the GUI has been changed
+        or when new values have come from a model when running
+        Results are returned as Array of numbers.
+      * @example
+      * //Classification
+      * this.onOutput = (data)=> {
+      *   if(data[0] == 0) {
+      *     sound.trigger()
+      *   } else {
+      *     sound2.trigger()
+      *   }
+      * }
+      * @example
+      * //Regression (3 outputs)
+      * this.onOutput = (data)=> {
+      *   sound.pitch = data[0]
+      *   sound.volume = data[1]
+      *   sound.lfo = data[2]
+      * }
+        @var {function}
+     */
+    this.onOutput = ()=> {
 
+    }
+  }
+  /**
+  Add the gui
+  @param {Element} [parent = document.body]  - the parent element to append to
+  */
   addGUI(p) {
     let parent = document.body;
     if(p)
@@ -82,68 +150,82 @@ class Learner {
     this.mainContainer.appendChild(table)
     let row = table.insertRow();
     let cell = row.insertCell();
-    let recBtn = document.createElement("BUTTON");
-    recBtn.classList.add("learner-btn")
-    recBtn.id = "rec-btn";
-    recBtn.onclick = ()=>{
+    cell.colSpan = 2;
+    this.recBtn = document.createElement("BUTTON");
+    this.recBtn.classList.add("learner-btn")
+    this.recBtn.onclick = ()=>{
       this.record();
     };
-    recBtn.innerHTML = "Record";
-    cell.appendChild(recBtn);
+    this.recBtn.innerHTML = "Record";
+    cell.appendChild(this.recBtn);
     cell = row.insertCell();
-    const countDown = document.createElement('span')
-    countDown.id = "countdown-span";
-    countDown.classList.add("learner-label");
-    cell.appendChild(countDown);
+    cell.colSpan = 2;
+    this.countDown = document.createElement('span')
+    this.countDown.classList.add("learner-label");
+    cell.appendChild(this.countDown);
 
 	  row = table.insertRow();
     cell = row.insertCell();
-    let trainBtn = document.createElement("BUTTON");
-    trainBtn.id = "train-btn";
-    trainBtn.classList.add("learner-btn")
-    trainBtn.onclick = ()=>{
+    cell.colSpan = 2;
+    this.trainBtn = document.createElement("BUTTON");
+    this.trainBtn.classList.add("learner-btn")
+    this.trainBtn.onclick = ()=>{
       this.train();
     };
-    trainBtn.innerHTML = "Train";
-    cell.appendChild(trainBtn);
+    this.trainBtn.innerHTML = "Train";
+    cell.appendChild(this.trainBtn);
 
     row = table.insertRow();
     cell = row.insertCell();
-    let runBtn = document.createElement("BUTTON");
-    runBtn.id = "run-btn";
-    runBtn.onclick = ()=>{
+    cell.colSpan = 2;
+    this.runBtn = document.createElement("BUTTON");
+    this.runBtn.onclick = ()=>{
       this.run();
     };
-    runBtn.innerHTML = "Run";
-    runBtn.classList.add("learner-btn")
-    runBtn.disabled = true;
-    cell.appendChild(runBtn);
+    this.runBtn.innerHTML = "Run";
+    this.runBtn.classList.add("learner-btn")
+    this.runBtn.disabled = true;
+    cell.appendChild(this.runBtn);
 
     row = table.insertRow();
     cell = row.insertCell();
-    let deleteLastBtn = document.createElement("BUTTON");
-    deleteLastBtn.classList.add("learner-btn")
-    deleteLastBtn.onclick = ()=>{
+    cell.colSpan = 1;
+    this.deleteLastBtn = document.createElement("BUTTON");
+    this.deleteLastBtn.classList.add("learner-btn")
+    this.deleteLastBtn.classList.add("learner-btn-3");
+    this.deleteLastBtn.onclick = ()=>{
       this.deleteLastRound();
     };
-    deleteLastBtn.innerHTML = "Delete Last Round";
-    cell.appendChild(deleteLastBtn);
+    this.deleteLastBtn.innerHTML = "Clear Prev";
+    cell.appendChild(this.deleteLastBtn);
 
+    this.deleteBtn = document.createElement("BUTTON");
     cell = row.insertCell();
-    let deleteBtn = document.createElement("BUTTON");
-    deleteBtn.classList.add("learner-btn");
-    deleteBtn.onclick = ()=>{
+    cell.colSpan = 1;
+    this.deleteBtn.classList.add("learner-btn");
+    this.deleteBtn.classList.add("learner-btn-3");
+    this.deleteBtn.onclick = ()=>{
       this.clear();
     };
-    deleteBtn.innerHTML = "Clear";
-    cell.appendChild(deleteBtn);
+    this.deleteBtn.innerHTML = "Clear All";
+    cell.appendChild(this.deleteBtn);
+
+    cell = row.insertCell();
+    cell.colSpan = 2;
+    this.saveBtn = document.createElement("BUTTON");
+    this.saveBtn.classList.add("learner-btn");
+    this.saveBtn.onclick = ()=>{
+      this.downloadTrainingData();
+    };
+    this.saveBtn.innerHTML = "Download Data";
+    cell.appendChild(this.saveBtn);
 
     row = table.insertRow();
     cell = row.insertCell();
-    let datalog = document.createElement('span')
-    datalog.id = "datalog";
-    datalog.classList.add("learner-label");
-    cell.appendChild(datalog);
+    cell.colSpan = 2;
+    this.datalog = document.createElement('span')
+    this.datalog.classList.add("learner-label");
+    cell.appendChild(this.datalog);
 
     this.outputLabel = document.createElement("span");
     this.outputLabel.innerHTML = "Select your outputs"
@@ -173,10 +255,16 @@ class Learner {
     this.rapidLib = RapidLib();
     this.myModel = new this.rapidLib.Classification();
   }
-
+/**
+  Add a regression model
+  @param {number} outputs - the number of outputs for the regression model
+  @param {boolean} [gui = true]  - Add gui
+  @param {number} [numFrames = 0]  - How many frames to smooth the output over
+ */
   addRegression(
       n,
-      gui = true
+      gui = true,
+      smoothOutput = 0
       )
    {
       let origin = document.location.origin
@@ -197,6 +285,11 @@ class Learner {
       this.classifier = false;
       this.numOutputs = n;
       this.gui = gui;
+      for(let i = 0; i < n; i++)
+      {
+        this.y.push(0);
+        this.addStream(smoothOutput);
+      }
       if(gui)
       {
         let container = this.selectorContainer;
@@ -211,7 +304,6 @@ class Learner {
           slider.value = 0;
           slider.step = 0.01;
           this.outputGUI.push(slider);
-          this.y.push(0);
           slider.oninput = ()=>{
             this.y[i] = parseFloat(slider.value);
             this.onOutput(this.y);
@@ -220,10 +312,16 @@ class Learner {
         }
       }
   }
-
+  /**
+    Add a classification model
+    @param {number} outputs - the number of classes for the classification model
+    @param {boolean} [gui = true]  - Include a gui
+    @param {number} [numFrames = 0]  - How many frames to smooth the output over
+   */
   addClassifier(
       n,
-      gui = true)
+      gui = true,
+      smoothOutput = 0)
   {
     let origin = document.location.origin
     if(origin.includes("file"))
@@ -242,6 +340,7 @@ class Learner {
     this.classifier = true;
     this.numOutputs = 1;
     this.gui = gui;
+    this.y.push(0);
     if(gui)
     {
       let container = this.selectorContainer;;
@@ -251,7 +350,6 @@ class Learner {
       var label = document.createElement("p");
       label.innerHTML = "Class:"
       label.id = "class-label"
-      this.y.push(0);
       selectList.oninput = ()=> {
         this.y[0] = parseInt(selectList.selectedIndex);
         if(this.onOutput !== undefined)
@@ -270,25 +368,36 @@ class Learner {
       }
       this.outputGUI.push(selectList);
     }
+    this.addStream(smoothOutput)
+  }
+
+  addStream(w)
+  {
+    try {
+      if(w > 0)
+      {
+        if(this.rapidLib === undefined)
+        {
+          this.rapidLib = RapidLib();
+        }
+        this.streamBuffers.push(new this.rapidLib.StreamBuffer(w))
+      }
+    } catch (err) {
+      this.onRapidLoad.push(()=>{this.addStream(w)})
+    }
   }
 
   disableButtons(disable)
   {
-    const run = document.getElementById("run-btn");
-    const rec = document.getElementById("rec-btn");
-    const train = document.getElementById("train-btn");
-    run.disabled = rec.disabled = train.disabled = disable;
+    this.runBtn.disabled = this.recBtn.disabled = this.trainBtn.disabled = disable;
   }
 
   updateButtons() {
-    const run = document.getElementById("run-btn");
-    const rec = document.getElementById("rec-btn");
-    const train = document.getElementById("train-btn");
-    run.innerHTML = this.running ? "Stop" : "Run"
-    rec.innerHTML = this.recording ? "Stop" : "Record"
-    rec.disabled = this.running;
-    run.disabled = this.recording;
-    train.disabled = this.recording || this.running;
+    this.runBtn.innerHTML = this.running ? "Stop" : "Run"
+    this.recBtn.innerHTML = this.recording ? "Stop" : "Record"
+    this.recBtn.disabled = this.running;
+    this.runBtn.disabled = this.recording;
+    this.trainBtn.disabled = this.recording || this.running;
     if(this.onUpdateState)
     {
       this.onUpdateState();
@@ -296,17 +405,24 @@ class Learner {
   }
 
   updateRows() {
-    const datalog = document.getElementById("datalog");
     this.numRows().then((n)=>{
       const total = n + this.temp.length;
-      datalog.innerHTML = "You have " + total + " saved examples";
+      this.datalog.innerHTML = "You have " + total + " saved examples";
     });
   }
 
+  /**
+  Set the delay for recording after the button has been pressed
+  @param {number} seconds - The number of seconds to delay
+  */
   setCountIn(val) {
     this.countIn = val;
   }
 
+  /**
+  Set the timer for how long to record for each time.
+  @param {number} seconds - The number of seconds to record for
+  */
   setRecordLimit(val) {
     this.recLimit = val;
   }
@@ -315,12 +431,35 @@ class Learner {
     return (ArrayBuffer.isView(x) &&
         Object.prototype.toString.call(x) !== "[object DataView]");
   }
-
+  /**
+  Provide a new input - output pair.
+  If recording, this is added to the dataset.
+  If running, the input is given to the model to predict a new output. The outputs is ignored.
+  If neither, this does nothing.
+  @param {Array} input - An array of numbers for the new input values
+  @param {Array} output - An array of numbers for the new output values
+  @example
+  learner.newExample([1,2,3,4],[5,6])
+  */
   newExample(input, y) {
     //Convert to Array if TypedArray
     if(this.isTypedArray(input))
     {
       input = Array.prototype.slice.call(input);
+    }
+    for(let i = 0; i < input.length; i++)
+    {
+      if(!input[i])
+      {
+        input[i] = 0;
+      }
+    }
+    for(let i = 0; i < y.length; i++)
+    {
+      if(!y[i])
+      {
+        y[i] = 0;
+      }
     }
     if(this.recording)
     {
@@ -354,7 +493,14 @@ class Learner {
 	    this.onOutput(this.y)
     }
   }
-
+  /**
+  Pass options to the classifier or regression model
+  @param {Object} options
+  @param {number} options.k - K value for KNN if using classification
+  @param {number} options.numEpochs - number of epochs to trian regression model for
+  @param {number} options.numHiddenNodes - number of hidden nodes in each hidden layer of regression model
+  @param {number} options.numHiddenLayers - number of hidden layers in regression model
+   */
   setModelOptions(options) {
     this.modelOptions = options;
     if(this.USE_WORKER)
@@ -399,6 +545,9 @@ class Learner {
     }
   }
 
+  /**
+  Train the current model
+   */
   train() {
     if(!this.running && ! this.recording)
     {
@@ -422,7 +571,9 @@ class Learner {
     this.disableButtons(false);
     this.run()
   }
-
+  /**
+  Run the current model
+   */
   run() {
     this.recording = false;
     this.running = !this.running;
@@ -434,11 +585,21 @@ class Learner {
     {
       for(let i = 0; i < this.numOutputs; i++)
       {
+        let output = data[i];
+        if(this.streamBuffers[i] !== undefined)
+        {
+          this.streamBuffers[i].push(output)
+          output = this.streamBuffers[i].mean();
+          if(this.classifier)
+          {
+            output = Math.round(output);
+          }
+        }
         if(this.gui)
         {
-          this.outputGUI[i].value = data[i];
+          this.outputGUI[i].value = output;
         }
-        this.y[i] = data[i];
+        this.y[i] = output;
       }
       this.onOutput(this.y);
     }
@@ -446,7 +607,7 @@ class Learner {
 
   limitRecord() {
     let timeLeft = this.recLimit;
-    const label = document.getElementById("countdown-span");
+    const label = this.cound
     this.stopInterval = setInterval(()=>{
       timeLeft -= 1;
       label.innerHTML = "stopping in " + timeLeft + " secs"
@@ -464,7 +625,7 @@ class Learner {
       clearInterval(this.stopInterval);
       this.stopInterval = null;
       this.stopTimeout = null;
-      const label = document.getElementById("countdown-span");
+      const label = this.countDown;
       label.innerHTML = "";
     }
     const doRun = ()=> {
@@ -480,14 +641,13 @@ class Learner {
 		    this.limitRecord();
       }
       this.updateButtons();
-      const run = document.getElementById("run-btn");
-      run.disabled = true;
+      this.runBtn.disabled = true;
     }
     if(this.countIn > 0 && !this.recording)
     {
       let timeLeft = this.countIn;
-      const label = document.getElementById("countdown-span");
-      const rec = document.getElementById("rec-btn");
+      const label = this.countDown
+      const rec = this.recBtn;
       rec.disabled = true;
       let interval = setInterval(()=>{
         timeLeft -= 1;
@@ -505,7 +665,9 @@ class Learner {
       doRun();
     }
   }
-
+  /**
+  Delete all training data
+   */
   clear() {
     return new Promise((resolve, reject)=> {
       this.store.setItem(this.DATASET_KEY,[]).then(()=> {
@@ -515,14 +677,18 @@ class Learner {
     })
 
   }
-
+  /**
+  Randomise all output parameters
+   */
   randomise() {
     for(let i = 0; i < this.numOutputs; i++)
     {
 	  this.updateOutput(i, Math.random());
     }
   }
-
+  /**
+  Print dataset to console
+   */
   print() {
     this.store.getItem(this.DATASET_KEY).then((dataset)=> {
       dataset.forEach((line)=> {
@@ -530,7 +696,9 @@ class Learner {
       });
     });
   }
-
+  /**
+  Delete last round of data (start - stop record cycle)
+   */
   deleteLastRound() {
     this.store.getItem(this.DATASET_KEY).then((dataset)=> {
         let trainingData = [];
@@ -595,6 +763,10 @@ class Learner {
     });
   };
 
+  /**
+  Get training data
+  @returns {Promise} Promise represents the training data
+   */
   trainingData() {
     return new Promise((resolve, reject)=> {
       this.save().then(()=> {
@@ -610,7 +782,11 @@ class Learner {
     });
   }
 
-
+  /**
+  Load training data from url
+  @returns {Promise}
+  @param {string} url - URL for json file containing dataset
+   */
   loadTrainingData(url) {
     return new Promise((resolve, reject)=> {
       this.clear().then(()=>{
@@ -629,7 +805,10 @@ class Learner {
       })
     })
   }
-
+  /**
+  Download training data to local machine as json
+  @returns {Promise}
+   */
   downloadTrainingData() {
     return new Promise((resolve, reject)=> {
       learner.trainingData().then((res)=>{
