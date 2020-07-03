@@ -32,7 +32,8 @@ class Learner {
     this.USE_WORKER = true;
     this.outputGUI = [];
     this.modelOptions = {};
-    this.classifier = true;
+    //Classifier 0, Regression 1, Series 2
+    this.modelType = 0;
     this.recordingRound = 0;
     /** Is currently recording
         @var {boolean} */
@@ -71,7 +72,7 @@ class Learner {
           });
           console.log("dataset exists of size " + dataset.length);
         }
-        this.updateRows();
+        this.updateNumExamples();
       });
       if(options.onLoad !== undefined) {
         options.onLoad();
@@ -243,7 +244,7 @@ class Learner {
 
     this.guiParent = parent;
 
-    this.updateRows();
+    this.updateNumExamples();
   }
 
   newRegression() {
@@ -282,7 +283,7 @@ class Learner {
         this.newRegression();
       }
 
-      this.classifier = false;
+      this.modelType = 1;
       this.numOutputs = n;
       this.gui = gui;
       for(let i = 0; i < n; i++)
@@ -337,9 +338,40 @@ class Learner {
     {
       this.newClassifier();
     }
-    this.classifier = true;
+    this.modelType = 0;
+    this.addDropdownGui(n, gui, smoothOutput)
+  }
+
+  /**
+    Add a series model
+    @param {number} outputs - the number of gestures for the series model
+    @param {boolean} [gui = true]  - Include a gui
+    @param {number} [numFrames = 0]  - How many frames to smooth the output over
+   */
+  addSeries(
+      n,
+      gui = true,
+      smoothOutput = 0)
+  {
+    let origin = document.location.origin
+    if(origin.includes("file"))
+    {
+      origin = "http://127.0.0.1:4200"
+    }
+    const workerUrl = origin + "/libs/seriesWorker.js"
+    if(this.USE_WORKER)
+    {
+      this.setWorker(workerUrl)
+    }
+    this.modelType = 2;
+
+    this.addDropdownGui(n, gui, smoothOutput)
+  }
+
+  addDropdownGui(n, gui, smoothOutput) {
     this.numOutputs = 1;
     this.gui = gui;
+    this.numClasses = n
     this.y.push(0);
     if(gui)
     {
@@ -404,9 +436,18 @@ class Learner {
     }
   }
 
-  updateRows() {
+  updateNumExamples() {
     this.numRows().then((n)=>{
-      const total = n + this.temp.length;
+      let total = 0;
+      console.log(n)
+      if(Array.isArray(n))
+      {
+        total = n;
+      }
+      else
+      {
+         total = n + this.temp.length;
+      }
       this.datalog.innerHTML = "You have " + total + " saved examples";
     });
   }
@@ -441,7 +482,7 @@ class Learner {
   @example
   learner.newExample([1,2,3,4],[5,6])
   */
-  newExample(input, y) {
+  newExample(input, y = []) {
     //Convert to Array if TypedArray
     if(this.isTypedArray(input))
     {
@@ -553,7 +594,7 @@ class Learner {
     {
       this.disableButtons(true);
       this.trainingData().then((t)=> {
-        this.updateRows();
+        this.updateNumExamples();
         if(this.USE_WORKER)
         {
           this.myWorker.postMessage({action:"train",data:t});
@@ -590,7 +631,7 @@ class Learner {
         {
           this.streamBuffers[i].push(output)
           output = this.streamBuffers[i].mean();
-          if(this.classifier)
+          if(this.modelType == 0)
           {
             output = Math.round(output);
           }
@@ -633,12 +674,15 @@ class Learner {
       this.recording = !this.recording;
       if(!this.recording)
       {
-        this.newRecordingRound();
         this.save();
       }
-      else if(this.recLimit > 0)
+      else
       {
-		    this.limitRecord();
+        this.newRecordingRound();
+        if(this.recLimit > 0)
+        {
+		      this.limitRecord();
+        }
       }
       this.updateButtons();
       this.runBtn.disabled = true;
@@ -671,7 +715,7 @@ class Learner {
   clear() {
     return new Promise((resolve, reject)=> {
       this.store.setItem(this.DATASET_KEY,[]).then(()=> {
-          this.updateRows();
+          this.updateNumExamples();
           resolve();
       });
     })
@@ -711,25 +755,47 @@ class Learner {
       	this.recordingRound--;
       	this.store.setItem(this.REC_KEY, this.recordingRound);
         this.store.setItem(this.DATASET_KEY, trainingData).then(()=> {
-          this.updateRows();
+          this.updateNumExamples();
         });
       });
   }
 
   addRow(newInputs, newOutputs) {
-    this.temp.push({input:JSON.parse(JSON.stringify(newInputs)),
-                    output:JSON.parse(JSON.stringify(newOutputs)),
-                    recordingRound:this.recordingRound});
-    this.updateRows();
+    if(this.modelType !== 2)
+    {
+      this.temp.push({input:JSON.parse(JSON.stringify(newInputs)),
+                      output:JSON.parse(JSON.stringify(newOutputs)),
+                      recordingRound:this.recordingRound});
+    }
+    else
+    {
+      this.temp.push(JSON.parse(JSON.stringify(newInputs)));
+    }
+    this.updateNumExamples();
   }
 
   save() {
     return new Promise((resolve, reject)=> {
       this.store.getItem(this.DATASET_KEY).then((dataset)=> {
-        dataset = dataset.concat(this.temp);
+        if(this.modelType == 2)
+        {
+          const initDataset = dataset.length === 0;
+          for(let i = 0; i < this.numClasses; i++)
+          {
+            if(initDataset) {
+              dataset.push({inputs:[],label:""+i});
+            }
+          }
+          dataset[this.y[0]].inputs.push(this.temp)
+          //console.log(dataset, this.temp, this.y[0])
+        }
+        else
+        {
+          dataset = dataset.concat(this.temp);
+        }
         this.temp = [];
         this.store.setItem(this.DATASET_KEY, dataset).then(()=> {
-          this.updateRows();
+          this.updateNumExamples();
           resolve();
         });
       });
@@ -750,9 +816,20 @@ class Learner {
       else
       {
         this.store.getItem(this.DATASET_KEY).then((dataset)=> {
-          if(dataset)
+          if(dataset !== undefined)
           {
-            resolve(dataset.length);
+            if(this.modelType === 2) {
+              let vals = [];
+              dataset.forEach((s)=> {
+                vals.push(s.inputs.length)
+              });
+              resolve(vals);
+            }
+            else
+            {
+              resolve(dataset.length);
+            }
+
           }
           else
           {
