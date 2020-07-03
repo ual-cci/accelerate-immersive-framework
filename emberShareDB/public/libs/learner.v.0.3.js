@@ -511,7 +511,14 @@ class Learner {
       //RUN
       if(this.USE_WORKER)
       {
-        this.myWorker.postMessage({action:"run",data:input});
+        if(this.modelType == 2)
+        {
+          this.temp.push(JSON.parse(JSON.stringify(input)));
+        }
+        else
+        {
+          this.myWorker.postMessage({action:"run",data:input});
+        }
       }
       else
       {
@@ -597,6 +604,13 @@ class Learner {
         this.updateNumExamples();
         if(this.USE_WORKER)
         {
+          // let newTraining = [];
+          // t.forEach((gesture)=> {
+          //   let data = {};
+          //   data.input = gesture.input[0];
+          //   data.label = gesture.label;
+          //   newTraining.push(data)
+          // })
           this.myWorker.postMessage({action:"train",data:t});
         }
         else
@@ -621,10 +635,16 @@ class Learner {
   run() {
     this.recording = false;
     this.running = !this.running;
+    if(!this.running && this.modelType == 2)
+    {
+      console.log("running series");
+      this.myWorker.postMessage({action:"run",data:this.temp});
+    }
     this.updateButtons();
   }
 
   runEnd(data) {
+    console.log("run end", data)
     if(this.onOutput !== undefined)
     {
       for(let i = 0; i < this.numOutputs; i++)
