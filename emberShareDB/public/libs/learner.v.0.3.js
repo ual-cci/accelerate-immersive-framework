@@ -439,7 +439,6 @@ class Learner {
   updateNumExamples() {
     this.numRows().then((n)=>{
       let total = 0;
-      console.log(n)
       if(Array.isArray(n))
       {
         total = n;
@@ -575,6 +574,7 @@ class Learner {
   setWorker(url) {
     this.myWorker = this.createWorker(url);
     this.myWorker.onmessage = (event)=>{
+      console.log(event)
       if(event.data == "trainingend")
       {
         this.trainingEnd()
@@ -610,7 +610,10 @@ class Learner {
 
   trainingEnd() {
     this.disableButtons(false);
-    this.run()
+    if(this.modelType !== 2)
+    {
+      this.run()
+    }
   }
   /**
   Run the current model
@@ -777,16 +780,16 @@ class Learner {
   save() {
     return new Promise((resolve, reject)=> {
       this.store.getItem(this.DATASET_KEY).then((dataset)=> {
-        if(this.modelType == 2)
+        if(this.modelType == 2 && this.temp.length > 0)
         {
           const initDataset = dataset.length === 0;
           for(let i = 0; i < this.numClasses; i++)
           {
             if(initDataset) {
-              dataset.push({inputs:[],label:""+i});
+              dataset.push({input:[],label:""+i});
             }
           }
-          dataset[this.y[0]].inputs.push(this.temp)
+          dataset[this.y[0]].input.push(this.temp)
           //console.log(dataset, this.temp, this.y[0])
         }
         else
@@ -821,7 +824,7 @@ class Learner {
             if(this.modelType === 2) {
               let vals = [];
               dataset.forEach((s)=> {
-                vals.push(s.inputs.length)
+                vals.push(s.input.length)
               });
               resolve(vals);
             }
@@ -848,12 +851,7 @@ class Learner {
     return new Promise((resolve, reject)=> {
       this.save().then(()=> {
         this.store.getItem(this.DATASET_KEY).then((dataset)=> {
-          let trainingData = [];
-          dataset.forEach((line)=> {
-            let l = {input:line.input, output:line.output};
-            trainingData.push(l);
-          });
-          resolve(trainingData);
+          resolve(dataset);
         });
       });
     });
