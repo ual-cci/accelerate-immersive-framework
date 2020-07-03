@@ -16,17 +16,14 @@ self.addEventListener('message', function(e) {
     if(mySeries !== undefined)
     {
       mySeries.reset();
-      console.log("train", JSON.stringify(trainingData))
       mySeries.train(trainingData);
     }
     self.postMessage("trainingend");
   }
   if(e.data.action == "run") {
     //Respond to run msg
-    console.log("testSet ",JSON.stringify(e.data.data));
     try {
       let c = mySeries.run(e.data.data);
-      console.log("run end worker", c)
       self.postMessage([c, mySeries.getCosts()]);
     } catch(err) {
       console.log(err)

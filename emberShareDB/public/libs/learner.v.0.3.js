@@ -606,10 +606,12 @@ class Learner {
         {
           // let newTraining = [];
           // t.forEach((gesture)=> {
-          //   let data = {};
-          //   data.input = gesture.input[0];
-          //   data.label = gesture.label;
-          //   newTraining.push(data)
+          //   gesture.input.forEach((example)=> {
+          //     let data = {};
+          //     data.input = example;
+          //     data.label = gesture.label;
+          //     newTraining.push(data)
+          //   });
           // })
           this.myWorker.postMessage({action:"train",data:t});
         }
@@ -802,15 +804,7 @@ class Learner {
       this.store.getItem(this.DATASET_KEY).then((dataset)=> {
         if(this.modelType == 2 && this.temp.length > 0)
         {
-          const initDataset = dataset.length === 0;
-          for(let i = 0; i < this.numClasses; i++)
-          {
-            if(initDataset) {
-              dataset.push({input:[],label:""+i});
-            }
-          }
-          dataset[this.y[0]].input.push(this.temp)
-          //console.log(dataset, this.temp, this.y[0])
+          dataset.push({input:this.temp, label:""+this.y[0]})
         }
         else
         {
@@ -842,9 +836,9 @@ class Learner {
           if(dataset !== undefined)
           {
             if(this.modelType === 2) {
-              let vals = [];
+              let vals = Array(this.numClasses).fill(0);
               dataset.forEach((s)=> {
-                vals.push(s.input.length)
+                vals[parseInt(s.label)]++;
               });
               resolve(vals);
             }
