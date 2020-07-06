@@ -459,9 +459,16 @@ class MaxiInstruments {
          this.loadModule(this.getSynthName()).then(()=> {
             this.createNode().then(resolve);
           }).catch((err)=> {
+            if(this.guiElement !== undefined)
+            {
+              const label = document.createElement("p");
+              label.innerHTML = "Audio worklets not supported, try Chrome!";
+              this.guiElement.appendChild(label)
+            }
             reject(err);
           });
         } catch (err) {
+          console.log("here")
           reject(err);
         }
       }
@@ -835,11 +842,11 @@ class MaxiSynth extends MaxiInstrument {
       "sustain":{scale:1, translate:0, val:1},
       "release":{scale:1500, translate:0, val:1000},
       "lfoFrequency":{scale:10, translate:0, val:0},
-      "lfoPitchMod":{scale:100, translate:0, val:1},
-      "lfoFilterMod":{scale:8000, translate:0, val:1},
+      "lfoPitchMod":{scale:100, translate:0, val:0},
+      "lfoFilterMod":{scale:8000, translate:0, val:0},
       "lfoAmpMod":{scale:1, translate:0, val:0},
-      "adsrPitchMod":{scale:100, translate:0, val:1},
-      "cutoff":{scale:3000, translate:40, val:2000},
+      "adsrPitchMod":{scale:100, translate:0, val:0},
+      "cutoff":{scale:3000, translate:40, val:3000},
       "reverbMix":{scale:1, translate:0, val:0},
       "roomSize":{scale:1.5, translate:0, val:0},
       "delay":{scale:44100, translate:0, val:0},
@@ -1126,7 +1133,7 @@ class MaxiSynth extends MaxiInstrument {
     this.outputGUI.oscFn = oscillatorSelector;
 
     const lfoSelector = document.createElement("select");
-    ["sin", "tri", "saw", "square"].forEach((osc, i)=> {
+    ["sin", "tri", "saw", "square", "noise"].forEach((osc, i)=> {
       const option = document.createElement("option");
       option.value = i;
       option.text = osc;

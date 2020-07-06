@@ -646,7 +646,15 @@ class MaxiSynthProcessor {
 
       const oscFn = this.getOscFn(this.parameters.oscFn.val);
       const lfoOscfn = this.getOscFn(this.parameters.lfoOscFn.val);
-      const lfoOut = this.lfo[lfoOscfn](this.parameters.lfoFrequency.val);
+      let lfoOut;
+      if(lfoOscfn === "noise")
+      {
+        lfoOut = this.lfo.noise();
+      }
+      else
+      {
+        lfoOut = this.lfo[lfoOscfn](this.parameters.lfoFrequency.val);
+      }
 
       this.dcoOut = 0;
       const out = this.triggered.concat(this.released);
@@ -661,14 +669,6 @@ class MaxiSynthProcessor {
         let lfoVal = this.parameters.lfoAmpMod.val;
         const ampOsc =  ((lfoOut + 1 ) / 2)
         let ampMod = (((1-lfoVal) * envOut) + (lfoVal * ampOsc * envOut)) / normalise;
-        // if(this.parameters.lfoFrequency.val < 0.01) {
-        //   ampMod = envOut / normalise;
-        // }
-
-        //const ampMod = envOut / 3;
-        //if(this.samplePtr %100 == 0) {
-          //console.log(ampMod)
-        //}
         let f = o.f;
         if(!poly)
         {
@@ -682,7 +682,6 @@ class MaxiSynthProcessor {
           }
         }
 
-        //f = f < 0 ? 0 : f;
         let osc;
         if(oscFn === "noise")
         {
@@ -699,32 +698,31 @@ class MaxiSynthProcessor {
       const delay = this.parameters.delay.val;
       const delayMix = this.parameters.delayMix.val;
       this.dlOut = (this.dl.dl(this.dcoOut, delay, 0.5) * delayMix * 3.5) + (this.dcoOut * (1 - delayMix))
-      //this.dlOut = (this.dcoOut * (1 - feedback))
 
+      var wet = this.parameters.reverbMix.val;
+      if(wet > 0.01) {
+        var room = this.parameters.roomSize.val;
+        this.reverbOut = (this.verb.play(this.dlOut, room, 0.5) * wet) + (this.dlOut * (1 - wet))
+      }
+      else {
+        this.reverbOut = this.dlOut;
+      }
       let filterEnv = 1;
       const filterOsc = ((lfoOut + 1)/2) * this.parameters.lfoFilterMod.val;
       let cutoff = this.parameters.cutoff.val;
       cutoff = (cutoff * filterEnv) + filterOsc;
-      if (cutoff > 2000) {
-        cutoff = 2000;
+      if (cutoff > 3000) {
+        cutoff = 3000;
       }
       if (cutoff < 40) {
         cutoff = 40;
       }
-      this.dfcOut = this.dcf.lores(this.dlOut, cutoff, 1);
-      var wet = this.parameters.reverbMix.val;
-      if(wet > 0.01) {
-        var room = this.parameters.roomSize.val;
-        this.reverbOut = (this.verb.play(this.dfcOut, room, 0.5) * wet) + (this.dfcOut * (1 - wet))
-      }
-      else {
-        this.reverbOut = this.dfcOut;
-      }
+      this.dfcOut = this.dcf.lores(this.reverbOut, cutoff, 0.5);
 
       var r = this.parameters.pan.val;
       var l = 1 - this.parameters.pan.val;
 
-      return [this.reverbOut * l, this.reverbOut * r];
+      return [this.dfcOut * l, this.dfcOut * r];
     }
 	else {
       //console.log("just 0")
