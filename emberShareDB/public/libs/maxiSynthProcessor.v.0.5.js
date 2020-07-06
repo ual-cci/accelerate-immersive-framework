@@ -341,7 +341,7 @@ class MaxiSamplerProcessor {
           let l = 1 - p;
           let sig = s.playUntil(rate, end) * this.velocities[i];
           if(this.samplePtr % 10000 == 0) {
-  
+
           }
           this.dcoOut[0] += sig * l;
           this.dcoOut[1] += sig * r;
@@ -643,8 +643,10 @@ class MaxiSynthProcessor {
     {
       const poly = this.parameters.poly.val == 1;
 
-      const lfoOut = this.lfo.sinewave(this.parameters.lfoFrequency.val);
       const oscFn = this.getOscFn(this.parameters.oscFn.val);
+      const lfoOscfn = this.getOscFn(this.parameters.lfoOscFn.val);
+      const lfoOut = this.lfo[lfoOscfn](this.parameters.lfoFrequency.val);
+
       this.dcoOut = 0;
       const out = this.triggered.concat(this.released);
 
@@ -653,11 +655,19 @@ class MaxiSynthProcessor {
         const envOut = this.adsr[o.o].adsr(1, this.adsr[o.o].trigger);
         o.lastVol = envOut;
         const pitchMod = (this.parameters.adsrPitchMod.val * envOut) + (lfoOut * this.parameters.lfoPitchMod.val);
-        const ampOsc =  ((lfoOut + 1 ) / 2) * this.parameters.lfoAmpMod.val;
-        const normalise = poly ? this.dco.length : 4.0;
-        const ampMod = (envOut + (ampOsc * envOut)) / normalise;
-        //const ampMod = envOut / 3;
 
+        const normalise = poly ? this.dco.length : 4.0;
+        let ampMod = envOut / normalise;
+        let lfoVal = this.parameters.lfoAmpMod.val;
+        //if(lfoVal > 0.01) {
+          const ampOsc =  ((lfoOut + 1 ) / 2)
+          ampMod = (((1-lfoVal) * envOut) + (lfoVal * ampOsc * envOut)) / normalise;
+        //}
+
+        //const ampMod = envOut / 3;
+        //if(this.samplePtr %100 == 0) {
+          //console.log(ampMod)
+        //}
         let f = o.f;
         if(!poly)
         {
@@ -730,6 +740,8 @@ class MaxiSynthProcessor {
       case 2:
         oscFn = "saw"; break;
       case 3:
+        oscFn = "square"; break;
+      case 4:
         oscFn = "noise"; break;
       default:
         oscFn = "sinewave"; break;

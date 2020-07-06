@@ -838,6 +838,7 @@ class MaxiSynth extends MaxiInstrument {
           "frequency2":{scale:1000, translate:0, val:440},
           "poly":{scale:1, translate:0, val:1},
           "oscFn":{scale:1, translate:0, val:0},
+          "lfoOscFn":{scale:1, translate:0, val:0},
         }
   }
 
@@ -1093,14 +1094,14 @@ class MaxiSynth extends MaxiInstrument {
     randomButton.classList.add("random-btn")
     randomButton.classList.add("maxi-btn")
     randomButton.innerHTML = "Randomise"
-    randomButton.style.width = "70px";
+    randomButton.style.width = "80px";
 
     randomButton.onclick = ()=>{
       this.randomise();
     }
 
     const oscillatorSelector = document.createElement("select");
-    ["sin", "tri", "saw", "noise"].forEach((osc, i)=> {
+    ["sin", "tri", "saw", "square", "noise"].forEach((osc, i)=> {
       const option = document.createElement("option");
       option.value = i;
       option.text = osc;
@@ -1110,9 +1111,24 @@ class MaxiSynth extends MaxiInstrument {
 
     oscillatorSelector.onchange = ()=> {
       const index = parseInt(oscillatorSelector.selectedIndex);
-      this.onGUIChange(index, Object.keys(this.parameters).length - 1);
+      this.onGUIChange(index, Object.keys(this.parameters).indexOf("oscFn"));
     }
     this.outputGUI.oscFn = oscillatorSelector;
+
+    const lfoSelector = document.createElement("select");
+    ["sin", "tri", "saw", "square"].forEach((osc, i)=> {
+      const option = document.createElement("option");
+      option.value = i;
+      option.text = osc;
+      lfoSelector.appendChild(option);
+    });
+    lfoSelector.classList.add("maxi-selector")
+
+    lfoSelector.onchange = ()=> {
+      const index = parseInt(lfoSelector.selectedIndex);
+      this.onGUIChange(index, Object.keys(this.parameters).indexOf("lfoOscFn"));
+    }
+    this.outputGUI.lfoOscFn = lfoSelector;
 
     const printParamsButton = document.createElement("BUTTON");
     printParamsButton.innerHTML = "Print"
@@ -1148,16 +1164,26 @@ class MaxiSynth extends MaxiInstrument {
     }
 
     let cell = row.insertCell();
-    cell.appendChild(title);
-    cell = row.insertCell();
-    cell.appendChild(randomButton);
+    //cell.appendChild(title);
+
+    var label = document.createElement("p");
+    label.innerHTML = "osc:"
+    label.classList.add("selector-label")
+    cell.appendChild(label);
     cell.appendChild(oscillatorSelector);
+    label = document.createElement("p");
+    label.innerHTML = "lfo:"
+    label.classList.add("selector-label")
+    cell.appendChild(label);
+    cell.appendChild(lfoSelector);
     cell = row.insertCell();
     //cell.colSpan = "2"
     cell.appendChild(presetSelector);
     cell = row.insertCell();
+    cell.appendChild(randomButton);
+    cell = row.insertCell();
     cell.appendChild(printParamsButton);
-    var ignore = ["poly", "oscFn"];
+    var ignore = ["poly", "oscFn", "lfoOscFn"];
     var cellCtr = 0;
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {
