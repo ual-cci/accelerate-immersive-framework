@@ -278,7 +278,6 @@ class MaxiInstruments {
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined && send)
           {
-            //console.log("enqueuing", this.globalParameters)
             this.enqueue();
           }
         }
@@ -305,6 +304,7 @@ class MaxiInstruments {
           this.globalParameters[index] = val;
           if(this.paramWriter !== undefined && send)
           {
+            //console.log("enqueuing", this.globalParameters)
             this.enqueue();
           }
         }
@@ -319,8 +319,8 @@ class MaxiInstruments {
   }
 
   enqueue() {
-      let success = this.paramWriter.enqueue(this.globalParameters);
-      this.retryEnqueue(success, 0)
+    let success = this.paramWriter.enqueue(this.globalParameters);
+    this.retryEnqueue(success, 0)
   }
 
   retryEnqueue(success, ctr) {
@@ -693,6 +693,7 @@ class MaxiInstrument {
     toAdd.sort((a, b)=> {
       return a.t - b.t;
     });
+    //console.log(toAdd)
     this.node.port.postMessage({
       sequence:{
         instrument:this.instrument,
@@ -705,7 +706,6 @@ class MaxiInstrument {
   onGUIChange(val, index) {
     const key = Object.keys(this.parameters)[index];
     this.onChange(val, key);
-
   }
 
   onMLChange(val, index) {
@@ -739,8 +739,8 @@ class MaxiInstrument {
   }
 
   sendDefaultParam() {
-    console.log("sendDefaultParam")
     setTimeout(()=>{
+      console.log("sendDefaultParam")
       const keys = Object.keys(this.parameters);
       keys.forEach((p, i)=> {
         const send = i == keys.length - 1
@@ -790,19 +790,28 @@ class MaxiInstrument {
 
   loadParamValues() {
     const key = this.getParamKey();
-    const vals = JSON.parse(window.localStorage.getItem(key))
-    if(vals)
+    const savedVals = JSON.parse(window.localStorage.getItem(key))
+    if(savedVals)
     {
-      const keys = Object.keys(vals);
+      //console.log(savedVals)
+      const keys = Object.keys(this.parameters);
       keys.forEach((key, i)=>{
-        const val = parseFloat(vals[key]);
-        if(this.outputGUI[key])
+        let val = parseFloat(savedVals[key]);
+        if(this.outputGUI[key] && val)
         {
-          const send = i >= keys.length - 1;
           this.outputGUI[key].value = val;
-          this.onChange(val, key, send);
         }
+        else
+        {
+          val = this.parameters[key].val;
+        }
+        const send = i >= keys.length - 1;
+        this.onChange(val, key, send);
       });
+    }
+    else
+    {
+      this.sendDefaultParam();
     }
   }
 
@@ -819,27 +828,28 @@ class MaxiSynth extends MaxiInstrument {
 
   static parameters() {
     return {
-          "gain":{scale:1, translate:0, val:1},
-          "pan":{scale:1, translate:0, val:0.5},
-          "attack":{scale:1500, translate:0, val:1000},
-          "decay":{scale:1500, translate:0, val:1000},
-          "sustain":{scale:1, translate:0, val:1},
-          "release":{scale:1500, translate:0, val:1000},
-          "lfoFrequency":{scale:10, translate:0, val:0},
-          "lfoPitchMod":{scale:100, translate:0, val:1},
-          "lfoFilterMod":{scale:8000, translate:0, val:1},
-          "lfoAmpMod":{scale:1, translate:0, val:0},
-          "adsrPitchMod":{scale:100, translate:0, val:1},
-          "cutoff":{scale:3000, translate:40, val:2000},
-          "Q":{scale:2, translate:0, val:1},
-          "wet":{scale:1, translate:0, val:0},
-          "roomSize":{scale:1.5, translate:0, val:0},
-          "frequency":{scale:1000, translate:0, val:440},
-          "frequency2":{scale:1000, translate:0, val:440},
-          "poly":{scale:1, translate:0, val:1},
-          "oscFn":{scale:1, translate:0, val:0},
-          "lfoOscFn":{scale:1, translate:0, val:0},
-        }
+      "gain":{scale:1, translate:0, val:1},
+      "pan":{scale:1, translate:0, val:0.5},
+      "attack":{scale:1500, translate:0, val:1000},
+      "decay":{scale:1500, translate:0, val:1000},
+      "sustain":{scale:1, translate:0, val:1},
+      "release":{scale:1500, translate:0, val:1000},
+      "lfoFrequency":{scale:10, translate:0, val:0},
+      "lfoPitchMod":{scale:100, translate:0, val:1},
+      "lfoFilterMod":{scale:8000, translate:0, val:1},
+      "lfoAmpMod":{scale:1, translate:0, val:0},
+      "adsrPitchMod":{scale:100, translate:0, val:1},
+      "cutoff":{scale:3000, translate:40, val:2000},
+      "reverbMix":{scale:1, translate:0, val:0},
+      "roomSize":{scale:1.5, translate:0, val:0},
+      "delay":{scale:44100, translate:0, val:0},
+      "delayMix":{scale:1.0, translate:0, val:0},
+      "frequency":{scale:1000, translate:0, val:440},
+      "frequency2":{scale:1000, translate:0, val:440},
+      "poly":{scale:1, translate:0, val:1},
+      "oscFn":{scale:1, translate:0, val:0},
+      "lfoOscFn":{scale:1, translate:0, val:0},
+    }
   }
 
   constructor(node, index, instrument, audioContext, onParamUpdate) {
@@ -1048,7 +1058,7 @@ class MaxiSynth extends MaxiInstrument {
         }
       }
     ];
-    this.sendDefaultParam();
+    //this.sendDefaultParam();
   }
 
   setOsc(osc) {
@@ -1263,7 +1273,7 @@ class MaxiSampler extends MaxiInstrument {
     this.voices = 8;
     this.parameters = MaxiSampler.parameters();
     this.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    this.sendDefaultParam();
+    //this.sendDefaultParam();
   }
 
   getFreq(n)
