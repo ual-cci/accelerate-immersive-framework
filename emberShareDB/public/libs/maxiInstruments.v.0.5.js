@@ -648,6 +648,20 @@ class MaxiInstrument {
       }
     }
     notes = notes.concat(newNotes)
+    newNotes = [];
+    for(let i = 0; i < notes.length; i++) {
+      const n = notes[i];
+      if(Array.isArray(n.start)) {
+        n.start.forEach((s)=> {
+          let newNote = JSON.parse(JSON.stringify(n));
+          newNote.start = s;
+          newNotes.push(newNote)
+        });
+        notes.splice(i, 1);
+        --i;
+      }
+    }
+    notes = notes.concat(newNotes)
     notes.forEach((n)=> {
       let doAdd = true;
       if(instruments.length > 0)

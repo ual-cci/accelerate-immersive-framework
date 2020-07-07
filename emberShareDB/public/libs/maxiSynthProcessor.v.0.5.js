@@ -694,19 +694,11 @@ class MaxiSynthProcessor {
 
         this.dcoOut += (osc * ampMod * this.parameters.gain.val * o.v);
       }
-      //Filter
       const delay = this.parameters.delay.val;
       const delayMix = this.parameters.delayMix.val;
       this.dlOut = (this.dl.dl(this.dcoOut, delay, 0.5) * delayMix * 3.5) + (this.dcoOut * (1 - delayMix))
 
-      var wet = this.parameters.reverbMix.val;
-      if(wet > 0.01) {
-        var room = this.parameters.roomSize.val;
-        this.reverbOut = (this.verb.play(this.dlOut, room, 0.5) * wet) + (this.dlOut * (1 - wet))
-      }
-      else {
-        this.reverbOut = this.dlOut;
-      }
+
       let filterEnv = 1;
       const filterOsc = ((lfoOut + 1)/2) * this.parameters.lfoFilterMod.val;
       let cutoff = this.parameters.cutoff.val;
@@ -717,12 +709,21 @@ class MaxiSynthProcessor {
       if (cutoff < 40) {
         cutoff = 40;
       }
-      this.dfcOut = this.dcf.lores(this.reverbOut, cutoff, 0.5);
+      this.dfcOut = this.dcf.lores(this.dlOut, cutoff, 0.5);
+
+      var wet = this.parameters.reverbMix.val;
+      if(wet > 0.01) {
+        var room = this.parameters.roomSize.val;
+        this.reverbOut = (this.verb.play(this.dfcOut, room, 0.2) * wet) + (this.dfcOut * (1 - wet))
+      }
+      else {
+        this.reverbOut = this.dfcOut;
+      }
 
       var r = this.parameters.pan.val;
       var l = 1 - this.parameters.pan.val;
 
-      return [this.dfcOut * l, this.dfcOut * r];
+      return [this.reverbOut * l, this.reverbOut * r];
     }
 	else {
       //console.log("just 0")

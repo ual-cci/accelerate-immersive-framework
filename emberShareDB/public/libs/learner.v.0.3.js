@@ -125,6 +125,15 @@ class Learner {
       *   sound.volume = data[1]
       *   sound.lfo = data[2]
       * }
+      * @example
+      * //Series Classification
+      * this.onOutput = (data)=> {
+      *   if(data[0] == 0) {
+      *     sound.trigger()
+      *   } else {
+      *     sound2.trigger()
+      *   }
+      * }
         @var {function}
      */
     this.onOutput = ()=> {
