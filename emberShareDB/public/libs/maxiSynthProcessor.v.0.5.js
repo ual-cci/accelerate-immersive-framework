@@ -256,6 +256,10 @@ class MaxiSamplerProcessor {
   //Unused stub
   externalNoteOff(freq) {}
 
+  setSequence(seq) {
+    this.sequence = seq;
+  }
+
   //Execute noteon/noteoffs (whether sequenced or manually triggered)
   handleCmd(nextCmd) {
     if(this.paramsLoaded())
@@ -625,13 +629,12 @@ class MaxiSynthProcessor {
   }
 
   onStop() {
-    this.midiPanic();
+    this.releaseAll();
   }
 
-  midiPanic() {
-    this.triggered.forEach((trig)=> {
-      this.externalNoteOff(trig.f);
-    });
+  setSequence(seq) {
+    this.sequence = seq;
+    this.releaseAll();
   }
 
   paramsLoaded() {
@@ -789,7 +792,7 @@ class MaxiInstrumentsProcessor extends AudioWorkletProcessor {
       if(event.data.sequence !== undefined)
       {
         const data = event.data.sequence;
-        this.instruments[data.instrument][data.index].sequence = data.val;
+        this.instruments[data.instrument][data.index].setSequence(data.val);
         //console.log(data, this.instruments[data.instrument][data.index].sequence);
       }
       if(event.data.paramKeys !== undefined)

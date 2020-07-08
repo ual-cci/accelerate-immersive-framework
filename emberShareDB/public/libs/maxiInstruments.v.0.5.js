@@ -595,9 +595,9 @@ class MaxiInstrument {
     });
   }
 
-  setSequence(seq, instruments = [], muteDrums = false) {
+  setSequence(seq, tickPerBeat = 24, transpose = 0, instruments = [], muteDrums = false) {
    	let toAdd = [];
-    let mul = 1;
+    let mul = this.TICKS_PER_BEAT / tickPerBeat;
     let notes = seq;
     //backwards compat/magenta
     if(seq.notes !== undefined) {
@@ -628,6 +628,7 @@ class MaxiInstrument {
       if(n.f !== undefined) {
         n.freq = n.f;
       }
+      //fold out notes
       if(Array.isArray(n.pitch)) {
         n.pitch.forEach((p)=> {
           let newNote = JSON.parse(JSON.stringify(n));
@@ -649,6 +650,7 @@ class MaxiInstrument {
     }
     notes = notes.concat(newNotes)
     newNotes = [];
+    //Fold out starts
     for(let i = 0; i < notes.length; i++) {
       const n = notes[i];
       if(Array.isArray(n.start)) {
@@ -705,7 +707,7 @@ class MaxiInstrument {
         var f = n.freq;
         if(f === undefined && n.pitch !== undefined)
         {
-          f = this.getFreq(n.pitch)
+          f = this.getFreq(n.pitch + transpose)
         }
       	toAdd.push({cmd:"noteon", f:f, t:start * mul, v:v});
       	toAdd.push({cmd:"noteoff", f:f, t:end * mul});
