@@ -269,12 +269,12 @@ class MaxiSamplerProcessor {
       if(nextCmd.cmd === "noteon")
       {
         let start = this.parameters['start_'+f].val;
-        //this.releaseTimes[f] = this.samplePtr + len;
-        // this.adsr[f].setSustain(1);
-        // this.adsr[f].setDecay(1);
-        // this.adsr[f].setAttack(1);
-        // this.adsr[f].setRelease(1);
-        // this.adsr[f].trigger = 1;
+      //  this.releaseTimes[f] = this.samplePtr + len;
+        this.adsr[f].setSustain(1);
+        this.adsr[f].setDecay(10);
+        this.adsr[f].setAttack(5);
+        this.adsr[f].setRelease(5);
+        this.adsr[f].trigger = 1;
         this.samples[f].setPosition(start);
         this.velocities[f] = v / 127;
       }
@@ -338,12 +338,12 @@ class MaxiSamplerProcessor {
           if(end <= start) {
             end = start + 1;
           }
-
+          //const envOut = this.adsr[i].adsr(1, this.adsr[i].trigger);
           let gain = this.parameters['gain_' + i].val;
           let p = this.parameters['pan_' + i].val;
           let r = p;
           let l = 1 - p;
-          let sig = s.playUntil(rate, end) * this.velocities[i];
+          let sig = s.playUntil(rate, end) * this.velocities[i] * gain;
           if(this.samplePtr % 10000 == 0) {
 
           }
