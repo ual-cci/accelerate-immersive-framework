@@ -559,7 +559,7 @@ class MaxiInstrument {
       loop:{
         instrument:this.instrument,
         index:this.index,
-        val:val
+        val:val - 1
       }
     });
   }
