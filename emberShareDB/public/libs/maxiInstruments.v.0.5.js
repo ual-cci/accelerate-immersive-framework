@@ -527,6 +527,70 @@ class MaxiInstruments {
   }
 }
 
+class MX {
+
+  //https://github.com/coolaj86/knuth-shuffle
+  static shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+  }
+
+  static unabbreviate(n) {
+    if(n.p !== undefined) {
+      n.pitch = n.p;
+      n.p = undefined;
+    }
+    if(n.s !== undefined) {
+      n.start = n.s;
+      n.s = undefined;
+    }
+    if(n.e !== undefined) {
+      n.end = n.e;
+      n.e = undefined;
+    }
+    if(n.l !== undefined) {
+      n.length = n.l;
+      n.l = undefined;
+    }
+    if(n.v !== undefined) {
+      n.velocity = n.v;
+      n.v = undefined;
+    }
+    if(n.f !== undefined) {
+      n.freq = n.f;
+      n.f = undefined;
+    }
+  }
+
+  static shuffleNotes(seq) {
+    let indexes = new Array(seq.length).fill(1).map((x,i)=>i);
+    MX.shuffle(indexes);
+    let newSeq = [];
+    seq.forEach((oldN, i)=> {
+      MX.unabbreviate(oldN);
+      let newN = JSON.parse(JSON.stringify(oldN));
+      let switchN = seq[indexes[i]];
+      MX.unabbreviate(switchN);
+      newN.pitch = newN.freq = undefined;
+      if(switchN.pitch !== undefined) {
+        newN.pitch = switchN.pitch;
+      }
+      else if(switchN.freq !== undefined) {
+        newN.freq = switchN.freq;
+      }
+      newSeq.push(JSON.parse(JSON.stringify(newN)));
+    })
+    return newSeq;
+  }
+}
+
 class MaxiInstrument {
 
   constructor(node, index, instrument, audioContext, onParamUpdate) {
@@ -536,6 +600,7 @@ class MaxiInstrument {
     this.audioContext = audioContext;
     this.onParamUpdate = onParamUpdate;
     this.mapped = [];
+    this.prevGains = {};
     this.outputGUI = [];
     this.TICKS_PER_BEAT = 24;
     this.NUM_SYNTHS = 6;
@@ -575,6 +640,9 @@ class MaxiInstrument {
   }
 
   unmute(tracks) {
+    if(this.prevGains === undefined) {
+      return;
+    }
     if(this.instrument === "sampler")
     {
       if(tracks === undefined)
@@ -588,10 +656,12 @@ class MaxiInstrument {
         }
       });
       this.setParams(params)
+      this.prevGains = {};
     }
     else
     {
       this.setParam("gain", this.prevGains);
+      this.prevGains = 0;
     }
   }
 
@@ -603,9 +673,11 @@ class MaxiInstrument {
         tracks = new Array(8).fill(1).map((x,i)=>i)
       }
       var params = tracks.map(x => [ "gain_" + x, 0]);
-      this.prevGains = {};
       params.forEach((row)=> {
-        this.prevGains[row[0]] = this.parameters[row[0]].val;
+        if(this.prevGains[row[0]] === undefined)
+        {
+          this.prevGains[row[0]] = this.parameters[row[0]].val;
+        }
       })
       this.setParams(params)
     }
@@ -652,24 +724,7 @@ class MaxiInstrument {
     let newNotes = [];
     for(let i = 0; i < notes.length; i++) {
       const n = notes[i];
-      if(n.p !== undefined) {
-        n.pitch = n.p;
-      }
-      if(n.s !== undefined) {
-        n.start = n.s;
-      }
-      if(n.e !== undefined) {
-        n.end = n.e;
-      }
-      if(n.l !== undefined) {
-        n.length = n.l;
-      }
-      if(n.v !== undefined) {
-        n.velocity = n.v;
-      }
-      if(n.f !== undefined) {
-        n.freq = n.f;
-      }
+      MX.unabbreviate(n);
       //fold out notes
       if(Array.isArray(n.pitch)) {
         n.pitch.forEach((p)=> {
