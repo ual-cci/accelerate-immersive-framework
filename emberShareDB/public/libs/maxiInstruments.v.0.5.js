@@ -569,6 +569,26 @@ class MX {
     }
   }
 
+  static shufflePos(seq) {
+    let indexes = new Array(seq.length).fill(1).map((x,i)=>i);
+    MX.shuffle(indexes);
+    let newSeq = [];
+    seq.forEach((oldN, i)=> {
+      MX.unabbreviate(oldN);
+      let newN = JSON.parse(JSON.stringify(oldN));
+      let switchN = seq[indexes[i]];
+      MX.unabbreviate(switchN);
+      newN.start = undefined;
+      if(switchN.start !== undefined) {
+        newN.start = switchN.start;
+        newN.end = switchN.end;
+        newN.length = switchN.length;
+      }
+      newSeq.push(JSON.parse(JSON.stringify(newN)));
+    })
+    return newSeq;
+  }
+
   static shuffleNotes(seq) {
     let indexes = new Array(seq.length).fill(1).map((x,i)=>i);
     MX.shuffle(indexes);
