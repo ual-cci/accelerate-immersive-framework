@@ -574,6 +574,48 @@ class MaxiInstrument {
     });
   }
 
+  unmute(tracks) {
+    if(this.instrument === "sampler")
+    {
+      if(tracks === undefined)
+      {
+        tracks = new Array(8).fill(1).map((x,i)=>i)
+      }
+      let params = [];
+      tracks.forEach((t)=> {
+        if(this.prevGains["gain_"+t] !== undefined) {
+          params.push(["gain_"+t, this.prevGains["gain_"+t]])
+        }
+      });
+      this.setParams(params)
+    }
+    else
+    {
+      this.setParam("gain", this.prevGains);
+    }
+  }
+
+  mute(tracks) {
+    if(this.instrument === "sampler")
+    {
+      if(tracks === undefined)
+      {
+        tracks = new Array(8).fill(1).map((x,i)=>i)
+      }
+      var params = tracks.map(x => [ "gain_" + x, 0]);
+      this.prevGains = {};
+      params.forEach((row)=> {
+        this.prevGains[row[0]] = this.parameters[row[0]].val;
+      })
+      this.setParams(params)
+    }
+    else
+    {
+      this.prevGains = this.parameters.gain.val;
+      this.setParam("gain", 0);
+    }
+  }
+
   noteon(freq = 60, vel = 127) {
     //console.log("instrument note on", this.instrument, this.index, freq, vel)
     this.node.port.postMessage({
