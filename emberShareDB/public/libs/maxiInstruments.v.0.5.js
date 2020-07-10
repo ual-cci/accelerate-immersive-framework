@@ -781,8 +781,10 @@ Return any muted samples / synths back to original gain
     }
     else
     {
-      this.setParam("gain", this.prevGains);
-      this.prevGains = 0;
+      if(this.prevGains["gain"] !== undefined) {
+        this.setParam("gain", this.prevGains["gain"]);
+      }
+      this.prevGains = {};
     }
   }
   /**
@@ -816,7 +818,7 @@ Return any muted samples / synths back to original gain
     }
     else
     {
-      this.prevGains = this.parameters.gain.val;
+      this.prevGains["gain"] = this.parameters.gain.val;
       this.setParam("gain", 0);
     }
   }
