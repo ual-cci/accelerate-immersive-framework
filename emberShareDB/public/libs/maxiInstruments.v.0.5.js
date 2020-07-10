@@ -818,7 +818,9 @@ Return any muted samples / synths back to original gain
     }
     else
     {
-      this.prevGains["gain"] = this.parameters.gain.val;
+      if(this.prevGains["gain"] === undefined) {
+        this.prevGains["gain"] = this.parameters.gain.val;
+      }
       this.setParam("gain", 0);
     }
   }
