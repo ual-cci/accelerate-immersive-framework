@@ -215,12 +215,12 @@ class MaxiInstruments {
 
   constructor() {
     /** Holds the sampler objects, in order of added
-        @var {Array} */
+        @var {MaxiSampler[]} */
     this.samplers = [];
     this.globalParameters = new Float32Array(512);
     this.loops = new Float32Array(16);
     /** Holds the synth objects, in order of added
-        @var {Array} */
+        @var {MaxiSynth[]} */
     this.synths = [];
     this.sendTick = false;
     this.synthProcessorName = 'maxi-synth-processor';
@@ -395,7 +395,8 @@ class MaxiInstruments {
       this.audioContext.destination.channelInterpretation='discrete';
       this.audioContext.destination.channelCountMode='explicit';
       this.audioContext.destination.channelCount=this.audioContext.destination.maxChannelCount
-
+      /** Holds the main AudioWorkletNode
+          @var {Object} */
      this.node = new AudioWorkletNode(
         this.audioContext,
         this.synthProcessorName,
@@ -489,6 +490,8 @@ Load the modules. Must be done before any synths or samplers are added
     return new Promise((resolve, reject)=> {
       if (this.audioContext === undefined) {
         try {
+           /** Holds the main AudioContext
+                @var {Object} */
           this.audioContext = new AudioContext({
             latencyHint:'playback',
             sample: 44100
@@ -695,6 +698,13 @@ class MaxiInstrument {
         @var {Object} */
     this.audioContext = audioContext;
     this.onParamUpdate = onParamUpdate;
+    /** Which instrument parameters to map
+        @var {string[]}
+        @example
+        synth.mapped = ["frequency", "attack"]
+        @example
+        sampler.mapped = ["gain_0", "rate_1"]
+     */
     this.mapped = [];
     this.prevGains = {};
     this.outputGUI = [];
@@ -855,6 +865,26 @@ Set Sequence
  * @param {number} [ticksPerBeat = 24] The ticks per beat of this sequence (max 24)
  * @param {number} [transpose = 0] Transpose all note values by this
  * @example
+ * //Synth MIDI notes on beats 1 and 3 (24 ticks per beat default)
+ * synth.setSequence([
+ *   {p:60, s:0, v:60, l:24},{p:60, s:48, v:60, l:24}
+ * ])
+ * @example
+ * //Synth MIDI notes on beats 1 and 3 (4 ticks per beat)
+ * synth.setSequence([
+ *   {p:60, s:0, v:60, l:4},{p:60, s:8, v:60, l:4}
+ * ], 4)
+ * @example
+ * //Synth frequencies, end provided
+ * synth.setSequence([
+ *   {f:440, s:0, e:12},{f:220, s:24, e:36}
+ * ])
+ * @example
+ * //Synth notes in 16ths transposed octave down
+ * synth.setSequence([
+ *   {p:60, s:0, l:2},{p:63, s:12, l:4}
+ * ], 4, -12)
+ * @example
  * sampler.setSequence([
  *   {p:0, s:0, v:60}, {p:1, s:24},
  * ])
@@ -864,10 +894,21 @@ Set Sequence
  *   {p:[0, 1, 2], s:0, v:60}
  * ])
  * @example
- * //Play sample 0 at 0, 24, 36 and 48 ticks 
+ * //Play sample 0 at 0, 24, 36 and 48 ticks
  * sampler.setSequence([
  *   {p:0, s:[0,24,36,48]}
  * ])
+ * @example
+ * //Play sample 0 on 1 and 3 (1 tick per beat)
+ * sampler.setSequence([
+ *   {p:0, s:[0,2]}
+ * ], 1)
+ * @example
+ * //Play samples on 16ths (4 ticks per beat), alternating velocities
+ * sampler.setSequence([
+ *   {p:0, s:[0,2,4,6], v:127},
+ *   {p:0, s:[1,2,5,7], v:60},
+ * ], 4)
 */
   setSequence(seq, tickPerBeat = 24, transpose = 0, instruments = [], muteDrums = false) {
    	let toAdd = [];
@@ -1001,7 +1042,9 @@ Set Sequence
       this.saveParamValues();
     }
   }
-
+/**
+Randomise all mapped parameters
+ */
   randomise() {
     this.mapped.forEach((key)=> {
       const val = Math.random();
@@ -1009,7 +1052,10 @@ Set Sequence
       this.onChange(val, key);
     })
   }
-
+  /**
+  Get values of mapped parameters
+  @return {string[]} params -
+   */
   getMappedParameters() {
     let vals = [];
     this.mapped.forEach((key)=> {
@@ -1030,12 +1076,33 @@ Set Sequence
 
   }
 
+/**
+  Set parameter values for instrument
+  @param {Array[]} pairs - Array of arrays containing [key, val] pairs
+  *@example
+  *synth.setParams([
+  *  ["gain", 0],
+  *  ["attack", 1000],
+  *  ["release", 40]
+  *])
+ */
   setParams(vals) {
     vals.forEach((pair, i)=>{
       this.setParam(pair[0], pair[1], i == vals.length - 1);
     })
   }
 
+  /**
+    Set parameter value for instrument
+    @param {string} key - name of parameter
+    @param {number} val - value of parameter
+    @param {boolean} [send=true] - Whether to send to audio worker or not (good for bulking changes)
+    @example
+    * //Wait until end to send
+    * sampler.setParam("gain_0", 0.5, false);
+    * sampler.setParam("gain_2", 0.5, false)
+    * sampler.setParam("gain_3", 0.5)
+   */
   setParam(name, val, send = true) {
     if(val < 0) val = 0.00;
     const scaled = (val - this.parameters[name].translate) / this.parameters[name].scale;
@@ -1103,6 +1170,11 @@ Set Sequence
     return vals;
   }
 }
+
+/**
+Class repesenting synth object. Subclass of MaxiInstrument
+@extends MaxiInstrument
+*/
 
 class MaxiSynth extends MaxiInstrument {
 
@@ -1353,6 +1425,10 @@ class MaxiSynth extends MaxiInstrument {
     return Nexus.mtof(n);
   }
 
+/**
+  Pick a preset
+  @param {number} index - index of preset
+  */
   preset(index) {
     if(index > 0 && index < this.presets.length)
     {
@@ -1511,6 +1587,12 @@ class MaxiSynth extends MaxiInstrument {
     this.useFreqSliders(this.parameters["poly"] == 0)
   }
 
+/**
+If true, synth uses two additional frequency parameters to contorl pitch,
+as opposed to taking pitch from the sequence.
+@param {boolean} useSliders
+ */
+
   useFreqSliders(useSliders) {
     this.setParam("poly", useSliders ? 0 : 1)
     //const vis = useSliders ? "visible" : "hidden"
@@ -1525,6 +1607,11 @@ class MaxiSynth extends MaxiInstrument {
     };
   }
 }
+
+/**
+Class repesenting sampler object. Subclass of MaxiInstrument
+@extends MaxiInstrument
+*/
 
 class MaxiSampler extends MaxiInstrument {
    static parameters() {
@@ -1636,6 +1723,13 @@ class MaxiSampler extends MaxiInstrument {
     this.toggleGroup();
   }
 
+  /**
+    Load Sample into slot
+    @param {string} url - url of audio file. If MIMIC asset, just use filename.
+    @param {number} index - slot in sampler to load to
+    @example
+    * sampler.loadSample("myBigKick.wav", 0);
+    */
   loadSample(url, index) {
     if (this.audioContext !== undefined) {
       this.loadSampleToArray(index, url)

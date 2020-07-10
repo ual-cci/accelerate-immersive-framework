@@ -3,6 +3,17 @@
 MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
 <p class = "tutorial-text">
+  <ul>
+    <li>
+      <a href = "https://www.doc.gold.ac.uk/~lmcca002/MaxiInstruments.html">Documentation</a>
+    </li>
+    <li>
+      <a href = "https://github.com/Louismac/learnerjs">Github</a>
+    </li>
+  </ul>
+
+</p>
+<p class = "tutorial-text">
 Previously, Chromium-based browsers (around Chrome 79) had a bug that may cause slight crackling in Audio Worklet based programs. However, we now believe this bug to be fixed (Chrome 80 onwards). If you are experiencing this issue, <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">you can follow the bug </a>and also download and run <a href ="https://www.google.com/chrome/canary/" >Canary (newer beta version of Chrome)</a> or <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">older versions of Chrome</a> to get better results.
 </p>
 <p class = "tutorial-heading">
@@ -13,7 +24,7 @@ Include the library
 </p>
 <pre>
 <code>
-&lt;script src = "https://mimicproject.com/libs/maxiInstruments.v.0.4.js"&gt;&lt;/script&gt;
+&lt;script src = "https://mimicproject.com/libs/maxiInstruments.v.0.5.js"&gt;&lt;/script&gt;
 </code>
 </pre>
 <p class = "tutorial-text">
@@ -190,10 +201,9 @@ The MaxiInstruments object has a global clock where you can specify a tempo (bpm
 <pre>
 <code>
 instruments.setTempo(80);
-instruments.setLoop(96); //4 Beats, set all instruments
-instruments.setLoopBeats(4); //Equivalent in beats
+instruments.setLoop(96); //4 Beats, set all instruments (default 24 ticks per beat)
+instruments.setLoop(16, 4); //4 Beats, set all instruments (4 ticks per beat)
 syn.setLoop(96); //Or set individual loops for each instrument
-syn.setLoopBeats(4); //Equivalent in beats
 instruments.playPause(); //Toggle playback
 instruments.rewind(); //Reset clock to 0
 </code>
@@ -219,7 +229,7 @@ Each note event is a Javascript object with some of the following properties. Yo
 <ul>
   <li>pitch or p: MIDI pitch of the note. For Samplers, this is the index of the particular sample. Can be a single value or array of values</li>
   <li>freq or f: Frequency in Hz (an alternative to pitch). Can be a single value or array of values</li>
-  <li>start or s: Start in ticks</li>
+  <li>start or s: Start in ticks. Can be a single value or array of values</li>
   <li>end or e: End in ticks</li>
   <li>length or l: Length in ticks (an alternative to end)</li>
   <li>velocity or v: Velocity (optional) (0-127)</li>
@@ -228,7 +238,7 @@ Each note event is a Javascript object with some of the following properties. Yo
 <pre>
 	<code>
 const synthSeq = [
-    {pitch:60, start:0, end:12, velocity:127},
+    {pitch:60, start:[0, 2, 4], end:12, velocity:127},
     {p:67, s:49, l:34, v:60},
     {p:[67, 60, 70], s:49, l:34, v:60},
     {freq:[440, 606, 2000], start:49, e:134},
