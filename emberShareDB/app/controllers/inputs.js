@@ -3,8 +3,10 @@ import { computed, set } from '@ember/object';
 export default Controller.extend({
   examples:computed(()=>{return[
     {title:"Mouse Input", docs:[
-      //Microbit
+      //Mouse
       {docid:"3738a892-330f-15ae-673e-5cb38f25a8e8",desc:"Just the bare minimum recording mouse X and Y"},
+      //Series
+      {docid:"741e7565-62fb-2998-8bf7-e86f9e365ea8",desc:"Mouse X and Y for Series Classification"},
     ]},
     {title:"Audio",docs:[
       //MFCCs
@@ -34,6 +36,10 @@ export default Controller.extend({
 
     ]},
     {title:"Sensors", docs:[
+      //Iphone
+      {docid:"674412e2-d4b6-ae40-8d5c-cddc1d271d17",desc:"Connect the motion sensors on your iphone. Requires free Motion sender app (https://apps.apple.com/gb/app/motionsender/id1315005698), values sent over OSC (via websockets)"},
+      //Android
+      {docid:"c678fa6c-bd17-7d9c-4df1-a92e7b02cb70",desc:"Connect the motion sensors on your Android. Requires free oscHook app (https://play.google.com/store/apps/details?id=com.hollyhook.oscHook), values sent over OSC (via websockets)"},
       //Microbit
       {docid:"f7686716-7c64-c87c-b413-07fb8828fafc",desc:"Connect to a BBC Micro:bit using WebBLE. Records accelerometer values. Code modified from https://github.com/antefact/microBit.js. Visit here to download firmware to upload onto your microbit"},
     ]},
