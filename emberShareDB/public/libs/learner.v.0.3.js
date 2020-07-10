@@ -164,7 +164,7 @@ class Learner {
     this.recBtn = document.createElement("BUTTON");
     this.recBtn.classList.add("learner-btn")
     this.recBtn.onclick = ()=>{
-      this.record();
+      this.toggleRecord();
     };
     this.recBtn.innerHTML = "Record";
     cell.appendChild(this.recBtn);
@@ -190,7 +190,7 @@ class Learner {
     cell.colSpan = 2;
     this.runBtn = document.createElement("BUTTON");
     this.runBtn.onclick = ()=>{
-      this.run();
+      this.toggleRun();
     };
     this.runBtn.innerHTML = "Run";
     this.runBtn.classList.add("learner-btn")
@@ -613,15 +613,6 @@ class Learner {
         this.updateNumExamples();
         if(this.USE_WORKER)
         {
-          // let newTraining = [];
-          // t.forEach((gesture)=> {
-          //   gesture.input.forEach((example)=> {
-          //     let data = {};
-          //     data.input = example;
-          //     data.label = gesture.label;
-          //     newTraining.push(data)
-          //   });
-          // })
           this.myWorker.postMessage({action:"train",data:t});
         }
         else
@@ -637,25 +628,25 @@ class Learner {
     this.disableButtons(false);
     if(this.modelType !== 2)
     {
-      this.run()
+      this.toggleRun()
     }
   }
+
   /**
-  Run the current model
+  Run/Stop the current model
    */
-  run() {
+  toggleRun() {
     this.recording = false;
     this.running = !this.running;
     if(!this.running && this.modelType == 2)
     {
-      console.log("running series");
       this.myWorker.postMessage({action:"run",data:this.temp});
+      this.temp = [];
     }
     this.updateButtons();
   }
 
   runEnd(data) {
-    console.log("run end", data)
     if(this.onOutput !== undefined)
     {
       for(let i = 0; i < this.numOutputs; i++)
@@ -689,11 +680,14 @@ class Learner {
     }, 1000);
     this.stopTimeout = setTimeout(()=>{
       this.stopTimeout = null;
-      this.record();
+      this.toggleRecord();
     }, this.countIn * 1000)
   }
 
-  record() {
+ /**
+  Start/Stop recording
+  */
+  toggleRecord() {
     if(this.stopInterval)
     {
       clearTimeout(this.stopTimeout);
@@ -779,19 +773,27 @@ class Learner {
    */
   deleteLastRound() {
     this.store.getItem(this.DATASET_KEY).then((dataset)=> {
-        let trainingData = [];
+      let trainingData = [];
+      if(this.modelType == 2)
+      {
+        dataset.pop();
+        trainingData = dataset;
+      }
+      else
+      {
         dataset.forEach((line)=> {
           if(line.recordingRound < this.recordingRound - 1)
           {
             trainingData.push({input:line.input, output:line.output});
           }
         });
-      	this.recordingRound--;
-      	this.store.setItem(this.REC_KEY, this.recordingRound);
-        this.store.setItem(this.DATASET_KEY, trainingData).then(()=> {
-          this.updateNumExamples();
-        });
+        this.recordingRound--;
+        this.store.setItem(this.REC_KEY, this.recordingRound);
+      }
+      this.store.setItem(this.DATASET_KEY, trainingData).then(()=> {
+        this.updateNumExamples();
       });
+    });
   }
 
   addRow(newInputs, newOutputs) {
