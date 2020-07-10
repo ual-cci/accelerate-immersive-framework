@@ -208,13 +208,19 @@ class ArrayReader {
 }
 
 
-
+/**
+   Class for the main MaxiInstruments library
+ */
 class MaxiInstruments {
 
   constructor() {
+    /** Holds the sampler objects, in order of added
+        @var {Array} */
     this.samplers = [];
     this.globalParameters = new Float32Array(512);
     this.loops = new Float32Array(16);
+    /** Holds the synth objects, in order of added
+        @var {Array} */
     this.synths = [];
     this.sendTick = false;
     this.synthProcessorName = 'maxi-synth-processor';
@@ -261,10 +267,21 @@ class MaxiInstruments {
     return this.samplers.concat(this.synths);
   }
 
+  /**
+  Return how many mapped parameters there are across all instruments
+  @returns {number} total number mapped parameters there are across all instruments
+  @example
+  * //Make a regression model that has the correct number of outputs
+  * learner.addRegression(instruments.getNumMappedOutputs(), false)
+  */
   getNumMappedOutputs() {
     return this.getInstruments().reduce((c, s) => c + s.mapped.length, 0);
   }
 
+  /**
+  Create a MaxiSampler instance
+  @returns {Object} the MaxiSampler object
+   */
   addSampler() {
     let sampler;
     if (this.audioContext !== undefined) {
@@ -291,6 +308,10 @@ class MaxiInstruments {
     return sampler;
   }
 
+  /**
+  Create a MaxiSynth instance
+  @returns {Object} the MaxiSynth object
+   */
   addSynth() {
     let synth;
     if(this.audioContext !== undefined) {
@@ -332,27 +353,35 @@ class MaxiInstruments {
       }, 30)
     }
   }
-
-  setParam(name, val) {
-    let param = this.node.parameters.get(name);
-    if(param)
-    {
-      param.setValueAtTime(val, this.audioContext.currentTime)
-    }
+ /**
+   Set the Loop of all instruments
+   @param {number} loopLength The length of the loop
+   @param {number} [ticks=24] ticksPerBeat for the loop
+   @example
+   * //Set loop for 4 beats at default 24 ticks
+   * instruments.setLoop(96)
+   * @example
+   * //Set loop for 4 beats
+   * instruments.setLoop(4, 1)
+  */
+  setLoop(val, ticks = 24) {
+    this.node.port.postMessage({loopAll: (val - 1) * (self.TICKS_PER_BEAT / ticks)});
   }
 
-  setLoop(val) {
-    this.node.port.postMessage({loopAll: val - 1});
-  }
-
-  setLoopBeats(val) {
-    this.node.port.postMessage({loopAll: (val * this.TICKS_PER_BEAT) - 1});
-  }
-
+  /**
+  Set Tempo
+  @param {number} tempo in BPM
+   */
   setTempo(tempo) {
     this.node.port.postMessage({tempo:tempo});
   }
 
+  /**
+  Get the current values of the mapped instrument parameters
+  @return {number[]} current values of the mapped instrument parameters
+  @examples
+  * learner.newExample(instruments.getMappedOutputs(), learner.y)
+   */
   getMappedOutputs() {
 	  let y = [];
     this.getInstruments().forEach((s)=> {
@@ -448,6 +477,14 @@ class MaxiInstruments {
     });
   }
 
+/**
+Load the modules. Must be done before any synths or samplers are added
+@return {Promise}
+@example
+*instruments.loadModules().then(()=> {
+*  //Music making code goes here
+*})
+ */
   loadModules() {
     return new Promise((resolve, reject)=> {
       if (this.audioContext === undefined) {
@@ -478,7 +515,14 @@ class MaxiInstruments {
       }
     });
   }
-
+ /**
+ Updates the mapped parameters of the instruments with new values (usually from a regression model)
+ @param {number[]} data The new values to the mapped parameters
+  *@example
+  *learner.onOutput = (output)=> {
+  *  instruments.updateMappedOutputs(output)
+  *}
+  */
   updateMappedOutputs(data)
   {
     let outputCtr = 0;
@@ -510,14 +554,41 @@ class MaxiInstruments {
     }
   }
 
+  /**
+  Toggle Play / pause
+   */
   playPause() {
     this.node.port.postMessage({togglePlaying:true});
   }
-
+  /**
+  Reset all sequencers to 0.
+   */
   rewind() {
     this.node.port.postMessage({rewind:true});
   }
 
+/**
+ * This callback type is called `onTickCallback` and is displayed as a global symbol.
+ *
+ * @callback onTickCallback
+ * @param {number[]} playHeads
+ */
+
+  /**
+    Set a callback function to be called on every tick
+    * @param {onTickCallback} callback
+    * @example
+    *instruments.setOnTick((playHeads)=> {
+    *  //The current playhead of the first instrument added
+    *  if(playHeads[0] == 1) {
+    *    sound.trigger()
+    *  }
+    *  //The current playhead of the third instrument added
+    *  if(playHeads[2] % 2 == 0) {
+    *    sound2.trigger()
+    *  }
+    *})
+   */
   setOnTick(onTick) {
     this.onTick = onTick;
     if(!this.sendTick) {
@@ -611,12 +682,17 @@ class MX {
   }
 }
 
+/**
+ Class representing a MaxiInstrument, the parent of both MaxiSynth and MaxiSampler
+ */
 class MaxiInstrument {
 
   constructor(node, index, instrument, audioContext, onParamUpdate) {
     this.node = node;
     this.index = index;
     this.instrument = instrument;
+    /** Holds the audio context
+        @var {Object} */
     this.audioContext = audioContext;
     this.onParamUpdate = onParamUpdate;
     this.mapped = [];
@@ -638,27 +714,39 @@ class MaxiInstrument {
       this.docId = window.frameElement.name
     }
   }
-
-  setLoop(val) {
-    this.node.port.postMessage({
-      loop:{
-        instrument:this.instrument,
-        index:this.index,
-        val:val - 1
-      }
-    });
-  }
-
-  setLoopBeats(val) {
-    this.node.port.postMessage({
-      loop:{
-        instrument:this.instrument,
-        index:this.index,
-        val:(val * this.TICKS_PER_BEAT) - 1
-      }
-    });
-  }
-
+  /**
+    Set the Loop of this instrument
+    @param {number} loopLength The length of the loop
+    @param {number} [ticks=24] ticksPerBeat for the loop
+    @example
+    * //Set loop for 4 beats at default 24 ticks
+    * synth.setLoop(96)
+    * @example
+    * //Set loop for 4 beats
+    * sampler.setLoop(4, 1)
+   */
+    setLoop(val, ticks = 24) {
+      this.node.port.postMessage({
+        loop:{
+          instrument:this.instrument,
+          index:this.index,
+          val:(val - 1) * (self.TICKS_PER_BEAT / ticks)
+        }
+      });
+    }
+/**
+Return any muted samples / synths back to original gain
+@param {number[]} [tracks=all tracks] If synth this argument is largely pointless.
+ * If a sampler you can specify to unmute particular samples
+ @example
+ synth.unmute()
+ @example
+ * //Unmute all samples
+ * sampler.unmute()
+ @example
+ * //Unmute first and fourth samples
+ * sampler.unmute([0, 3])
+ */
   unmute(tracks) {
     if(this.prevGains === undefined) {
       return;
@@ -684,7 +772,19 @@ class MaxiInstrument {
       this.prevGains = 0;
     }
   }
-
+  /**
+  Mute given synth or samples
+  @param {number[]} [tracks=all tracks] If synth this argument is largely pointless.
+   * If a sampler you can specify to mute particular samples
+   @example
+   synth.mute()
+   @example
+   * //Mute all samples
+   * sampler.mute()
+   @example
+   * //Mute first and fourth samples
+   * sampler.mute([0, 3])
+   */
   mute(tracks) {
     if(this.instrument === "sampler")
     {
@@ -708,6 +808,11 @@ class MaxiInstrument {
     }
   }
 
+/**
+Trigger note on
+@param {number} [freq = 60] Pitch of MIDI note
+@param {number} [vel = 127] Velocity (0-127)
+ */
   noteon(freq = 60, vel = 127) {
     //console.log("instrument note on", this.instrument, this.index, freq, vel)
     this.node.port.postMessage({
@@ -718,7 +823,10 @@ class MaxiInstrument {
       }
     });
   }
-
+  /**
+  Trigger note ff
+  @param {number} [freq = 60] Pitch of MIDI note
+   */
   noteoff(freq = 60) {
     this.node.port.postMessage({
       noteoff:{
@@ -729,6 +837,38 @@ class MaxiInstrument {
     });
   }
 
+/**
+Set Sequence
+ * @param {Object[]} sequence - The sequence to be assigned.
+ * @param {(number|number[])} sequence[].s - the start position in ticks of an event. If array, multiple events at same pitch and length played
+ * @param {(number|number[])} sequence[].start - the start position in ticks of an event. If array, multiple events at same pitch and length played
+ * @param {number} sequence[].l - The length in ticks of an event. Does not apply to sampler.
+ * @param {number} sequence[].length - The length in ticks of an event. Does not apply to sampler.
+ * @param {number} sequence[].e - The end in ticks of an event. Does not apply to sampler.
+ * @param {number} sequence[].end - The end in ticks of an event. Does not apply to sampler.
+ * @param {(number|number[])} sequence[].p - the MIDI note of an event, if array chord played. If sampler, denotes sample to trigger.
+ * @param {(number|number[])} sequence[].pitch - the MIDI note of an event, if array chord played. If sampler, denotes sample to trigger.
+ * @param {(number|number[])} sequence[].f - the frequency in Hz of an event, if array chord played
+ * @param {(number|number[])} sequence[].frequency - the the frequency in Hz of an event, if array chord played
+ * @param {number} sequence[].v - The velocity of an event (0 - 127). Default 127
+ * @param {number} sequence[].velocity - The velocity of an event (0 - 127). Default 127
+ * @param {number} [ticksPerBeat = 24] The ticks per beat of this sequence (max 24)
+ * @param {number} [transpose = 0] Transpose all note values by this
+ * @example
+ * sampler.setSequence([
+ *   {p:0, s:0, v:60}, {p:1, s:24},
+ * ])
+ * @example
+ * //Play samples 0,1,2 at the start of the seqeunce
+ * sampler.setSequence([
+ *   {p:[0, 1, 2], s:0, v:60}
+ * ])
+ * @example
+ * //Play sample 0 at 0, 24, 36 and 48 ticks 
+ * sampler.setSequence([
+ *   {p:0, s:[0,24,36,48]}
+ * ])
+*/
   setSequence(seq, tickPerBeat = 24, transpose = 0, instruments = [], muteDrums = false) {
    	let toAdd = [];
     let mul = this.TICKS_PER_BEAT / tickPerBeat;
