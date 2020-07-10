@@ -1603,7 +1603,7 @@ as opposed to taking pitch from the sequence.
   useFreqSliders(useSliders) {
     this.setParam("poly", useSliders ? 0 : 1)
     //const vis = useSliders ? "visible" : "hidden"
-    const vis = useSliders ? "block" : "none"
+    const vis = useSliders ? "table-cell" : "none"
     let elem = document.getElementsByClassName("cell_frequency");
     for (let e of elem) {
       e.style.display = vis;
