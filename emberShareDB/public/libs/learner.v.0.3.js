@@ -18,7 +18,10 @@ class Learner {
   */
   constructor(options) {
     let modelName = "";
-    let docIdPrefix = window.frameElement.name;
+    let docIdPrefix;
+    if(window.frameElement) {
+      docIdPrefix = window.frameElement.name;
+    }
     let databaseName = "";
     if(docIdPrefix === undefined)
     {
