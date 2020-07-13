@@ -778,7 +778,7 @@ export default Controller.extend({
           const scrollPos = this.get('editor').getCursor(true);
           this.get('editor.doc').setValue(serverSource)
           this.get('editor').scrollIntoView(scrollPos);
-          this.set("surpress", true);
+          this.set("surpress", false);
         }
       })
     });
