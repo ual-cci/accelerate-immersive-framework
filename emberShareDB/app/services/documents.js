@@ -243,7 +243,7 @@ export default Service.extend({
           combined = this.get('codeParser').insertDatasetId(combined, docId);
           if(replaceAssets)
           {
-            this.get('cs').log("doc service", docId)
+            //this.get('cs').log("doc service", docId)
             this.get('codeParser').replaceAssets(combined, doc.get('assets'), docId)
             .then((withAssets)=> {
               resolve(withAssets)

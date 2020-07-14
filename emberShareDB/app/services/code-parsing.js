@@ -154,7 +154,7 @@ export default Service.extend({
         newSrc = newSrc + src.substring(endIndex)
       }
     }
-    this.get('cs').log(newSrc)
+    //this.get('cs').log(newSrc)
     return newSrc;
   },
   insertChildren(src, children, assets) {
@@ -470,35 +470,36 @@ export default Service.extend({
           const fileType = assets[i].fileType;
           let asset = this.get('store').peekRecord('asset',fileId);
 
-          this.get('cs').log("replaceAssets",assets[i].size)
-
+          //this.get('cs').log("replaceAssets",assets[i].size)
+          const useBase64 = !config.colabMode;
           //If file is media replace with base64
           if(this.get('assetService').isMedia(fileType) &&
-             !this.get('assetService').isTooBig(assets[i].size))
+             !this.get('assetService').isTooBig(assets[i].size)
+           && useBase64)
           {
             if(!isEmpty(asset))
             {
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-              this.get('cs').log("replaced base64")
+              //this.get('cs').log("replaced base64")
               source = source.replace(new RegExp(toFind,"gm"),b64);
             }
             else
             {
-              this.get('cs').log("need to fetch asset for conversion");
+              //this.get('cs').log("need to fetch asset for conversion");
               await this.get('assetService').fetchAsset(assets[i], docId);
-              this.get('cs').log("finding record");
+              //this.get('cs').log("finding record");
               asset = this.get('store').peekRecord('asset',fileId);
-              this.get('cs').log("found record");
+              //this.get('cs').log("found record");
               const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
               source = source.replace(new RegExp(toFind,"gm"), b64);
-              this.get('cs').log("replaced base64")
+            //  this.get('cs').log("replaced base64")
             }
           }
           else
           {
             //Else just use endpoint
             const url = config.serverHost + "/asset/" + docId + "/" + toFind
-            this.get('cs').log("replaced url", url)
+            //this.get('cs').log("replaced url", url)
             source = source.replace(new RegExp("\"" + toFind + "\"","gm"), "\"" + url + "\"");
             source = source.replace(new RegExp("\'" + toFind + "\'","gm"), "\"" + url + "\"");
             //this.get('cs').log(source)
