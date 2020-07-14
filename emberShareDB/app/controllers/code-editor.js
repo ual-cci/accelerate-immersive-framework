@@ -965,7 +965,7 @@ export default Controller.extend({
     if(this.get('highContrast')) {
       this.setAllCodeWhite()
     }
-    this.get('cs').log("session change, surpress", surpress);
+    //this.get('cs').log("session change, surpress", surpress);
     if(!surpress
       && delta[0].origin !== "playback"
       && this.get('droppedOps').length == 0)
@@ -982,7 +982,7 @@ export default Controller.extend({
       {
         const ops = this.get('codeParser').getOps(delta, editor);
         ops.forEach((op)=>{
-          this.get('cs').log("submitting op")
+          //this.get('cs').log("submitting op")
           this.submitOp(op);
         });
         if(isEmpty(doc.type))
@@ -1180,7 +1180,7 @@ export default Controller.extend({
       return new RSVP.Promise((resolve, reject)=> {
         const editor = this.get('editor');
         this.set('surpress', true);
-        this.get('cs').log("SURPRESSING");
+        //this.get('cs').log("SURPRESSING");
         if(prev)
         {
           this.get('opsPlayer').prevOp(editor, rewind).then(()=>{resolve()});
