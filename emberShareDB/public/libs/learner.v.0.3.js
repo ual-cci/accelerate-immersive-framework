@@ -593,7 +593,6 @@ class Learner {
   setWorker(url) {
     this.myWorker = this.createWorker(url);
     this.myWorker.onmessage = (event)=>{
-      console.log(event)
       if(event.data == "trainingend")
       {
         this.trainingEnd()

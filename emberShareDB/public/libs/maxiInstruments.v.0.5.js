@@ -827,29 +827,29 @@ Return any muted samples / synths back to original gain
 
 /**
 Trigger note on
-@param {number} [freq = 60] Pitch of MIDI note
+@param {number} [pitch = 60] Pitch of MIDI note
 @param {number} [vel = 127] Velocity (0-127)
  */
-  noteon(freq = 60, vel = 127) {
+  noteon(pitch = 60, vel = 127) {
     //console.log("instrument note on", this.instrument, this.index, freq, vel)
     this.node.port.postMessage({
       noteon:{
         instrument:this.instrument,
         index:this.index,
-        val:{f:freq, v:vel}
+        val:{f:this.getFreq(pitch), v:vel}
       }
     });
   }
   /**
   Trigger note ff
-  @param {number} [freq = 60] Pitch of MIDI note
+  @param {number} [pitch = 60] Pitch of MIDI note
    */
-  noteoff(freq = 60) {
+  noteoff(pitch = 60) {
     this.node.port.postMessage({
       noteoff:{
         instrument:this.instrument,
         index:this.index,
-        val:freq
+        val:this.getFreq(pitch)
       }
     });
   }
@@ -1569,7 +1569,7 @@ class MaxiSynth extends MaxiInstrument {
         }
         cell = row.insertCell();
         cellCtr++;
-        cell.classList.add("cell_" + p);
+        cell.id = this.index + "cell_" + p;
         let val = this.parameters[p].val;
         val = (val - this.parameters[p].translate) / this.parameters[p].scale;
         const slider = document.createElement('input');
@@ -1604,14 +1604,10 @@ as opposed to taking pitch from the sequence.
     this.setParam("poly", useSliders ? 0 : 1)
     //const vis = useSliders ? "visible" : "hidden"
     const vis = useSliders ? "table-cell" : "none"
-    let elem = document.getElementsByClassName("cell_frequency");
-    for (let e of elem) {
-      e.style.display = vis;
-    };
-    elem = document.getElementsByClassName("cell_frequency2");
-    for (let e of elem) {
-      e.style.display = vis;
-    };
+    let elem = document.getElementById(this.index + "cell_frequency");
+    elem.style.display = vis;
+    elem = document.getElementById(this.index + "cell_frequency2");
+    elem.style.display = vis;
   }
 }
 
