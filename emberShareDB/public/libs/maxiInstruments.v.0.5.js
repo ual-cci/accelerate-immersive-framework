@@ -379,6 +379,17 @@ class MaxiInstruments {
   }
 
   /**
+  Set Gain
+  @param {number} [val = 1] GainNode attached to AudioWorkletNode
+   */
+  setGain(val = 1) {
+    if(this.gainNode !== undefined && this.audioContext != undefined)
+    {
+      this.gainNode.gain.setValueAtTime(val, this.audioContext.currentTime);
+    }
+  }
+
+  /**
   Get the current values of the mapped instrument parameters
   @return {number[]} current values of the mapped instrument parameters
   @examples
@@ -445,7 +456,9 @@ class MaxiInstruments {
       this.node.port.onmessageerror = event => {
         console.log(`Error message from port: ` + event.data);
       };
-      this.node.connect(this.audioContext.destination);
+      this.gainNode = new GainNode(this.audioContext);
+      this.node.connect(this.gainNode);
+      this.gainNode.connect(this.audioContext.destination);
       this.node.channelInterpretation='discrete';
       this.node.channelCountMode='explicit';
       this.node.channelCount=this.audioContext.destination.maxChannelCount;
