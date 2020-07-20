@@ -1,113 +1,47 @@
 <div class = "limited-width-container">
-<h1>Supervised Learning</h1>
-<img src = {{supervisedLearningURL}} style = "display: block;width:500px;margin:auto;padding:20px;"/>
-
-<h1>Why in a Browser?</h1>
-<p class = "tutorial-text">
-<ul>
-  <li>
-    Works (almost) everywhere, no installations (I’m looking at you, Python)
-  </li>
-  <li>
-    Good for dissemination
-  </li>
-  <li>
-    Lots of students taught Javascript (CS, creative computing)
-  </li>
-  <li>
-    Javascript is fast growing, low barrier to entry
-  </li>
-</ul>
-</p>
-<h1>Requirements For Machine Learnt Mappings in the Browser</h1>
-<p class = "tutorial-text">
-<ul>
-  <li>
-    Connect a variety of inputs (video, audio, sensors etc….)
-  </li>
-  <li>
-    Run a variety of outputs (music, graphics etc…)
-  </li>
-  <li>
-    Record input values, alongside output parameters in a dataset, persisted
-  </li>
-  <li>
-    Train a model (regression or classification)
-  </li>
-  <li>
-    Run inference (generate new outputs from new inputs)
-  </li>
-  <li>
-    All in realtime without interference / crackling, timing issues (I’m looking at you, ScriptProcessorNode)
-  </li>
-</ul>
-</p>
-
-<h1> The Solution </h1>
-<h3> mimicproject.com </h3>
+<h1>NIME 2020 Demo Session</h1>
 <img src = {{mimicSupervisedLearningURL}} style = "display: block;width:500px;margin:auto;padding:20px;"/>
 <p class = "tutorial-text">
-  <ul>
-    <li>Run and share projects easily in the browser</li>
-    <li>Loads of learning resources</li>
-    <li>Integrated libraries</li>
-  </ul>
-</p>
-<h3> Learner.js </h3>
-<p class = "tutorial-text">
-  <ul>
-    <li>Built on top of RapidLib.js</li>
-    <li>Provides UI common to most tasks</li>
-    <li>Saves dataset in browser cache, can also save/load datasets easily</li>
-    <li>Learning happens on worker threads</li>
-  </ul>
-</p>
-
-<h3> MaxiInstruments </h3>
-<p class = "tutorial-text">
-  <ul>
-    <li>Synthesiser and Sampler running on AudioWorklets </li>
-    <li>Built on top on newest version of maximilian.js</li>
-    <li>GUI interfaces provided</li>
-    <li>Easily combined with Learner.js</li>
-  </ul>
+Learner.js and MaxiInstruments.js are libraries to make musical machine learning web apps easy. They were used to make the demos below using minimal code. Check out the guides at the bottom for more details.
 </p>
 <h1>Examples</h1>
-<h3> Object tracker classification example </h3>
+<h3> Object Recognition Classification Example </h3>
 
 {{embedded-project docId = "a4c91621-199c-65b5-e355-2aadfc27c33f" height = "350px" manualLoad = true}}
 <p class = "tutorial-text">
 <ol>
-    <li>Use the drop down menu labelled “Class:” at the top of the Learner.js controls to change the current class. You should hear the drum beat change. </li>
-    <li>Change the Class back to 0. Pick a neutral position (standing/sitting in the middle of the screen). Press record, and after a 2 second delay, 2 seconds of this pose will be recorded into Class 0 of the dataset. When we are recording, everytime a new frame of video is analysed, we take those features (the input) and store them alongside the class label (in this case 0).</li>
-    <li>The MobileNet feature extractor is good at telling what different objects are in the picture. Pick 3 objects from around your desk that you can hold up to the camera. Remember, the model will have to learn to spot the differences between these objects so the more different they are, the better it will work.</li>
-    <li>For each object, change the Class dropdown to a new class BEFORE you press record. Then record in some examples of you holding up that object. Record in a few 2-second runs, having more examples and more slight variations on each object will make your classifier more robust. For example, you might want to record examples of an object in slightly different locations / positions / rotations.</li>
-    <li>When you have examples of all three classes, press Train. This will train the model then automatically Run when it is done. When the classifier is running, everytime a new frame of video is analysed, we take those features (the input) and run them through the classifier. It predicts which object it thinks you are holding and reacts accordingly</li>
+    <li class = "exercise-list-item">Use the drop down menu labelled “Class:” at the top of the Learner.js controls to change the current class. You should hear the drum beat change. </li>
+    <li class = "exercise-list-item">Change the Class back to 0. Pick a neutral position (standing/sitting in the middle of the screen). Press record, and after a 2 second delay, 2 seconds of this pose will be recorded into Class 0 of the dataset. When we are recording, everytime a new frame of video is analysed, we take those features (the input) and store them alongside the class label (in this case 0).</li>
+    <li class = "exercise-list-item">The MobileNet feature extractor is good at telling what different objects are in the picture. Pick 3 objects from around your desk that you can hold up to the camera. Remember, the model will have to learn to spot the differences between these objects so the more different they are, the better it will work.</li>
+    <li class = "exercise-list-item">For each object, change the Class dropdown to a new class BEFORE you press record. Then record in some examples of you holding up that object. Record in a few 2-second runs, having more examples and more slight variations on each object will make your classifier more robust. For example, you might want to record examples of an object in slightly different locations / positions / rotations.</li>
+    <li class = "exercise-list-item">When you have examples of all three classes, press Train. This will train the model then automatically Run when it is done. When the classifier is running, everytime a new frame of video is analysed, we take those features (the input) and run them through the classifier. It predicts which object it thinks you are holding and reacts accordingly</li>
 </ol>
 </p>
 
-<h3> Body tracker regression example </h3>
+<h3> Body Tracker Regression Example </h3>
 {{embedded-project docId = "2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed" height = "350px" manualLoad = true}}
 <p class = "tutorial-text">
   <ol>
-    <li>
+    <li class = "exercise-list-item">
       We have set up Learner.js and MaxiInstruments.js to map several parameters of each synth, including the filters, reverb and pitch. When you press the “Randomise All” button, all of the mapped parameters will get new random values. You will see the sliders on the synth interfaces adjust as well. Our plan is to associate different positions and movements of your body to different sets of parameters. We can provide a few examples and then when we train the model, the regression will provide a continuous mapping and we can use the body as an expressive controller.
   </li>
-  <li>
+  <li class = "exercise-list-item">
     When you have found a sound you like, stand in one static pose. Hit Record and record in some values for about 3-4 seconds. Now every time you get a new camera reading, it will be saved in the dataset, alongside each of the current values of the mapped parameters. You should see the numbers of examples going up on the Learner.js interface. Repeat this process of finding a set of sounds you like using the random button (or manually adjusting), picking a body position and recording in a few more pose - sound combinations.
   </li>
-  <li>
+  <li class = "exercise-list-item">
     Hit “Train”. When it's ready, it will automatically start running. As with before, when you are running, everytime you get a new set of skeleton points from the camera, it will be fed into the model and the model will predict some new values for the synth parameters. These will then be applied in realtime to the synths (via a smoothing filter).
   </li>
   </ol>
 </p>
 
 <h1> Find out more </h1>
-<p class = "tutorial-text">
+<p class = "tutorial-text" style = "margin-bottom:70px;">
   <ul>
-    <li><a class = "big-link" href = "https://mimicproject.com"> https://mimicproject.com </a></li>
-    <li><a class = "big-link" href = "https://mimicproject.com/guides/learner">https://mimicproject.com/guides/learner </a></li>
-    <li><a class = "big-link"   href = "https://mimicproject.com/guides/maxi-instrument">https://mimicproject.com/guides/maxi-instrument </a></li>
+    <li><a class = "big-link" href = "https://mimicproject.com/guides/learner">Learner.js Guide</a></li>
+    <li><a class = "big-link" href = "https://mimicproject.com/guides/maxi-instrument">MaxiInstruments.js Guide </a></li>
+    <li><a class = "big-link" href = "https://mimicproject.com/inputs">Feature Extractors</a></li>
+    <li><a class = "big-link" href = "https://www.futurelearn.com/courses/apply-creative-machine-learning">Take the FutureLearn Course "Apply Creative Machine Learning". Its free. </a></li>
+
   </ul>
 </p>
 </div>
