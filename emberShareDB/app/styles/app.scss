@@ -605,6 +605,13 @@ input[id="docName"]:-ms-input-placeholder {
     background-color: white;
 }
 
+.load-project-btn {
+  position: relative;
+  margin: auto;
+  width:100px;
+  display: block;
+}
+
 #embedded-run-container {
   position: absolute;
   bottom:0;
@@ -915,6 +922,11 @@ input[id="docName"]:-ms-input-placeholder {
 
 .link-input {
   color:black;
+}
+
+
+.big-link {
+  font-size:20pt;
 }
 
 .btn-primary {

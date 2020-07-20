@@ -7,11 +7,19 @@ export default Component.extend({
   url:config.localOrigin,
   height:"440px",
   loaded:false,
+  manualLoad:false,
   srcURL:"about:none",
+  buttonTop:computed('height', function() {
+    let height = this.get('height');
+    height = height.substring(0, height.length - 2);
+    height = parseInt(height)
+    return height / 2 + "px";
+  }),
   didInsertElement() {
     this._super(...arguments);
-    console.log('element id: ' + this.elementId);
-    this.observe()
+    if(!this.get('manualLoad')) {
+      this.observe()
+    }
   },
   observe:function() {
     var options = {
@@ -31,5 +39,13 @@ export default Component.extend({
     }, options);
 
     observer.observe(document.getElementById(this.elementId));
+ },
+ actions:{
+   loadProject() {
+     this.set("manualLoad", false);
+     let src = this.get("url") + "/code/" + this.get("docId") +  "?embed=true&showCode=true";
+     this.set("srcURL", src)
+     this.set("loaded", true);
+   }
  }
  });

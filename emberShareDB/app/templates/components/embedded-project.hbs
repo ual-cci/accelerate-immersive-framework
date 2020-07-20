@@ -1,2 +1,8 @@
+{{#if manualLoad}}
+<div class = "load-project-btn" style = "top:{{buttonTop}}">
+{{#bs-button (html-attributes aria-label="show assets") class = "load-project-btn"
+ onClick=(action "loadProject")}}Start Demo{{/bs-button}}
+</div>
+{{/if}}
 <iframe class = "embedded-tutorial-code" src={{srcURL}} allow="microphone" scrolling="no" style="width: 100%; height: {{height}}; overflow: hidden;">what?</iframe>
-<a class = "embedded-link" href = {{concat url "/code/" docId}}>Open Project</a>
+<a class = "embedded-link" href = {{concat url "/code/" docId}}>Go To Project</a>
