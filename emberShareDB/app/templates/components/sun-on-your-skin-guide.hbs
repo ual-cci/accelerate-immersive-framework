@@ -1,0 +1,18 @@
+<h1> Body Tracker Regression Example </h1>
+<p class = "tutorial-text">
+  Make a continuous mapping between your body and the parameters of this soundscape. Instructions below.
+</p>
+{{embedded-project docId = "2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed" height = "450px" manualLoad = false}}
+<p class = "tutorial-text">
+  <ol>
+    <li class = "exercise-list-item">
+      We have set up Learner.js and MaxiInstruments.js to map several parameters of each synth, including the filters, reverb and pitch. When you press the “Randomise All” button, all of the mapped parameters will get new random values. You will see the sliders on the synth interfaces adjust as well. Our plan is to associate different positions and movements of your body to different sets of parameters. We can provide a few examples and then when we train the model, the regression will provide a continuous mapping and we can use the body as an expressive controller.
+  </li>
+  <li class = "exercise-list-item">
+    When you have found a sound you like, stand in one static pose. Hit Record and record in some values for about 3-4 seconds. Now every time you get a new camera reading, it will be saved in the dataset, alongside each of the current values of the mapped parameters. You should see the numbers of examples going up on the Learner.js interface. Repeat this process of finding a set of sounds you like using the random button (or manually adjusting), picking a body position and recording in a few more pose - sound combinations.
+  </li>
+  <li class = "exercise-list-item">
+    Hit “Train”. When it's ready, it will automatically start running. As with before, when you are running, everytime you get a new set of skeleton points from the camera, it will be fed into the model and the model will predict some new values for the synth parameters. These will then be applied in realtime to the synths (via a smoothing filter).
+  </li>
+  </ol>
+</p>

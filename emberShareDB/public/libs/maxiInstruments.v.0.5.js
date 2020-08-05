@@ -799,6 +799,7 @@ Return any muted samples / synths back to original gain
       }
       this.prevGains = {};
     }
+    document.getElementById("muteButton" + this.index).innerHTML = "Mute"
   }
   /**
   Mute given synth or samples
@@ -836,6 +837,7 @@ Return any muted samples / synths back to original gain
       }
       this.setParam("gain", 0);
     }
+    document.getElementById("muteButton" + this.index).innerHTML = "Unmute"
   }
 
 /**
@@ -1693,6 +1695,7 @@ class MaxiSampler extends MaxiInstrument {
     let row;
     const rowLength = 4;
     row = table.insertRow();
+
     let cell = row.insertCell();
     const title = document.createElement('p');
     title.innerHTML = "MaxiSampler";
@@ -1707,6 +1710,22 @@ class MaxiSampler extends MaxiInstrument {
       this.toggleGroup();
     }
     cell.appendChild(changeGroupButton);
+
+    cell = row.insertCell();
+    const muteButton = document.createElement("BUTTON");
+    muteButton.innerHTML = "Mute";
+    muteButton.classList.add("maxi-btn")
+    muteButton.id = "muteButton" + this.index;
+    muteButton.onclick = ()=>{
+      if(Object.keys(this.prevGains).length === 0) {
+        this.mute()
+      }
+      else
+      {
+        this.unmute()
+      }
+    }
+    cell.appendChild(muteButton);
 
     for(let i = 0; i < Object.keys(this.parameters).length; i++)
     {

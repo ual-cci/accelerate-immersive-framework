@@ -53,6 +53,12 @@ export default Controller.extend({
   isLyric:computed('model', function() {
     return this.get('model').id == "lyrics"
   }),
+  isSun:computed('model', function() {
+    return this.get('model').id == "sun-on-your-skin"
+  }),
+  isKicks:computed('model', function() {
+    return this.get('model').id == "kick-classifier"
+  }),
   actions: {
     onClick(example) {
       this.transitionToRoute('examples', example.id)

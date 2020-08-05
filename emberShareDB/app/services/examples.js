@@ -13,12 +13,16 @@ export default Service.extend({
       {id:"mario",docid:"a8baea19-711f-4e43-46ab-71e5212ed5db",desc:"What if AI finished the Mario theme song? Use Magenta's MusicRNN model to experiment with different continuations of the catchiest computer game music"},
     ]},
     {title:"User Input",examples:[
+      //
+      {id:"kick-classifier", docid:"a4c91621-199c-65b5-e355-2aadfc27c33f",desc:"Control this audio track with objects and your webcam"},
+      //
+      {id:"sun-on-your-skin", docid:"2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed",desc:"Map the movements of your body to a synth soundscape."},
       //audio triggers
       {id:"audio-trigger", docid:"585ecea5-4841-6ae5-a8c1-4a0ddb8975fd",desc:"Train an audio classifier on your own percussive sounds and use it to reconfigure music tracks live."},
-      //FaceAPI
-      {id:"facesynth", docid:"9dc4eaf4-93db-26e8-9357-155eb152ea44",desc:"Train a granular sythesiser to respond to the emotions of your face."},
-      //shelly drum machine
-      {id:"rhythm-remixer", docid:"c89860a4-824a-5dfc-ff90-412f58531f5a",desc:"Play in rhythms using your microphone and have them remixed into new beats."},
+      // //FaceAPI
+      // {id:"facesynth", docid:"9dc4eaf4-93db-26e8-9357-155eb152ea44",desc:"Train a granular sythesiser to respond to the emotions of your face."},
+      // //shelly drum machine
+      // {id:"rhythm-remixer", docid:"c89860a4-824a-5dfc-ff90-412f58531f5a",desc:"Play in rhythms using your microphone and have them remixed into new beats."},
 
     ]},
     {title:"Audio Remix",examples:[
