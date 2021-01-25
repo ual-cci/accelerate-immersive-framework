@@ -53,6 +53,11 @@ NODE_ENV=local node server
 
     ENV.localOrigin = "http://localhost:4200";
     ENV.contentCollectionName = 'docs';
+
+    //FOR PROD BACKEND
+    //const url = "url = "mimic-238710.appspot.com";"
+    //ENV.serverHost = "https://" + url;
+    //ENV.wsHost = "wss://" + url;
     
     //FOR DEV BACKEND
     //const url = "dev.codecircle.gold.ac.uk/api"
