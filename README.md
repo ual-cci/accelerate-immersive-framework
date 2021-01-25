@@ -8,11 +8,13 @@ Install Ember CLI
 ```
 npm install -g ember-cli
 ```
-Start Mongo if not already running
+
 
 The project contains two folders, one for the ember frontend and one for the node server
 
 ### Running the server locally"
+
+* Start Mongo if not already running
 
 * cd into "/nodeServer"
 
