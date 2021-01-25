@@ -12,7 +12,9 @@ Start Mongo if not already running
 
 The project contains two folders, one for the ember frontend and one for the node server
 
-### Running the server locally -  in "nodeServer"
+### Running the server locally"
+
+* cd into "/nodeServer"
 
 * The ports and IP addresses are pulled in from an external config file, this is not committed as it may contain sensitive info (e.g. mongo logins etc...)
 
@@ -44,6 +46,8 @@ NODE_ENV=local node server
 ```
 
 ### Running the Front End locally in "emberShareDB"
+
+* cd into "/emberShareDB"
 
 * The config for this project is stored in config->environment.js. It is not stored in the repo (for deployment clash/security reasons) so you will need to get it from Louis or MYK
 
