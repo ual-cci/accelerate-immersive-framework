@@ -777,8 +777,10 @@ export default Controller.extend({
           this.set("surpress", true);
           this.get('cs').log("setting editor to", serverSource)
           const scrollPos = this.get('editor').getCursor(true);
+          this.get('cs').log(scrollPos)
+          this.get("editor").focus()
           this.get('editor.doc').setValue(serverSource)
-          this.get('editor').scrollIntoView(scrollPos);
+          this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
           this.set("surpress", false);
         }
       })
