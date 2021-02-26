@@ -1395,9 +1395,17 @@ export default Controller.extend({
       this.get('cs').log("setting codeW to ", doHide ? "30px" : w);
       this.set('codeW', doHide ? "30px" : w);
       const editor = this.get('editor');
-      if(!isEmpty(editor))
+      if(!isEmpty(editor) && !doHide)
       {
+        console.log("refresh")
         editor.refresh();
+        setTimeout(()=> {
+          console.log("refresh")
+          editor.refresh();
+          editor.refresh();
+          editor.refresh();
+          editor.refresh();
+        },50)
       }
     }, 200)
   },
