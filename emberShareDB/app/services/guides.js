@@ -5,6 +5,7 @@ import { computed, set } from '@ember/object';
 export default Service.extend({
   guides:computed(()=>{ return[
       {title:"Interactive Machine Learning",guides:[
+        {id:"supervised-ml", name:"Basic Supervised Learning", desc:"Learn about supervised machine learning and how you can build interactive music systems in the browser using just examples", author:"Louis McCallum"},
         {id:"learner", name:"Building Mappings by Example with Learner.js", desc:"Learner.js provides an interface that allows you to easily record in examples of input and output pairings. You can then train a model to respond with new outputs when you provide new inputs. We take care of all the storage, threading and GUI needs and all you have to do is pick what you want to control!", author:"Louis McCallum"},
         {id:"kadenze",name:"Machine Learning for Musicians and Artists alongside Kadenze", desc:"Translating Wekinator based exercises to the MIMIC platform from Rebecca Fiebrink's excellent Kadenze course",author:"Louis McCallum"},
         {id:"RAPIDMIX",name:"Using RapidLib.js for Machine Learning", desc:" This page provides a minimal guide on how to use the RapidLib, showing how to use simple machine learning objects in five steps with two simple examples of applied Machine Learning tasks.",author:"Franciso Bernardo"},

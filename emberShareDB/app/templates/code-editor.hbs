@@ -215,18 +215,14 @@
   {{/if}}
   {{/if}}
   </div>
-    {{#if mediaQueries.isDesktop}}
-    {{#if isEmbedded}}
-    <div></div>
-    {{else}}
+  {{#if mediaQueries.isDesktop}}
       {{project-tabs
         parent = parentData
         tabs = tabs
         onSelect = (action 'tabSelected')
         onDelete = (action 'tabDeleted')
         onCreate = (action 'newTab')}}
-    {{/if}}
-    {{/if}}
+  {{/if}}
   </header>
   <main>
     <div id = "fullscreen">

@@ -11,15 +11,15 @@ The library provides a variety of higher level musical listening facilities for 
 <p class = "tutorial-text">
 The first embeded example here is a feature extractor from live audio. You can choose as input either a sound file from your hard drive, or an attached microphone. Note that you will need to give permission for the microphone to run within a web browser, for security reasons. A single feature is extracted, the Sensory Dissonance (how rough sounding tha audio is, according to a perceptual model). If you selected an audio file, it will play back, but if you selected microphone the output audio will be silent to avoid feedback.
 </p>
-{{embedded-project docId = "f6a258e2-35c4-6b08-0bbf-07f334de613a" height = "300px"}}
+{{embedded-project docId = "f6a258e2-35c4-6b08-0bbf-07f334de613a" height = "350px"}}
 <p class = "tutorial-text">
 The second embeded example is a live spectral view, showing the results of a Fast Fourier Transform of successive snapshots of the input signal. The power spectrum and phase spectrum are both plotted, in linear frequency range. Most of the activity will tend to be on the left of the plot of the power spectrum, for normal audio sources, whose spectral content tends to drop off for higher frequencies. You can choose the gain for the output to hear or not hear the source signal (the default is silence).
 </p>
-{{embedded-project docId = "38c2887a-f8f3-5959-324c-7c0f176c0db7" height = "350px"}}
+{{embedded-project docId = "38c2887a-f8f3-5959-324c-7c0f176c0db7" height = "400px"}}
 <p class = "tutorial-text">
 The third embeded example is an onset detector, which reacts to percussive events in the input signal. If you are using live microphone near a speaker you may find headphones work best, to avoid feedback effects. An onset is indicated by a flashing colour change; changing the threshold adjusts the sensitivity of detection.
 </p>
-{{embedded-project docId = "fcdf62d8-a47b-1ddf-f16a-9cd09b328a65" height = "350px"}}
+{{embedded-project docId = "fcdf62d8-a47b-1ddf-f16a-9cd09b328a65" height = "400px"}}
 <h2>Part 3: Making Music</h2>
 <p class = "tutorial-text">
 Once an input sound is analysed, you can synthesize output based on the features, work with machine learning to further classify or process inputs based on the features,and make generally responsive and interactive music systems for concerts, installations, websites, etc
@@ -28,9 +28,9 @@ Once an input sound is analysed, you can synthesize output based on the features
 <p class = "tutorial-text">Some more developed examples available on codecircle are linked now.</p>
 
 <p class = "tutorial-text">Spectral delay based on spectral resynthesis. The input is analysed by FFT, then particular spectral bins can be independently delayed and fed back on themselves to make a diffuse delayed filterbank.</p>
-{{embedded-project docId = "d5499af6-f4f3-2683-0c05-b700f1a9f1b1" height = "650px"}}
+{{embedded-project docId = "d5499af6-f4f3-2683-0c05-b700f1a9f1b1" height = "700px"}}
 <p class = "tutorial-text">bbcut, based on beat tracking. The input is cut up live into stuttering buffers, with the cut points determined by tracking of the primary metrical level in the music.</p>
-{{embedded-project docId = "a9e1808c-8c5e-2634-9f6f-d0197b123b34" height = "550px"}}
+{{embedded-project docId = "a9e1808c-8c5e-2634-9f6f-d0197b123b34" height = "600px"}}
 <h2>Part 4: Getting Started With Code</h2>
 <p class = "tutorial-text">The library can be used just for the machine listening objects, used within your own audio callback (e.g., as part of a ScriptProcessorNode), or via a quick set-up frontend that hides Web Audio API details and  has you write setup and audio callback functions analogous to Processing's setup and draw.</p>
 

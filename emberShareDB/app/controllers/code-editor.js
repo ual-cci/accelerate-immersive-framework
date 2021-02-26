@@ -176,6 +176,7 @@ export default Controller.extend({
         document.getElementById("output-container").style["left"]="0px";
         document.getElementById("main-site-container").style.padding="0px"
         document.getElementById("main-site-container").style.border="none"
+        document.getElementsByClassName("CodeMirror")[0].style.height = "100vh"
       }
 
       if(embedWithCode)

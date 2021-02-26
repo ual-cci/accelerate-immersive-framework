@@ -1,0 +1,67 @@
+<div class = "limited-width-container">
+<h1>Inputs and Outputs</h1>
+<img src = {{concat url "mapping.png"}} style = "display: block;width:200px;margin:auto;padding:20px;"/>
+<p class = "tutorial-text">
+  We can think of most Digital Musical Instruments as taking some input from the real world (usually a performer(s) via some sensors), going through a mapping or analysis before creating a sonic output.
+</p>
+<p class = "tutorial-text">
+   Whilst this can be hand coded….
+</p>
+<h1>Supervised Learning</h1>
+<p class = "tutorial-text">
+Supervised learning can be used to build models that predict new values, based on previous examples of input - output pairs.
+</p>
+<p class = "tutorial-text">
+This allows us to build complex systems that can make predictions about unseen data. And the best part is, we don’t have to program them ourselves. We could spend time handcrafting computer programs ourselves and coming up with rules to decide if a certain percentage red pixels on a car dash cam means there’s a stop light, or if a triangle shaped thing coming out of a circle shaped thing is definitely a unicorn, or if a certain sequence of frequencies means a saxophone solo has begun.
+</p>
+<p class = "tutorial-text">
+These tasks are hard or even impossible to program by hand, but are actually well within reach using machine learning. All we have to do is provide labelled examples.
+</p>
+<p class = "tutorial-text">
+With supervised machine learning, labels are the supreme ruler. After seeing a set of pictures labelled cat, and a set of pictures labelled dog, a model will hopefully be able to learn the difference. But it needs to see these original labelled ground truths first.
+</p>
+<img src = {{concat url "supervised-ml.png"}} style = "display: block;width:700px;margin:auto;padding:20px;"/>
+<p class = "tutorial-text">
+We can then use these trained models in real time projects for musical instruments, installations and games combining cameras, sensors, sounds and more.
+</p>
+<h1>Two types of models </h1>
+<p class = "tutorial-text">
+The first distinction we’ll make in models is between classification and regression, and the key difference here is in how each example is labelled.
+</p>
+<p class = "tutorial-text">
+<h3>Classification</h3>
+</p>
+<p class = "tutorial-text">
+In classification tasks, the label applied to each new example is a discrete one. For example, that picture is a cat, that sound is a french horn. For building musical instruments, we are able to trigger events, change presets or patterns depending on which state the model predicts we are in.
+</p>
+<p class = "tutorial-text">
+<h3>Regression</h3>
+</p>
+<p class = "tutorial-text">
+In regression tasks, the label is a continuous number. For example, this sound is 85% acoustic or this picture of a cat is 0.6 grumpy. For building musical instruments, we can use this to create continuous mappings between input signals and parameters of synthesisers or generative systems.
+</p>
+<h1>The MIMIC Platform</h1>
+<p class = "tutorial-text">
+This is what this process looks like on the MIMIC Platform, using our clear examples, the <a href = {{concat guideUrl "learner"}}> Learner.js</a> library and the the <a href = {{concat guideUrl "maxi-instrument"}}> MaxiInstruments.js</a> library.
+</p>
+<p class = "tutorial-text">
+Now you're in the know, you can either further investigate the libraries using their guides, or try a musical classification or regression example.
+</p>
+<p class = "tutorial-text">
+  <ul>
+    <li>
+      Control this audio track with objects<a href = {{concat exampleUrl "kick-classifier"}}> and your webcam</a>
+    </li>
+    <li>
+      Map the movements of your body to<a href = {{concat exampleUrl "sun-on-your-skin"}}> a synth soundscape</a>
+    </li>
+    <li>
+      Learn more about the<a href = {{concat guideUrl "learner"}}> Learner.js library</a>
+    </li>
+    <li>
+      Learn more about the<a href = {{concat guideUrl "maxi-instruments"}}> MaxiInstruments.js library</a>
+    </li>
+  </ul>
+</p>
+<img src = {{concat url "supervisedlearninglearnermimic.png"}} style = "display: block;width:700px;margin:auto;padding:20px;"/>
+</div>

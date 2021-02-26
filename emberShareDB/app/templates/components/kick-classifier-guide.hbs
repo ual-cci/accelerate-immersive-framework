@@ -1,14 +1,58 @@
 <h1> Object Recognition Classification Example </h1>
 <p class = "tutorial-text">
-  Here we use the MobileNet feature extractor to control this audio track with a model trained on objects you hold up to your webcam. Instructions below.
+This exercise has an initial step where you build your own controller using machine learning! There are also some suggestions for further remixing the patch with your own musical ideas which you can work on if you're into coding. You can still do loads of fun stuff without coding if you want, or if you want to get into the code, you can do that also!
 </p>
-{{embedded-project docId = "a4c91621-199c-65b5-e355-2aadfc27c33f" height = "450px" manualLoad = false}}
 <p class = "tutorial-text">
+If you want to learn abit more about the basics of <strong>supervised learning</strong>, you can check out this <a href = {{concat guideUrl "supervised-ml"}}>guide.</a>
+</p>
+<p class = "tutorial-text">
+  Here we use the MobileNet feature extractor to control this audio track with a model trained on objects you hold up to your webcam. Whenever a different object is recognised, we change the playback rate, or the pattern, of the kicks.
+</p>
+{{embedded-project docId = "a4c91621-199c-65b5-e355-2aadfc27c33f" height = "500px" manualLoad = false}}
+<p class = "tutorial-text">
+  <h1>
+    Building Your Own Classifier
+  </h1>
 <ol>
-    <li class = "exercise-list-item">Use the drop down menu labelled “Class:” at the top of the Learner.js controls to change the current class. You should hear the drum beat change. </li>
-    <li class = "exercise-list-item">Change the Class back to 0. Pick a neutral position (standing/sitting in the middle of the screen). Press record, and after a 2 second delay, 2 seconds of this pose will be recorded into Class 0 of the dataset. When we are recording, everytime a new frame of video is analysed, we take those features (the input) and store them alongside the class label (in this case 0). You can always hit the "Mute" button on the sampler if you need break from the music while you work on your classifier.</li>
-    <li class = "exercise-list-item">The MobileNet feature extractor is good at telling what different objects are in the picture. Pick 3 objects from around your desk that you can hold up to the camera. Remember, the model will have to learn to spot the differences between these objects so the more different they are, the better it will work.</li>
-    <li class = "exercise-list-item">For each object, change the Class dropdown to a new class BEFORE you press record. Then record in some examples of you holding up that object. Record in a few 2-second runs, having more examples and more slight variations on each object will make your classifier more robust. For example, you might want to record examples of an object in slightly different locations / positions / rotations.</li>
-    <li class = "exercise-list-item">When you have examples of all three classes, press Train. This will train the model then automatically Run when it is done. When the classifier is running, everytime a new frame of video is analysed, we take those features (the input) and run them through the classifier. It predicts which object it thinks you are holding and reacts accordingly</li>
+    <li class = "exercise-list-item"><strong>Changing the class value manually: </strong>Use the drop down menu labelled “Class:” at the top of the Learner.js controls to change the current class. You should hear the drum beat change. </li>
+    <li class = "exercise-list-item"><strong>Record a neutral pose: </strong>Change the Class back to 0. Pick a neutral position (standing/sitting in the middle of the screen).
+      <p class = "tutorial-text">
+      Press record, and after a 2 second delay, 2 seconds of this pose will be recorded into Class 0 of the dataset. When we are recording, everytime a new frame of video is analysed, we take those features (the input) and store them alongside the class label (in this case 0).
+    </p>
+      You can always hit the "Mute" button on the sampler if you need break from the music while you work on your classifier.</li>
+    <li class = "exercise-list-item"><strong>Pick some objects: </strong>The MobileNet feature extractor is good at telling what different objects are in the picture. Pick 3 objects from around your desk that you can hold up to the camera. Remember, the model will have to learn to spot the differences between these objects so the more different they are, the better it will work.</li>
+    <li class = "exercise-list-item"><strong>Record examples of new objects: </strong>For each object, change the Class dropdown to a new class BEFORE you press record. Then record in some examples of you holding up that object.
+      <p class = "tutorial-text">
+      Record in a few 2-second runs, having more examples and more slight variations on each object will make your classifier more robust.
+      </p>
+      For example, you might want to record examples of an object in slightly different locations / positions / rotations.</li>
+    <li class = "exercise-list-item"><strong>Try out your model: </strong>When you have examples of all three classes, press Train. This will train the model then automatically Run when it is done.
+      <p class = "tutorial-text">
+      When the classifier is running, everytime a new frame of video is analysed, we take those features (the input) and run them through the classifier. It predicts which object it thinks you are holding and reacts accordingly
+        </p>
+    </li>
 </ol>
+</p>
+<p class = "tutorial-text">
+<h1>
+  Editting the Code
+</h1>
+As well as choosing your own objects, you can also try changing the musical content of the patch, and how it responds to being in different classes. To edit the project, you must first Fork it (make your own copy) using the button at the top of the code window. Here's some ideas
+<ul>
+  <li class = "exercise-list-item"> Change the samples
+    <ul><li class = "exercise-list-item">
+      You can upload your own samples using the “Add Files” menu (2nd from the left) in the title bar. You can now refer to them by their filename in project. You can now replace your new sounds into the code (lines 53-55)
+    </li></ul>
+  </li>
+  <li class = "exercise-list-item"> Change the patterns
+    <ul><li class = "exercise-list-item">
+      The main drum pattern is set around line 58. This is an array of starts, samples and velocities (optional). For more detail on how to define sequences, look at the MaxiInstrument.js documentation.
+    </li></ul>
+  </li>
+  <li class = "exercise-list-item"> Change the classes
+    <ul><li class = "exercise-list-item">
+      Currently, we change the rate of the kick drum in Class 1 and 2, and make a short repeating loop in Class 3. This happens in the learner.onOutput callback. You could choose to change the pattern instead, or different parameters. Each sample has a gain, rate, pan, start and end
+    </li></ul>
+  </li>
+</ul>
 </p>

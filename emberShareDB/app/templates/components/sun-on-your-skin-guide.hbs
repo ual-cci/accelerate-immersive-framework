@@ -1,18 +1,90 @@
 <h1> Body Tracker Regression Example </h1>
 <p class = "tutorial-text">
-  Make a continuous mapping between your body and the parameters of this soundscape. Instructions below.
+This exercise has an initial step where you build your own controller using machine learning! There are also some suggestions for further remixing the patch with your own musical ideas which you can work on if you're into coding. You can still do loads of fun stuff without coding if you want, or if you want to get into the code, you can do that also!
 </p>
-{{embedded-project docId = "2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed" height = "450px" manualLoad = false}}
 <p class = "tutorial-text">
+If you want to learn abit more about the basics of <strong>supervised learning</strong>, you can check out this <a href = {{concat guideUrl "supervised-ml"}}>guide.</a>
+</p>
+<p class = "tutorial-text">
+We’re going to try using a regression model to map several parameters of several synths to a skeleton tracker. Using the project below, we'll make a continuous mapping between your body and the parameters of this soundscape.
+</p>
+{{embedded-project docId = "2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed" height = "500px" manualLoad = false}}
+<p class = "tutorial-text">
+  <h1>
+    Building Your Own Regression Mapping
+  </h1>
   <ol>
     <li class = "exercise-list-item">
-      We have set up Learner.js and MaxiInstruments.js to map several parameters of each synth, including the filters, reverb and pitch. When you press the “Randomise All” button, all of the mapped parameters will get new random values. You will see the sliders on the synth interfaces adjust as well. Our plan is to associate different positions and movements of your body to different sets of parameters. We can provide a few examples and then when we train the model, the regression will provide a continuous mapping and we can use the body as an expressive controller.
+      <strong>Find a sound you like: </strong>We have set up Learner.js and MaxiInstruments.js to map several parameters of each synth, including the filters, reverb and pitch.
+      <p class = "tutorial-text">
+      When you press the “Randomise All” button, all of the mapped parameters will get new random values. You will see the sliders on the synth interfaces adjust as well.
+      </p>
+        <p class = "tutorial-text">
+       Our plan is to associate different positions and movements of your body to different sets of parameters.
+       </p>
+       We can provide a few examples and then when we train the model, the regression will provide a continuous mapping and we can use the body as an expressive controller.
   </li>
   <li class = "exercise-list-item">
-    When you have found a sound you like, stand in one static pose. Hit Record and record in some values for about 3-4 seconds. Now every time you get a new camera reading, it will be saved in the dataset, alongside each of the current values of the mapped parameters. You should see the numbers of examples going up on the Learner.js interface. Repeat this process of finding a set of sounds you like using the random button (or manually adjusting), picking a body position and recording in a few more pose - sound combinations.
+    <strong>Match poses to sounds: </strong>When you have found a sound you like, stand in one static pose.
+<p class = "tutorial-text">
+    Hit Record and record in some values for about 3-4 seconds. Now every time you get a new camera reading, it will be saved in the dataset, alongside each of the current values of the mapped parameters. You should see the numbers of examples going up on the Learner.js interface.
+  </p>
+<p class = "tutorial-text">
+    Repeat this process of finding a set of sounds you like using the random button (or manually adjusting), picking a body position and recording in a few more pose - sound combinations.
+  </p>
   </li>
   <li class = "exercise-list-item">
-    Hit “Train”. When it's ready, it will automatically start running. As with before, when you are running, everytime you get a new set of skeleton points from the camera, it will be fed into the model and the model will predict some new values for the synth parameters. These will then be applied in realtime to the synths (via a smoothing filter).
+    <strong>Play with your trained model: </strong>Hit “Train”. When it's ready, it will automatically start running.
+<p class = "tutorial-text">
+     When you are running, everytime you get a new set of skeleton points from the camera, it will be fed into the model and the model will predict some new values for the synth parameters.
+</p>
+     These will then be applied in realtime to the synths (via a smoothing filter).
   </li>
   </ol>
+</p>
+<p class = "tutorial-text">
+<h1>
+Editting the Code
+</h1>
+<p class = "tutorial-text">
+As well as building your own interactions through building a dataset, you can also edit other parts of the project to make your own creative work. To edit the project, you must first Fork it (make your own copy) using the button at the top of the code window.
+</p>
+<p class = "tutorial-text">
+You can use the <a href = {{concat guideUrl "maxi-instruments"}}>MaxiInstruments.js</a> Guide and MaxiInstruments.js Documentation to help you when trying to edit the code.
+</p>
+<p class = "tutorial-text">
+<ul>
+  <li class = "exercise-list-item">
+    Change the mapped parameters
+    <ul>
+      <li class = "exercise-list-item">
+        You can change the parameters that are controlled by the regression model by changing names in the “mapped” array for each synth (around line 69). If you change the parameters that are mapped, you will have to delete your dataset and start again.
+      </li>
+      <li class = "exercise-list-item">
+        You can update the parameters of the synthesisers that are not mapped (e.g. not controlled by the regression model) using the sliders in the interface. You can then press the “Print” button and the code for setting all these parameters will be posted to the console. You can then copy this into your project and the preset will be loaded whenever you run the patch.
+      </li>
+  </ul>
+</li>
+  <li class = "exercise-list-item"> Change the sequences
+    <ul>
+      <li class = "exercise-list-item">
+      Each synth has a short single sequence, you can add in different patterns for each
+    </li>
+    <li class = "exercise-list-item">
+    Currently each synth has a slightly different length loop creating a phasing pattern, you can change this or just set one loop for all (line 122).
+    </li>
+  </ul>
+  </li>
+  <li class = "exercise-list-item"> Change the sample
+    <ul>
+      <li class = "exercise-list-item">
+      Currently the start point of the sample is being shortened every loop. You can find this in the setOnTick callback (line 138). This function is called on every tick and returns the value of each instrument's playhead and is useful for sequencing longer term structures.
+    </li>
+    <li class = "exercise-list-item">
+    Again, you can upload a new sample(s)  and load them in a sequence.
+    </li>
+  </ul>
+  </li>
+</ul>
+</p>
 </p>

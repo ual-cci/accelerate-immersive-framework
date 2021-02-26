@@ -45,6 +45,9 @@ export default Controller.extend({
   isColab:computed('model', function() {
     return this.get('model').id == "colab"
   }),
+  isSupervisedML:computed('model', function() {
+    return this.get('model').id == "supervised-ml"
+  }),
   actions: {
     onClick(guide) {
       this.transitionToRoute('guides', guide.id)

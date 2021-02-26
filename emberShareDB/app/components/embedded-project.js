@@ -5,7 +5,7 @@ import { computed } from '@ember/object';
 export default Component.extend({
   docId:"",
   url:config.localOrigin,
-  height:"440px",
+  height:"490px",
   loaded:false,
   manualLoad:false,
   srcURL:"about:none",
