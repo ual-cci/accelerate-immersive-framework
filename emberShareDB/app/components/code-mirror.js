@@ -24,6 +24,7 @@ export default Component.extend({
       autoCloseTags: true,
       autocomplete:true,
       foldGutter: true,
+      autorefresh:true,
       gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
     editor.on("keydown", (cm, event)=> {

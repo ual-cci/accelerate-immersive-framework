@@ -12,7 +12,7 @@ module.exports = function(defaults) {
       "lint/css-lint.js","hint/show-hint.css", "edit/matchbrackets.js",
       "search/search.js", "search/searchcursor.js","dialog/dialog.js","dialog/dialog.css",
       "fold/foldgutter.css","fold/foldcode.js","fold/foldgutter.js", "fold/brace-fold.js",
-    "fold/xml-fold.js", "fold/indent-fold.js", "fold/comment-fold.js"],
+    "fold/xml-fold.js", "fold/indent-fold.js", "fold/comment-fold.js","display/autorefresh.js"],
       modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
       themes: ['monokai'],
       keymaps: ['sublime']

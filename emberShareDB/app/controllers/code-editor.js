@@ -963,6 +963,10 @@ export default Controller.extend({
     }, this.get('codeTimerRefresh')));
   },
   onSessionChange:function(delta) {
+    //dont send up the op if we're embedded (allows local code changes)
+    if(this.get("isEmbeddedWithCode")) {
+      return
+    }
     const surpress = this.get('surpress');
     const doc = this.get('currentDoc');
     const editor = this.get('editor');
@@ -1081,6 +1085,13 @@ export default Controller.extend({
     const currentUser = this.get('sessionAccount').currentUserId;
     let model = this.get('model');
     this.get('cs').log("setCanEditDoc")
+    //If embedded, allow editting (ops dont get sent)
+    if(this.get("isEmbeddedWithCode")) {
+      this.set('canEditDoc', true);
+      this.set('showReadOnly', false);
+      this.set('isOwner', false);
+      return
+    }
     if(isEmpty(currentUser) || isEmpty(model))
     {
       this.get('cs').log("NO USER OR MODEL")
