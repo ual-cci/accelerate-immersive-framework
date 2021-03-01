@@ -550,10 +550,10 @@ input[id="docName"]:-ms-input-placeholder {
   overflow-y:visible;
 }
 
-// #main-site-container {
-//   padding-left: 8%;
-//   padding-right: 8%;
-// }
+#main-site-container {
+  height: 98vh;
+  margin-top:-10px;
+}
 
 #main-code-container {
   left:0px;
@@ -614,7 +614,7 @@ input[id="docName"]:-ms-input-placeholder {
 
 #embedded-run-container {
   position: absolute;
-  bottom:50px;
+  bottom:35px;
   right:0;
   width:210px;
   height: auto;

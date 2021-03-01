@@ -448,6 +448,9 @@ export default Controller.extend({
       this.set('titleNoName', doc.get('name'));
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
+      if(this.get("isEmbeddedWithCode")) {
+        this.foldHead()
+      }
       resolve();
     })
   },
@@ -1331,7 +1334,6 @@ export default Controller.extend({
     }, 100));
   },
   hijackConsoleOutput: function() {
-
     (()=>{
         let oldLog = this.get('cs').log
         this.get('cs').log = (msg) => {
@@ -1378,6 +1380,17 @@ export default Controller.extend({
       tab.style.width = codeW
     }
   },
+  foldHead:function() {
+    const editor = this.get('editor');
+    editor.operation(function() {
+       for (var l = editor.firstLine(); l <= editor.lastLine(); ++l)
+       {
+         if(editor.doc.getLine(l).includes("<head>")) {
+           editor.foldCode({line: l, ch: 0}, null, "fold");
+         }
+       }
+    });
+  },
   hideCode: function(doHide) {
     let container = document.getElementById('ace-container');
     container.classList.add(doHide ? 'hiding-code' : 'showing-code');
@@ -1405,9 +1418,10 @@ export default Controller.extend({
           editor.refresh();
           editor.refresh();
           editor.refresh();
-        },50)
+        },1000)
       }
     }, 200)
+
   },
   setAllCodeWhite() {
     document.querySelectorAll('#ace-container').forEach(
