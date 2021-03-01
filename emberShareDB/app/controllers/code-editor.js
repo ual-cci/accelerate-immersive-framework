@@ -165,7 +165,7 @@ export default Controller.extend({
       this.set("codeW", embedWithCode ? "0px" : (window.innerWidth / 2)  + "px");
       if(embed)
       {
-        document.getElementById("main-code-container").style.height="97vh"
+        document.getElementById("main-code-container").style.height="95vh"
         document.getElementById("main-code-container").style.width="100vw"
         document.getElementById("output-container").style["border-top-width"]=0;
         document.getElementById("output-container").style["border-bottom-width"]=0;
@@ -176,7 +176,10 @@ export default Controller.extend({
         document.getElementById("output-container").style["left"]="0px";
         document.getElementById("main-site-container").style.padding="0px"
         document.getElementById("main-site-container").style.border="none"
-        document.getElementsByClassName("CodeMirror")[0].style.height = "100vh"
+      }
+      else
+      {
+        document.getElementsByClassName("CodeMirror")[0].style.height = "80vh"
       }
 
       if(embedWithCode)
