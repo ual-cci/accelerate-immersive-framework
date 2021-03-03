@@ -782,11 +782,13 @@ export default Controller.extend({
         if(serverSource !== localSource)
         {
           this.set("surpress", true);
-          this.get('cs').log("setting editor to", serverSource)
+          this.get('cs').log("updating edirot")
           const scrollPos = this.get('editor').getCursor(true);
           this.get('cs').log(scrollPos)
           this.get("editor").focus()
-          this.get('editor.doc').setValue(serverSource)
+          var scrollInfo = this.get("editor").getScrollInfo();
+          this.get("editor").setValue(serverSource);
+          this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
           this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
           this.set("surpress", false);
         }
