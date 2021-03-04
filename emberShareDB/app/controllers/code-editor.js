@@ -146,7 +146,7 @@ export default Controller.extend({
     this.set("wsAvailable", false)
     this.selectRootDoc().then(()=> {
       if(this.get("canEditDoc")) {
-        this.initWebSockets()
+        this.initShareDB()
       }
       this.addWindowListener();
       this.initUI();
@@ -157,7 +157,6 @@ export default Controller.extend({
     this.get('cs').log('initShareDB');
     this.set('leftCodeEditor', false);
     this.initWebSockets();
-
   },
   initUI: function() {
     this.set('collapsed', true);
@@ -238,8 +237,8 @@ export default Controller.extend({
             this.set('wsAvailable', true);
             if(!this.get('fetchingDoc'))
             {
-              // this.get('cs').log("selectRootDoc");
-              // this.selectRootDoc();
+              this.get('cs').log("selectRootDoc");
+              this.selectRootDoc();
             }
           }
         };
@@ -272,6 +271,7 @@ export default Controller.extend({
   {
     if(this.get('wsAvailable') && !isEmpty(this.get('sharedDBDoc')))
     {
+      this.get('cs').log("clearning up sharedb")
       try{
         this.get('sharedDBDoc').destroy();
       }
