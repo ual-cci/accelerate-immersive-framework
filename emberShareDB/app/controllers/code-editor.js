@@ -142,14 +142,22 @@ export default Controller.extend({
     this.set("hudMessage", "");
     this.set("showHUD", true);
     this.clearTabs();
-    this.initShareDB();
+    //this.initShareDB();
+    this.set("wsAvailable", false)
+    this.selectRootDoc().then(()=> {
+      if(this.get("canEditDoc")) {
+        this.initWebSockets()
+      }
+      this.addWindowListener();
+      this.initUI();
+    })
+
   },
   initShareDB: function() {
     this.get('cs').log('initShareDB');
     this.set('leftCodeEditor', false);
     this.initWebSockets();
-    this.addWindowListener();
-    this.initUI();
+
   },
   initUI: function() {
     this.set('collapsed', true);
@@ -230,8 +238,8 @@ export default Controller.extend({
             this.set('wsAvailable', true);
             if(!this.get('fetchingDoc'))
             {
-              this.get('cs').log("selectRootDoc");
-              this.selectRootDoc();
+              // this.get('cs').log("selectRootDoc");
+              // this.selectRootDoc();
             }
           }
         };
@@ -305,8 +313,8 @@ export default Controller.extend({
     this.cleanUpConnections().then(()=>{
       if(!this.get('fetchingDoc') && !this.get('leftCodeEditor'))
       {
-        this.get('cs').log("selecting doc")
-        this.selectRootDoc();
+        // this.get('cs').log("selecting doc")
+        // this.selectRootDoc();
       }
     })
   },
@@ -330,28 +338,31 @@ export default Controller.extend({
   },
   selectRootDoc: function() {
     this.get('cs').log("selectRootDoc")
-    this.newDocSelected(this.get('model').id).then(()=> {
-      this.updateTabbarLocation();
-      this.get('cs').log("loaded root doc, preloading assets");
-      this.fetchChildren().then(()=> {
-        this.resetScrollPositions();
-        this.preloadAssets().then(()=> {
-          if(this.doPlayOnLoad())
-          {
-            this.updateIFrame();
-          }
-          this.set('doPlay',!this.doPlayOnLoad());
-          this.updatePlayButton();
-          if(config.colabMode === false) {
-            this.set('model.isCollaborative', false);
-          }
-          const doc = this.get('currentDoc');
-          if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
-            this.get('cs').log("setting update source interval")
-            this.set('updateSourceInterval', setInterval(()=>{
-              this.updateSessionFromSource();
-            }, this.get('updateSourceRate')));
-          }
+    return new RSVP.Promise((resolve, reject)=> {
+      this.newDocSelected(this.get('model').id).then(()=> {
+        this.updateTabbarLocation();
+        this.get('cs').log("loaded root doc, preloading assets");
+        this.fetchChildren().then(()=> {
+          this.resetScrollPositions();
+          this.preloadAssets().then(()=> {
+            if(this.doPlayOnLoad())
+            {
+              this.updateIFrame();
+            }
+            this.set('doPlay',!this.doPlayOnLoad());
+            this.updatePlayButton();
+            if(config.colabMode === false) {
+              this.set('model.isCollaborative', false);
+            }
+            const doc = this.get('currentDoc');
+            if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
+              this.get('cs').log("setting update source interval")
+              this.set('updateSourceInterval', setInterval(()=>{
+                this.updateSessionFromSource();
+              }, this.get('updateSourceRate')));
+            }
+            resolve();
+          });
         });
       });
     });
