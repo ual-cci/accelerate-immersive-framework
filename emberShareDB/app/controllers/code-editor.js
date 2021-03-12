@@ -149,23 +149,25 @@ export default Controller.extend({
       if(this.get("canEditDoc")) {
         this.initShareDB()
       } else if(this.get("isViewer")) {
-        this.get('editor').setValue("");
-        this.writeIframeContent("");
-        this.get("opsPlayer").startTimer(this.get("editor"))
-        setInterval(()=>{
-          const playerOps = this.get("opsPlayer").getToSend();
-          if(playerOps.length > 0) {
-            playerOps.forEach((ops)=> {
-              this.didReceiveOp(ops)
-            })
-
-          }
-        },500)
+        this.initViewer();
       }
       this.addWindowListener();
       this.initUI();
     })
+  },
+  initViewer: function() {
+    this.get('editor').setValue("");
+    this.writeIframeContent("");
+    this.get("opsPlayer").startTimer(this.get("editor"))
+    this.set("viewerInterval", setInterval(()=>{
+      const playerOps = this.get("opsPlayer").getToSend();
+      if(playerOps.length > 0) {
+        playerOps.forEach((ops)=> {
+          this.didReceiveOp(ops)
+        })
 
+      }
+    },100))
   },
   initShareDB: function() {
     this.get('cs').log('initShareDB');
@@ -300,6 +302,7 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject)=> {
       this.cleanUpShareDB();
       this.set('currentDoc', null);
+
       if(!isEmpty(this.get('socket')))
       {
         this.get('socket').removeEventListener('error')
@@ -1823,9 +1826,15 @@ export default Controller.extend({
         this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
+        this.get("opsPlayer").cleanUp();
+        if(!isEmpty(this.get("viewerInterval"))) {
+          clearInterval(this.get("viewerInterval"))
+          this.set("viewerInterval", null)
+        }
         if(!isEmpty(this.get("updateSourceInterval")))
         {
           clearInterval(this.get("updateSourceInterval"));
+          this.set("updateSourceInterval", null)
         }
         if(this.get('wsAvailable'))
         {

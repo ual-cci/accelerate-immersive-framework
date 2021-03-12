@@ -46,40 +46,55 @@ export default Service.extend({
       let currentOp = this.get("ops")[this.get("ptr")]
       let doSend = false;
       currentOp.op.forEach((op)=> {
-          if(op.date)
-          {
-            if(op.date < time)
-            {
-              doSend = true;
-              latestTime = op.date
-            }
-          }
-          else
+        if(op.date)
+        {
+          latestTime = op.date
+          if(op.date < time)
           {
             doSend = true;
           }
+        }
+        else
+        {
+          doSend = true;
+        }
       })
       if(doSend) {
         this.get("fromPlayer").push(currentOp.op)
         this.incrementProperty("ptr")
       }
-
     }
   },
   startTimer(editor) {
     this.shift(true, editor, true).then(()=>{
-      const lag = 15
-      let now = new Date() - lag;
-      const interval = 1000;
-      this.executeUntil(now,)
-      setInterval(()=>{
-        now += (interval/1000)
+      const lag = 10000
+      let now = new Date().getTime() - lag;
+      const interval = 100;
+      this.executeUntil(now)
+      this.set("schedulerInteval",setInterval(()=>{
+        now += (interval)
         this.executeUntil(now)
-      },interval)
-      setInterval(()=>{
+      },interval))
+      this.set("updateOpsInterval",setInterval(()=>{
         this.loadOps()
-      },lag*1000)
+      },lag))
     })
+  },
+  filterOps(allOps) {
+    let sourceOps = []
+    allOps.forEach((ops) => {
+      if(ops.op !== undefined)
+      {
+        if(ops.op.length > 0)
+        {
+          if(ops.op[0].p[0] === "newEval" || ops.op[0].p[0] === "source")
+          {
+            sourceOps.push(ops)
+          }
+        }
+      }
+    });
+    return sourceOps
   },
   loadOps() {
     const doc = this.get('doc');
@@ -90,20 +105,7 @@ export default Service.extend({
           url: config.serverHost + "/documents/ops/" + doc,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
-          let sourceOps = []
-          res.data.forEach((ops) => {
-            if(ops.op !== undefined)
-            {
-              if(ops.op.length > 0)
-              {
-                if(ops.op[0].p[0] === "newEval" || ops.op[0].p[0] === "source")
-                {
-                  sourceOps.push(ops)
-                }
-              }
-            }
-          });
-          this.set('ops', sourceOps);
+          this.set('ops', this.filterOps(res.data));
           this.get('cs').log("GOT OPS",this.get('ops'))
           resolve(this.get('ops'));
         }).catch((err) => {
@@ -111,6 +113,16 @@ export default Service.extend({
           reject(err);
         });
     });
+  },
+  cleanUp() {
+    if(!isEmpty(this.get("schedulerInteval"))) {
+      clearInterval(this.get("schedulerInteval"))
+      this.set("schedulerInteval", null)
+    }
+    if(!isEmpty(this.get("updateOpsInterval"))) {
+      clearInterval(this.get("updateOpsInterval"))
+      this.set("updateOpsInterval", null)
+    }
   },
   shift(prev, editor, rewind = false) {
     this.get("cs").log("shift", rewind)
@@ -123,11 +135,8 @@ export default Service.extend({
           this.set('prevDir', null);
           this.set('ptr', 0);
         }
-        this.get("cs").log("updateOps");
         this.updateOps(prev);
-        this.get("cs").log("applyTransform");
         this.applyTransform(editor)
-        this.get("cs").log("resolve");
         resolve();
       }
       this.get("cs").log(isEmpty(this.get('ops')))
