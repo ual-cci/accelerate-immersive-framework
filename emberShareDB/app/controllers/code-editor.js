@@ -145,29 +145,31 @@ export default Controller.extend({
     this.clearTabs();
     this.set("wsAvailable", false)
     this.set("isViewer", this.get('viewer') == "true")
+    this.get("cs").log("selectRootDoc","begin")
     this.selectRootDoc().then(()=> {
       if(this.get("canEditDoc")) {
         this.initShareDB()
-      } else if(this.get("isViewer")) {
-        this.initViewer();
       }
       this.addWindowListener();
       this.initUI();
     })
   },
   initViewer: function() {
-    this.get('editor').setValue("");
-    this.writeIframeContent("");
-    this.get("opsPlayer").startTimer(this.get("editor"))
-    this.set("viewerInterval", setInterval(()=>{
-      const playerOps = this.get("opsPlayer").getToSend();
-      if(playerOps.length > 0) {
-        playerOps.forEach((ops)=> {
-          this.didReceiveOp(ops)
-        })
+    if(this.get("isViewer")) {
+      this.get("cs").log("initViewer")
+      this.get('editor').setValue("");
+      this.writeIframeContent("");
+      this.get("opsPlayer").startTimer(this.get("editor"))
+      this.set("viewerInterval", setInterval(()=>{
+        const playerOps = this.get("opsPlayer").getToSend();
+        if(playerOps.length > 0) {
+          playerOps.forEach((ops)=> {
+            this.didReceiveOp(ops)
+          })
 
-      }
-    },100))
+        }
+      },100))
+    }
   },
   initShareDB: function() {
     this.get('cs').log('initShareDB');
@@ -253,7 +255,7 @@ export default Controller.extend({
             this.set('wsAvailable', true);
             if(!this.get('fetchingDoc'))
             {
-              this.get('cs').log("selectRootDoc");
+              this.get("cs").log("selectRootDoc","websockets")
               this.selectRootDoc();
             }
           }
@@ -281,6 +283,15 @@ export default Controller.extend({
         this.get('cs').log("web sockets not available");
         this.websocketError();
       }
+    }
+  },
+  cleanUpOpPlayer: function()
+  {
+    this.set("isViewer",false);
+    this.get("opsPlayer").cleanUp();
+    if(!isEmpty(this.get("viewerInterval"))) {
+      clearInterval(this.get("viewerInterval"))
+      this.set("viewerInterval", null)
     }
   },
   cleanUpShareDB: function()
@@ -347,10 +358,14 @@ export default Controller.extend({
         this.set('sharedDBDoc', null);
         this.set('currentDoc', null);
       }
-      this.connectToDoc(docId).then((newDoc)=> {
-        this.set('currentDoc', newDoc);
-        this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
-      }).catch((err)=>reject(err));
+      if(!this.get("fetchingDoc"))
+      {
+        this.connectToDoc(docId).then((newDoc)=> {
+          this.set('currentDoc', newDoc);
+          this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
+        }).catch((err)=>reject(err));
+      }
+
     })
   },
   selectRootDoc: function() {
@@ -378,6 +393,7 @@ export default Controller.extend({
                 this.updateSessionFromSource();
               }, this.get('updateSourceRate')));
             }
+            this.initViewer();
             resolve();
           });
         });
@@ -1332,9 +1348,11 @@ export default Controller.extend({
         this.set('recordingOptions', {isRecording:false});
         this.writeIframeContent("");
         this.cleanUpShareDB();
+        this.cleanUpOpPlayer();
         this.set('currentDoc', null);
         if(!isEmpty(this.get('editor')))
         {
+          this.get("cs").log("selectRootDoc","refreshDoc")
           this.selectRootDoc();
         }
       };
@@ -1826,11 +1844,7 @@ export default Controller.extend({
         this.set("titleName", "");
         this.get('cs').clear();
         this.get('cs').clearObservers();
-        this.get("opsPlayer").cleanUp();
-        if(!isEmpty(this.get("viewerInterval"))) {
-          clearInterval(this.get("viewerInterval"))
-          this.set("viewerInterval", null)
-        }
+        this.cleanUpOpPlayer();
         if(!isEmpty(this.get("updateSourceInterval")))
         {
           clearInterval(this.get("updateSourceInterval"));

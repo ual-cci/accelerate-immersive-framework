@@ -41,6 +41,7 @@ export default Service.extend({
   },
   executeUntil(time) {
     let latestTime = 0;
+    //Whilst not off the end and behind time
     while(this.inBounds(this.get("ptr")) && latestTime < time)
     {
       let currentOp = this.get("ops")[this.get("ptr")]
@@ -70,7 +71,7 @@ export default Service.extend({
       const lag = 10000
       let now = new Date().getTime() - lag;
       const interval = 100;
-      this.executeUntil(now)
+      this.cleanUp()
       this.set("schedulerInteval",setInterval(()=>{
         now += (interval)
         this.executeUntil(now)
@@ -78,6 +79,7 @@ export default Service.extend({
       this.set("updateOpsInterval",setInterval(()=>{
         this.loadOps()
       },lag))
+      this.executeUntil(now)
     })
   },
   filterOps(allOps) {
@@ -115,6 +117,7 @@ export default Service.extend({
     });
   },
   cleanUp() {
+    this.get("cs").log("cleaned up op player")
     if(!isEmpty(this.get("schedulerInteval"))) {
       clearInterval(this.get("schedulerInteval"))
       this.set("schedulerInteval", null)
