@@ -30,6 +30,32 @@ export default Service.extend({
     this.set('doc', doc);
     this.set('ops', null);
   },
+  startTimer(editor, didReceiveOp, self) {
+    this.shift(true, editor, true).then(()=>{
+      let currentOp = this.get("ops")[this.get("ptr")]
+      let forwardUntil = new Date() - 15;
+      while(this.inBounds(this.get("ptr")))
+      {
+        currentOp = this.get("ops")[this.get("ptr")]
+        let doSend = false;
+        if(currentOp.op !== undefined)
+        {
+          currentOp.op.forEach((op)=> {
+            if(op.p[0]=="source")
+            {
+              if(!op.date || op.date < forwardUntil) {
+                doSend = true;
+              }
+            }
+          })
+        }
+        if(doSend) {
+          didReceiveOp(currentOp.op, null, self)
+        }
+        this.incrementProperty("ptr")
+      }
+    })
+  },
   loadOps() {
     const doc = this.get('doc');
     this.get('cs').log("loading ops", doc);
@@ -41,26 +67,33 @@ export default Service.extend({
         }).then(bind((res) => {
           this.set('ops', res.data);
           this.get('cs').log("GOT OPS", res.data)
-          this.set('ptr', this.get('ops').length);
+          //this.set('ptr', this.get('ops').length);
           resolve(res.data);
         })).catch(bind((err) => {
+          this.get("cs").log("op GET rejected", err)
           reject(err);
         }));
     });
   },
   shift(prev, editor, rewind = false) {
+    this.get("cs").log("shift", rewind)
     this.set('reachedEnd', false);
     return new RSVP.Promise((resolve, reject) => {
       const fetch = () => {
+        this.get("cs").log("Fetch");
         if(rewind)
         {
           this.set('prevDir', null);
           this.set('ptr', 0);
         }
+        this.get("cs").log("updateOps");
         this.updateOps(prev);
+        this.get("cs").log("applyTransform");
         this.applyTransform(editor)
+        this.get("cs").log("resolve");
         resolve();
       }
+      this.get("cs").log(isEmpty(this.get('ops')))
       if(isEmpty(this.get('ops')))
       {
         this.loadOps().then(() => {fetch()}).catch((err) => {reject(err)});
@@ -78,6 +111,7 @@ export default Service.extend({
   },
   updateOps(prev) {
     this.set('opsToApply', null);
+    this.get("cs").log("updateOps", this.get("ptr"))
     let newPtr = this.get('ptr');
     if(!isEmpty(this.get('prevDir')))
     {
@@ -91,6 +125,7 @@ export default Service.extend({
     while(!hasHitBounds && isEmpty(this.get('opsToApply')))
     {
       newPtr = prev ? newPtr - 1 : newPtr + 1;
+      this.get("cs").log("newPtr", newPtr,this.get('opsToApply'))
       if(this.inBounds(newPtr))
       {
         const ops = this.get('ops')[newPtr];
@@ -154,6 +189,7 @@ export default Service.extend({
     return this.shift(false, editor, rewind);
   },
   applyTransform(editor) {
+    this.get('cs').log("applying", this.get('opsToApply'))
     if(!isEmpty(this.get('opsToApply')))
     {
       return this.get('parser').applyOps(this.get('opsToApply'), editor);

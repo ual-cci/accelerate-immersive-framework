@@ -12,7 +12,7 @@ import jQuery from 'jquery';
 
 export default Controller.extend({
   //Query Params
-  queryParams:["showCode","embed"],
+  queryParams:["showCode","embed","viewer"],
 
   //Services
   websockets: inject('websockets'),
@@ -142,11 +142,19 @@ export default Controller.extend({
     this.set("hudMessage", "");
     this.set("showHUD", true);
     this.clearTabs();
-    //this.initShareDB();
     this.set("wsAvailable", false)
+    this.set("isViewer", this.get('viewer') == "true")
     this.selectRootDoc().then(()=> {
       if(this.get("canEditDoc")) {
         this.initShareDB()
+      } else if(this.get("isViewer")) {
+        this.get('cs').log("REWIND")
+        this.get('editor').setValue("");
+        this.writeIframeContent("");
+        let fn = (source, ops, self)=> {
+          this.didReceiveOp(source, ops, self)
+        }
+        this.get("opsPlayer").startTimer(this.get("editor"), fn, this)
       }
       this.addWindowListener();
       this.initUI();
@@ -581,26 +589,29 @@ export default Controller.extend({
     toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container });
     this.set('cursors', toUpdate);
   },
-  didReceiveOp: function (ops,source) {
-    const embed = this.get('isEmbedded');
-    const editor = this.get('editor');
-    if(!embed && ops.length > 0 && this.get('model.isCollaborative'))
+  didReceiveOp: (ops, source, self)=> {
+    const editor = self.get('editor');
+    const canReceiveOp = ()=> {
+      return (self.get('model.isCollaborative') || self.get('isViewer'))
+      && !self.get('isEmbedded')
+    }
+    if(ops.length > 0 && canReceiveOp())
     {
       if(!source && ops[0].p[0] === "source")
       {
-        this.get('cs').log("did receive op", ops, source)
-
-        this.set('surpress', true);
-        this.get('opsPlayer').set('opsToApply', ops)
+        self.get('cs').log("did receive op")
+        self.set('surpress', true);
+        self.get('opsPlayer').set('opsToApply', ops)
         let prevHistory = editor.doc.getHistory();
-        this.get('opsPlayer').applyTransform(editor)
+        self.get('opsPlayer').applyTransform(editor)
         let afterHistory = editor.doc.getHistory();
         //WE REMOVE ANY NEW ITEMS FROM THE UNDO HISTORY AS THEY DID NOT
         //COME FROM THE LOCAL EDITOR
         afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
         editor.doc.setHistory(afterHistory);
-        this.set('surpress', false);
-        this.newCursor(ops[0]);
+        self.set('surpress', false);
+        self.get('cs').log("applying op")
+        //self.newCursor(ops[0]);
       }
       else if (ops[0].p[0] == "assets")
       {
@@ -798,6 +809,7 @@ export default Controller.extend({
           this.get('cs').log(scrollPos)
           this.get("editor").focus()
           var scrollInfo = this.get("editor").getScrollInfo();
+          this.get("cs").log("updateSessionFromSource")
           this.get("editor").setValue(serverSource);
           this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
           this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
@@ -995,7 +1007,8 @@ export default Controller.extend({
     //this.get('cs').log("session change, surpress", surpress);
     if(!surpress
       && delta[0].origin !== "playback"
-      && this.get('droppedOps').length == 0)
+      && this.get('droppedOps').length == 0
+      && this.get("canEditDoc"))
     {
       this.incrementProperty('editCtr');
 

@@ -195,10 +195,10 @@ export default Service.extend({
         {
           const child = children[j];
           const url = config.redirectServerHost + "/source/" + child.documentId;
-          this.get('cs').log("BEFORE", child.name);
+          //this.get('cs').log("BEFORE", child.name);
           js = js.replace(new RegExp("\"" + child.name + "\"","gm"), "\"" + url + "\"");
           js = js.replace(new RegExp("\'" + child.name + "\'","gm"), "\"" + url + "\"");
-          this.get('cs').log("AFTER", js);
+          //this.get('cs').log("AFTER", js);
         };
         newSrc = newSrc + js;
       }
@@ -265,7 +265,7 @@ export default Service.extend({
           }
         })
       } catch(err) {
-        this.get('cs').log(err);
+        //this.get('cs').log(err);
       }
     }
     this.get('cs').log("possibles", possibles)
@@ -537,6 +537,7 @@ export default Service.extend({
     op['si'] =  str;
     op.owner = this.get('sessionAccount').currentUserName;
     op.cursor = editor.doc.getCursor();
+    op.date = new Date().getTime();
     //this.get('cs').log("delta op", op);
     return op
   },
@@ -548,6 +549,7 @@ export default Service.extend({
     op['sd'] =  str;
     op.owner = this.get('sessionAccount').currentUserName;
     op.cursor = editor.doc.getCursor();
+    op.date = new Date().getTime();
     //this.get('cs').log("delta op", op);
     return op
   },
