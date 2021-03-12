@@ -620,7 +620,7 @@ export default Controller.extend({
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    this.get("cs").log("didReceiveOp",ops[0])
+    this.get("cs").log("didReceiveOp")
     if(ops.length > 0 && canReceiveOp())
     {
       if(!source && ops[0].p[0] === "source")
@@ -649,7 +649,7 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
-        this.get('cs').log(ops[0], new Date().getTime() - ops[0].oi.date, isEmpty(ops[0].od), ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
+        this.get('cs').log("newEval",isEmpty(ops[0].od),isEmpty(this.get('prevEvalReceived')),ops[0].oi.date)
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
@@ -673,6 +673,8 @@ export default Controller.extend({
               }
               this.set('surpress', false);
             }
+          } else {
+            this.get("cs").log("recieved but skipped")
           }
 
           if(doFlash && !isEmpty(ops[0].oi.pos))
