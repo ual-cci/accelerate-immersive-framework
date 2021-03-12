@@ -49,6 +49,7 @@ export default Service.extend({
       currentOp.op.forEach((op)=> {
         if(op.date)
         {
+          this.get("cs").log(op.date,time)
           latestTime = op.date
           if(op.date < time)
           {
@@ -73,7 +74,7 @@ export default Service.extend({
       const interval = 100;
       this.cleanUp()
       this.set("schedulerInteval",setInterval(()=>{
-        now += (interval)
+        now = new Date().getTime() - lag;
         this.executeUntil(now)
       },interval))
       this.set("updateOpsInterval",setInterval(()=>{
