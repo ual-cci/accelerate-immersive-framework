@@ -8,6 +8,7 @@ import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
+import { bind } from '@ember/runloop';
 import jQuery from 'jquery';
 
 export default Controller.extend({
@@ -148,10 +149,18 @@ export default Controller.extend({
       if(this.get("canEditDoc")) {
         this.initShareDB()
       } else if(this.get("isViewer")) {
-        this.get('cs').log("REWIND")
         this.get('editor').setValue("");
         this.writeIframeContent("");
-        this.get("opsPlayer").startTimer(this.get("editor"), this.didReceiveOp)
+        this.get("opsPlayer").startTimer(this.get("editor"))
+        setInterval(()=>{
+          const playerOps = this.get("opsPlayer").getToSend();
+          if(playerOps.length > 0) {
+            playerOps.forEach((ops)=> {
+              this.didReceiveOp(ops)
+            })
+
+          }
+        },500)
       }
       this.addWindowListener();
       this.initUI();
@@ -586,13 +595,13 @@ export default Controller.extend({
     toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container });
     this.set('cursors', toUpdate);
   },
-  didReceiveOp: (ops, source)=> {
+  didReceiveOp: function(ops, source) {
     const editor = this.get('editor');
     const canReceiveOp = ()=> {
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    this.get("cs").log("didReceiveOp")
+    this.get("cs").log("didReceiveOp",ops[0])
     if(ops.length > 0 && canReceiveOp())
     {
       if(!source && ops[0].p[0] === "source")

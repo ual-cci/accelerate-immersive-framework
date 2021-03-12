@@ -10,7 +10,8 @@ export default Service.extend({
   sessionAccount:inject('session-account'),
   cs:inject('console'),
   ops: null,
-  opsToApply: null,
+  opsToApply:null,
+  fromPlayer:[],
   ptr:0,
   prevDir: null,
   doc:null,
@@ -30,30 +31,54 @@ export default Service.extend({
     this.set('doc', doc);
     this.set('ops', null);
   },
-  startTimer(editor, didReceiveOp) {
-    this.shift(true, editor, true).then(()=>{
+  getToSend() {
+    let toSend = [];
+    if(this.get("fromPlayer").length > 0) {
+      toSend = JSON.parse(JSON.stringify(this.get('fromPlayer')))
+      this.set("fromPlayer",[]);
+    }
+    return toSend
+  },
+  executeUntil(time) {
+    let latestTime = 0;
+    while(this.inBounds(this.get("ptr")) && latestTime < time)
+    {
       let currentOp = this.get("ops")[this.get("ptr")]
-      let forwardUntil = new Date() - 15;
-      while(this.inBounds(this.get("ptr")))
-      {
-        currentOp = this.get("ops")[this.get("ptr")]
-        let doSend = false;
-        if(currentOp.op !== undefined)
-        {
-          currentOp.op.forEach((op)=> {
-            if(op.p[0]=="source")
+      let doSend = false;
+      currentOp.op.forEach((op)=> {
+          if(op.date)
+          {
+            if(op.date < time)
             {
-              if(!op.date || op.date < forwardUntil) {
-                doSend = true;
-              }
+              doSend = true;
+              latestTime = op.date
             }
-          })
-        }
-        if(doSend) {
-          didReceiveOp(currentOp.op)
-        }
+          }
+          else
+          {
+            doSend = true;
+          }
+      })
+      if(doSend) {
+        this.get("fromPlayer").push(currentOp.op)
         this.incrementProperty("ptr")
       }
+
+    }
+  },
+  startTimer(editor) {
+    this.shift(true, editor, true).then(()=>{
+      const lag = 15
+      let now = new Date() - lag;
+      const interval = 1000;
+      this.executeUntil(now,)
+      setInterval(()=>{
+        now += (interval/1000)
+        this.executeUntil(now)
+      },interval)
+      setInterval(()=>{
+        this.loadOps()
+      },lag*1000)
     })
   },
   loadOps() {
@@ -65,14 +90,26 @@ export default Service.extend({
           url: config.serverHost + "/documents/ops/" + doc,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
-          this.set('ops', res.data);
-          this.get('cs').log("GOT OPS", res.data)
-          //this.set('ptr', this.get('ops').length);
-          resolve(res.data);
-        }).catch(bind((err) => {
+          let sourceOps = []
+          res.data.forEach((ops) => {
+            if(ops.op !== undefined)
+            {
+              if(ops.op.length > 0)
+              {
+                if(ops.op[0].p[0] === "newEval" || ops.op[0].p[0] === "source")
+                {
+                  sourceOps.push(ops)
+                }
+              }
+            }
+          });
+          this.set('ops', sourceOps);
+          this.get('cs').log("GOT OPS",this.get('ops'))
+          resolve(this.get('ops'));
+        }).catch((err) => {
           this.get("cs").log("op GET rejected", err)
           reject(err);
-        }));
+        });
     });
   },
   shift(prev, editor, rewind = false) {
