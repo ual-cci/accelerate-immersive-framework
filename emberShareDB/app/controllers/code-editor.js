@@ -151,10 +151,7 @@ export default Controller.extend({
         this.get('cs').log("REWIND")
         this.get('editor').setValue("");
         this.writeIframeContent("");
-        let fn = (source, ops, self)=> {
-          this.didReceiveOp(source, ops, self)
-        }
-        this.get("opsPlayer").startTimer(this.get("editor"), fn, this)
+        this.get("opsPlayer").startTimer(this.get("editor"), this.didReceiveOp)
       }
       this.addWindowListener();
       this.initUI();
@@ -589,28 +586,29 @@ export default Controller.extend({
     toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container });
     this.set('cursors', toUpdate);
   },
-  didReceiveOp: (ops, source, self)=> {
-    const editor = self.get('editor');
+  didReceiveOp: (ops, source)=> {
+    const editor = this.get('editor');
     const canReceiveOp = ()=> {
-      return (self.get('model.isCollaborative') || self.get('isViewer'))
-      && !self.get('isEmbedded')
+      return (this.get('model.isCollaborative') || this.get('isViewer'))
+      && !this.get('isEmbedded')
     }
+    this.get("cs").log("didReceiveOp")
     if(ops.length > 0 && canReceiveOp())
     {
       if(!source && ops[0].p[0] === "source")
       {
-        self.get('cs').log("did receive op")
-        self.set('surpress', true);
-        self.get('opsPlayer').set('opsToApply', ops)
+        this.get('cs').log("did receive op")
+        this.set('surpress', true);
+        this.get('opsPlayer').set('opsToApply', ops)
         let prevHistory = editor.doc.getHistory();
-        self.get('opsPlayer').applyTransform(editor)
+        this.get('opsPlayer').applyTransform(editor)
         let afterHistory = editor.doc.getHistory();
         //WE REMOVE ANY NEW ITEMS FROM THE UNDO HISTORY AS THEY DID NOT
         //COME FROM THE LOCAL EDITOR
         afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
         editor.doc.setHistory(afterHistory);
-        self.set('surpress', false);
-        self.get('cs').log("applying op")
+        this.set('surpress', false);
+        this.get('cs').log("applying op")
         //self.newCursor(ops[0]);
       }
       else if (ops[0].p[0] == "assets")

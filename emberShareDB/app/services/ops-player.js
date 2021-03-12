@@ -30,7 +30,7 @@ export default Service.extend({
     this.set('doc', doc);
     this.set('ops', null);
   },
-  startTimer(editor, didReceiveOp, self) {
+  startTimer(editor, didReceiveOp) {
     this.shift(true, editor, true).then(()=>{
       let currentOp = this.get("ops")[this.get("ptr")]
       let forwardUntil = new Date() - 15;
@@ -50,7 +50,7 @@ export default Service.extend({
           })
         }
         if(doSend) {
-          didReceiveOp(currentOp.op, null, self)
+          didReceiveOp(currentOp.op)
         }
         this.incrementProperty("ptr")
       }
@@ -64,12 +64,12 @@ export default Service.extend({
           type: "GET",
           url: config.serverHost + "/documents/ops/" + doc,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
-        }).then(bind((res) => {
+        }).then((res) => {
           this.set('ops', res.data);
           this.get('cs').log("GOT OPS", res.data)
           //this.set('ptr', this.get('ops').length);
           resolve(res.data);
-        })).catch(bind((err) => {
+        }).catch(bind((err) => {
           this.get("cs").log("op GET rejected", err)
           reject(err);
         }));
