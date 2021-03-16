@@ -251,7 +251,7 @@ export default Service.extend({
     return this.shift(false, editor, rewind);
   },
   applyTransform(editor) {
-    this.get('cs').log("applying", this.get('opsToApply'))
+    //this.get('cs').log("applying", this.get('opsToApply'))
     if(!isEmpty(this.get('opsToApply')))
     {
       return this.get('parser').applyOps(this.get('opsToApply'), editor);

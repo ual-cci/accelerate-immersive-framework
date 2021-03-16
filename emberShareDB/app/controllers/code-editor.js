@@ -623,7 +623,7 @@ export default Controller.extend({
     //this.get("cs").log("didReceiveOp")
     if(ops.length > 0 && canReceiveOp())
     {
-      this.get("cs").log("didReceiveOp",ops[0].p[0] )
+      //this.get("cs").log("didReceiveOp",ops[0].p[0] )
       if(!source && ops[0].p[0] === "source")
       {
         this.set('surpress', true);
@@ -1511,7 +1511,10 @@ export default Controller.extend({
       this.onSessionChange(change);
     },
     onReevaluate() {
-      this.updateIFrame(true);
+      if(this.get("canEditDoc"))
+      {
+        this.updateIFrame(true);
+      }
     },
 
     suggestCompletions(editor, options) {
