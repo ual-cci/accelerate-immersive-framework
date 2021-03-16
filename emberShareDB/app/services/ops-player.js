@@ -39,13 +39,14 @@ export default Service.extend({
     }
     return toSend
   },
-  executeUntil(time) {
+  executeUntil(time, justSource=false) {
     let latestTime = 0;
     //Whilst not off the end and behind time
     while(this.inBounds(this.get("ptr")) && latestTime < time)
     {
       let currentOp = this.get("ops")[this.get("ptr")]
-      let doSend = false;
+      let send = false;
+      let goToNext = false;
       currentOp.op.forEach((op)=> {
         if(op.date)
         {
@@ -53,16 +54,27 @@ export default Service.extend({
           latestTime = op.date
           if(op.date < time)
           {
-            doSend = true;
+            send = true;
+            goToNext = true;
           }
         }
         else
         {
-          doSend = true;
+          send = true;
+          goToNext = true;
+        }
+        this.get("cs").log(op.p[0])
+        if(justSource && op.p[0] !== "source")
+        {
+          send = false;
+          goToNext = true;
         }
       })
-      if(doSend) {
+      if(send) {
         this.get("fromPlayer").push(currentOp.op)
+      }
+      if(goToNext)
+      {
         this.incrementProperty("ptr")
       }
     }
@@ -80,7 +92,7 @@ export default Service.extend({
       this.set("updateOpsInterval",setInterval(()=>{
         this.loadOps()
       },lag))
-      this.executeUntil(now)
+      this.executeUntil(now, true)
     })
   },
   filterOps(allOps) {

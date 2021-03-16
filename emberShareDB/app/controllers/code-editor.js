@@ -620,12 +620,12 @@ export default Controller.extend({
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    this.get("cs").log("didReceiveOp")
+    //this.get("cs").log("didReceiveOp")
     if(ops.length > 0 && canReceiveOp())
     {
+      this.get("cs").log("didReceiveOp",ops[0].p[0] )
       if(!source && ops[0].p[0] === "source")
       {
-        this.get('cs').log("did receive op")
         this.set('surpress', true);
         this.get('opsPlayer').set('opsToApply', ops)
         let prevHistory = editor.doc.getHistory();
@@ -636,8 +636,7 @@ export default Controller.extend({
         afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
         editor.doc.setHistory(afterHistory);
         this.set('surpress', false);
-        this.get('cs').log("applying op")
-        //self.newCursor(ops[0]);
+        //this.newCursor(ops[0]);
       }
       else if (ops[0].p[0] == "assets")
       {
