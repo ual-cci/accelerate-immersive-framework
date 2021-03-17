@@ -1,6 +1,8 @@
-// import Maximilian from './maximilian.wasmmodule.js';
 import Maximilian from './sema-engine.wasmmodule.js';
+
+// NOTE: dynamically loads from the adjacent ringBuf.js file
 import RingBuffer from "./ringbuf.js"; //thanks padenot
+
 import Open303 from './open303.wasmmodule.js';
 import { SABInputTransducer, SABOutputTransducer } from './transducers.js';
 
@@ -13,7 +15,6 @@ import { SABInputTransducer, SABOutputTransducer } from './transducers.js';
 //     this.ifft.setup(1024, 256, 1024);
 //     this.mags = new Maximilian.VectorFloat();
 //     this.phases = new Maximilian.VectorFloat();
-//     this.mags.resize(512, 0);
 //     this.phases.resize(512, 0);
 //   }
 //
@@ -382,109 +383,116 @@ class MaxiProcessor extends AudioWorkletProcessor {
 	 * @param {*} buf
 	 */
 	addSampleBuffer = (name, buf) => {
+		// console.log(`loading sample '${name}'`);
 		this.sampleVectorBuffers[name] = this.translateFloat32ArrayToBuffer(buf);
 	};
 
+	/**
+	 *
+	 * @param {*} name
+	 * @param {*} buf
+	 */
+	addSharedArrayBuffer = data => {
+		console.info("buffer received");
+		let sab = data.value;
+		let rb = new RingBuffer(sab, Float64Array);
+		inputSABs[data.channelID] = {
+			sab,
+			rb,
+			blocksize: data.blocksize,
+			value:
+				data.blocksize > 1
+					? new Float64Array(data.blocksize)
+					: 0,
+		}
+  }
+
+  eval = data => {
+		// check if new code is being sent for evaluation?
+		let setupFunction;
+		let loopFunction;
+		try {
+			setupFunction = eval(data["setup"]);
+			loopFunction = eval(data["loop"]);
+
+			this.nextSignalFunction = 1 - this.currentSignalFunction;
+			// setup function with the  types
+			this._q[this.nextSignalFunction] = setupFunction();
+			//allow feedback between evals
+			this._mems[this.nextSignalFunction] = this._mems[
+				this.currentSignalFunction
+			];
+			// output[SPECTROGAMCHANNEL][i] = specgramValue;
+			// then use channelsplitter
+			this.signals[this.nextSignalFunction] = loopFunction;
+			this._cleanup[this.nextSignalFunction] = 0;
+			let xfadeBegin = Maximilian.maxiMap.linlin(
+				1.0 - this.nextSignalFunction,
+				0,
+				1,
+				-1,
+				1
+			);
+			let xfadeEnd = Maximilian.maxiMap.linlin(
+				this.nextSignalFunction,
+				0,
+				1,
+				-1,
+				1
+			);
+			this.xfadeControl.prepare(xfadeBegin, xfadeEnd, 2, true); // short xfade across signals
+			this.xfadeControl.triggerEnable(true); //enable the trigger straight away
+			this.codeSwapState = this.codeSwapStates.QUEUD;
+		} catch (err) {
+			if (err instanceof TypeError) {
+				console.log(
+					"TypeError in worklet evaluation: " + err.name + " – " + err.message
+				);
+			} else {
+				console.log(
+					"Error in worklet evaluation: " + err.name + " – " + err.message
+				);
+				console.log(setupFunction);
+				console.log(loopFunction);
+			}
+		}
+	}
 	/**
 	 * @onMessageHandler
 	 * * message port async handler
 	 * @param {*} event
 	 */
 	onMessageHandler = (event) => {
-		if ("address" in event.data) {
-			//this must be an OSC message
-			this.OSCMessages[event.data.address] = event.data.args;
-			//console.log(this.OSCMessages);
-		} else if ("func" in event.data && "sendbuf" == event.data.func) {
-			console.log("aesendbuf", event.data);
 
-  		this.addSampleBuffer(event.data.name, event.data.data);
+    if (event.data.address) {
 
-  	} else if ("func" in event.data && "sab" == event.data.func) {
-			console.log("buf received", event.data);
+      this.OSCMessages[event.data.address] = event.data.args;
 
-			let sab = event.data.value;
-			let rb = new RingBuffer(sab, Float64Array);
+    } else if (event.data.func){
 
-			inputSABs[event.data.channelID] = {
-				sab: sab,
-				rb: rb,
-				blocksize: event.data.blocksize,
-				value:
-					event.data.blocksize > 1 ? new Float64Array(event.data.blocksize) : 0,
-			};
+      if(event.data.func === "sendbuf" ) {
 
-			//TEMP DEPR.ECATED
-			// } else if ('peermsg' in event.data) {
-			//   console.log('peer', event);
-			//   //this is from peer streaming, map it on to any listening transducers
-			//   let targetTransducers = this.matchTransducers('NET', [event.data.src, event.data.ch]);
-			//   // console.log(targetTransducers.length);
-			//   for (let idx in targetTransducers) {
-			//     targetTransducers[idx].setValue(event.data.val);
-			//   }
+        this.addSampleBuffer(event.data.name, event.data.data);
+
+      } else if (event.data.func === "sab" ) {
+
+        this.addSharedArrayBuffer(event.data);
+      }
+
 		} else if (event.data.sample) {
+
 			let sampleKey = event.data.sample.substr(0, event.data.sample.length - 4);
+
 			this.addSampleBuffer(sampleKey, event.data.buffer);
-		} else if ("phase" in event.data) {
-			// console.log(this.kuraPhaseIdx);
-			// console.log(event);
+
+    } else if ("phase" in event.data) {
+
 			this.netClock.setPhase(event.data.phase, event.data.i);
 			// this.kuraPhase = event.data.phase;
 			// this.kuraPhaseIdx = event.data.i;
-		} else if ("eval" in event.data) {
-			// check if new code is being sent for evaluation?
+		} else if (event.data.eval) {
 
-			let setupFunction;
-			let loopFunction;
-			try {
-				setupFunction = eval(event.data["setup"]);
-				loopFunction = eval(event.data["loop"]);
-
-				this.nextSignalFunction = 1 - this.currentSignalFunction;
-
-				// setup function with the  types
-				this._q[this.nextSignalFunction] = setupFunction();
-				//allow feedback between evals
-				this._mems[this.nextSignalFunction] = this._mems[
-					this.currentSignalFunction
-				];
-				// output[SPECTROGAMCHANNEL][i] = specgramValue;
-				// then use channelsplitter
-				this.signals[this.nextSignalFunction] = loopFunction;
-				this._cleanup[this.nextSignalFunction] = 0;
-
-				let xfadeBegin = Maximilian.maxiMap.linlin(
-					1.0 - this.nextSignalFunction,
-					0,
-					1,
-					-1,
-					1
-				);
-				let xfadeEnd = Maximilian.maxiMap.linlin(
-					this.nextSignalFunction,
-					0,
-					1,
-					-1,
-					1
-				);
-				this.xfadeControl.prepare(xfadeBegin, xfadeEnd, 2, true); // short xfade across signals
-				this.xfadeControl.triggerEnable(true); //enable the trigger straight away
-
-				this.codeSwapState = this.codeSwapStates.QUEUD;
-			} catch (err) {
-				if (err instanceof TypeError) {
-					console.log(
-						"TypeError in worklet evaluation: " + err.name + " – " + err.message
-					);
-				} else {
-					console.log(
-						"Error in worklet evaluation: " + err.name + " – " + err.message
-					);
-					console.log(setupFunction);
-					console.log(loopFunction);
-				}
-			}
+      this.eval(event.data);
 		}
 	};
 
