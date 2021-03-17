@@ -71,6 +71,7 @@ export default Service.extend({
         }
       })
       if(send) {
+        this.set("latestVersion", currentOp.v + 1)
         this.get("fromPlayer").push(currentOp.op)
       }
       if(goToNext)
@@ -80,6 +81,7 @@ export default Service.extend({
     }
   },
   startTimer(editor) {
+    this.set("latestVersion", 0)
     this.shift(true, editor, true).then(()=>{
       const lag = 10000
       let now = new Date().getTime() - lag;
@@ -90,7 +92,7 @@ export default Service.extend({
         this.executeUntil(now)
       },interval))
       this.set("updateOpsInterval",setInterval(()=>{
-        this.loadOps()
+        this.loadOps(this.get("latestVersion"))
       },lag))
       this.executeUntil(now, true)
     })
@@ -111,13 +113,15 @@ export default Service.extend({
     });
     return sourceOps
   },
-  loadOps() {
+  loadOps(from=0) {
     const doc = this.get('doc');
-    this.get('cs').log("loading ops", doc);
+    this.get('cs').log("loading ops", doc, from);
     return new RSVP.Promise((resolve, reject) => {
+      let url = config.serverHost + "/documents/ops/" + doc
+      url = url + "?version="+from;
       $.ajax({
           type: "GET",
-          url: config.serverHost + "/documents/ops/" + doc,
+          url:url,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
           this.set('ops', this.filterOps(res.data));
