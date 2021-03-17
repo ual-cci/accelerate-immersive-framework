@@ -12,21 +12,8 @@ export default Service.extend({
   ops: null,
   opsToApply:null,
   fromPlayer:[],
-  ptr:0,
   prevDir: null,
   doc:null,
-  atHead() {
-    const ptr = this.get('ptr');
-    if(isEmpty(this.get('ops')))
-    {
-      return true;
-    }
-    else
-    {
-      this.get('cs').log("checking head", ptr, this.get('ops').length)
-      return ptr >= this.get('ops').length - 1;
-    }
-  },
   reset(doc) {
     this.set('doc', doc);
     this.set('ops', null);
@@ -40,61 +27,69 @@ export default Service.extend({
     return toSend
   },
   executeUntil(time, justSource=false) {
-    let latestTime = 0;
-    //Whilst not off the end and behind time
-    while(this.inBounds(this.get("ptr")) && latestTime < time)
-    {
-      let currentOp = this.get("ops")[this.get("ptr")]
-      let send = false;
-      let goToNext = false;
-      currentOp.op.forEach((op)=> {
-        if(op.date)
-        {
-          this.get("cs").log(op.date,time)
-          latestTime = op.date
-          if(op.date < time)
+    return new RSVP.Promise((resolve, reject) => {
+      let toSend = [];
+      this.get("ops").forEach((currentOp)=>
+      {
+        let send = false;
+        currentOp.op.forEach((op)=> {
+          if(op.date)
           {
-            send = true;
-            goToNext = true;
+            if(op.date < time)
+            {
+              send = true;
+            }
           }
-        }
-        else
-        {
-          send = true;
-          goToNext = true;
-        }
-        this.get("cs").log(op.p[0])
-        if(justSource && op.p[0] !== "source")
-        {
-          send = false;
-          goToNext = true;
+          else
+          {
+            send = currentOp.v < 2;
+          }
+          if(justSource && op.p[0] !== "source")
+          {
+            send = false;
+          }
+        })
+        if(send) {
+          this.get("cs").log("sending",currentOp.v,currentOp.op[0].p[0],justSource)
+          toSend.push(currentOp)
+        } else {
+          this.get("cs").log("skipping",currentOp.v)
         }
       })
-      if(send) {
+      //this.get("cs").log(this.get("ops").length, toSend.length)
+      toSend.forEach((currentOp)=>{
         this.set("latestVersion", currentOp.v + 1)
-        this.get("fromPlayer").push(currentOp.op)
-      }
-      if(goToNext)
-      {
-        this.incrementProperty("ptr")
-      }
-    }
+        this.get("fromPlayer").push(currentOp)
+        const index = this.get('ops').indexOf(currentOp);
+        this.get("cs").log("removing at",index)
+        if (index > -1) {
+          this.get('ops').splice(index, 1);
+        }
+      });
+      //this.get("cs").log(this.get("ops").length)
+      resolve();
+    });
   },
   startTimer(editor) {
-    this.set("latestVersion", 0)
-    this.shift(true, editor, true).then(()=>{
-      const lag = 10000
-      let now = new Date().getTime() - lag;
+    this.set("latestVersion", 0);
+    this.set("ptr", 0);
+    this.loadOps(0).then(()=>{
+      const lag = 10000;
       const interval = 100;
+      let now = new Date().getTime() - lag;
       this.cleanUp()
-      this.set("schedulerInteval",setInterval(()=>{
-        now = new Date().getTime() - lag;
-        this.executeUntil(now)
-      },interval))
-      this.set("updateOpsInterval",setInterval(()=>{
-        this.loadOps(this.get("latestVersion"))
-      },lag))
-      this.executeUntil(now, true)
+      let justSource = true;
+      this.executeUntil(now, true).then(()=> {
+        this.set("schedulerInteval",setInterval(()=>{
+          now = new Date().getTime() - lag;
+          this.executeUntil(now, justSource)
+        },interval))
+        this.set("updateOpsInterval",setInterval(()=>{
+          this.loadOps(this.get("latestVersion")).then(()=>{
+            justSource = false;
+          });
+        },lag))
+      });
     })
   },
   filterOps(allOps) {
@@ -124,7 +119,13 @@ export default Service.extend({
           url:url,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
-          this.set('ops', this.filterOps(res.data));
+          this.get('cs').log(res)
+          if(res) {
+            this.set('ops', this.filterOps(res.data));
+          }
+          else {
+            this.set('ops', [])
+          }
           this.get('cs').log("GOT OPS",this.get('ops'))
           resolve(this.get('ops'));
         }).catch((err) => {
@@ -143,116 +144,6 @@ export default Service.extend({
       clearInterval(this.get("updateOpsInterval"))
       this.set("updateOpsInterval", null)
     }
-  },
-  shift(prev, editor, rewind = false) {
-    this.get("cs").log("shift", rewind)
-    this.set('reachedEnd', false);
-    return new RSVP.Promise((resolve, reject) => {
-      const fetch = () => {
-        this.get("cs").log("Fetch");
-        if(rewind)
-        {
-          this.set('prevDir', null);
-          this.set('ptr', 0);
-        }
-        this.updateOps(prev);
-        this.applyTransform(editor)
-        resolve();
-      }
-      this.get("cs").log(isEmpty(this.get('ops')))
-      if(isEmpty(this.get('ops')))
-      {
-        this.loadOps().then(() => {fetch()}).catch((err) => {reject(err)});
-      }
-      else
-      {
-        fetch();
-      }
-    });
-  },
-  inBounds(ptr) {
-    const ops = this.get('ops');
-    const inBounds = ptr >= 0 && ptr < ops.length;
-    return inBounds;
-  },
-  updateOps(prev) {
-    this.set('opsToApply', null);
-    this.get("cs").log("updateOps", this.get("ptr"))
-    let newPtr = this.get('ptr');
-    if(!isEmpty(this.get('prevDir')))
-    {
-      if(prev != this.get('prevDir'))
-      {
-        newPtr = prev ? newPtr + 1 : newPtr - 1;
-      }
-    }
-    this.set('prevDir', prev);
-    let hasHitBounds = false;
-    while(!hasHitBounds && isEmpty(this.get('opsToApply')))
-    {
-      newPtr = prev ? newPtr - 1 : newPtr + 1;
-      this.get("cs").log("newPtr", newPtr,this.get('opsToApply'))
-      if(this.inBounds(newPtr))
-      {
-        const ops = this.get('ops')[newPtr];
-        if(!isEmpty(ops.op))
-        {
-          let toApply = [];
-          for(let j = 0; j < ops.op.length; j++)
-          {
-            let op = ops.op[j];
-            if(op.p[0] == "source")
-            {
-              //INVERT
-              if(prev)
-              {
-                if(!isEmpty(op.si))
-                {
-                  op = {p:op.p, sd:op.si};
-                }
-                else if(!isEmpty(op.sd))
-                {
-                  op = {p:op.p, si:op.sd};
-                }
-              }
-              toApply.push(op);
-            }
-          }
-          if(prev)
-          {
-            //You have to reverse if youre going backwards
-            toApply = toApply.reverse()
-          }
-          if(toApply.length > 0)
-          {
-            this.get('cs').log(toApply);
-            this.set('opsToApply', toApply);
-          }
-        }
-      }
-      else
-      {
-        hasHitBounds = true;
-      }
-    }
-    this.get('cs').log("newPtr", newPtr, "oldPtr", this.get('ptr'))
-    if(this.inBounds(newPtr))
-    {
-      this.set('ptr', newPtr);
-    }
-    else
-    {
-      this.set('reachedEnd', true);
-    }
-  },
-  clamp(num, min, max) {
-    return num <= min ? min : num >= max ? max : num;
-  },
-  prevOp(editor, rewind = false) {
-    return this.shift(true, editor, rewind);
-  },
-  nextOp(editor, rewind = false) {
-    return this.shift(false, editor, rewind);
   },
   applyTransform(editor) {
     //this.get('cs').log("applying", this.get('opsToApply'))

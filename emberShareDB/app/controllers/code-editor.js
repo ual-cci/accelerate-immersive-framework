@@ -72,6 +72,7 @@ export default Controller.extend({
   isRoot:true,
   isMobile:false,
   iframeTitle:"title",
+  prevEvalReceived:0,
   updateSourceRate:30000,
   updateSourceOnInterval:true,
   updateSourceInterval:undefined,
@@ -164,7 +165,7 @@ export default Controller.extend({
         const playerOps = this.get("opsPlayer").getToSend();
         if(playerOps.length > 0) {
           playerOps.forEach((ops)=> {
-            this.didReceiveOp(ops)
+            this.didReceiveOp(ops.op, null, ops.v)
           })
 
         }
@@ -288,6 +289,7 @@ export default Controller.extend({
   cleanUpOpPlayer: function()
   {
     this.set("isViewer",false);
+    this.set("prevEvalReceived", 0);
     this.get("opsPlayer").cleanUp();
     if(!isEmpty(this.get("viewerInterval"))) {
       clearInterval(this.get("viewerInterval"))
@@ -614,13 +616,12 @@ export default Controller.extend({
     toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container });
     this.set('cursors', toUpdate);
   },
-  didReceiveOp: function(ops, source) {
+  didReceiveOp: function(ops, source, version = 0) {
     const editor = this.get('editor');
     const canReceiveOp = ()=> {
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    //this.get("cs").log("didReceiveOp")
     if(ops.length > 0 && canReceiveOp())
     {
       //this.get("cs").log("didReceiveOp",ops[0].p[0] )
@@ -648,14 +649,13 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
-        this.get('cs').log("newEval",isEmpty(ops[0].od),isEmpty(this.get('prevEvalReceived')),ops[0].oi.date)
+        this.get('cs').log("newEval",version,ops[0]);
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
           //AND THOSE THAT DIDNT HAPPEN IN THE LAST 5 SECS
           let doFlash = false;
-          if(isEmpty(this.get('prevEvalReceived')) ||
-             !isEmpty(this.get('prevEvalReceived')) && !isEmpty(ops[0].od))
+          if(version > this.get("prevEvalReceived"))
           {
             var ignoreDate = true
             if(new Date().getTime() - ops[0].oi.date < 5000 || ignoreDate)
@@ -663,7 +663,7 @@ export default Controller.extend({
               this.set('surpress', true);
               try {
                 console.log("executing", ops[0].oi.code)
-                this.set('prevEvalReceived', ops[0].oi.code)
+                this.set('prevEvalReceived', version)
                 doFlash = true;
                 document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
               } catch (err) {
@@ -895,16 +895,15 @@ export default Controller.extend({
             {
               const toSend = {
                 uuid:this.get('sessionAccount').getSessionID(),
-                date:new Date().getTime(),
                 code:combined,
                 pos:pos
               }
               console.log("sending op", toSend)
               this.set('evalPtr', this.get('evalPtr') + 1);
-              let op = {p:["newEval"], oi:toSend}
-              if(!isEmpty(this.get('prevEval')))
-              {
-                op.od = this.get('prevEval')
+              let op = {
+                p:["newEval"],
+                oi:toSend,
+                date:new Date().getTime()
               }
               this.submitOp(op).catch((err)=>{
                 this.get('cs').log('error updating doc', err);
@@ -1039,23 +1038,14 @@ export default Controller.extend({
     {
       this.incrementProperty('editCtr');
 
-      if(!this.get('opsPlayer').atHead())
+      const ops = this.get('codeParser').getOps(delta, editor);
+      ops.forEach((op)=>{
+        //this.get('cs').log("submitting op")
+        this.submitOp(op);
+      });
+      if(isEmpty(doc.type))
       {
-        this.get('cs').log("not at head", doc.get('source'), editor.getValue());
-        this.submitOp({p: ["source", 0], sd: doc.get('source')});
-        this.submitOp({p: ["source", 0], si: editor.getValue()});
-      }
-      else
-      {
-        const ops = this.get('codeParser').getOps(delta, editor);
-        ops.forEach((op)=>{
-          //this.get('cs').log("submitting op")
-          this.submitOp(op);
-        });
-        if(isEmpty(doc.type))
-        {
-          this.setLanguage();
-        }
+        this.setLanguage();
       }
       this.get('opsPlayer').reset(doc.id);
       this.restartCodeTimer();
@@ -1266,22 +1256,10 @@ export default Controller.extend({
       });
 
     }
-    if(this.get('opsPlayer').atHead())
-    {
-      this.updateSourceFromSession().then(()=> {
-        update().then(()=>{
-          this.set('surpress', false);
-          this.get('cs').log("UNSURPRESSING");
-        });
-      }).catch((err)=>{this.get('cs').log(err)})
-    }
-    else
-    {
-      update().then(()=>{
-        this.set('surpress', false);
-        this.get('cs').log("UNSURPRESSING");
-      });
-    }
+    update().then(()=>{
+      this.set('surpress', false);
+      this.get('cs').log("UNSURPRESSING");
+    });
   },
   updateSavedVals: function()
   {
