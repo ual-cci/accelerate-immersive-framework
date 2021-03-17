@@ -649,29 +649,28 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
-        this.get('cs').log("newEval",version,ops[0]);
+        this.get('cs').log("newEval",version,ops);
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
           //AND THOSE THAT DIDNT HAPPEN IN THE LAST 5 SECS
           let doFlash = false;
-          if(version > this.get("prevEvalReceived"))
+          const doExecute =
+            (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
+            (this.get("model.isCollaborative") && ops[0].date)
+          if(doExecute)
           {
-            var ignoreDate = true
-            if(new Date().getTime() - ops[0].oi.date < 5000 || ignoreDate)
-            {
-              this.set('surpress', true);
-              try {
-                console.log("executing", ops[0].oi.code)
-                this.set('prevEvalReceived', version)
-                doFlash = true;
-                document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
-              } catch (err) {
-                doFlash = false;
-                console.log("error evaluating received code", err);
-              }
-              this.set('surpress', false);
+            this.set('surpress', true);
+            try {
+              console.log("executing", ops[0].oi.code)
+              this.set('prevEvalReceived', version)
+              doFlash = true;
+              document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+            } catch (err) {
+              doFlash = false;
+              console.log("error evaluating received code", err);
             }
+            this.set('surpress', false);
           } else {
             this.get("cs").log("recieved but skipped")
           }
