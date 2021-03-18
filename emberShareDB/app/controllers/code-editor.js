@@ -1140,6 +1140,7 @@ export default Controller.extend({
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserId;
+    const currentUserName = this.get('sessionAccount').currentUserName;
     let model = this.get('model');
     this.get('cs').log("setCanEditDoc")
     //If embedded, allow editting (ops dont get sent)
@@ -1164,16 +1165,12 @@ export default Controller.extend({
       this.set('isOwner', false);
       if(model.get('readOnly'))
       {
-        /*
-        if is collaborator {
-          this.set('canEditSource', true);
-          this.set('canEditSettings', false);
-        }
-        */
-        this.get('cs').log("READ ONLY")
-        this.set('canEditSource', false);
+        const isCollaborator = this.get("model.collaborators").includes(currentUserName)
+        this.get('cs').log(this.get("model.collaborators"), currentUserName)
+        this.get('cs').log("isCollaborator", isCollaborator)
+        this.set('canEditSource', isCollaborator);
         this.set('canEditSettings', false);
-        this.set('showReadOnly', true);
+        this.set('showReadOnly', !isCollaborator);
         return;
       }
     }

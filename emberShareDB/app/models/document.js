@@ -21,6 +21,7 @@ export default DS.Model.extend({
   dontPlay:DS.attr('boolean'),
   isCollaborative:DS.attr('boolean'),
   children:DS.attr(),
+  collaborators:DS.attr(),
   parent:DS.attr('string'),
   type:DS.attr('string')
 });
