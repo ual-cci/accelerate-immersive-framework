@@ -159,7 +159,7 @@
         <span class="tooltiptext">COLLABORATIVE EDITTING</span>
       </div>
       {{/if}}
-      {{#if canEditDoc}}
+      {{#if canEditSource}}
         <div class="tooltip">
           <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
           {{input tabIndex = "0" type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
@@ -188,7 +188,7 @@
             </div>
           {{/each}}
         </div>
-      {{#if canEditDoc}}
+      {{#if canEditSource}}
       <div id = "asset-progress"></div>
       <div class = "file-upload">
         {{file-upload
@@ -207,7 +207,7 @@
       tokens=model.tags
       allowDuplicates=false
       placeholder="Enter Tags"
-      editable=canEditDoc
+      editable=canEditSettings
       searchTag=(action 'searchTag')
       tokensChanged=(action 'tagsChanged')
       inputToggled=(action 'syncOutputContainer')

@@ -39,7 +39,8 @@ export default Controller.extend({
   suppress: false,
   codeTimer: null,
   isNotEdittingDocName:true,
-  canEditDoc:false,
+  canEditSource:false,
+  canEditSettings:false,
   isOwner:false,
   autoRender:false,
   codeTimerRefresh:500,
@@ -148,7 +149,7 @@ export default Controller.extend({
     this.set("isViewer", this.get('viewer') == "true")
     this.get("cs").log("selectRootDoc","begin")
     this.selectRootDoc().then(()=> {
-      if(this.get("canEditDoc")) {
+      if(this.get("canEditSource")) {
         this.initShareDB()
       }
       this.addWindowListener();
@@ -157,11 +158,11 @@ export default Controller.extend({
   },
   initViewer: function() {
     //Can't be a viewer and an editor
-    if(this.get("canEditDoc")) {
+    if(this.get("canEditSource")) {
       this.set("isViewer", false);
     }
     if(this.get("isViewer")) {
-      this.get("cs").log("initViewerinloop", this.get("canEditDoc"), this.get("isViewer"))
+      this.get("cs").log("initViewer")
       this.get('editor').setValue("");
       this.writeIframeContent("");
       this.get("opsPlayer").startTimer(this.get("editor"))
@@ -492,8 +493,8 @@ export default Controller.extend({
         reject(err);
         return;
       });
-      this.get('cs').log("CAN EDIT?", this.get('canEditDoc'))
-      editor.options.readOnly = !this.get('canEditDoc');
+      editor.options.readOnly = !this.get('canEditSource');
+      this.get('cs').log("CAN EDIT SOURCE?", this.get('canEditSource'),editor.options.readOnly)
       this.set('showHUD', false);
       this.scrollToSavedPosition();
       this.set('titleName', doc.get('name') + " by " + this.get('model.owner'));
@@ -534,7 +535,7 @@ export default Controller.extend({
   setTabs: function(data) {
     const currentDoc = this.get('currentDoc');
     const tabs = data.map((child)=> {
-      const canDelete = this.get('canEditDoc') && child.id==currentDoc.id;
+      const canDelete = this.get('canEditSettings') && child.id==currentDoc.id;
       return {name:child.name, id:child.id, isSelected:child.id==currentDoc.id, canDelete:canDelete};
     });
     this.get('cs').log("tabs", tabs);
@@ -1040,7 +1041,7 @@ export default Controller.extend({
     if(!surpress
       && delta[0].origin !== "playback"
       && this.get('droppedOps').length == 0
-      && this.get("canEditDoc"))
+      && this.get("canEditSource"))
     {
       this.incrementProperty('editCtr');
 
@@ -1142,7 +1143,7 @@ export default Controller.extend({
     this.get('cs').log("setCanEditDoc")
     //If embedded, allow editting (ops dont get sent)
     if(this.get("isEmbeddedWithCode")) {
-      this.set('canEditDoc', true);
+      this.set('canEditSource', true);
       this.set('showReadOnly', false);
       this.set('isOwner', false);
       return
@@ -1150,19 +1151,27 @@ export default Controller.extend({
     if(isEmpty(currentUser) || isEmpty(model))
     {
       this.get('cs').log("NO USER OR MODEL")
-      this.set('canEditDoc', false);
+      this.set('canEditSource', false);
+      this.set('canEditSettings', false);
       this.set('showReadOnly', true);
       this.set('isOwner', false);
       return;
     }
-    if(currentUser != model.get('ownerId'))
+    if(currentUser !== model.get('ownerId'))
     {
       this.get('cs').log("NOT OWNER")
       this.set('isOwner', false);
       if(model.get('readOnly'))
       {
+        /*
+        if is collaborator {
+          this.set('canEditSource', true);
+          this.set('canEditSettings', false);
+        }
+        */
         this.get('cs').log("READ ONLY")
-        this.set('canEditDoc', false);
+        this.set('canEditSource', false);
+        this.set('canEditSettings', false);
         this.set('showReadOnly', true);
         return;
       }
@@ -1170,14 +1179,18 @@ export default Controller.extend({
     else
     {
       this.set('isOwner', true);
-      this.set('canEditDoc', true);
+      this.set('canEditSource', true);
+      this.set('canEditSettings', true);
       this.set('showReadOnly', false);
       this.get('cs').log("IS OWNER")
       return;
     }
     this.get('cs').log("IS DESKTOP?", this.get('mediaQueries.isDesktop'))
     this.set('showReadOnly', false);
-    this.set('canEditDoc', this.get('mediaQueries.isDesktop'));
+    if(!this.get('mediaQueries.isDesktop')) {
+      this.set('canEditSource', false);
+      this.set('canEditSettings', false);
+    }
   },
   deleteCurrentDocument: function() {
     let model = this.get('model');
@@ -1495,7 +1508,7 @@ export default Controller.extend({
       this.onSessionChange(change);
     },
     onReevaluate() {
-      if(this.get("canEditDoc"))
+      if(this.get("canEditSource"))
       {
         this.updateIFrame(true);
       }
@@ -1536,7 +1549,7 @@ export default Controller.extend({
       },50)
     },
     doEditDocName() {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         this.set('isNotEdittingDocName', false);
         scheduleOnce('afterRender',  function() {
@@ -1553,7 +1566,7 @@ export default Controller.extend({
       .then(()=>this.get('sessionAccount').updateOwnedDocuments()));
     },
     deleteDoc() {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         this.deleteCurrentDocument();
       }
@@ -1647,7 +1660,7 @@ export default Controller.extend({
     },
     deleteAsset(asset)
     {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         if (confirm('Are you sure you want to delete?')) {
           this.get('cs').log("deleting asset", asset)
@@ -1694,7 +1707,7 @@ export default Controller.extend({
     },
     //SHOW AND HIDE MENUS
     togglePrivacy() {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         let model = this.get('model');
         model.set('isPrivate', !model.get('isPrivate'));
@@ -1705,7 +1718,7 @@ export default Controller.extend({
       }
     },
     toggleReadOnly() {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         let model = this.get('model');
         model.set('readOnly', !model.get('readOnly'));
@@ -1730,7 +1743,7 @@ export default Controller.extend({
       this.toggleProperty('autoRender');
     },
     toggleCollaborative() {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         let model = this.get('model');
         model.set('isCollaborative', !model.get('isCollaborative'));
@@ -1986,7 +1999,7 @@ export default Controller.extend({
 
     //TABS
     newTab(docId) {
-      if(this.get('canEditDoc'))
+      if(this.get('canEditSettings'))
       {
         this.get('cs').log('new tab', docId);
         this.fetchChildren().then(()=>{
