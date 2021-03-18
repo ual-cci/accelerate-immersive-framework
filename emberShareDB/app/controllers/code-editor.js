@@ -156,8 +156,12 @@ export default Controller.extend({
     })
   },
   initViewer: function() {
+    //Can't be a viewer and an editor
+    if(this.get("canEditDoc")) {
+      this.set("isViewer", false);
+    }
     if(this.get("isViewer")) {
-      this.get("cs").log("initViewer")
+      this.get("cs").log("initViewerinloop", this.get("canEditDoc"), this.get("isViewer"))
       this.get('editor').setValue("");
       this.writeIframeContent("");
       this.get("opsPlayer").startTimer(this.get("editor"))
@@ -167,7 +171,6 @@ export default Controller.extend({
           playerOps.forEach((ops)=> {
             this.didReceiveOp(ops.op, null, ops.v)
           })
-
         }
       },100))
     }
@@ -652,8 +655,12 @@ export default Controller.extend({
         this.get('cs').log("newEval",version,ops);
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
-          //IGNORE OPS THAT DONT HAVE AN ACCOMPANYING DELETE OPERATION
-          //AND THOSE THAT DIDNT HAPPEN IN THE LAST 5 SECS
+          /*
+          We need to filter out unwanted extra newEval ops
+          When viewing, we get one extra and make sure the version is higher
+          than the last. With colab, we dont get the version, but the extra
+          ops dont have a date field so we can ignore them
+          */
           let doFlash = false;
           const doExecute =
             (version > this.get("prevEvalReceived") && this.get("isViewer")) ||

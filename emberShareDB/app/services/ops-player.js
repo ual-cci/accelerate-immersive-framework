@@ -42,6 +42,7 @@ export default Service.extend({
           }
           else
           {
+            //Dont send if no date, unless first op
             send = currentOp.v < 2;
           }
           if(justSource && op.p[0] !== "source")
@@ -56,17 +57,14 @@ export default Service.extend({
           this.get("cs").log("skipping",currentOp.v)
         }
       })
-      //this.get("cs").log(this.get("ops").length, toSend.length)
       toSend.forEach((currentOp)=>{
         this.set("latestVersion", currentOp.v + 1)
         this.get("fromPlayer").push(currentOp)
         const index = this.get('ops').indexOf(currentOp);
-        this.get("cs").log("removing at",index)
         if (index > -1) {
           this.get('ops').splice(index, 1);
         }
       });
-      //this.get("cs").log(this.get("ops").length)
       resolve();
     });
   },
@@ -119,7 +117,6 @@ export default Service.extend({
           url:url,
           headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
-          this.get('cs').log(res)
           if(res) {
             this.set('ops', this.filterOps(res.data));
           }
