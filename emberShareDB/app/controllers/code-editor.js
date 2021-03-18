@@ -1165,7 +1165,9 @@ export default Controller.extend({
       this.set('isOwner', false);
       if(model.get('readOnly'))
       {
-        const isCollaborator = this.get("model.collaborators").includes(currentUserName)
+        const isCollaborator =
+          this.get("model.collaborators").includes(currentUserName) &&
+          this.get("model.isCollaborative");
         this.get('cs').log(this.get("model.collaborators"), currentUserName)
         this.get('cs').log("isCollaborator", isCollaborator)
         this.set('canEditSource', isCollaborator);
