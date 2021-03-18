@@ -15,14 +15,14 @@
             doubleClick=(action 'editToken' token)}}
         {{/each}}
         <div class="tooltip">
-          <span class="tooltiptext">Add Tag</span>
+          <span class="tooltiptext">{{placeholder}}</span>
           {{#if showInput}}
-            {{#bs-button tabIndex = "0" class = "add-file-button" id = "add-tag"
+            {{#bs-button tabIndex = "0" class = "add-file-button" id = addButtonId
               icon="glyphicon glyphicon-chevron-up"
               onClick=(action 'addPressed')}}
             {{/bs-button}}
           {{else}}
-            {{#bs-button tabIndex = "0" class = "add-file-button" id = "add-tag"
+            {{#bs-button tabIndex = "0" class = "add-file-button" id = addButtonId
               icon="glyphicon glyphicon-plus"
               onClick=(action 'addPressed')}}
             {{/bs-button}}

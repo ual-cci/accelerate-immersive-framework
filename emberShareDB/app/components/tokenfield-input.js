@@ -39,6 +39,9 @@ export default Component.extend({
     tokenfieldId: computed('elementId', function () {
         return `${this.elementId}-tokenfield`;
     }),
+    addButtonId: computed('elementId', function () {
+        return `${this.elementId}-add-btn`;
+    }),
 
     // State
     inputValue: null,
@@ -57,7 +60,7 @@ export default Component.extend({
 
     didUpdateAttrs() {
       this._super(...arguments);
-      const addBtn = document.getElementById("add-tag");
+      const addBtn = document.getElementById(this.get("addButtonId"));
       if (this.get('editable'))
       {
         addBtn.style.display = 'block';

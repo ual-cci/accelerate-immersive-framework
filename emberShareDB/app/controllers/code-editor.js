@@ -48,6 +48,7 @@ export default Controller.extend({
   showShare:false,
   showReadOnly:false,
   showRecordingPanel:false,
+  showColabOptions:false,
   showAssets:false,
   showPreview:false,
   showSettings:false,
@@ -1532,6 +1533,16 @@ export default Controller.extend({
     },
 
     //DOC PROPERTIES
+    collaboratorsChanged(users) {
+      this.get('documentService').updateDoc(this.get('model').id, 'collaborators', users)
+      .catch((err)=>{
+        this.get('cs').log('error updating doc', err);
+      });
+    },
+    searchCollaborator(user) {
+      this.get('cs').log("search Collaborator", user)
+      this.transitionToRoute('documents', user, 0, "views");
+    },
     tagsChanged(tags) {
       this.get('documentService').updateDoc(this.get('model').id, 'tags', tags)
       .catch((err)=>{

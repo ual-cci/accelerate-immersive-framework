@@ -158,6 +158,7 @@
         {{input tabIndex = "0" type="checkbox" checked=model.isCollaborative click=(action 'toggleCollaborative')}}
         <span class="tooltiptext">COLLABORATIVE EDITTING</span>
       </div>
+
       {{/if}}
       {{#if canEditSource}}
         <div class="tooltip">
@@ -203,15 +204,31 @@
     </div>
   {{/if}}
   {{#if mediaQueries.isDesktop}}
-    {{tokenfield-input
-      tokens=model.tags
-      allowDuplicates=false
-      placeholder="Enter Tags"
-      editable=canEditSettings
-      searchTag=(action 'searchTag')
-      tokensChanged=(action 'tagsChanged')
-      inputToggled=(action 'syncOutputContainer')
-    }}
+    {{#if showSettings}}
+    {{#if model.isCollaborative}}
+      {{tokenfield-input
+        elementId="collaborators"
+        tokens=model.collaborators
+        allowDuplicates=false
+        placeholder="Enter Collaborators"
+        editable=canEditSettings
+        searchTag=(action 'searchCollaborator')
+        tokensChanged=(action 'collaboratorsChanged')
+        inputToggled=(action 'syncOutputContainer')
+      }}
+    {{/if}}
+    {{else}}
+      {{tokenfield-input
+        tokens=model.tags
+        elementId="tags"
+        allowDuplicates=false
+        placeholder="Enter Tags"
+        editable=canEditSettings
+        searchTag=(action 'searchTag')
+        tokensChanged=(action 'tagsChanged')
+        inputToggled=(action 'syncOutputContainer')
+      }}
+    {{/if}}
   {{/if}}
   {{/if}}
   </div>
