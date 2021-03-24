@@ -232,7 +232,7 @@ export default Controller.extend({
       this.get('cs').observers.push(this);
     }, 50)
   },
-  initWebSockets: function() {
+  initWebSockets: function(onSelectDoc) {
     let socket = this.get('socket');
     this.get('cs').log("init websockets", socket);
     if(!isEmpty(socket) && socket.state == 1)
@@ -262,7 +262,11 @@ export default Controller.extend({
             if(!this.get('fetchingDoc'))
             {
               this.get("cs").log("selectRootDoc","websockets")
-              this.selectRootDoc();
+              this.selectRootDoc().then(()=> {
+                if(onSelectDoc) {
+                  onSelectDoc();
+                }
+              });
             }
           }
         };
@@ -454,6 +458,20 @@ export default Controller.extend({
       });
     })
   },
+  reloadDoc: function() {
+    const scrollPos = this.get('editor').getCursor(true);
+    this.get('cs').log(scrollPos)
+    this.get("editor").focus()
+    var scrollInfo = this.get("editor").getScrollInfo();
+    this.cleanUpConnections().then(()=>{
+      this.initWebSockets(()=>{
+        this.get("editor").focus()
+        this.get("cs").log("scrolling cur", scrollPos.line, scrollPos.ch)
+        this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
+        this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
+      });
+    })
+  },
   setLanguage: function() {
     const editor = this.get('editor');
     const doc = this.get('currentDoc');
@@ -629,7 +647,7 @@ export default Controller.extend({
     }
     if(ops.length > 0 && canReceiveOp())
     {
-      //this.get("cs").log("didReceiveOp",ops[0].p[0] )
+      this.get("cs").log("didReceiveOp",ops[0].p[0] )
       if(!source && ops[0].p[0] === "source")
       {
         this.set('surpress', true);
@@ -642,7 +660,7 @@ export default Controller.extend({
         afterHistory.done = afterHistory.done.slice(0, prevHistory.done.length)
         editor.doc.setHistory(afterHistory);
         this.set('surpress', false);
-        //this.newCursor(ops[0]);
+        this.newCursor(ops[0]);
       }
       else if (ops[0].p[0] == "assets")
       {
@@ -709,26 +727,17 @@ export default Controller.extend({
   submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-      let droppedOps = this.get('droppedOps');
-      //let droppedOps = [1,2,3]
-      //this.get('cs').log("Submitting op", op)
-      if(droppedOps.length > 0) {
-        this.set('droppedOps', droppedOps.push(op));
-        reject();
-        return;
-      }
 
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        //this.get('cs').log("Submitting op on ws")
         try
         {
+          this.get('cs').log("Submitting op on ws")
           sharedDBDoc.submitOp(op, (err) => {
-            //this.get('cs').log("callback", err)
+            this.get('cs').log("callback", err)
             if(!isEmpty(err) && op.p[0] !== "trig")
             {
-              droppedOps.push(op);
               this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
               this.set('showConnectionWarning', true);
               this.get('cs').log("error submitting op (ws)", op)
@@ -744,9 +753,9 @@ export default Controller.extend({
         }
         catch (err)
         {
+          this.get('cs').log("catch", err)
           if(op.p[0] !== "trig")
           {
-            droppedOps.push(op);
             if(isEmpty(this.get('model.parent')))
             {
               this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
@@ -756,8 +765,10 @@ export default Controller.extend({
               this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
             }
 
-            this.set('showConnectionWarning', true);
+            //this.set('showConnectionWarning', true);
+            //;
 
+            this.reloadDoc();
             this.get('cs').log("error submitting op (ws)",err)
             reject(err);
           }
@@ -776,7 +787,6 @@ export default Controller.extend({
           return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
-          droppedOps.push(op);
           this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work");
           this.set('showConnectionWarning', true);
           reject(err);
@@ -839,7 +849,7 @@ export default Controller.extend({
         if(serverSource !== localSource)
         {
           this.set("surpress", true);
-          this.get('cs').log("updating edirot")
+          this.get('cs').log("updating editor")
           const scrollPos = this.get('editor').getCursor(true);
           this.get('cs').log(scrollPos)
           this.get("editor").focus()
