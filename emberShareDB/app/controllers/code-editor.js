@@ -400,6 +400,11 @@ export default Controller.extend({
             const doc = this.get('currentDoc');
             if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
               this.get('cs').log("setting update source interval")
+              if(!isEmpty(this.get("updateSourceInterval")))
+              {
+                clearInterval(this.get("updateSourceInterval"));
+                this.set("updateSourceInterval", null)
+              }
               this.set('updateSourceInterval', setInterval(()=>{
                 this.updateSessionFromSource();
               }, this.get('updateSourceRate')));
