@@ -458,17 +458,69 @@ export default Controller.extend({
       });
     })
   },
+  //A check to see if we have drifted or lost ops, resyncs if necessary
+  updateSessionFromSource: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('currentDoc');
+      this.get('documentService').getSource(doc.id).then((serverSource)=>{
+        const localSource = this.get('editor').getValue();
+        if(serverSource !== localSource)
+        {
+          this.set("surpress", true);
+          const scrollPos = this.get('editor').getCursor(true);
+          this.get("editor").focus()
+          var scrollInfo = this.get("editor").getScrollInfo();
+          this.get("editor").setValue(serverSource);
+          this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
+          this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
+          this.set("surpress", false);
+          this.get('cs').log("local code out of sync with server");
+        }
+        else
+        {
+          this.get('cs').log("local code is in sync");
+        }
+      })
+    });
+  },
+  updateSourceFromSession: function() {
+    return new RSVP.Promise((resolve, reject) => {
+      const doc = this.get('currentDoc');
+      if(!isEmpty(doc) && this.get('droppedOps').length == 0)
+      {
+        const source = this.get('editor').getValue();
+        //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
+        //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
+        const actions = [
+          this.get('documentService').updateDoc(doc.id, "source", source),
+        ];
+        Promise.all(actions)
+        .then(()=>resolve())
+        .catch((err)=>{
+          this.get('cs').log("error updateSourceFromSession - updateDoc", err);
+          reject(err);
+        });
+      }
+      else
+      {
+          resolve();
+      }
+    });
+  },
   reloadDoc: function() {
     const scrollPos = this.get('editor').getCursor(true);
-    this.get('cs').log(scrollPos)
-    this.get("editor").focus()
+    const editor = this.get("editor");
+    this.get('cs').log("reloading doc");
+    editor.options.readOnly = true;
+    editor.focus()
     var scrollInfo = this.get("editor").getScrollInfo();
     this.cleanUpConnections().then(()=>{
       this.initWebSockets(()=>{
-        this.get("editor").focus()
+        editor.focus()
         this.get("cs").log("scrolling cur", scrollPos.line, scrollPos.ch)
-        this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
-        this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
+        editor.scrollTo(scrollInfo.left, scrollInfo.top);
+        editor.setCursor({line:scrollPos.line, ch:scrollPos.ch})
+        editor.options.readOnly = !this.get('canEditSource');
       });
     })
   },
@@ -647,7 +699,7 @@ export default Controller.extend({
     }
     if(ops.length > 0 && canReceiveOp())
     {
-      this.get("cs").log("didReceiveOp",ops[0].p[0] )
+      //this.get("cs").log("didReceiveOp",ops[0].p[0] )
       if(!source && ops[0].p[0] === "source")
       {
         this.set('surpress', true);
@@ -733,9 +785,9 @@ export default Controller.extend({
         const sharedDBDoc = this.get('sharedDBDoc');
         try
         {
-          this.get('cs').log("Submitting op on ws")
+          //this.get('cs').log("Submitting op on ws")
           sharedDBDoc.submitOp(op, (err) => {
-            this.get('cs').log("callback", err)
+            //this.get('cs').log("callback", err)
             if(!isEmpty(err) && op.p[0] !== "trig")
             {
               this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
@@ -766,7 +818,6 @@ export default Controller.extend({
             }
 
             //this.set('showConnectionWarning', true);
-            //;
 
             this.reloadDoc();
             this.get('cs').log("error submitting op (ws)",err)
@@ -840,53 +891,7 @@ export default Controller.extend({
     }
     return selection;
   },
-  //A check to see if we have drifted or lost ops, resyncs if necessary
-  updateSessionFromSource: function() {
-    return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('currentDoc');
-      this.get('documentService').getSource(doc.id).then((serverSource)=>{
-        const localSource = this.get('editor').getValue();
-        if(serverSource !== localSource)
-        {
-          this.set("surpress", true);
-          this.get('cs').log("updating editor")
-          const scrollPos = this.get('editor').getCursor(true);
-          this.get('cs').log(scrollPos)
-          this.get("editor").focus()
-          var scrollInfo = this.get("editor").getScrollInfo();
-          this.get("cs").log("updateSessionFromSource")
-          this.get("editor").setValue(serverSource);
-          this.get("editor").scrollTo(scrollInfo.left, scrollInfo.top);
-          this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
-          this.set("surpress", false);
-        }
-      })
-    });
-  },
-  updateSourceFromSession: function() {
-    return new RSVP.Promise((resolve, reject) => {
-      const doc = this.get('currentDoc');
-      if(!isEmpty(doc) && this.get('droppedOps').length == 0)
-      {
-        const source = this.get('editor').getValue();
-        //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
-        //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
-        const actions = [
-          this.get('documentService').updateDoc(doc.id, "source", source),
-        ];
-        Promise.all(actions)
-        .then(()=>resolve())
-        .catch((err)=>{
-          this.get('cs').log("error updateSourceFromSession - updateDoc", err);
-          reject(err);
-        });
-      }
-      else
-      {
-          resolve();
-      }
-    });
-  },
+
   updateIFrame: function(selection = false) {
     this.updateSourceFromSession().then(()=> {
       this.fetchChildren().then(()=> {
