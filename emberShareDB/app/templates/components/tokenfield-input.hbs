@@ -4,7 +4,7 @@
         {{#if hasTokens}}
           <div></div>
         {{else}}
-          <p class = "tokenfield-label">&lt;&mdash;{{placeholder}}</p>
+          <p id = {{labelId}} class = "tokenfield-label">&lt;&mdash;{{placeholder}}</p>
         {{/if}}
         {{#each tokens as |token index|}}
             {{component tokenComponent

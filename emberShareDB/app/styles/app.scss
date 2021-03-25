@@ -1134,6 +1134,10 @@ input[id="docName"]:-ms-input-placeholder {
 .uncharted-token-input:focus {
 }
 
+#tags-token-label {
+  visibility: hidden;
+}
+
 #collaborators.uncharted-tokenfield-input {
   border:3px solid $mimic-yellow;
 }

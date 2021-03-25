@@ -42,6 +42,9 @@ export default Component.extend({
     addButtonId: computed('elementId', function () {
         return `${this.elementId}-add-btn`;
     }),
+    labelId: computed('elementId', function () {
+        return `${this.elementId}-token-label`;
+    }),
 
     // State
     inputValue: null,
