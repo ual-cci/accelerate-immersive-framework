@@ -146,6 +146,7 @@ export default Service.extend({
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         this.get('cs').log('deleting doc : ' + doc.parent ? "parent" : "child");
+        this.get("cs").log(doc.assets)
         let actions = doc.assets.map((a)=>{return this.get('assetService').deleteAsset(a.name, docId)});
         actions.concat(doc.children.map((c)=>this.deleteDoc(c)));
         Promise.all(actions).then(()=> {

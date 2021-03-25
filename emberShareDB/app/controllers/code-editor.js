@@ -724,13 +724,18 @@ export default Controller.extend({
         this.set('surpress', false);
         this.newCursor(ops[0]);
       }
-      else if (ops[0].p[0] == "assets")
+      else if (ops[0].p[0] == "assetsUpdated")
       {
-        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-          toChange.set('assets',ops[0].oi);
-        });
-        this.get('cs').log("didReceiveOp", "preloadAssets")
-        this.preloadAssets();
+        this.get("cs").log(ops[0].oi)
+        if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
+        {
+          this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+            toChange.set('assets',ops[0].oi.assets);
+            this.get('cs').log("didReceiveOp", "preloadAssets")
+            this.preloadAssets();
+          });
+
+        }
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
@@ -1514,6 +1519,20 @@ export default Controller.extend({
     //this.transitionToRoute("code-editor", this.get("model.id"))
     //this.transitionToRoute("about")
   },
+  alertAssetsUpdated(newAssets) {
+    const toSend = {
+      uuid:this.get('sessionAccount').getSessionID(),
+      assets:newAssets
+    }
+    let op = {
+      p:["assetsUpdated"],
+      oi:toSend,
+      date:new Date().getTime()
+    }
+    this.submitOp(op).catch((err)=>{
+      this.get('cs').log('error updating doc', err);
+    });
+  },
   actions: {
 
     //codemirror
@@ -1679,7 +1698,9 @@ export default Controller.extend({
         this.get('documentService').updateDoc(doc.id, "assets", newAssets),
         this.get('documentService').updateDoc(doc.id, "assetQuota", e.size + doc.get('assetQuota'))
       ];
+
       Promise.all(actions).then(()=>{
+        this.alertAssetsUpdated(newAssets);
         if(!this.get('wsAvailable'))
         {
           this.refreshDoc();
@@ -1713,6 +1734,7 @@ export default Controller.extend({
               this.get('documentService').updateDoc(doc.id, "assetQuota", totalSize)
             ];
             Promise.all(actions).then(()=>{
+              this.alertAssetsUpdated(newAssets);
               if(!this.get('wsAvailable'))
               {
                 this.refreshDoc();
