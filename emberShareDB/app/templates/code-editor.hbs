@@ -205,18 +205,20 @@
   {{/if}}
   {{#if mediaQueries.isDesktop}}
     {{#if showSettings}}
-    {{#if model.isCollaborative}}
-      {{tokenfield-input
-        elementId="collaborators"
-        tokens=model.collaborators
-        allowDuplicates=false
-        placeholder="Enter Collaborators"
-        editable=canEditSettings
-        searchTag=(action 'searchCollaborator')
-        tokensChanged=(action 'collaboratorsChanged')
-        inputToggled=(action 'syncOutputContainer')
-      }}
-    {{/if}}
+      {{#if model.isCollaborative}}
+        {{#if canEditSettings}}
+          {{tokenfield-input
+            elementId="collaborators"
+            tokens=model.collaborators
+            allowDuplicates=false
+            placeholder="Enter Collaborators"
+            editable=canEditSettings
+            searchTag=(action 'searchCollaborator')
+            tokensChanged=(action 'collaboratorsChanged')
+            inputToggled=(action 'syncOutputContainer')
+          }}
+        {{/if}}
+      {{/if}}
     {{else}}
       {{tokenfield-input
         tokens=model.tags

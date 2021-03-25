@@ -248,7 +248,12 @@ export default Controller.extend({
     else
     {
       try {
-        socket = new ReconnectingWebSocket(config.wsHost)
+        let url = this.get("model.isCollaborative") ? config.colabWsHost:config.wsHost;
+        if(isEmpty(url)) {
+          url = config.wsHost;
+        }
+        this.get("cs").log("connecting to", url);
+        socket = new ReconnectingWebSocket(url);
         this.set('socket', socket);
         socket.onopen = () => {
           console.log("web socket open");
