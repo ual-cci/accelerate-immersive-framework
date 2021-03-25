@@ -1,6 +1,11 @@
 <div class="uncharted-form-control">
     <div class="uncharted-token-main-container">
       <div class="uncharted-token-container">
+        {{#if hasTokens}}
+          <div></div>
+        {{else}}
+          <p class = "tokenfield-label">&lt;&mdash;{{placeholder}}</p>
+        {{/if}}
         {{#each tokens as |token index|}}
             {{component tokenComponent
             token=token

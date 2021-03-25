@@ -1134,6 +1134,24 @@ input[id="docName"]:-ms-input-placeholder {
 .uncharted-token-input:focus {
 }
 
+#collaborators.uncharted-tokenfield-input {
+  border:3px solid $mimic-yellow;
+}
+
+.orange-checkbox {
+  color:$mimic-yellow!important;
+}
+
+.tokenfield-label {
+  width: 200px;
+  text-align: center;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -10px 0 0 -100px;
+}
+
 .uncharted-token-input {
   padding-left:10px;
   margin: 10px 10px 10px 10px;
@@ -1182,6 +1200,7 @@ input[id="docName"]:-ms-input-placeholder {
 .uncharted-token-container {
   background-color: #e6e6e6;
   height:auto;
+  position:relative;
 }
 
 #add-tag.add-file-button

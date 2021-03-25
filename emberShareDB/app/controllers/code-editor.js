@@ -1777,6 +1777,14 @@ export default Controller.extend({
       {
         let model = this.get('model');
         model.set('isCollaborative', !model.get('isCollaborative'));
+        const checkbox = document.getElementById("colab-checkbox")
+        if(model.get('isCollaborative'))
+        {
+          checkbox.classList.add("orange-checkbox");
+        }
+        else {
+          checkbox.classList.remove("orange-checkbox");
+        }
         this.get('documentService').updateDoc(model.id, 'isCollaborative', model.get('isCollaborative'))
         .catch((err)=>{
           this.get('cs').log('error updating doc', err);
