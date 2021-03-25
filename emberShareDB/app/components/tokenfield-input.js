@@ -64,14 +64,18 @@ export default Component.extend({
     didUpdateAttrs() {
       this._super(...arguments);
       const addBtn = document.getElementById(this.get("addButtonId"));
-      if (this.get('editable'))
+      if(!isEmpty(addBtn))
       {
-        addBtn.style.display = 'block';
+        if (this.get('editable'))
+        {
+          addBtn.style.display = 'block';
+        }
+        else
+        {
+          addBtn.style.display = 'none';
+        }
       }
-      else
-      {
-        addBtn.style.display = 'none';
-      }
+
     },
 
     didInsertElement() {
