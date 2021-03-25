@@ -2,6 +2,7 @@ const ShareDB = require('sharedb');
 const WebSocket = require('ws');
 const WebSocketJSONStream = require('@teamwork/websocket-json-stream')
 const mongo = require('mongodb');
+const MongoClient = require('mongodb').MongoClient;
 const multiparty = require('connect-multiparty')();
 const fs = require('fs');
 const Gridfs = require('gridfs-stream');
@@ -36,16 +37,17 @@ var initDocAPI = function(
       disableDocAction: true,
       disableSpaceDelimitedActions: true,
   }
-  if(redisConfig !== undefined) {
-    // console.log("adding redis pubsub")
-    // const redis = require("redis");
-    // const client = redis.createClient(
-    //   redisConfig.redis_port,redisConfig.redis_ip, {
-    //   'auth_pass': redisConfig.redis_key,
-    //   'return_buffers': true
-    // }).on('error', (err) => console.error('ERR:REDIS:', err));
-    // shareDBOptions.pubsub = require('sharedb-redis-pubsub')({client: client});
-  }
+  //if(redisConfig !== undefined) {
+  // console.log("adding redis pubsub")
+  // const redis = require("redis");
+  // redis_url = "rediss://:p8675a0cd06be217162483e565adcb66769d52489c23e7b89e0f05421f90ea27a@ec2-54-72-159-57.eu-west-1.compute.amazonaws.com:13290"
+  // const client = redis.createClient(redis_url, {
+  //   tls: {
+  //       rejectUnauthorized: false
+  //   }
+  // });
+  // console.log(client)
+  //shareDBOptions.pubsub = require('sharedb-redis-pubsub')({client: client});
   shareDB = new ShareDB(shareDBOptions);
   shareDBConnection = shareDB.connect();
 
@@ -62,10 +64,12 @@ function handleError(err)
 
 function startAssetAPI(server, app)
 {
-  documentMongo = mongo.MongoClient.connect(mongoUri, function(err, client) {
+  const client = new MongoClient(mongoUri, {useNewUrlParser:true, useUnifiedTopology:true});
+
+  client.connect(err => {
     if(err)
     {
-      console.log("DOCUMENT MODEL - error connecting to database", err);
+      console.log("DOCUMENT MODEL 1 - error connecting to database", err);
     }
     else
     {
@@ -147,38 +151,6 @@ function startAssetAPI(server, app)
         });
       });
 
-      // app.post('/assetWithURL', app.oauth.authenticate(), function(req,res) {
-      //   console.log("assetWITHURL", req.body)
-      //   const mimetype = req.body.mimetype;
-      //   const name = req.body.name;
-      //   const url = req.body.url;
-      //   var writestream = gridFS.createWriteStream({
-      //     filename: name,
-      //     mode: 'w',
-      //     content_type: mimetype,
-      //   });
-      //
-      //   http.get(url, response => {
-      //     console.log('got resource', response.body)
-      //     var stream = response.pipe(writestream);
-      //     writestream.on('close', function(file) {
-      //       const content_type = mimetype;
-      //       const newAsset = {
-      //         name:name,
-      //         fileId:file._id,
-      //         fileType:content_type,
-      //         size:file.length
-      //       };
-      //       console.log('success uploading asset', file.length);
-      //       res.status(200);
-      //       res.json(newAsset);
-      //       fs.unlink(url, function(err) {
-      //          console.log('success!')
-      //        });
-      //     });
-      //   });
-      // });
-
       app.get('/asset/:docid/:filename', function(req, res) {
         var doc = shareDBConnection.get(contentCollectionName, req.params.docid);
         doc.fetch(function(err) {
@@ -242,7 +214,10 @@ function startAssetAPI(server, app)
         });
       });
     }
+
   });
+
+
 }
 
 function canDeleteAsset(db, docId, asset) {
@@ -403,7 +378,7 @@ function startDocAPI(app)
     const query = {
       $and: [searchTermOr,
              {parent: null},
-             { children : { $exists : true } },
+             {children : { $exists : true } },
              {$or: [{ownerId: currentUser}, {isPrivate: false}]}
            ],
       $sort: s,
@@ -534,12 +509,35 @@ function startDocAPI(app)
     });
   });
 
-  app.get('/documents/ops/:id', app.oauth.authenticate(),(req,res) => {
-    //console.log("fetching ops for", contentCollectionName, req.params.id);
+  //from date provided in milliseconds since epoch UTC (e.g. new Date.getTime())
+  //version number also used as from indicator to filter results
+  app.get('/documents/ops/:id',(req,res) => {
+    let date = parseInt(req.query.date)
+    if(!date) {
+      date = 0
+    }
+    let version
+    if(req.query.version) {
+      version = parseInt(req.query.version)
+    }
+    console.log("fetching ops for", contentCollectionName, req.params.id, version);
+
+    //Only return ops past a certain date
     const callback = function (err, results) {
-      res.status(200).send({data:results});
+      results = results.filter(op => {
+        if(op.op) {
+          if(op.op[0].date) {
+            return op.op[0].date > date
+          }
+        }
+        return true;
+      });
+      const code = results.length > 0 ? 200:204;
+      let toSend = {data:results}
+      console.log("sending", toSend);
+      res.status(code).send(toSend);
     };
-    shareDBMongo.getOps(contentCollectionName, req.params.id, null, null, {}, callback);
+    shareDBMongo.getOps(contentCollectionName, req.params.id, version, null,{},callback);
   });
 
   app.options('/documents', (req,res) => {
@@ -725,6 +723,7 @@ function createDoc(attr) {
             dontPlay:false,
             isCollaborative:false,
             children:[],
+            collaborators:[],
             parent:attr.parent,
             type:attr.parent ? null : "html",
             assetQuota:attr.assetQuota ? attr.assetQuota : 0
@@ -732,6 +731,7 @@ function createDoc(attr) {
             let op = {};
             op.p = ['source',0];
             op.si = attr.source;
+            op.date = new Date().getTime();
             doc.submitOp(op);
             resolve(doc);
             return;
@@ -747,76 +747,76 @@ function createDoc(attr) {
 }
 
 /////helpers
-
-const dropDocs = () => {
-  return new Promise((resolve, reject) => {
-    mongo.MongoClient.connect(mongoUri, function(err, client) {
-      if(err)
-      {
-        console.log("DOCUMENT MODEL - error connecting to database", err);
-      }
-      else
-      {
-        console.log("Connected successfully to mongo");
-        docDB = client.db(contentDBName);
-        docDB.collection(contentCollectionName).drop();
-      }
-    });
-  });
-}
-
-const dropAssets = () => {
-  return new Promise((resolve, reject) => {
-    mongo.MongoClient.connect(mongoUri, function(err, client) {
-      if(err)
-      {
-        console.log("DOCUMENT MODEL - error connecting to database", err);
-      }
-      else
-      {
-        console.log("Connected successfully to mongo");
-        docDB = client.db(contentDBName);
-        docDB.collection('fs.chunks').drop();
-        docDB.collection('fs.files').drop();
-      }
-    });
-  });
-}
-
-const removeDocs = (ids) =>
-{
-  console.log("removing docs",ids);
-  return new Promise((resolve, reject) => {
-    mongo.MongoClient.connect(mongoUri, function(err, client) {
-      if(err)
-      {
-        console.log("DOCUMENT MODEL - error connecting to database", err);
-      }
-      else
-      {
-        console.log("Connected successfully to mongo");
-        docDB = client.db(contentDBName);
-        docDB.collection(contentCollectionName).deleteMany({ _id: { $in: ids } }, function(err, obj) {
-          console.log(err, obj.result)
-          if (err) {
-            reject(err)
-          } else  {
-            resolve();
-          }
-          docDB.close();
-        });
-      }
-    });
-  });
-}
+//
+// const dropDocs = () => {
+//   return new Promise((resolve, reject) => {
+//     mongo.MongoClient.connect(mongoUri, function(err, client) {
+//       if(err)
+//       {
+//         console.log("DOCUMENT MODEL - error connecting to database", err);
+//       }
+//       else
+//       {
+//         console.log("Connected successfully to mongo");
+//         docDB = client.db(contentDBName);
+//         docDB.collection(contentCollectionName).drop();
+//       }
+//     });
+//   });
+// }
+//
+// const dropAssets = () => {
+//   return new Promise((resolve, reject) => {
+//     mongo.MongoClient.connect(mongoUri, function(err, client) {
+//       if(err)
+//       {
+//         console.log("DOCUMENT MODEL - error connecting to database", err);
+//       }
+//       else
+//       {
+//         console.log("Connected successfully to mongo");
+//         docDB = client.db(contentDBName);
+//         docDB.collection('fs.chunks').drop();
+//         docDB.collection('fs.files').drop();
+//       }
+//     });
+//   });
+// }
+//
+// const removeDocs = (ids) =>
+// {
+//   console.log("removing docs",ids);
+//   return new Promise((resolve, reject) => {
+//     mongo.MongoClient.connect(mongoUri, function(err, client) {
+//       if(err)
+//       {
+//         console.log("DOCUMENT MODEL - error connecting to database", err);
+//       }
+//       else
+//       {
+//         console.log("Connected successfully to mongo");
+//         docDB = client.db(contentDBName);
+//         docDB.collection(contentCollectionName).deleteMany({ _id: { $in: ids } }, function(err, obj) {
+//           console.log(err, obj.result)
+//           if (err) {
+//             reject(err)
+//           } else  {
+//             resolve();
+//           }
+//           docDB.close();
+//         });
+//       }
+//     });
+//   });
+// }
 
 module.exports = {
   initDocAPI:initDocAPI
 }
 
-if(process.env.NODE_ENV == "test") {
-  module.exports.dropDocs = dropDocs,
-  module.exports.createDoc = createDoc,
-  module.exports.removeDocs = removeDocs,
-  module.exports.dropAssets = dropAssets
-}
+// if(process.env.NODE_ENV == "test") {
+//   module.exports.dropDocs = dropDocs,
+//   module.exports.createDoc = createDoc,
+//   module.exports.removeDocs = removeDocs,
+//   module.exports.dropAssets = dropAssets
+// }

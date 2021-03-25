@@ -102,6 +102,7 @@ model.getUser = function(username, password) {
       bcrypt.compare(password, hash).then((res) => {
         if(res)
         {
+          console.log("passwords match")
           resolve(user);
 					return;
         }
@@ -164,7 +165,7 @@ function startAuthAPI(app)
   app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
   app.use(bodyParser.json());
 
-  mongoose.connect(mongoUri, { useMongoClient: true }, function(err, res) {
+  mongoose.connect(mongoUri, function(err, res) {
     if (err) {
       return console.error('USER MODEL - Error connecting to "%s":', mongoUri, err);
     }

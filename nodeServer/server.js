@@ -4,7 +4,7 @@ var userAPI = require('./user-model.js');
 var docAPI = require('./document-model.js');
 var guid = require('./uuid.js');
 var cors = require('express-cors');
-var config = require('./config.js');
+
 var bodyParser = require('body-parser');
 const app = express();
 
@@ -42,18 +42,25 @@ function startServer()
     res.send(200);
   });
 
-  let contentDBName = config.contentDBName;
-  let oauthDBName = config.oauthDBName;
-  const contentCollectionName = config.contentCollectionName;
+  var config = {};
+
+  try {
+    config = require('./config.js');
+  } catch {
+    console.log("no config file")
+  }
+
+  let contentDBName = config.contentDBName || "cc3_dev_content";
+  let oauthDBName = config.oauthDBName || "cc3_dev_oauth";
+  const contentCollectionName = config.contentCollectionName || "docs";
   const replicaSet = config.replicaSet;
   const mongoUser = config.mongoUser;
   const mongoPassword = config.mongoPassword;
 
-  let mongoContentUri = "";
-  let mongoUserUri = "";
   let redis;
-  console.log("NODE_ENV", process.env.NODE_ENV)
-  if(process.env.NODE_ENV === "local" || process.env.NODE_ENV == "test")
+  var environment = process.env.NODE_ENV 
+  console.log("NODE_ENV", environment)
+  if(environment === "local" || environment == "test")
   {
     console.log("setting local/test env");
     contentDBName = process.env.NODE_ENV == "test" ? config.test_contentDBName:contentDBName;
@@ -63,7 +70,7 @@ function startServer()
     mongoContentUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +contentDBName;
     mongoUserUri = 'mongodb://' + mongoIP + ':' + mongoPort + '/' +oauthDBName;
   }
-  else if (process.env.NODE_ENV === "development")
+  else if (environment === "development")
   {
     console.log("setting development env");
     const mongoIP = config.development_mongoIP;
@@ -81,25 +88,32 @@ function startServer()
     }
     console.log(mongoContentUri, mongoUserUri)
   }
-  else if(process.env.NODE_ENV === "production")
+  else if(environment === "heroku" || process.env.heroku_mongoUser)
+  {
+    console.log("setting heroku env");
+
+    const mongoUser = process.env.heroku_mongoUser || config.heroku_mongoUser;
+    const mongoPassword = process.env.heroku_mongoPassword || config.heroku_mongoPassword;
+    let uri = "mongodb+srv://"+mongoUser+":"+mongoPassword+"@cluster0.rvdi2.mongodb.net/"
+    mongoContentUri = uri+contentDBName;
+    mongoUserUri = uri+oauthDBName;
+    console.log(mongoContentUri, mongoUserUri)
+
+  }
+  else if(environment === "production")
   {
     console.log("setting production env");
-    const mongoIP = config.production_mongoIP;
-    const mongoPort = config.production_mongoPort;
-    const replicaSet = config.production_replicaSet;
-    const mongoUser = config.production_mongoUser;
-    const mongoPassword = config.production_mongoPassword;
-    const ip1 = config.production_mongoIP1;
-    const ip2 = config.production_mongoIP2;
+    const mongoIP =  process.env.production_mongoIP || config.production_mongoIP;
+    const mongoPort = process.env.production_mongoPort || config.production_mongoPort;
+    const replicaSet = process.env.production_replicaSet || config.production_replicaSet;
+    const mongoUser = process.env.production_mongoUser ||config.production_mongoUser;
+    const mongoPassword = process.env.production_mongoPassword || config.production_mongoPassword;
+    const ip1 = process.env.production_mongoIP1 || config.production_mongoIP1;
+    const ip2 = process.env.production_mongoIP1 || config.production_mongoIP2;
     let uri = "mongodb://"+mongoUser+":"+mongoPassword+"@"+ip1+"0"+ip2+mongoPort;
     uri = uri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
     mongoContentUri = uri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
     mongoUserUri = uri + "/" + oauthDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";
-
-    // redis = {};
-    // redis.redis_port = config.redis_port;
-    // redis.redis_ip = config.redis_ip;
-    // redis.redis_key = config.redis_key;
 
   }
 
@@ -113,7 +127,7 @@ function startServer()
     contentDBName, contentCollectionName, mongoContentUri,
     redis
   );
-  console.log('server set up');
+  console.log('server set up', PORT);
 }
 
 module.exports = app; // for testing
