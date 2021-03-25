@@ -403,6 +403,10 @@ export default Controller.extend({
               this.set('model.isCollaborative', false);
             }
             const doc = this.get('currentDoc');
+            if(isEmpty(this.get("model.collaborators"))) {
+              this.set("model.collaborators", []);
+              this.get('documentService').updateDoc(doc.id, "collaborators", [])
+            }
             if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
               this.get('cs').log("setting update source interval")
               if(!isEmpty(this.get("updateSourceInterval")))
