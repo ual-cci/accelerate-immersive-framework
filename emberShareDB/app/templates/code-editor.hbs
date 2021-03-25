@@ -26,7 +26,7 @@
               class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
               <span class="tooltiptext">Render Code</span>
             </div>
-            {{#if isOwner}}
+            {{#if canEditSource}}
               <div class="tooltip">
                 {{#if showAssets}}
                   {{#bs-button (html-attributes aria-label="hide assets")

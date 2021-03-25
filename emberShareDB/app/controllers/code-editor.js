@@ -1690,7 +1690,7 @@ export default Controller.extend({
     },
     deleteAsset(asset)
     {
-      if(this.get('canEditSettings'))
+      if(this.get('canEditSource'))
       {
         if (confirm('Are you sure you want to delete?')) {
           this.get('cs').log("deleting asset", asset)
