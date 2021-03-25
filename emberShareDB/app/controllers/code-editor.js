@@ -173,15 +173,21 @@ export default Controller.extend({
       this.cleanUpOpPlayer();
       this.get('editor').setValue("");
       this.writeIframeContent("");
-      this.get("opsPlayer").startTimer(this.get("editor"))
-      this.set("viewerInterval", setInterval(()=>{
-        const playerOps = this.get("opsPlayer").getToSend();
-        if(playerOps.length > 0) {
-          playerOps.forEach((ops)=> {
-            this.didReceiveOp(ops.op, null, ops.v)
-          })
-        }
-      },100));
+      this.get("opsPlayer").startTimer(this.get("editor")).then(()=>{
+        let didClear = false;
+        this.set("viewerInterval", setInterval(()=>{
+          const playerOps = this.get("opsPlayer").getToSend();
+          if(playerOps.length > 0) {
+            playerOps.forEach((ops)=> {
+              this.didReceiveOp(ops.op, null, ops.v)
+            })
+          }
+          if(!didClear) {
+            this.clearCursors();
+            didClear = true;
+          }
+        },100));
+      })
     }
   },
   initShareDB: function() {
@@ -416,7 +422,10 @@ export default Controller.extend({
               this.set("model.collaborators", []);
               this.get('documentService').updateDoc(doc.id, "collaborators", [])
             }
-            if(this.get('updateSourceOnInterval') && this.get('model.isCollaborative')) {
+            if(this.get('updateSourceOnInterval') &&
+            this.get('model.isCollaborative') &&
+            !this.get("isViewer"))
+            {
               this.get('cs').log("setting update source interval")
               if(!isEmpty(this.get("updateSourceInterval")))
               {
@@ -673,6 +682,14 @@ export default Controller.extend({
         });
       }
     })
+  },
+  clearCursors() {
+    this.get("cs").log("clearing cursors");
+    const cursors = this.get('cursors');
+    Object.keys(cursors).forEach((c)=>{
+      this.get("cs").log("removing", cursors[c])
+      cursors[c].marker.clear();
+    });
   },
   newCursor(op) {
     //this.get("cs").log(op)

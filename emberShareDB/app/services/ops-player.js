@@ -72,26 +72,29 @@ export default Service.extend({
     });
   },
   startTimer(editor) {
-    this.set("latestVersion", 0);
-    this.set("ptr", 0);
-    this.loadOps(0).then(()=>{
-      const lag = 10000;
-      const interval = 100;
-      let now = new Date().getTime() - lag;
-      this.cleanUp()
-      let justSource = true;
-      this.executeUntil(now, true).then(()=> {
-        this.set("schedulerInteval",setInterval(()=>{
-          now = new Date().getTime() - lag;
-          this.executeUntil(now, justSource)
-        },interval))
-        this.set("updateOpsInterval",setInterval(()=>{
-          this.loadOps(this.get("latestVersion")).then(()=>{
-            justSource = false;
-          });
-        },lag))
-      });
-    })
+    return new RSVP.Promise((resolve, reject)=> {
+      this.set("latestVersion", 0);
+      this.set("ptr", 0);
+      this.loadOps(0).then(()=>{
+        const lag = 10000;
+        const interval = 100;
+        let now = new Date().getTime() - lag;
+        this.cleanUp()
+        let justSource = true;
+        this.executeUntil(now, true).then(()=> {
+          this.set("schedulerInteval",setInterval(()=>{
+            now = new Date().getTime() - lag;
+            this.executeUntil(now, justSource)
+          },interval))
+          this.set("updateOpsInterval",setInterval(()=>{
+            this.loadOps(this.get("latestVersion")).then(()=>{
+              justSource = false;
+            });
+          },lag))
+          resolve();
+        });
+      })
+    });
   },
   filterOps(allOps) {
     let sourceOps = []
