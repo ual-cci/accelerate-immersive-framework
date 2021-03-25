@@ -164,6 +164,13 @@ export default Controller.extend({
     }
     if(this.get("isViewer")) {
       this.get("cs").log("initViewer")
+      this.resetOpsPlayer();
+    }
+  },
+  resetOpsPlayer:function() {
+    if(this.get("isViewer"))
+    {
+      this.cleanUpOpPlayer();
       this.get('editor').setValue("");
       this.writeIframeContent("");
       this.get("opsPlayer").startTimer(this.get("editor"))
@@ -174,7 +181,7 @@ export default Controller.extend({
             this.didReceiveOp(ops.op, null, ops.v)
           })
         }
-      },100))
+      },100));
     }
   },
   initShareDB: function() {
@@ -302,7 +309,7 @@ export default Controller.extend({
   },
   cleanUpOpPlayer: function()
   {
-    this.set("isViewer",false);
+    //this.set("isViewer",false);
     this.set("prevEvalReceived", 0);
     this.get("opsPlayer").cleanUp();
     if(!isEmpty(this.get("viewerInterval"))) {
@@ -378,7 +385,9 @@ export default Controller.extend({
       {
         this.connectToDoc(docId).then((newDoc)=> {
           this.set('currentDoc', newDoc);
-          this.didReceiveDoc().then(()=>resolve()).catch((err)=>reject(err));
+          this.didReceiveDoc().then(()=>{
+            resolve();
+          }).catch((err)=>reject(err));
         }).catch((err)=>reject(err));
       }
 
@@ -666,6 +675,10 @@ export default Controller.extend({
     })
   },
   newCursor(op) {
+    //this.get("cs").log(op)
+    if(isEmpty(op.owner)) {
+      return
+    }
     const toUpdate = this.get('cursors')
     const prev = toUpdate[op.owner];
     const colours =["#ED3D05","#FFCE00","#0ED779","#F79994","#4D42EB"];
@@ -2093,6 +2106,7 @@ export default Controller.extend({
         {
           this.newDocSelected(docId).then(()=> {
             this.fetchChildren()
+            this.resetOpsPlayer();
           });
         }
       }).catch((err)=>{

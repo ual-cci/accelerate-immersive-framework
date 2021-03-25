@@ -29,34 +29,37 @@ export default Service.extend({
   executeUntil(time, justSource=false) {
     return new RSVP.Promise((resolve, reject) => {
       let toSend = [];
-      this.get("ops").forEach((currentOp)=>
+      if(!isEmpty(this.get("ops")))
       {
-        let send = false;
-        currentOp.op.forEach((op)=> {
-          if(op.date)
-          {
-            if(op.date < time)
+        this.get("ops").forEach((currentOp)=>
+        {
+          let send = false;
+          currentOp.op.forEach((op)=> {
+            if(op.date)
             {
-              send = true;
+              if(op.date < time)
+              {
+                send = true;
+              }
             }
-          }
-          else
-          {
-            //Dont send if no date, unless first op
-            send = currentOp.v < 2;
-          }
-          if(justSource && op.p[0] !== "source")
-          {
-            send = false;
+            else
+            {
+              //Dont send if no date, unless first op
+              send = currentOp.v < 2;
+            }
+            if(justSource && op.p[0] !== "source")
+            {
+              send = false;
+            }
+          })
+          if(send) {
+            this.get("cs").log("sending",currentOp.v,currentOp.op[0].p[0],justSource,currentOp.op[0])
+            toSend.push(currentOp)
+          } else {
+            //this.get("cs").log("skipping",currentOp.v)
           }
         })
-        if(send) {
-          this.get("cs").log("sending",currentOp.v,currentOp.op[0].p[0],justSource)
-          toSend.push(currentOp)
-        } else {
-          this.get("cs").log("skipping",currentOp.v)
-        }
-      })
+      }
       toSend.forEach((currentOp)=>{
         this.set("latestVersion", currentOp.v + 1)
         this.get("fromPlayer").push(currentOp)
@@ -133,6 +136,7 @@ export default Service.extend({
   },
   cleanUp() {
     this.get("cs").log("cleaned up op player")
+    this.set("latestVersion", 0);
     if(!isEmpty(this.get("schedulerInteval"))) {
       clearInterval(this.get("schedulerInteval"))
       this.set("schedulerInteval", null)
