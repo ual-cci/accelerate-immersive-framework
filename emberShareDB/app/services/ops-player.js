@@ -34,6 +34,7 @@ export default Service.extend({
         this.get("ops").forEach((currentOp)=>
         {
           let send = false;
+          //Docs made earlier than 20/3/21 wont work with this (no dates!)
           currentOp.op.forEach((op)=> {
             if(op.date)
             {
