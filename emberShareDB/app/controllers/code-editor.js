@@ -418,6 +418,11 @@ export default Controller.extend({
               this.set('model.isCollaborative', false);
             }
             const doc = this.get('currentDoc');
+            if(isEmpty(this.get("model.collaborators")))
+            {
+              this.set("model.collaborators", []);
+              this.get('documentService').updateDoc(doc.id, "collaborators", [])
+            }
 
             if(this.get('updateSourceOnInterval') &&
             this.get('model.isCollaborative') &&
@@ -738,6 +743,7 @@ export default Controller.extend({
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
+    this.get("cs").log("didReceiveOp",canReceiveOp())
     if(ops.length > 0 && canReceiveOp())
     {
       //this.get("cs").log("didReceiveOp",ops[0].p[0] )
@@ -1201,7 +1207,10 @@ export default Controller.extend({
   },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserId;
-    const currentUserName = this.get('sessionAccount').currentUserName;
+    let currentUserName = this.get('sessionAccount').currentUserName;
+    if(isEmpty(currentUserName)) {
+      currentUserName = "";
+    }
     let model = this.get('model');
     this.get('cs').log("setCanEditDoc")
     //If embedded, allow editting (ops dont get sent)
@@ -1228,14 +1237,10 @@ export default Controller.extend({
       {
         let isCollaborator = false;
         if(!isEmpty(this.get("model.collaborators"))) {
-          inList = this.get("model.collaborators").includes(currentUserName) &&
+          isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
                    this.get("model.isCollaborative");
         }
-        else
-        {
-          this.set("model.collaborators", []);
-          this.get('documentService').updateDoc(doc.id, "collaborators", [])
-        }
+
         this.get('cs').log(this.get("model.collaborators"), currentUserName);
         this.get('cs').log("isCollaborator", isCollaborator);
         this.set('canEditSource', isCollaborator);
@@ -1616,6 +1621,9 @@ export default Controller.extend({
     //DOC PROPERTIES
     collaboratorsChanged(users) {
       this.get('documentService').updateDoc(this.get('model').id, 'collaborators', users)
+      .then(()=>{
+        this.reloadDoc();
+      })
       .catch((err)=>{
         this.get('cs').log('error updating doc', err);
       });
