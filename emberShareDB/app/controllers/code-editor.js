@@ -418,10 +418,7 @@ export default Controller.extend({
               this.set('model.isCollaborative', false);
             }
             const doc = this.get('currentDoc');
-            if(isEmpty(this.get("model.collaborators"))) {
-              this.set("model.collaborators", []);
-              this.get('documentService').updateDoc(doc.id, "collaborators", [])
-            }
+
             if(this.get('updateSourceOnInterval') &&
             this.get('model.isCollaborative') &&
             !this.get("isViewer"))
@@ -1229,11 +1226,18 @@ export default Controller.extend({
       this.set('isOwner', false);
       if(model.get('readOnly'))
       {
-        const isCollaborator =
-          this.get("model.collaborators").includes(currentUserName) &&
-          this.get("model.isCollaborative");
-        this.get('cs').log(this.get("model.collaborators"), currentUserName)
-        this.get('cs').log("isCollaborator", isCollaborator)
+        let isCollaborator = false;
+        if(!isEmpty(this.get("model.collaborators"))) {
+          inList = this.get("model.collaborators").includes(currentUserName) &&
+                   this.get("model.isCollaborative");
+        }
+        else
+        {
+          this.set("model.collaborators", []);
+          this.get('documentService').updateDoc(doc.id, "collaborators", [])
+        }
+        this.get('cs').log(this.get("model.collaborators"), currentUserName);
+        this.get('cs').log("isCollaborator", isCollaborator);
         this.set('canEditSource', isCollaborator);
         this.set('canEditSettings', false);
         this.set('showReadOnly', !isCollaborator);
