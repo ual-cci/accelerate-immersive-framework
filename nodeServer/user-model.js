@@ -186,7 +186,7 @@ function startAuthAPI(app)
     const username = req.query.username.toLowerCase();
     console.log("find user", username);
     OAuthUsersModel.find({username:username}, function(err,users) {
-      console.log("returned user", users.length, err);
+      console.log("returned user", err);
 			if(users.length > 0 && !err)
 			{
         console.log("found user");

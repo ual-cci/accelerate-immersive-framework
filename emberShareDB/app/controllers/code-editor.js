@@ -75,6 +75,7 @@ export default Controller.extend({
   isMobile:false,
   iframeTitle:"title",
   prevEvalReceived:0,
+  gotFirstEval:false,
   updateSourceRate:30000,
   updateSourceOnInterval:true,
   updateSourceInterval:undefined,
@@ -317,6 +318,7 @@ export default Controller.extend({
   {
     //this.set("isViewer",false);
     this.set("prevEvalReceived", 0);
+    this.set("gotFirstEval", false);
     this.get("opsPlayer").cleanUp();
     if(!isEmpty(this.get("viewerInterval"))) {
       clearInterval(this.get("viewerInterval"))
@@ -776,22 +778,24 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
-        this.get('cs').log("newEval",version,ops);
+        this.get('cs').log("newEval",version,ops,this.get("prevEvalReceived"));
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           /*
           We need to filter out unwanted extra newEval ops
           When viewing, we get one extra and make sure the version is higher
-          than the last. With colab, we dont get the version, but the extra
-          ops dont have a date field so we can ignore them
+          than the last. With colab, we get an extra od field after the first time
           */
           let doFlash = false;
           const doExecute =
             (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
-            (this.get("model.isCollaborative") && ops[0].date)
+            (this.get("model.isCollaborative") && ops[0].od === undefined ||
+            (this.get("model.isCollaborative") && ops[0].od !== undefined && !this.get("gotFirstEval"))
+          )
           if(doExecute)
           {
             this.set('surpress', true);
+            this.set("gotFirstEval", true)
             try {
               console.log("executing", ops[0].oi.code)
               this.set('prevEvalReceived', version)
@@ -973,13 +977,14 @@ export default Controller.extend({
                 code:combined,
                 pos:pos
               }
-              console.log("sending op", toSend)
               this.set('evalPtr', this.get('evalPtr') + 1);
               let op = {
                 p:["newEval"],
                 oi:toSend,
                 date:new Date().getTime()
               }
+              console.log("sending op", op)
+
               this.submitOp(op).catch((err)=>{
                 this.get('cs').log('error updating doc', err);
               });
