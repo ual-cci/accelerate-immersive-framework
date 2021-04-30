@@ -158,15 +158,14 @@
         {{input tabIndex = "0" type="checkbox" checked=model.isCollaborative click=(action 'toggleCollaborative')}}
         <span class="tooltiptext">COLLABORATIVE EDITTING</span>
       </div>
-
       {{/if}}
-      {{#if canEditSource}}
-        <div class="tooltip">
-          <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-          {{input tabIndex = "0" type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-          <span class="tooltiptext">Render Code Whilst Typing</span>
-        </div>
-      {{/if}}
+    {{/if}}
+    {{#if canEditSource}}
+      <div class="tooltip">
+        <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
+        {{input tabIndex = "0" type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
+        <span class="tooltiptext">Render Code Whilst Typing</span>
+      </div>
     {{/if}}
   </div>
   {{/if}}

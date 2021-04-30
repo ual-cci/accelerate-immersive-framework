@@ -1864,6 +1864,9 @@ export default Controller.extend({
           checkbox.classList.remove("orange-checkbox");
         }
         this.get('documentService').updateDoc(model.id, 'isCollaborative', model.get('isCollaborative'))
+        .then(()=>{
+          this.reloadDoc();
+        })
         .catch((err)=>{
           this.get('cs').log('error updating doc', err);
         });
