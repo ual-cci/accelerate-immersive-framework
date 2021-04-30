@@ -778,7 +778,7 @@ export default Controller.extend({
       }
       else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
       {
-        this.get('cs').log("newEval",version,ops,this.get("prevEvalReceived"));
+        console.log("newEval",version,ops,this.get("prevEvalReceived"));
         if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
         {
           /*
@@ -789,8 +789,8 @@ export default Controller.extend({
           let doFlash = false;
           const doExecute =
             (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
-            (this.get("model.isCollaborative") && ops[0].od === undefined ||
-            (this.get("model.isCollaborative") && ops[0].od !== undefined && !this.get("gotFirstEval"))
+            (this.get("model.isCollaborative") && ops[0].od !== undefined ||
+            (this.get("model.isCollaborative") && ops[0].od === undefined && !this.get("gotFirstEval"))
           )
           if(doExecute)
           {
@@ -807,7 +807,7 @@ export default Controller.extend({
             }
             this.set('surpress', false);
           } else {
-            this.get("cs").log("recieved but skipped")
+            console.log("recieved but skipped")
           }
 
           if(doFlash && !isEmpty(ops[0].oi.pos))
