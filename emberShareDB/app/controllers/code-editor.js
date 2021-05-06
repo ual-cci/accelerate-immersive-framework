@@ -1225,6 +1225,7 @@ export default Controller.extend({
       this.set('isOwner', false);
       return
     }
+    //Noone signed in
     if(isEmpty(currentUser) || isEmpty(model))
     {
       this.get('cs').log("NO USER OR MODEL")
@@ -1234,28 +1235,34 @@ export default Controller.extend({
       this.set('isOwner', false);
       return;
     }
+    //Someone signed in but not the owner
     if(currentUser !== model.get('ownerId'))
     {
       this.get('cs').log("NOT OWNER")
       this.set('isOwner', false);
+      let isCollaborator = false;
+      if(!isEmpty(this.get("model.collaborators"))) {
+        isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
+                 this.get("model.isCollaborative");
+      }
+      this.get('cs').log(this.get("model.collaborators"), currentUserName);
+      this.get('cs').log("isCollaborator", isCollaborator);
+      this.set('canEditSettings', false);
+      //Not owner but read only
       if(model.get('readOnly'))
       {
-        let isCollaborator = false;
-        if(!isEmpty(this.get("model.collaborators"))) {
-          isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
-                   this.get("model.isCollaborative");
-        }
-
-        this.get('cs').log(this.get("model.collaborators"), currentUserName);
-        this.get('cs').log("isCollaborator", isCollaborator);
         this.set('canEditSource', isCollaborator);
-        this.set('canEditSettings', false);
         this.set('showReadOnly', !isCollaborator);
-        return;
+      } else {
+        //not owner by and not read only
+        this.set('canEditSource', true);
+        this.set('showReadOnly', false);
       }
+      return;
     }
     else
     {
+      //signed in and is the owner
       this.set('isOwner', true);
       this.set('canEditSource', true);
       this.set('canEditSettings', true);
@@ -1263,6 +1270,7 @@ export default Controller.extend({
       this.get('cs').log("IS OWNER")
       return;
     }
+    //Never gets here?
     this.get('cs').log("IS DESKTOP?", this.get('mediaQueries.isDesktop'))
     this.set('showReadOnly', false);
     if(!this.get('mediaQueries.isDesktop')) {
