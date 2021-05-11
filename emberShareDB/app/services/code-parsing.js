@@ -471,7 +471,7 @@ export default Service.extend({
           let asset = this.get('store').peekRecord('asset',fileId);
 
           //this.get('cs').log("replaceAssets",assets[i].size)
-          const useBase64 = !config.colabMode;
+          const useBase64 = true;
           //If file is media replace with base64
           if(this.get('assetService').isMedia(fileType) &&
              !this.get('assetService').isTooBig(assets[i].size)
