@@ -426,9 +426,8 @@ export default Controller.extend({
               this.get('documentService').updateDoc(doc.id, "collaborators", [])
             }
 
-            if(this.get('updateSourceOnInterval') &&
-            this.get('model.isCollaborative') &&
-            !this.get("isViewer"))
+            if(this.get('updateSourceOnInterval') && this.isCollaborator())
+            && !this.get("isViewer"))
             {
               this.get('cs').log("setting update source interval")
               if(!isEmpty(this.get("updateSourceInterval")))
@@ -1210,6 +1209,18 @@ export default Controller.extend({
     var textarea = document.getElementById('console');
     textarea.scrollTop = textarea.scrollHeight;
   },
+  isCollaborator: function() {
+    let currentUserName = this.get('sessionAccount').currentUserName;
+    if(isEmpty(currentUserName)) {
+      currentUserName = "";
+    }
+    if(!isEmpty(this.get("model.collaborators"))) {
+      isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
+               this.get("model.isCollaborative");
+      return isCollaborator
+    }
+    return false
+  }
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
@@ -1240,11 +1251,7 @@ export default Controller.extend({
     {
       this.get('cs').log("NOT OWNER")
       this.set('isOwner', false);
-      let isCollaborator = false;
-      if(!isEmpty(this.get("model.collaborators"))) {
-        isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
-                 this.get("model.isCollaborative");
-      }
+      let isCollaborator = this.isCollaborator()
       this.get('cs').log(this.get("model.collaborators"), currentUserName);
       this.get('cs').log("isCollaborator", isCollaborator);
       this.set('canEditSettings', false);
