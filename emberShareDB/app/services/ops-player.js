@@ -26,6 +26,8 @@ export default Service.extend({
     }
     return toSend
   },
+  //Called every 100ms, collects ops that are before given time
+  //on the the fromPlayer array 
   executeUntil(time, justSource=false) {
     return new RSVP.Promise((resolve, reject) => {
       let toSend = [];
