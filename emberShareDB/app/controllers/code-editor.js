@@ -859,7 +859,7 @@ export default Controller.extend({
         const sharedDBDoc = this.get('sharedDBDoc');
         //For testing purposes!!! definietly keep commented!!!
         //if(Math.random()>0.1) {
-        if(true)
+        if(true) {
           try
           {
             //this.get('cs').log("Submitting op on ws")
