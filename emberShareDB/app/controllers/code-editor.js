@@ -76,8 +76,8 @@ export default Controller.extend({
   iframeTitle:"title",
   prevEvalReceived:0,
   gotFirstEval:false,
-  updateSourceRate:30000,
-  updateSourceOnInterval:true,
+  updateSourceRate:10000,
+  updateSourceOnInterval:false,
   updateSourceInterval:undefined,
   evalPtr:0,
   highContrast:false,
@@ -425,26 +425,29 @@ export default Controller.extend({
               this.set("model.collaborators", []);
               this.get('documentService').updateDoc(doc.id, "collaborators", [])
             }
-
-            if(this.get('updateSourceOnInterval') && this.isCollaborator())
-            && !this.get("isViewer"))
-            {
-              this.get('cs').log("setting update source interval")
-              if(!isEmpty(this.get("updateSourceInterval")))
-              {
-                clearInterval(this.get("updateSourceInterval"));
-                this.set("updateSourceInterval", null)
-              }
-              this.set('updateSourceInterval', setInterval(()=>{
-                this.updateSessionFromSource();
-              }, this.get('updateSourceRate')));
-            }
+            this.startSyncTimer()
             this.initViewer();
             resolve();
           });
         });
       });
     });
+  },
+  startSyncTimer: function() {
+    if((this.get('updateSourceOnInterval')
+    && (this.isCollaborator() || this.get("isOwner")))
+    && !this.get("isViewer"))
+    {
+      this.get('cs').log("setting update source interval")
+      if(!isEmpty(this.get("updateSourceInterval")))
+      {
+        clearInterval(this.get("updateSourceInterval"));
+        this.set("updateSourceInterval", null)
+      }
+      this.set('updateSourceInterval', setInterval(()=>{
+        this.updateSessionFromServer();
+      }, this.get('updateSourceRate')));
+    }
   },
   connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
@@ -494,11 +497,19 @@ export default Controller.extend({
     })
   },
   //A check to see if we have drifted or lost ops, resyncs if necessary
-  updateSessionFromSource: function() {
+  updateSessionFromServer: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
       this.get('documentService').getSource(doc.id).then((serverSource)=>{
         const localSource = this.get('editor').getValue();
+        const localOnes = localSource.split("1").length
+        const localTwos = localSource.split("2").length
+        const serverOnes = serverSource.split("1").length
+        const serverTwos = serverSource.split("2").length
+        this.get("cs").log("localOnes",localOnes)
+        this.get("cs").log("localTwos",localTwos)
+        this.get("cs").log("serverOnes",serverOnes)
+        this.get("cs").log("serverTwos",serverTwos)
         if(serverSource !== localSource)
         {
           this.set("surpress", true);
@@ -510,10 +521,12 @@ export default Controller.extend({
           this.get("editor").setCursor({line:scrollPos.line, ch:scrollPos.ch})
           this.set("surpress", false);
           this.get('cs').log("local code out of sync with server");
+          resolve()
         }
         else
         {
           this.get('cs').log("local code is in sync");
+          resolve()
         }
       })
     });
@@ -549,14 +562,18 @@ export default Controller.extend({
     editor.options.readOnly = true;
     editor.focus()
     var scrollInfo = this.get("editor").getScrollInfo();
-    this.cleanUpConnections().then(()=>{
-      this.initWebSockets(()=>{
-        editor.focus()
-        this.get("cs").log("scrolling cur", scrollPos.line, scrollPos.ch)
-        editor.scrollTo(scrollInfo.left, scrollInfo.top);
-        editor.setCursor({line:scrollPos.line, ch:scrollPos.ch})
-        editor.options.readOnly = !this.get('canEditSource');
-      });
+    this.updateSessionFromServer().then(()=>{
+      this.updateSourceFromSession().then(()=>{
+        this.cleanUpConnections().then(()=>{
+          this.initWebSockets(()=>{
+            editor.focus()
+            this.get("cs").log("scrolling cur", scrollPos.line, scrollPos.ch)
+            editor.scrollTo(scrollInfo.left, scrollInfo.top);
+            editor.setCursor({line:scrollPos.line, ch:scrollPos.ch})
+            editor.options.readOnly = !this.get('canEditSource');
+          });
+        })
+      })
     })
   },
   setLanguage: function() {
@@ -744,9 +761,11 @@ export default Controller.extend({
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    this.get("cs").log("didReceiveOp",canReceiveOp())
+    this.get("cs").log("didReceiveOp", ops)
+    this.get("cs").log("canReceiveOp",canReceiveOp())
     if(ops.length > 0 && canReceiveOp())
     {
+      this.get("cs").log("isFromMe",!(!source && ops[0].p[0] === "source"))
       //this.get("cs").log("didReceiveOp",ops[0].p[0] )
       if(!source && ops[0].p[0] === "source")
       {
@@ -838,50 +857,59 @@ export default Controller.extend({
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
-        try
-        {
-          //this.get('cs').log("Submitting op on ws")
-          sharedDBDoc.submitOp(op, (err) => {
-            //this.get('cs').log("callback", err)
-            if(!isEmpty(err) && op.p[0] !== "trig")
+        //For testing purposes!!! definietly keep commented!!!
+        //if(Math.random()>0.1) {
+        if(true)
+          try
+          {
+            //this.get('cs').log("Submitting op on ws")
+            sharedDBDoc.submitOp(op, (err) => {
+              //this.get('cs').log("callback", err)
+              if(!isEmpty(err) && op.p[0] !== "trig")
+              {
+                this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
+                this.set('showConnectionWarning', true);
+                this.get('cs').log("error submitting op (ws)", op)
+                reject(err);
+                return;
+              }
+              else
+              {
+                resolve();
+                return;
+              }
+            });
+          }
+          catch (err)
+          {
+            this.get('cs').log("catch", err)
+            if(op.p[0] !== "trig")
             {
-              this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
-              this.set('showConnectionWarning', true);
-              this.get('cs').log("error submitting op (ws)", op)
+              if(isEmpty(this.get('model.parent')))
+              {
+                this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
+              }
+              else
+              {
+                this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
+              }
+
+              //this.set('showConnectionWarning', true);
+
+              this.reloadDoc();
+              this.get('cs').log("error submitting op (ws)",err)
               reject(err);
-              return;
             }
             else
             {
-              resolve();
-              return;
+              resolve()
             }
-          });
-        }
-        catch (err)
-        {
-          this.get('cs').log("catch", err)
-          if(op.p[0] !== "trig")
-          {
-            if(isEmpty(this.get('model.parent')))
-            {
-              this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
-            }
-            else
-            {
-              this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
-            }
-
-            //this.set('showConnectionWarning', true);
-
-            this.reloadDoc();
-            this.get('cs').log("error submitting op (ws)",err)
-            reject(err);
           }
-          else
-          {
-            resolve()
-          }
+        } else {
+          //This is the else for a place where we simulate failed ops submissions
+          this.reloadDoc();
+          this.get('cs').log("FAKE error submitting op (ws)")
+          reject();
         }
       }
       else
@@ -1119,8 +1147,7 @@ export default Controller.extend({
 
       const ops = this.get('codeParser').getOps(delta, editor);
       ops.forEach((op)=>{
-        //this.get('cs').log("submitting op")
-        this.submitOp(op);
+        this.submitOp(op).catch((err)=>{this.get('cs').log("error submitting op")});
       });
       if(isEmpty(doc.type))
       {
@@ -1215,12 +1242,12 @@ export default Controller.extend({
       currentUserName = "";
     }
     if(!isEmpty(this.get("model.collaborators"))) {
-      isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
+      const isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
                this.get("model.isCollaborative");
       return isCollaborator
     }
     return false
-  }
+  },
   setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserId;
     let currentUserName = this.get('sessionAccount').currentUserName;
