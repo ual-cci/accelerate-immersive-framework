@@ -759,13 +759,23 @@ export default Controller.extend({
       return (this.get('model.isCollaborative') || this.get('isViewer'))
       && !this.get('isEmbedded')
     }
-    this.get("cs").log("didReceiveOp", ops)
-    this.get("cs").log("canReceiveOp",canReceiveOp())
+    this.get("cs").log("didReceiveOp", ops, source, version)
     if(ops.length > 0 && canReceiveOp())
     {
-      this.get("cs").log("isFromMe",!(!source && ops[0].p[0] === "source"))
-      //this.get("cs").log("didReceiveOp",ops[0].p[0] )
-      if(!source && ops[0].p[0] === "source")
+      let isFromOwner = false
+      //json inserts have uuids (we might be able to remove these?)
+      //source is true if it came from the local machine, seems reliable
+      if(ops[0].oi !== undefined) {
+        isFromOwner = ops[0].oi.uuid === this.get("sessionAccount").getSessionID()
+      }
+      //text ops have owners
+      if(ops[0].owner !== undefined) {
+        isFromOwner =  ops[0].owner === this.get('sessionAccount').currentUserName;
+      }
+      const isCodeUpdate = ops[0].p[0] === "source";
+      const isAssetUpdate = ops[0].p[0] == "assetsUpdated" && !isEmpty(ops[0].oi);
+      const isReevaluation = ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi);
+      if(!source && !isFromOwner && isCodeUpdate) 
       {
         this.set('surpress', true);
         this.get('opsPlayer').set('opsToApply', ops)
@@ -779,61 +789,49 @@ export default Controller.extend({
         this.set('surpress', false);
         this.newCursor(ops[0]);
       }
-      else if (ops[0].p[0] == "assetsUpdated")
+      else if (!source && !isFromOwner && isAssetUpdate)
       {
         this.get("cs").log(ops[0].oi)
-        if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
-        {
-          this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
-            toChange.set('assets',ops[0].oi.assets);
-            this.get('cs').log("didReceiveOp", "preloadAssets")
-            this.preloadAssets();
-          });
-
-        }
+        this.get('store').findRecord('document',this.get('model').id).then((toChange) => {
+          toChange.set('assets',ops[0].oi.assets);
+          this.get('cs').log("didReceiveOp", "preloadAssets")
+          this.preloadAssets();
+        });
       }
-      else if (!source && ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi))
+      //If inserting (oi) a newEval
+      else if (!source && !isFromOwner && isReevaluation)
       {
         console.log("newEval",version,ops,this.get("prevEvalReceived"));
-        if(ops[0].oi.uuid !== this.get("sessionAccount").getSessionID())
+        /*
+        We need to filter out unwanted extra newEval ops
+        When viewing, we get one extra and make sure the version is higher
+        than the last.
+        */
+        let doFlash = false;
+        const doExecute =
+          (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
+           (this.get("model.isCollaborative"))
+        if(doExecute)
         {
-          /*
-          We need to filter out unwanted extra newEval ops
-          When viewing, we get one extra and make sure the version is higher
-          than the last. With colab, we get an extra od field after the first time
-          */
-          let doFlash = false;
-          const doExecute =
-            (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
-            (this.get("model.isCollaborative") && ops[0].od !== undefined ||
-            (this.get("model.isCollaborative") && ops[0].od === undefined && !this.get("gotFirstEval"))
-          )
-          if(doExecute)
-          {
-            this.set('surpress', true);
-            this.set("gotFirstEval", true)
-            try {
-              console.log("executing", ops[0].oi.code)
-              this.set('prevEvalReceived', version)
-              doFlash = true;
-              document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
-            } catch (err) {
-              doFlash = false;
-              console.log("error evaluating received code", err);
-            }
-            this.set('surpress', false);
-          } else {
-            console.log("recieved but skipped")
+          this.set('surpress', true);
+          this.set("gotFirstEval", true)
+          try {
+            console.log("executing", ops[0].oi.code)
+            this.set('prevEvalReceived', version)
+            doFlash = true;
+            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+          } catch (err) {
+            doFlash = false;
+            console.log("error evaluating received code", err);
           }
-
-          if(doFlash && !isEmpty(ops[0].oi.pos))
-          {
-            this.flashSelectedText(ops[0].oi.pos)
-          }
+          this.set('surpress', false);
+        } else {
+          console.log("recieved but skipped")
         }
-        else
+
+        if(doFlash && !isEmpty(ops[0].oi.pos))
         {
-          this.get('cs').log("matching guuid, ignoring")
+          this.flashSelectedText(ops[0].oi.pos)
         }
       }
       else if (!source && ops[0].p[0] == "children")
@@ -996,7 +994,7 @@ export default Controller.extend({
                 oi:toSend,
               }
               console.log("sending op", op)
-
+              //Send then immediately delete
               this.submitOp(op).then(()=>{
                 let op = {
                   p:["newEval"],
@@ -1603,12 +1601,12 @@ export default Controller.extend({
   alertAssetsUpdated(newAssets) {
     const toSend = {
       uuid:this.get('sessionAccount').getSessionID(),
-      assets:newAssets
+      assets:newAssets,
+      date:new Date().getTime()
     }
     let op = {
       p:["assetsUpdated"],
       oi:toSend,
-      date:new Date().getTime()
     }
     //Delete after send
     this.submitOp(op).then(()=>{

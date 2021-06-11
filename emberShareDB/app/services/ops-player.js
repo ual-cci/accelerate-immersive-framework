@@ -38,7 +38,6 @@ export default Service.extend({
           let send = false;
           //Docs made earlier than 20/3/21 wont work with this (no dates!)
           currentOp.op.forEach((op)=> {
-            //Ops from others have dates
             //this.get('cs').log("executeUntil",op)
             let hasDate = false
             if(op.oi)
@@ -84,6 +83,7 @@ export default Service.extend({
       toSend.forEach((currentOp)=>{
         this.set("latestVersion", currentOp.v + 1)
         this.get("fromPlayer").push(currentOp)
+        //Remove ops once sent
         const index = this.get('ops').indexOf(currentOp);
         if (index > -1) {
           this.get('ops').splice(index, 1);
@@ -110,32 +110,36 @@ export default Service.extend({
   startTimer(editor) {
     return new RSVP.Promise((resolve, reject)=> {
       this.set("latestVersion", 0);
+      //Load all the ops
       this.loadOps(0).then(()=>{
         const lag = 10000;
         const interval = 100;
         let now;
         this.cleanUp()
         let justSource = true;
+        //Set the latestVersion to the most recent op
         this.fastForwardsLatestVersion();
+        //Clear all the ops
         this.set("ops", [])
-        setTimeout(()=>{
-          this.set("schedulerInteval",setInterval(()=>{
-            now = new Date().getTime() - lag;
-            this.executeUntil(now, justSource)
-          },interval))
-          this.set("updateOpsInterval",setInterval(()=>{
-            this.loadOps(this.get("latestVersion")).then(()=>{
-              justSource = false;
-            });
-          },lag));
-          resolve()
-        }, lag)
+        //Start counter to update ops every "lag" seconds
+        this.set("updateOpsInterval",setInterval(()=>{
+          this.loadOps(this.get("latestVersion")).then(()=>{
+            justSource = false;
+          });
+        },lag));
+        //Start counter to check for ops to playback every "interval" seconds
+        this.set("schedulerInteval",setInterval(()=>{
+          now = new Date().getTime() - lag;
+          this.executeUntil(now, justSource)
+        },interval))
+        resolve()
       })
     });
   },
-  filterOps(allOps) {
+  //Remove any ops that are not re-evaluations or code updates
+  filterOps(toFilter) {
     let sourceOps = []
-    allOps.forEach((ops) => {
+    toFilter.forEach((ops) => {
       if(ops.op !== undefined)
       {
         if(ops.op.length > 0)
