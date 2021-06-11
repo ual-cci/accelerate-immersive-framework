@@ -27,7 +27,7 @@ export default Service.extend({
     return toSend
   },
   //Called every 100ms, collects ops that are before given time
-  //on the the fromPlayer array 
+  //on the the fromPlayer array
   executeUntil(time, justSource=false) {
     return new RSVP.Promise((resolve, reject) => {
       let toSend = [];
@@ -38,14 +38,32 @@ export default Service.extend({
           let send = false;
           //Docs made earlier than 20/3/21 wont work with this (no dates!)
           currentOp.op.forEach((op)=> {
+            //Ops from others have dates
+            //this.get('cs').log("executeUntil",op)
+            let hasDate = false
+            if(op.oi)
+            {
+              if(op.oi.date)
+              {
+                hasDate = true
+                if(op.oi.date < time)
+                {
+                  this.get("cs").log(op.oi.date - time)
+                  send = true;
+                }
+              }
+            }
+            //.si text ops have date a level higher than .oi json ops
             if(op.date)
             {
+              hasDate = true
               if(op.date < time)
               {
+                this.get("cs").log(op.date - time)
                 send = true;
               }
             }
-            else
+            if(!hasDate)
             {
               //Dont send if no date, unless first op
               send = currentOp.v < 2;
@@ -59,7 +77,7 @@ export default Service.extend({
             this.get("cs").log("sending",currentOp.v,currentOp.op[0].p[0],justSource,currentOp.op[0])
             toSend.push(currentOp)
           } else {
-            //this.get("cs").log("skipping",currentOp.v)
+            //this.get("cs").log("skipping",currentOp,justSource)
           }
         })
       }
@@ -74,17 +92,33 @@ export default Service.extend({
       resolve();
     });
   },
+  fastForwardsLatestVersion() {
+    if(!isEmpty(this.get("ops")))
+    {
+      this.get("ops").forEach((op)=>
+      {
+        if(this.get("latestVersion")< op.v)
+        {
+          this.set("latestVersion", op.v)
+        }
+      })
+    }
+    this.set("latestVersion", this.get("latestVersion") + 1)
+    this.get("cs").log("fastforwarded to ", this.get("latestVersion"))
+  },
+  //Called when document is loaded from code-editor.js
   startTimer(editor) {
     return new RSVP.Promise((resolve, reject)=> {
       this.set("latestVersion", 0);
-      this.set("ptr", 0);
       this.loadOps(0).then(()=>{
         const lag = 10000;
         const interval = 100;
-        let now = new Date().getTime() - lag;
+        let now;
         this.cleanUp()
         let justSource = true;
-        this.executeUntil(now, true).then(()=> {
+        this.fastForwardsLatestVersion();
+        this.set("ops", [])
+        setTimeout(()=>{
           this.set("schedulerInteval",setInterval(()=>{
             now = new Date().getTime() - lag;
             this.executeUntil(now, justSource)
@@ -93,9 +127,9 @@ export default Service.extend({
             this.loadOps(this.get("latestVersion")).then(()=>{
               justSource = false;
             });
-          },lag))
-          resolve();
-        });
+          },lag));
+          resolve()
+        }, lag)
       })
     });
   },
@@ -132,7 +166,10 @@ export default Service.extend({
           else {
             this.set('ops', [])
           }
-          this.get('cs').log("GOT OPS",this.get('ops'))
+          this.get('cs').log("GOT OPS",from, this.get('ops').length)
+          // for(const op of this.get('ops')) {
+          //   this.get('cs').log(op)
+          // }
           resolve(this.get('ops'));
         }).catch((err) => {
           this.get("cs").log("op GET rejected", err)
@@ -140,6 +177,7 @@ export default Service.extend({
         });
     });
   },
+  //Clears all the timers
   cleanUp() {
     this.get("cs").log("cleaned up op player")
     this.set("latestVersion", 0);

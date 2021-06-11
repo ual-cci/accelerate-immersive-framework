@@ -172,8 +172,6 @@ export default Controller.extend({
     if(this.get("isViewer"))
     {
       this.cleanUpOpPlayer();
-      this.get('editor').setValue("");
-      this.writeIframeContent("");
       this.get("opsPlayer").startTimer(this.get("editor")).then(()=>{
         let didClear = false;
         this.set("viewerInterval", setInterval(()=>{
@@ -853,7 +851,11 @@ export default Controller.extend({
   submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc');
-
+      const error = ()=>{
+        this.reloadDoc();
+        this.get('cs').log("FAKE error submitting op (ws)")
+        reject();
+      }
       if(this.get('wsAvailable'))
       {
         const sharedDBDoc = this.get('sharedDBDoc');
@@ -867,10 +869,7 @@ export default Controller.extend({
               //this.get('cs').log("callback", err)
               if(!isEmpty(err) && op.p[0] !== "trig")
               {
-                this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work")
-                this.set('showConnectionWarning', true);
-                this.get('cs').log("error submitting op (ws)", op)
-                reject(err);
+                error()
                 return;
               }
               else
@@ -885,31 +884,19 @@ export default Controller.extend({
             this.get('cs').log("catch", err)
             if(op.p[0] !== "trig")
             {
-              if(isEmpty(this.get('model.parent')))
-              {
-                this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, please fork this document to fix issues")
-              }
-              else
-              {
-                this.set('connectionWarning', "Warning: Your document may have become corrupted. Please reload the page. If this problem persists, we recommend you create a new tab, copy acorss your code and delete this one.")
-              }
-
-              //this.set('showConnectionWarning', true);
-
-              this.reloadDoc();
-              this.get('cs').log("error submitting op (ws)",err)
-              reject(err);
+              error()
+              return
             }
             else
             {
               resolve()
+              return
             }
           }
         } else {
           //This is the else for a place where we simulate failed ops submissions
-          this.reloadDoc();
-          this.get('cs').log("FAKE error submitting op (ws)")
-          reject();
+          error()
+          return
         }
       }
       else
@@ -921,9 +908,7 @@ export default Controller.extend({
           return;
         }).catch((err) => {
           this.get('cs').log("ERROR Not submitted");
-          this.set('connectionWarning', "Warning: connection issues mean that the autosave function has ceased working. We recommend you reload the site to avoid losing work");
-          this.set('showConnectionWarning', true);
-          reject(err);
+          error()
           return;
         });
       }
@@ -1002,17 +987,23 @@ export default Controller.extend({
               const toSend = {
                 uuid:this.get('sessionAccount').getSessionID(),
                 code:combined,
-                pos:pos
+                pos:pos,
+                date:new Date().getTime()
               }
               this.set('evalPtr', this.get('evalPtr') + 1);
               let op = {
                 p:["newEval"],
                 oi:toSend,
-                date:new Date().getTime()
               }
               console.log("sending op", op)
 
-              this.submitOp(op).catch((err)=>{
+              this.submitOp(op).then(()=>{
+                let op = {
+                  p:["newEval"],
+                  od:toSend,
+                }
+                this.submitOp(op)
+              }).catch((err)=>{
                 this.get('cs').log('error updating doc', err);
               });
               this.set('prevEval', toSend);
@@ -1619,7 +1610,14 @@ export default Controller.extend({
       oi:toSend,
       date:new Date().getTime()
     }
-    this.submitOp(op).catch((err)=>{
+    //Delete after send
+    this.submitOp(op).then(()=>{
+      let op = {
+        p:["assetsUpdated"],
+        od:toSend,
+      }
+      this.submitOp(op)
+    }).catch((err)=>{
       this.get('cs').log('error updating doc', err);
     });
   },
