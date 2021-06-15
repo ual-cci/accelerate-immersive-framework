@@ -603,6 +603,7 @@ export default Service.extend({
     ops.forEach((op)=> {
       opToDelta(op);
     });
+    editor.refresh();
   },
   getLanguage(source) {
     let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);

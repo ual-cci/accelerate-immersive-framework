@@ -76,8 +76,8 @@ export default Controller.extend({
   iframeTitle:"title",
   prevEvalReceived:0,
   gotFirstEval:false,
-  updateSourceRate:10000,
-  updateSourceOnInterval:false,
+  updateSourceRate:30000,
+  updateSourceOnInterval:true,
   updateSourceInterval:undefined,
   evalPtr:0,
   highContrast:false,
@@ -432,9 +432,7 @@ export default Controller.extend({
     });
   },
   startSyncTimer: function() {
-    if((this.get('updateSourceOnInterval')
-    && (this.isCollaborator() || this.get("isOwner")))
-    && !this.get("isViewer"))
+    if(this.get('updateSourceOnInterval') && this.get("isViewer"))
     {
       this.get('cs').log("setting update source interval")
       if(!isEmpty(this.get("updateSourceInterval")))
@@ -500,14 +498,6 @@ export default Controller.extend({
       const doc = this.get('currentDoc');
       this.get('documentService').getSource(doc.id).then((serverSource)=>{
         const localSource = this.get('editor').getValue();
-        const localOnes = localSource.split("1").length
-        const localTwos = localSource.split("2").length
-        const serverOnes = serverSource.split("1").length
-        const serverTwos = serverSource.split("2").length
-        this.get("cs").log("localOnes",localOnes)
-        this.get("cs").log("localTwos",localTwos)
-        this.get("cs").log("serverOnes",serverOnes)
-        this.get("cs").log("serverTwos",serverTwos)
         if(serverSource !== localSource)
         {
           this.set("surpress", true);
@@ -775,7 +765,7 @@ export default Controller.extend({
       const isCodeUpdate = ops[0].p[0] === "source";
       const isAssetUpdate = ops[0].p[0] == "assetsUpdated" && !isEmpty(ops[0].oi);
       const isReevaluation = ops[0].p[0] === "newEval" && !isEmpty(ops[0].oi);
-      if(!source && !isFromOwner && isCodeUpdate) 
+      if(!source && !isFromOwner && isCodeUpdate)
       {
         this.set('surpress', true);
         this.get('opsPlayer').set('opsToApply', ops)
@@ -808,18 +798,27 @@ export default Controller.extend({
         than the last.
         */
         let doFlash = false;
+        const date = ops[0].oi.date
         const doExecute =
-          (version > this.get("prevEvalReceived") && this.get("isViewer")) ||
-           (this.get("model.isCollaborative"))
+          (date > this.get("prevEvalReceived")) ||
+           !this.get("gotFirstEval")
         if(doExecute)
         {
           this.set('surpress', true);
           this.set("gotFirstEval", true)
           try {
-            console.log("executing", ops[0].oi.code)
-            this.set('prevEvalReceived', version)
+            this.set('prevEvalReceived', date)
             doFlash = true;
-            document.getElementById("output-iframe").contentWindow.eval(ops[0].oi.code);
+            const code = ops[0].oi.code
+            this.updateSavedVals();
+            const savedVals = this.get('savedVals');
+            let model = this.get('model');
+            //We replace the assets etc... on this side (we are sent the raw code)
+            this.get('documentService').getCombinedSource(model.id, true, code, savedVals)
+            .then((combined) => {
+              console.log("executing", combined)
+              document.getElementById("output-iframe").contentWindow.eval(combined);
+            })
           } catch (err) {
             doFlash = false;
             console.log("error evaluating received code", err);
@@ -982,9 +981,11 @@ export default Controller.extend({
             }
             if(doSend)
             {
+              //We send the uncombined raw text (eg without base64 assets etc..),
+              //and convert on the other side
               const toSend = {
                 uuid:this.get('sessionAccount').getSessionID(),
-                code:combined,
+                code:toRender,
                 pos:pos,
                 date:new Date().getTime()
               }
