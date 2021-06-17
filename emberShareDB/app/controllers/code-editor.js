@@ -77,7 +77,7 @@ export default Controller.extend({
   prevEvalReceived:0,
   gotFirstEval:false,
   updateSourceRate:30000,
-  updateSourceOnInterval:true,
+  updateSourceOnInterval:false,
   updateSourceInterval:undefined,
   evalPtr:0,
   highContrast:false,
@@ -172,8 +172,10 @@ export default Controller.extend({
     if(this.get("isViewer"))
     {
       this.cleanUpOpPlayer();
+      this.get("cs").log("starting op time (code editor)")
       this.get("opsPlayer").startTimer(this.get("editor")).then(()=>{
         let didClear = false;
+        this.get("cs").log("started op time (code editor)")
         this.set("viewerInterval", setInterval(()=>{
           const playerOps = this.get("opsPlayer").getToSend();
           if(playerOps.length > 0) {
@@ -431,6 +433,8 @@ export default Controller.extend({
       });
     });
   },
+  //This function does really work well for viewer or collaborate modes
+  //because its at odds with the ops (disabled at the moment)
   startSyncTimer: function() {
     if(this.get('updateSourceOnInterval') && this.get("isViewer"))
     {
@@ -806,31 +810,30 @@ export default Controller.extend({
         {
           this.set('surpress', true);
           this.set("gotFirstEval", true)
-          try {
-            this.set('prevEvalReceived', date)
-            doFlash = true;
-            const code = ops[0].oi.code
-            this.updateSavedVals();
-            const savedVals = this.get('savedVals');
-            let model = this.get('model');
-            //We replace the assets etc... on this side (we are sent the raw code)
-            this.get('documentService').getCombinedSource(model.id, true, code, savedVals)
-            .then((combined) => {
-              console.log("executing", combined)
+          this.set('prevEvalReceived', date)
+          doFlash = true;
+          const code = ops[0].oi.code
+          this.updateSavedVals();
+          const savedVals = this.get('savedVals');
+          let model = this.get('model');
+          //We replace the assets etc... on this side (we are sent the raw code)
+          this.get('documentService').getCombinedSource(model.id, true, code, savedVals)
+          .then((combined) => {
+            console.log("executing", combined)
+            try {
               document.getElementById("output-iframe").contentWindow.eval(combined);
-            })
-          } catch (err) {
-            doFlash = false;
-            console.log("error evaluating received code", err);
-          }
+            } catch (err) {
+              doFlash = false;
+              console.log("error evaluating received code", err);
+            }
+            if(doFlash && !isEmpty(ops[0].oi.pos))
+            {
+              this.flashSelectedText(ops[0].oi.pos)
+            }
+          })
           this.set('surpress', false);
         } else {
           console.log("recieved but skipped")
-        }
-
-        if(doFlash && !isEmpty(ops[0].oi.pos))
-        {
-          this.flashSelectedText(ops[0].oi.pos)
         }
       }
       else if (!source && ops[0].p[0] == "children")

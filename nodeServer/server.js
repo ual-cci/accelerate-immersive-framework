@@ -58,7 +58,7 @@ function startServer()
   const mongoPassword = config.mongoPassword;
 
   let redis;
-  var environment = process.env.NODE_ENV 
+  var environment = process.env.NODE_ENV
   console.log("NODE_ENV", environment)
   if(environment === "local" || environment == "test")
   {
@@ -88,7 +88,7 @@ function startServer()
     }
     console.log(mongoContentUri, mongoUserUri)
   }
-  else if(environment === "heroku" || process.env.heroku_mongoUser)
+  else if(environment === "heroku")
   {
     console.log("setting heroku env");
 
@@ -109,7 +109,7 @@ function startServer()
     const mongoUser = process.env.production_mongoUser ||config.production_mongoUser;
     const mongoPassword = process.env.production_mongoPassword || config.production_mongoPassword;
     const ip1 = process.env.production_mongoIP1 || config.production_mongoIP1;
-    const ip2 = process.env.production_mongoIP1 || config.production_mongoIP2;
+    const ip2 = process.env.production_mongoIP2 || config.production_mongoIP2;
     let uri = "mongodb://"+mongoUser+":"+mongoPassword+"@"+ip1+"0"+ip2+mongoPort;
     uri = uri + "," + ip1 + "1" + ip2 + mongoPort + "," + ip1 + "2" + ip2 + mongoPort;
     mongoContentUri = uri + "/" + contentDBName + "?ssl=true&replicaSet=" + replicaSet + "&authSource=admin&retryWrites=true";

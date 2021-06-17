@@ -467,7 +467,7 @@ function startDocAPI(app)
         //console.log("Patching candidates", patched);
         const current = doc.data;
         let actions = [];
-        const IGNORE_LIST = ["source", "documentId"]
+        const IGNORE_LIST = ["source", "documentId", "newEval"]
         for (var key in patched) {
             if (current.hasOwnProperty(key) && patched.hasOwnProperty(key)) {
                 if(JSON.stringify(current[key]) !== JSON.stringify(patched[key]))
@@ -525,9 +525,17 @@ function startDocAPI(app)
     //Only return ops past a certain date
     const callback = function (err, results) {
       results = results.filter(op => {
-        if(op.op) {
-          if(op.op[0].date) {
-            return op.op[0].date > date
+        if(op.op !== undefined) {
+          if(op.op[0] !== undefined) {
+            if(op.op[0].date !== undefined) {
+              return op.op[0].date > date
+            }
+            //oi ops have dates at a lower level than si ops
+            else if(op.op[0].oi !== undefined) {
+              if(op.op[0].oi.date !== undefined) {
+                return op.op[0].oi.date > date
+              }
+            }
           }
         }
         return true;
@@ -717,7 +725,7 @@ function createDoc(attr) {
             tags:attr.tags ? attr.tags:[],
             forkedFrom:attr.forkedFrom,
             savedVals:{},
-            newEval:"",
+            newEval:{},
             stats:{views:0, forks:0, edits:0},
             flags:0,
             dontPlay:false,

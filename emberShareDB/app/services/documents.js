@@ -100,6 +100,7 @@ export default Service.extend({
         }));
     });
   },
+  //Calls PATCH /documents on the server
   updateDoc(docId, field, value) {
     //this.get('cs').log("updateDoc",docId, field, value)
     return new RSVP.Promise((resolve, reject) => {

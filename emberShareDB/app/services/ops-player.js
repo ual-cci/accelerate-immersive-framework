@@ -122,6 +122,7 @@ export default Service.extend({
         //Clear all the ops
         this.set("ops", [])
         //Start counter to update ops every "lag" seconds
+        this.get("cs").log("starting op timer", lag)
         this.set("updateOpsInterval",setInterval(()=>{
           this.loadOps(this.get("latestVersion")).then(()=>{
             justSource = false;
@@ -162,7 +163,7 @@ export default Service.extend({
       $.ajax({
           type: "GET",
           url:url,
-          headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
+          //headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
           if(res) {
             this.set('ops', this.filterOps(res.data));
