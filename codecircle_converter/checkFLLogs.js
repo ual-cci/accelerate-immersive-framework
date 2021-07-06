@@ -59,7 +59,7 @@ DOC_ID = "604160d7-316e-58dd-219c-ec910f4fa2e4";
 //DOC_ID = "ce1c782f-2e17-7b10-3857-a51f85cb81d8";
 
 var getLogs = (docId)=> {
-  console.log("getting logs")
+  console.log("getting logs for " docId)
   return new Promise((resolve, reject)=> {
     var logHTTP = new XMLHttpRequest();
     logHTTP.onreadystatechange = async ()=> {
@@ -74,7 +74,7 @@ var getLogs = (docId)=> {
             if(op.op[0].p[0] === "stats" && op.op[0].oi[0] === "fl_stats") {
               const stats = op.op[0].oi[1];
               data.push(JSON.parse(stats))
-              //console.log(JSON.parse(stats))
+              console.log(JSON.parse(stats))
             }
           }
         })

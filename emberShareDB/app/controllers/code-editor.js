@@ -1234,8 +1234,10 @@ export default Controller.extend({
     if(isEmpty(currentUserName)) {
       currentUserName = "";
     }
-    if(!isEmpty(this.get("model.collaborators"))) {
-      const isCollaborator = this.get("model.collaborators").includes(currentUserName) &&
+    currentUserName = currentUserName.toLowerCase()
+    let collaborators = this.get("model.collaborators").map(i=>i.toLowerCase())
+    if(!isEmpty(collaborators)) {
+      const isCollaborator = collaborators.includes(currentUserName) &&
                this.get("model.isCollaborative");
       return isCollaborator
     }
