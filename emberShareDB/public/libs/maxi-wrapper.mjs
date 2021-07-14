@@ -41,14 +41,10 @@ function sabPrinter() {
   try {
     for (let v in maxi.sharedArrayBuffers) {
       let avail = maxi.sharedArrayBuffers[v].rb.available_read();
-      var rd = Atomics.load(maxi.sharedArrayBuffers[v].rb.read_ptr, 0);
-      var wr = Atomics.load(maxi.sharedArrayBuffers[v].rb.write_ptr, 0);
-      //console.log(v, rd, wr)
       if ( avail > 0 && avail != maxi.sharedArrayBuffers[v].rb.capacity) {
         for (let i = 0; i < avail; i += maxi.sharedArrayBuffers[v].blocksize) {
           let elements = new Float64Array(maxi.sharedArrayBuffers[v].blocksize);
           let val = maxi.sharedArrayBuffers[v].rb.pop(elements);
-          //console.log(v,elements[0]);
           if(maxi.onData) {
             maxi.onData(v,elements)
           }
@@ -57,7 +53,6 @@ function sabPrinter() {
     }
     setTimeout(sabPrinter, 20);
   } catch (error) {
-    // console.log(error);
     setTimeout(sabPrinter, 20);
   }
 }
@@ -75,20 +70,41 @@ maxi.sendData = (id, data)=> {
   maxi.pushDataToSharedBuffer(id, data);
 }
 
-maxi.updateCode = (tag)=>{
-  let fromTag = document.getElementById(tag).innerHTML;
-  const code = `()=>{
-    let q = this.newq();
-    let createDSPLoop = ()=> {` +
-      fromTag +
-    ` return play;
+maxi.updateCode = async (location)=>{
+
+  const executeCode = (userCode)=> {
+    const code = `()=>{
+      let q = this.newq();
+      let createDSPLoop = ()=> {` +
+        userCode +
+      ` return play;
+      }
+      q.play = createDSPLoop();
+      return q;
+    }`
+    console.log(code)
+    dspCode.setup = code;
+    //with newer versions of the sema-engine.js, there needs to be a delay
+    //Between making the engine and updating the code. (13/7/21)
+    setTimeout(()=>{maxi.eval(dspCode)},200);
+  }
+  //Try script element
+  let scriptElement = document.getElementById(location)
+  if(scriptElement)
+  {
+    executeCode(scriptElement.innerHTML)
+  }
+  else
+  {
+    //Else try url
+    let response = await fetch(location);
+    if (response.ok) {
+      let text = await response.text();
+      executeCode(text)
+    } else {
+      //Else use string literal
+      console.log("HTTP-Error: " + response.status);
+      executeCode(location)
     }
-    q.play = createDSPLoop();
-    return q;
-  }`
-  console.log(code)
-  dspCode.setup = code;
-  //with newer versions of the sema-engine.js, there needs to be a delay
-  //Between making the engine and updating the code. (13/7/21)
-  setTimeout(()=>{maxi.eval(dspCode)},200);
+  }
 }
