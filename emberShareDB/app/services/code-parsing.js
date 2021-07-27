@@ -382,7 +382,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        this.get('cs').log("acorn couldnt parse script, probably src", err)
+        this.get('cs').log("acorn couldnt parse script, probably src")
       }
       if(ops.length > 0)
       {

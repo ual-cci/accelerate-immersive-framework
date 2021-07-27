@@ -2,12 +2,13 @@
 import {
   Engine,
   Learner,
-} from "./sema-engine.mjs";
+} from "./index.mjs";
 
 import RingBuffer from "./ringbuf.js";
 
-const origin = "https://mimicproject.com/libs";
-//const origin = "http://localhost:4200/libs";
+//const origin = "https://mimicproject.com/libs";
+const origin = "http://localhost:4200/libs";
+
 
 export let maxi;
 let dspCode = "";
@@ -58,10 +59,6 @@ function sabPrinter() {
 }
 sabPrinter()
 
-maxi.makeSender = (id)=> {
-
-}
-
 maxi.sendData = (id, data)=> {
   if(maxi.sharedArrayBuffers[id] === undefined) {
     maxi.createSharedBuffer(id, "ML", data.length);
@@ -73,6 +70,7 @@ maxi.sendData = (id, data)=> {
 maxi.updateCode = async (location)=>{
 
   const executeCode = (userCode)=> {
+    userCode = userCode.replace(/Maximilian/g, "Module");
     const code = `()=>{
       let q = this.newq();
       let createDSPLoop = ()=> {` +
