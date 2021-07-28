@@ -24,6 +24,7 @@ Router.map(function() {
   this.route('nime2020');
   this.route('futurelearn');
   this.route('crash-course');
+  this.route('techyard');
 });
 
 export default Router;

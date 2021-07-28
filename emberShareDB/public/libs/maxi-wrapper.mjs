@@ -6,9 +6,13 @@ import {
 
 import RingBuffer from "./ringbuf.js";
 
-//const origin = "https://mimicproject.com/libs";
-const origin = "http://localhost:4200/libs";
-
+const origin = "https://mimicproject.com/libs";
+//const origin = "http://localhost:4200/libs";
+var head = document.getElementsByTagName('HEAD')[0];
+var meta = document.createElement('meta');
+meta.httpEquiv = "origin-trial";
+meta.content = "AipZcFrgMg9ylKLo57EBO0tGMBmsXqFLzwuJJP20GXbHuST7hB1MuUjHX8j3+wbFQot8LyYvaDmS1rONKHvSzwwAAAB6eyJvcmlnaW4iOiJodHRwczovL21pbWljcHJvamVjdC5jb206NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNjM5NTI2Mzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZX0=";
+head.appendChild(meta);
 
 export let maxi;
 let dspCode = "";
