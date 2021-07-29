@@ -217,6 +217,21 @@ export default Service.extend({
     const newSrc = src.replace(toFind, replace);
     return newSrc;
   },
+  insertCrossOrigin(src)
+  {
+    return src
+
+    // let toFind = /"https:\/\/unpkg.com\/ml5@0.3.1\/dist\/ml5.min.js"/g;
+    // let replace = "\"https://unpkg.com/ml5@0.3.1/dist/ml5.min.js\" crossorigin";
+    // let newSrc = src.replace(toFind, replace);
+    // let toFind = /<script /g;
+    // let replace = "<script crossorigin ";
+    // let newSrc = src.replace(toFind, replace);
+    // toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
+    // replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
+    // newSrc = newSrc.replace(toFind, replace);
+    // return newSrc;
+  },
   getPossibleNodes(src) {
     const scripts = this.getScripts(src);
     let possibles = [];

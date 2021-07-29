@@ -2,14 +2,10 @@
 
 <h1>Tech Yard Demos</h1>
 
-<p class = "tutorial-text">
-  Currently, you will need to use Google Chrome as a browser for these demos to work properly
-</p>
-
 <h2>1. Impulses</h2>
 
 <p class = "tutorial-text">
-  We can use maths to generate signals that control the speaker.
+  In order to tell the speaker how to move in and out, we send it a stream of numbers. In fact, we send over 40,000 numbers <strong> every second!</strong>. This stream of numbers is often called a signal and we can use maths and computer programs to generate these signals.
 </p>
 
 <p class = "tutorial-text">
@@ -21,7 +17,11 @@
 </p>
 
 <p class = "tutorial-text">
-  The first signal we're going to send to the speaker tells it to move in and out (up to 1 and then doen to 0) for really short amount of time, followed by a pause. When the gap between these is long, you will hear this is a series of individual short sounds. As we make the gaps between the spikes shorter, the sounds get quicker and eventually, they begin to sound like one continuous sound. Even better, as they get faster, the pitch of the sound will get higher!
+  The first signal we're going to send to the speaker tells it to move in and out (up to 1 and then doen to 0) for really short amount of time, followed by a pause. When the gap between these is long, you will hear this is a series of individual short sounds.
+</p>
+
+<p class = "tutorial-text">
+  As we make the gaps between the spikes shorter, the sounds get quicker and eventually, they begin to sound like one continuous sound. Even better, as they get faster, the pitch of the sound will get higher!
 </p>
 
 <p class = "tutorial-text">
@@ -84,7 +84,7 @@
 </p>
 
 <p class = "tutorial-text">
-  In the demo below, we've also changed the shape of the wave again, which makes a different sound. Instead of smoothly moving in a line, or doing short bursts, we move to the top, stay there for a while, then move back down again and stay there. This is called a <strong>Square Wave</strong> because, you;ve guessed it, it looks like a square.
+  In the demo below, we've also changed the shape of the wave again, which makes a different sound. Instead of smoothly moving in a line, or doing short bursts, we move to the top, stay there for a while, then move back down again and stay there. This is called a <strong>Square Wave</strong> because, you've guessed it, it looks like a square.
 </p>
 
 <h3>Task</h3>
@@ -106,12 +106,12 @@
 <h2>4. Noise</h2>
 
 <p class = "tutorial-text">
-  Finally, we'll look at what happens if you just use random numbers to control the speaker. This is called noise!
+  Finally, we'll look at what happens if you just use random numbers to control the speaker. This is called noise! Where have you heard sounds like this before?
 </p>
 
 <h3>Task</h3>
 <p class = "tutorial-text">
-  Use the slider to make the noise louder and quieter
+  Use the slider to change the volume of the noise. Look how the waveform gets bigger and smaller as the sound gets louder and quieter.
 </p>
 
 <!-- Noise -->
@@ -124,12 +124,17 @@
 </p>
 
 <p class = "tutorial-text">
-  Take a look at this audio file, you can see that the it has similar waves to the oscilloscope signal we saw when making the electronic sounds earlier. Click the waveform to play the sound and watch as the playhead moves across the sample. This is signal that is being sent to the speaker to move it in and out!
+  Take a look at this audio file, you can see that the it has similar waves to the oscilloscope signal we saw when making the electronic sounds earlier.
+</p>
+<p class = "tutorial-text">
+  Click the waveform to play the sound and watch as the playhead moves across the sample. This is signal that is being sent to the speaker to move it in and out!
 </p>
 
 <!-- Short Waveform -->
 {{embedded-project docId = "
-5ac1cfbb-0498-445e-b8ab-f126ba4a19dd" height = "350px" manualLoad = false}}
+5ac1cfbb-0498-445e-b8ab-f126ba4a19dd" height = "300px" manualLoad = false}}
+
+<h3>Changing the Speed</h3>
 
 <p class = "tutorial-text">
   In the same way that we move up and down faster or slower to change the pitch of the electronic sounds, we can move through the audio file slower or faster.
@@ -151,6 +156,7 @@
     <li>Click on the audio files to start playing, and click again to pause. You will see the progress bar move as you move through the audio file. Can you see the louder parts of the sound happen when the waveform is bigger? </li>
     <li>Use the slider underneather the waveform to speed up and slow down the playback. You can see the progress bar move at different speeds and listen to the results</li>
     <li>Set the speed to really slow and listen for a while as it moves through the file. It almost sounds like a completely different song!</li>
+    <li>What do you think happens when we move through the audio file backwards?</li>
   </ul>
 </p>
 
@@ -174,8 +180,8 @@ be63fe09-64e2-bf2e-639f-d648c2c6864a" height = "350px" manualLoad = false}}
 
 <p class = "tutorial-text">
   <ul>
-    <li>There are two tracks, an instrumental track and a drum track. When these play, you'll see the playhead move across the waveform like in the earlier examples</li>
-    <li>There is also a sequencer underneath, and this controls where in audio file we play from and what speed we move through the audio file at a given time step</li>
+    <li><strong> The Waveforms</strong>: There are two tracks, an instrumental track and a drum track. When these play, you'll see the playhead move across the waveform like in the earlier examples</li>
+    <li><strong> The Sequencer</strong>: There is also a sequencer underneath, and this controls where in audio file we play from and what speed we move through the audio file at a given time step</li>
     <li>Using this, we can program in a pattern that jumps around the audio files and repitches the audio to make a new track!</li>
   </ul>
 </p>
@@ -187,7 +193,7 @@ be63fe09-64e2-bf2e-639f-d648c2c6864a" height = "350px" manualLoad = false}}
 <p class = "tutorial-text">
   <ul>
     <li>Hit the "PLAY" button at the bottom</li>
-    <li>Watch as the sequencer moves along underneather audio files. Also look how the text at the end changes when it reaches a new time step telling you where the audio is skipping to and what the pitch is</li>
+    <li>Watch as the sequencer moves along underneath the audio files. Also look how the text at the end changes when it reaches a new time step telling you where the audio is skipping to and what the pitch is</li>
   </ul>
 </p>
 
@@ -195,19 +201,53 @@ be63fe09-64e2-bf2e-639f-d648c2c6864a" height = "350px" manualLoad = false}}
 {{embedded-project docId = "
 7c367fdb-2ebb-3841-22e6-c6435674a048" height = "700px" manualLoad = false}}
 
+<h3>Programming the Sequencer</h3>
+
 <p class = "tutorial-text">
-  Now we're going to program in some position changes to Track 1. The sliders will program in a position change for whatever track and time step you last clicked on. You can see this as it is coloured in <a style = "colour:#2bb; !important">green</a>.
+  <ul>
+    <li>The sequencer at the bottom moves through 8 different steps one after another.</li>
+    <li>At each step there is an instruction stored about how to play back each of the two  tracks, either by changing the speed, or skipping to another point in the audio file.</li>
+    <li>When you click on a square on the sequencer, you can see which instructions are stored there on the sliders and labels above.</li>
+    <li>You can then use these sliders to change the instructions for that particular time step.</li>
+    <li>To change the instructions for another time step, just click on another square on the sequencer. You'll know which one you're currently working with because it will be filled in green!</li>
+    <li>The top row controls Track 1, and the bottom row Track 2.</li>
+  </ul>
+
 </p>
 
 <h3>Task Part 2</h3>
 <p class = "tutorial-text">
-  Sequencing the start position of Track 1
+  Sequencing the start position of Track 1. First follow our instructions to get a feel for how it works, then try making your tracks.
 </p>
 <p class = "tutorial-text">
   <ul>
-    <li>Click on the second square in the top row of the sequence. Then move the Position slider down from 0.125 to 0. This means at the second time step, the audio file will skip back to beginning</li>
-    <li>Click on the third square in the top row of the sequence. Then move the Position slider down from 0.25 to 0. Again, this means at the third time step, the audio file will skip back to beginning</li>
-    <li>Do this for the forth square as well. Listen to the audio playback and watch the playhead as the audio file loops back to the beginning four times in a row at the sequencer plays</li>
+    <li>
+      Program to skip to audio file back to beginning (position 0) at time step 2
+      <br><br>
+      <ol>
+        <li>
+          Click on the 2nd square in the top row of the sequence.
+        </li>
+        <li>
+          Then move the Position slider down from 0.125 to 0.
+        </li>
+      </ol>
+      <br>
+      </li>
+      <li>
+        Program to skip to audio file back to beginning (position 0) at time step 3
+        <br><br>
+        <ol>
+          <li>
+            Click on the 3rd square in the top row of the sequence.
+          </li>
+          <li>
+            Then move the Position slider down from 0.25 to 0.
+          </li>
+        </ol>
+        <br>
+        </li>
+    <li>Do this for the 4th square as well. Listen to the audio playback and watch the playhead as the audio file loops back to the beginning four times in a row at the sequencer plays</li>
     <li>Try this for some of the others squares with different start positions to make your own track. Try changing Track 2 as well!</li>
   </ul>
 </p>
@@ -217,14 +257,40 @@ be63fe09-64e2-bf2e-639f-d648c2c6864a" height = "350px" manualLoad = false}}
   Sequencing the pitch of both tracks
 </p>
 <p class = "tutorial-text">
-  <ul>
-    <li>Click on the fourth square in the top row of the sequence. Then move the Pitch slider down from 1 to 0.5. This means at the fourth time step, the audio file will start playing the audio file and half speed</li>
-    <li>Click on the fifth square in the top row of the sequence. Then move the Pitch slider up from 1 to 1.5. This means at the fifth time step, the audio file will start playing the audio file and 1.5 times the speed </li>
+  <ul style = "">
+    <li>
+      Program to start playing back the audio at half the speed at time step 4
+      <br><br>
+      <ol>
+        <li>
+          Click on the 4th square in the top row of the sequence
+        </li>
+        <li>
+          Then move the Pitch slider down from 1 to 0.5
+        </li>
+      </ol>
+      <br>
+      </li>
+      <li>
+        Program to start playing back the audio at 1.5 times the speed at time step 5
+        <br><br>
+        <ol>
+          <li>
+            Click on the 5th square in the top row of the sequence
+          </li>
+          <li>
+            Then move the Pitch slider up from 1 to 1.5
+          </li>
+        </ol>
+        <br>
+        </li>
     <li>Listen to the audio playback and watch the playhead as the audio file slows down and speeds up when it reaches the time steps on the sequencer. You should be able to hear the pitch getting higher and lower</li>
     <li>Try this for some of the others squares with different pitches to make your own track. Try changing Track 2 as well!</li>
   </ul>
 </p>
-
+  <br>  <br>  <br>  <br>  <br>
+<h2> AND WE'RE DONE. THANKS. YOU'RE GREAT.</h2>
+  <br>  <br>  <br>  <br>  <br>
 <p class = "tutorial-text">
 </p>
 
