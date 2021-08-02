@@ -1,0 +1,39 @@
+<h1>A Spacebar is All You Need for a Drum Machine</h1>
+
+<p class = "tutorial-text">
+Rhythm is complex, you may have such an impression when looking at a sophisticated drum machine. All those knobs and buttons are supposed to work together to compose a drum pattern. You need to think about, in every detail, what to sound, when to sound, and how to sound, and input them all into the machine. But oftentimes, rhythm comes to your mind as a flowing groove with sounding details yet to be specified. You may, like me, tap on the table trying to capture the beating energy. So, what if the drum machine can understand your tapping and make up all the details for you?
+</p>
+
+<p class = "tutorial-text">
+Magenta’s GrooVAE can generate drum patterns based on a single sequence of time points. So, this programme takes your groove tapped onthe spacebar as input to the GrooVAE model, which then return you a completed pattern! Simple taps in, complex beats out!
+</p>
+
+{{embedded-project docId = "fd439a02-9ca3-b9db-9054-40aa3aa5cbb5" width="250px" height="850px"}}
+
+<p class = "tutorial-text">
+You can replace the drum sounds with some from your favourite collections. Here’s how to do it:
+</p>
+
+<p class = "tutorial-text">
+<ol>
+  <li>Click the Setting icon in the menu bar, then Fork this project making it editable</li>
+  <li>Click the File icon in the menu bar, then you can upload your own samples.</li>
+  <li>Now you need to change the code. Make the code panel visible and select “sampler.js”. Inside the code you can find “const sampleMap”, which is the variable that defines the sample mapping.</li>
+  <li>Observe what is defined in “const sampleMap”, you see there are 16 sample files being mapped to 16 MIDI notes. Don’t change the MIDI notes, but replace the names of the files with the ones you have uploaded.</li>
+</ol>
+</p>
+
+<p class = "tutorial-text">
+Or, If you also want to twist the model a bit, telling it to be more, or less improvising, then:
+</p>
+
+<p class = "tutorial-text">
+<ol>
+  <li>Select “groove.js”, find “const temperature” in the code. This is the variable specifying the stochasticity level of the pattern generation.</li>
+  <li>Try different values, pay attention to the subtle difference in the outcome around the sweet spot between order and chaos!</li>
+</ol>
+</p>
+
+<p class = "tutorial-text">
+We also have the 2-bar version SpaceDrum II that you might want to check out too. Have fun!
+</p>

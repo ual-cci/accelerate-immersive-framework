@@ -190,7 +190,7 @@ export default Service.extend({
       if(!added)
       {
         /**
-        Insert cross origin at the beginning of script tags that ARE NOT
+        Insert crossorigin at the beginning of script tags that ARE NOT
         tabs (e.g. actual URLS to external or internally hosted libraries)
         This is necsesary because all external resources MUST have a CORS
         or CORP policy, and if we dont explictly put in the "crossorigin"

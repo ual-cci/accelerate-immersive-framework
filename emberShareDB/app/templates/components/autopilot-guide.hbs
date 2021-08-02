@@ -1,0 +1,42 @@
+<h1>Linear Regression Model to Generate Drone Sound</h1>
+
+<p class = "tutorial-text">
+The perceptual features of drone sound involve sustaining yet ever-changing sonic textures. Such an effect can be achieved by mixing different audio components together and continuously modulating the harmonics of them. If we use a synthesiser to produce these audio components, there will be many parameters involved in the modulation in order to obtain interesting musical dynamics, in fact, too many for a lazy noise maker like me!
+</p>
+
+<p class = "tutorial-text">
+So, since we know linear regression models can produce continuous data based on a few given discrete data points, why not use one to generate continuous control signals for all the parameters of a synthesiser? This way lazy noise makers just need to decide a few discrete parametric points as well as how the sound would traverse around these points, then the model will do all the calculations!
+</p>
+
+{{embedded-project docId = "37bd95c1-c1ff-a09a-55eb-eb8cc4884e88" width="250px" height="650px"}}
+
+<p class = "tutorial-text">
+Now, you see there are two panels in the UI, the upper one is for the synthesiser while the lower one is for the linear regression model. Let’s get our lazy hands on it:
+</p>
+
+<p class = "tutorial-text">
+
+<ol>
+  <li>
+    Hit Record to tell the model to start waiting to capture and record any discrete data points to be later fed into it. You will see what these data points represent in the following steps
+  </li>
+  <li>
+     Hit Randomise to generate a random sound, you will see the synthesiser’s parameter values change accordingly. You can adjust the parameters manually or hit Randomise again until you find a sound you like as one of the ‘anchor sounds’ for your drone sound.
+  </li>
+  <li>
+    Hit somewhere on the blue Pad, as the ‘anchor position’, to map the ‘anchor sound’ to. This way the ‘anchor sound’ and the ‘anchor position’ are bound together making up an ‘anchor data point’, which is now captured and recorded by the linear regression model as the discrete datapoint it needs to produce continuous signals with.
+  </li>
+  <li>
+    However lazy you might be, a few more ‘anchor points’ are needed. So, repeat step 2-3 a couple of times.
+  </li>
+  <li>
+    Hit Stop then Train, the model creates a continuous space based on the ‘anchor points’ you gave it. This space joins all the ‘anchor sounds’ and ‘anchor positions’ together with interpolation and extrapolation. The space is your playground ready, but you can’t hear it or see it unless you fly through it.
+  </li>
+  <li>
+    Juicy part! Move your mouse on to the blue Pad and hold down the button, imagine like holding a drone, slowly steer it over the Pad. You should be able to hear the sound changes following your movement. In other words, the movement in a spatial continuum is transformed to the sound changing in a sonic continuum.
+  </li>
+  <li>
+    Release the mouse button, your movement will be recorded and repeatedly played back and forth to control the ‘drone’. Lazy noise makingaccomplished!
+  </li>
+</ol>
+</p>

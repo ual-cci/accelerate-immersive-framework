@@ -59,6 +59,12 @@ export default Controller.extend({
   isKicks:computed('model', function() {
     return this.get('model').id == "kick-classifier"
   }),
+  isSpaceDrum:computed('model', function() {
+    return this.get('model').id == "space-drum"
+  }),
+  isAutoPilot:computed('model', function() {
+    return this.get('model').id == "auto-pilot"
+  }),
   actions: {
     onClick(example) {
       this.transitionToRoute('examples', example.id)

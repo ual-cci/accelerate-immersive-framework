@@ -8,12 +8,8 @@ export default Service.extend({
       {id:"kick-classifier", docid:"a4c91621-199c-65b5-e355-2aadfc27c33f",desc:"Control this audio track with objects and your webcam"},
       //
       {id:"sun-on-your-skin", docid:"2fdd8ba2-3cb8-1838-49a5-fe9cfe6650ed",desc:"Map the movements of your body to a synth soundscape."},
-      // //audio triggers
-      // {id:"audio-trigger", docid:"585ecea5-4841-6ae5-a8c1-4a0ddb8975fd",desc:"Train an audio classifier on your own percussive sounds and use it to reconfigure music tracks live."},
-      // //FaceAPI
-      // {id:"facesynth", docid:"9dc4eaf4-93db-26e8-9357-155eb152ea44",desc:"Train a granular sythesiser to respond to the emotions of your face."},
-      // //shelly drum machine
-      // {id:"rhythm-remixer", docid:"c89860a4-824a-5dfc-ff90-412f58531f5a",desc:"Play in rhythms using your microphone and have them remixed into new beats."},
+      {id:"space-drum", docid:"fd439a02-9ca3-b9db-9054-40aa3aa5cbb5",desc:"What if the drum machine can understand your tapping and make up all the details for you?"},
+      {id:"auto-pilot", docid:"37bd95c1-c1ff-a09a-55eb-eb8cc4884e88",desc:"Make a 2D parameter map for theis synth then plot journeys around it!"}
 
     ]},
     {title:"Generative Music", examples:[
