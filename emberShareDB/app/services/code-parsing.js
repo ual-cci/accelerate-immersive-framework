@@ -230,13 +230,19 @@ export default Service.extend({
   {
     //return src
 
-    // let toFind = /"https:\/\/unpkg.com\/ml5@0.3.1\/dist\/ml5.min.js"/g;
-    // let replace = "\"https://unpkg.com/ml5@0.3.1/dist/ml5.min.js\" crossorigin";
-    // let newSrc = src.replace(toFind, replace);
-    let toFind = /<script /g;
-    let replace = "<script crossorigin ";
+    let toFind = /\/dist\/ml5.min.js"/g;
+    let replace = "/dist/ml5.min.js\" crossorigin";
     let newSrc = src.replace(toFind, replace);
+    toFind = /\/dist\/ml5.js"/g;
+    replace = "/dist/ml5.js\" crossorigin";
+    newSrc = newSrc.replace(toFind, replace);
+    // let toFind = /<script /g;
+    // let replace = "<script crossorigin ";
+    // let newSrc = src.replace(toFind, replace);
     toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
+    replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
+    newSrc = newSrc.replace(toFind, replace);
+    toFind = /"https:\/\/www.doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
     replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
     newSrc = newSrc.replace(toFind, replace);
     return newSrc;

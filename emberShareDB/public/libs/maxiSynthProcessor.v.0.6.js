@@ -1,4 +1,4 @@
-import Maximilian from "https://mimicproject.com/libs/maximilian.wasmmodule.v.0.5.js"
+import Maximilian from "http://localhost:4200/libs/maximilian.wasmmodule.v.0.5.js"
 //From Paul Adenot https://github.com/padenot/ringbuf.js
 
 class RingBuffer {
