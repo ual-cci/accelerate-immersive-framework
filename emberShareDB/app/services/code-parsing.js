@@ -217,20 +217,29 @@ export default Service.extend({
     const newSrc = src.replace(toFind, replace);
     return newSrc;
   },
+  /**
+    Here we insert "crossorigin" to the beginning of any script tags
+    This is necsesary because all external resources MUST have a CORS
+    or CORP policy, and if we dont explictly put in the "crossorigin"
+    atrribute, even if the resource has "Access-Control-Allow-Origin:*", it
+    doesnt get past.
+    We also swap out any doc.ac.uk hosted rapidLib libraries for the same-origin
+    mimicproject.com hosted one for the same reasons
+  */
   insertCrossOrigin(src)
   {
-    return src
+    //return src
 
     // let toFind = /"https:\/\/unpkg.com\/ml5@0.3.1\/dist\/ml5.min.js"/g;
     // let replace = "\"https://unpkg.com/ml5@0.3.1/dist/ml5.min.js\" crossorigin";
     // let newSrc = src.replace(toFind, replace);
-    // let toFind = /<script /g;
-    // let replace = "<script crossorigin ";
-    // let newSrc = src.replace(toFind, replace);
-    // toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
-    // replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
-    // newSrc = newSrc.replace(toFind, replace);
-    // return newSrc;
+    let toFind = /<script /g;
+    let replace = "<script crossorigin ";
+    let newSrc = src.replace(toFind, replace);
+    toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
+    replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
+    newSrc = newSrc.replace(toFind, replace);
+    return newSrc;
   },
   getPossibleNodes(src) {
     const scripts = this.getScripts(src);
