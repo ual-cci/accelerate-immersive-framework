@@ -157,7 +157,7 @@ export default Service.extend({
     //this.get('cs').log(newSrc)
     return newSrc;
   },
-  insertChildren(src, children, assets) {
+  insertTabs(src, children, assets) {
     let newSrc = "";
     const scripts = this.getScripts(src);
     scripts.forEach((script)=> {
@@ -189,7 +189,19 @@ export default Service.extend({
       }
       if(!added)
       {
-        newSrc = newSrc + script.scriptTag;
+        /**
+        Insert cross origin at the beginning of script tags that ARE NOT
+        tabs (e.g. actual URLS to external or internally hosted libraries)
+        This is necsesary because all external resources MUST have a CORS
+        or CORP policy, and if we dont explictly put in the "crossorigin"
+        atrribute, even if the resource has "Access-Control-Allow-Origin:*", it
+        doesnt get past.
+        */
+        let scriptTag = script.scriptTag
+        let toFind = /<script /g;
+        let replace = "<script crossorigin ";
+        scriptTag = scriptTag.replace(toFind, replace);
+        newSrc = newSrc + scriptTag;
         let js = script.src;
         for(let j = 0; j < children.length; j++)
         {
@@ -218,34 +230,20 @@ export default Service.extend({
     return newSrc;
   },
   /**
-    Here we insert "crossorigin" to the beginning of any script tags
-    This is necsesary because all external resources MUST have a CORS
-    or CORP policy, and if we dont explictly put in the "crossorigin"
-    atrribute, even if the resource has "Access-Control-Allow-Origin:*", it
-    doesnt get past.
-    We also swap out any doc.ac.uk hosted rapidLib libraries for the same-origin
-    mimicproject.com hosted one for the same reasons
+    We swap out any doc.ac.uk hosted rapidLib libraries for the same-origin
+    mimicproject.com hosted one because of CORS
   */
-  insertCrossOrigin(src)
+  replaceNoCORSResources(src)
   {
     //return src
-
-    let toFind = /\/dist\/ml5.min.js"/g;
-    let replace = "/dist/ml5.min.js\" crossorigin";
-    let newSrc = src.replace(toFind, replace);
-    toFind = /\/dist\/ml5.js"/g;
-    replace = "/dist/ml5.js\" crossorigin";
-    newSrc = newSrc.replace(toFind, replace);
-    // let toFind = /<script /g;
-    // let replace = "<script crossorigin ";
-    // let newSrc = src.replace(toFind, replace);
+    let toFind, replace, newSrc = ""
     toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
     replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
-    newSrc = newSrc.replace(toFind, replace);
+    src = src.replace(toFind, replace);
     toFind = /"https:\/\/www.doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
     replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
-    newSrc = newSrc.replace(toFind, replace);
-    return newSrc;
+    src = src.replace(toFind, replace);
+    return src;
   },
   getPossibleNodes(src) {
     const scripts = this.getScripts(src);
