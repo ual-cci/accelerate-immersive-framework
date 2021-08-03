@@ -50,8 +50,8 @@ function sabPrinter() {
         for (let i = 0; i < avail; i += maxi.sharedArrayBuffers[v].blocksize) {
           let elements = new Float64Array(maxi.sharedArrayBuffers[v].blocksize);
           let val = maxi.sharedArrayBuffers[v].rb.pop(elements);
-          if(maxi.onData) {
-            maxi.onData(v,elements)
+          if(maxi.onInput) {
+            maxi.onInput(v,elements)
           }
         }
       }
@@ -63,7 +63,7 @@ function sabPrinter() {
 }
 sabPrinter()
 
-maxi.sendData = (id, data)=> {
+maxi.send = (id, data)=> {
   if(maxi.sharedArrayBuffers[id] === undefined) {
     maxi.createSharedBuffer(id, "ML", data.length);
     console.log(maxi.sharedArrayBuffers)
@@ -71,7 +71,7 @@ maxi.sendData = (id, data)=> {
   maxi.pushDataToSharedBuffer(id, data);
 }
 
-maxi.updateCode = async (location)=>{
+maxi.setAudioCode = async (location)=>{
 
   const executeCode = (userCode)=> {
     userCode = userCode.replace(/Maximilian/g, "Module");
