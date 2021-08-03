@@ -187,6 +187,7 @@ export default Service.extend({
           }
         }
       }
+      //If not a script imported from a tab
       if(!added)
       {
         /**
@@ -198,9 +199,12 @@ export default Service.extend({
         doesnt get past.
         */
         let scriptTag = script.scriptTag
-        let toFind = /<script /g;
-        let replace = "<script crossorigin ";
-        scriptTag = scriptTag.replace(toFind, replace);
+        if(scriptTag.includes("src=") || scriptTag.includes("src =") ) {
+          let toFind = /<script /g;
+          let replace = "<script crossorigin ";
+          scriptTag = scriptTag.replace(toFind, replace);
+        }
+
         newSrc = newSrc + scriptTag;
         let js = script.src;
         for(let j = 0; j < children.length; j++)
