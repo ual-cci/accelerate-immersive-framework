@@ -1,9 +1,7 @@
 <h2>Learner.js</h2>
 
-{{embedded-project docId = "3738a892-330f-15ae-673e-5cb38f25a8e8" height = "700px" manualLoad = false}}
-
 <p class = "tutorial-text">
-This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools.
+This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools. If you would like to check out the JSDoc API documentation, or the look at the source code, see the links below.
 </p>
 <p class = "tutorial-text">
   <ul>
@@ -30,10 +28,18 @@ If you want to follow along to this tutorial with a simple project, check out th
 </p>
 
 <p class = "tutorial-text">
-You can also find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a> here.
+You can also follow along to more complex examples if you would like, for example, using body tracking or audio analysis. If you want to take on this challenge, you can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a> here.
 </p>
 
+{{embedded-project docId = "3738a892-330f-15ae-673e-5cb38f25a8e8" height = "700px" manualLoad = false}}
 
+<p class = "tutorial-heading">
+A Simple Example
+</p>
+
+<p class = "tutorial-text">
+Below we have a 
+</p>
 
 <p class = "tutorial-heading">
 1. Set up
@@ -42,9 +48,9 @@ You can also find <a href = "https://mimicproject.com/inputs">a bunch of fun inp
 Include the library
 </p>
 <pre>
-<xmp>
+<code>
 &lt;script src = "https://mimicproject.com/libs/learner.v.0.2.js"&gt;&lt;/script&gt;
-</xmp>
+</code>
 </pre>
 <p class = "tutorial-text">
 Initialise the object
@@ -66,7 +72,7 @@ learner.addGUI(document.getElementById("dataset"));
 </pre>
 </p>
 <p class = "tutorial-text">
-When you run the program you will see that you are given a number of simple controls including record, train, run, clear. You are also given a set of controls to set the output state. For classifiers, this will be a dropdown menu. For Regression models, this will be a slider per output.
+When you run the program you will see that you are given a number of simple controls that will allow you to build up a dataset and train and use and model. These include record, train, run, clear. You are also given a set of controls to set the output state. For classifiers, this will be a dropdown menu. For Regression models, this will be a slider per output.
 </p>
 <p class = "tutorial-heading">
 3. Add Model

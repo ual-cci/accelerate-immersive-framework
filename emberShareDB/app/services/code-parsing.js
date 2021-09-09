@@ -192,14 +192,15 @@ export default Service.extend({
       {
         /**
         Insert crossorigin at the beginning of script tags that ARE NOT
-        tabs (e.g. actual URLS to external or internally hosted libraries)
+        tabs (e.g. actual URLS to externally hosted libraries)
         This is necsesary because all external resources MUST have a CORS
         or CORP policy, and if we dont explictly put in the "crossorigin"
         atrribute, even if the resource has "Access-Control-Allow-Origin:*", it
         doesnt get past.
         */
         let scriptTag = script.scriptTag
-        if(scriptTag.includes("src=") || scriptTag.includes("src =") ) {
+        if((scriptTag.includes("src=") || scriptTag.includes("src =")) &&
+        (!scriptTag.includes("mimicproject.com"))) {
           let toFind = /<script /g;
           let replace = "<script crossorigin ";
           scriptTag = scriptTag.replace(toFind, replace);

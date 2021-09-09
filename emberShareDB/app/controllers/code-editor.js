@@ -149,13 +149,14 @@ export default Controller.extend({
     this.clearTabs();
     this.set("wsAvailable", false)
     this.set("isViewer", this.get('viewer') == "true")
-    this.get("cs").log("selectRootDoc","begin")
+    this.get("cs").log("selectRootDoc","begin");
+    this.initFromUrl();
     this.selectRootDoc().then(()=> {
       if(this.get("canEditSource")) {
         this.initShareDB()
       }
-      this.addWindowListener();
       this.initUI();
+      this.addWindowListener();
     })
   },
   initViewer: function() {
@@ -196,14 +197,15 @@ export default Controller.extend({
     this.set('leftCodeEditor', false);
     this.initWebSockets();
   },
+  initFromUrl: function() {
+    this.set('isEmbedded', this.get('embed') == "true");
+    this.set('isEmbeddedWithCode', this.get('showCode') == "true");
+  },
   initUI: function() {
-    this.set('collapsed', true);
+    //this.set('collapsed', true);
     setTimeout(()=> {
-      const embed = this.get('embed') == "true";
-      const embedWithCode = this.get('showCode') == "true";
-      this.get('cs').log("embed",embed,"embedWithCode",embedWithCode)
-      this.set('isEmbedded', embed);
-      this.set('isEmbeddedWithCode', embedWithCode);
+      const embed = this.get("isEmbedded");
+      const embedWithCode = this.get("isEmbeddedWithCode");
       this.set('isMobile', !(this.get('mediaQueries').isDesktop) && (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded')));
       this.get('cs').log("isMobile", this.get('isMobile'));
       this.set('showCodeControls', !(embed && !embedWithCode) || this.get('isDesktop'));
@@ -244,7 +246,7 @@ export default Controller.extend({
       container.style["padding-right"] = embed ? "0%" : "8%";
       this.updateDragPos();
       this.get('cs').observers.push(this);
-    }, 50)
+    }, 50);
   },
   initWebSockets: function(onSelectDoc) {
     let socket = this.get('socket');
@@ -616,6 +618,7 @@ export default Controller.extend({
       this.set('titleNoName', doc.get('name'));
       this.get('sessionAccount').set('currentDoc', this.get('model').id);
       this.set('fetchingDoc', false);
+      this.get('cs').log("isEmbeddedWithCode",this.get("isEmbeddedWithCode"));
       if(this.get("isEmbeddedWithCode")) {
         this.foldHead()
       }
@@ -1552,10 +1555,12 @@ export default Controller.extend({
   },
   foldHead:function() {
     const editor = this.get('editor');
-    editor.operation(function() {
+    this.get('cs').log("FOLDING HEAD");
+    editor.operation(()=> {
        for (var l = editor.firstLine(); l <= editor.lastLine(); ++l)
        {
          if(editor.doc.getLine(l).includes("<head>")) {
+           this.get('cs').log("FOLDING HEAD FOUND ELEMENT");
            editor.foldCode({line: l, ch: 0}, null, "fold");
          }
        }
