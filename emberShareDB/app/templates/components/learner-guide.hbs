@@ -1,7 +1,12 @@
 <h2>Learner.js</h2>
 
 <p class = "tutorial-text">
-This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools. If you would like to check out the JSDoc API documentation, or the look at the source code, see the links below.
+This is a quick walkthrough of how to use Learner.js on the MIMIC platform to quickly build your own simple machine learning tools.
+</p>
+<p class = "tutorial-text">
+</p>
+<p class = "tutorial-text">
+If you would like to check out the JSDoc API documentation, or the look at the source code, see the links below.
 </p>
 <p class = "tutorial-text">
   <ul>
@@ -23,29 +28,47 @@ Learner.js provides an interface that allows you to easily record in examples of
 If you want to learn abit more about the basics of <strong>supervised learning</strong>, you can check out this <a href = {{concat guideUrl "supervised-ml"}}>guide.</a>
 </p>
 
-<p class = "tutorial-text">
-If you want to follow along to this tutorial with a simple project, check out the <a href = "https://mimicproject.com/code/3738a892-330f-15ae-673e-5cb38f25a8e8"> Mouse XY Example</a>. Otherwise, you can make a new project from scratch and follow along that way.
-</p>
-
-<p class = "tutorial-text">
-You can also follow along to more complex examples if you would like, for example, using body tracking or audio analysis. If you want to take on this challenge, you can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a> here.
-</p>
-
-{{embedded-project docId = "3738a892-330f-15ae-673e-5cb38f25a8e8" height = "700px" manualLoad = false}}
-
 <p class = "tutorial-heading">
 A Simple Example
 </p>
 
 <p class = "tutorial-text">
-Below we have a 
+Before we look at any code, we can first look at a simple example of a project that uses <strong>Learner.js</strong> to classify clicks from your mouse (x and y coordinates) into one of two possible groups. I know, exciting right?
+</p>
+
+<p class = "tutorial-text">
+<ol>
+  <li>First, we're going to provide the dataset. Select <strong>Record</strong>.</li>
+  <li>Now, click a few times in the <strong>bottom left hand corner</strong> of the blue rectangle. You should see the number of saved examples going up.</li>
+  <li>Now we want to add in some example of the second class. To do this, change the <strong>Class drop down</strong> to 1.</li>
+  <li>Click a few times in the <strong>top right hand corner</strong> of the blue rectangle. Again, you should see the number of saved examples going up.</li>
+  <li>Stop <strong>Recording</strong> and click <strong>Train</strong>. When the model is build, it will automatically start running the trained model. This means you can click anywhere in the blue rectangle, and it will tell you which class you are in. You've made a binary decision maker, with no coding!</li>
+</ol>
+</p>
+
+{{embedded-project docId = "3738a892-330f-15ae-673e-5cb38f25a8e8" height = "700px" manualLoad = false}}
+
+<p class = "tutorial-heading">
+Learning the Library
+</p>
+
+<p class = "tutorial-text">
+  If you hit the <strong>Show Code</strong> button in the bottom right on the project above, you can see how its made. Its not a lot of code! The rest of this document will go through this code from the Learner.js library step by step and have you making amazing projects in no time.
+</p>
+
+<p class = "tutorial-text">
+You can follow along looking at the code above, or select <strong>Go To Project</strong> (the big green button) to check out the project in a separate tab. Otherwise, you can make a new project from scratch and follow along that way.
+</p>
+
+<p class = "tutorial-text">
+You can also follow along to more complex examples if you would like, for example, using body tracking or audio analysis! If you want to take on this challenge, you can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a> here.
 </p>
 
 <p class = "tutorial-heading">
 1. Set up
 </p>
 <p class = "tutorial-text">
-Include the library
+The learner.js library lives on the Mimic website and the first thing we have to do is include the library in our document. You can add the following code to the HTML at the top of your project.
 </p>
 <pre>
 <code>
@@ -53,7 +76,7 @@ Include the library
 </code>
 </pre>
 <p class = "tutorial-text">
-Initialise the object
+Now some Javascript! First thing we need to do is make an instance of the main Learner object and save it in a variable to refer to later.
 </p>
 <pre>
 <code>
@@ -64,35 +87,43 @@ const learner = new Learner();
 2.  Add GUI
 </p>
 <p class = "tutorial-text">
-Give the learner the HTML element you want to attach the GUI to
+In order to get all the useful interfaces in our project, we need to tell Learner.js to make it, and attach it to an <strong>existing HTML element in our project</strong>.
+<p class = "tutorial-text">
+  Here we attach the Learner.js interface to a <code>div</code> element called "dataset" that we have included in our project.
+</p>
+
+</p>
 <pre>
 <code>
 learner.addGUI(document.getElementById("dataset"));
 </code>
 </pre>
-</p>
-<p class = "tutorial-text">
-When you run the program you will see that you are given a number of simple controls that will allow you to build up a dataset and train and use and model. These include record, train, run, clear. You are also given a set of controls to set the output state. For classifiers, this will be a dropdown menu. For Regression models, this will be a slider per output.
-</p>
+
 <p class = "tutorial-heading">
 3. Add Model
 </p>
 <p class = "tutorial-text">
-You can now specify a model to use. For regression (continuous values), use the code below, specifying the number of outputs you want to control.
+You can now specify a model to use. Each Learner object can only have <strong>one type of model</strong>, so if you want to have <strong>multiple models</strong>, you need to make <strong>multiple Learner objects</strong>!
 </p>
-<pre>
-<code>
-learner.addRegression(3)
-</code>
-</pre>
 <p class = "tutorial-text">
-For classification (discrete states), use the code below specifying the number of classes you wish to discriminate between
+The model we used in the example of is a <strong>Classifier</strong>, in that it applies <strong>discrete labels</strong> to the inputs. Use the code below, specifying the number of classes you wish to discriminate between.
 </p>
 <pre>
 <code>
 learner.addClassification(4)
 </code>
 </pre>
+<p class = "tutorial-text">
+For regression (continuous values), use the code below, specifying the number of outputs you want to control.
+</p>
+<pre>
+<code>
+learner.addRegression(3)
+</code>
+</pre>
+<p class = "tutorial-heading">
+Tweaking your models
+</p>
 <p class = "tutorial-text">
 You can also adjust a few parameters of your models by passing an options object. For Regression models, RapidLib uses a Neural Network and the three available parameters to this are below. If you don't know what these mean, don't worry, the defaults will do you fine.
 </p>
@@ -115,6 +146,7 @@ learner.setModelOptions({
 })
 </code>
 </pre>
+
 <p class = "tutorial-heading">
 4. Add data
 </p>
@@ -146,8 +178,35 @@ const whenYouReceiveNewInputs = (newInputs)=> {
 }
 </code>
 </pre>
+<p class = "tutorial-heading">
+Where does my data get saved?
+</p>
 <p class = "tutorial-text">
-Each dataset is specific to a MIMIC documents, and your dataset will be saved in the browser's IndexedDB. This means that will persist beyond reruns of the project, refreshes of the page and closing of the browser window (in public mode). You will <strong>loose</strong> the data if you clear your cache, or if you close the window and you are in private / incognito mode.
+Each dataset is specific to a MIMIC documents, and your dataset will be saved in the browser's IndexedDB. This means that will persist beyond reruns of the project, refreshes of the page and closing of the browser window (in public mode). You will <strong>lose</strong> the data if you clear your cache, or if you close the window and you are in private / incognito mode.
+</p>
+<p class = "tutorial-heading">
+Downloading and Loading Datasets
+</p>
+<p class = "tutorial-text">
+You may wish to save your dataset to your local machine, or upload your current dataset to our servers, so that anyone who runs your project can train a model using your dataset. Luckily, you can do that.
+</p>
+<p class = "tutorial-text">
+First you have to download the data. Just hit the "Download Data" button on the GUI and you will get a .json file with all your lovely data.
+</p>
+<p class = "tutorial-text">
+You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data. See below how you pass the function to the Learner constructor, in which you load the data, then when that is done, train().
+</p>
+<pre>
+<code>
+const learner = new Learner({onLoad:()=>{
+  learner.loadTrainingData("myLearnerData.json").then(()=> {
+    learner.train()
+  })
+}})
+</code>
+</pre>
+<p class = "tutorial-heading">
+Pro Tip for Timing Recordings
 </p>
 <p class = "tutorial-text">
 You can also use the following functions to provide a count in to recording, this will delay the start of recording the given number of seconds after the "record" button has been pressed. You can also choose to limit recording time, again specifying a given number of seconds beforehand you want to record for before it is automatically shut off. Both default to 0.
@@ -205,28 +264,7 @@ External Outputs
 </ul>
 </p>
 <p class = "tutorial-heading">
-6. Downloading and Loading Datasets
-</p>
-<p class = "tutorial-text">
-You may wish to save your dataset to your local machine, or upload your current dataset to our servers, so that anyone who runs your project can train a model using your dataset. Luckily, you can do that.
-</p>
-<p class = "tutorial-text">
-First you have to download the data. Just hit the "Download Data" button on the GUI and you will get a .json file with all your lovely data.
-</p>
-<p class = "tutorial-text">
-You can then upload this file as an asset to your project and load in the data when your project is run. As the set up of the learner object is aynchronous, you can use the onLoad() callback to load your data. See below how you pass the function to the Learner constructor, in which you load the data, then when that is done, train().
-</p>
-<pre>
-<code>
-const learner = new Learner({onLoad:()=>{
-  learner.loadTrainingData("myLearnerData.json").then(()=> {
-    learner.train()
-  })
-}})
-</code>
-</pre>
-<p class = "tutorial-heading">
-7. Now be free and make amazing projects!
+6. Now be free and make amazing projects!
 </p>
 <p class = "tutorial-text">You can find <a href = "https://mimicproject.com/inputs">a bunch of fun inputs</a>
 </p>

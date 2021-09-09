@@ -1578,7 +1578,8 @@ export default Controller.extend({
       tab.classList.remove(!doHide ? 'hiding-code' : 'showing-code');
     }
     setTimeout(()=> {
-      const w = (window.innerWidth / 2)  + "px";
+      const proportion = this.get("isEmbeddedWithCode") ? 0.9:0.5;
+      const w = (window.innerWidth * proportion)  + "px";
       this.set('isShowingCode', !doHide);
       this.get('cs').log("setting codeW to ", doHide ? "30px" : w);
       this.set('codeW', doHide ? "30px" : w);
