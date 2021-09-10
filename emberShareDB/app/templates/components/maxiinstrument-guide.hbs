@@ -2,6 +2,11 @@
 <p class = "tutorial-text">
 MaxiInstruments is a class of simple synths and samplers that are designed to so that their parameters can be easily controlled using the <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. They are AudioWorklets backed so do not get interrupted by beefy feature extractors one might use an an input or the running of a model to do the mapping.
 </p>
+
+<p class = "tutorial-text">
+If you would like to check out the JSDoc API documentation, or the look at the source code, see the links below.
+</p>
+
 <p class = "tutorial-text">
   <ul>
     <li>
@@ -13,14 +18,61 @@ MaxiInstruments is a class of simple synths and samplers that are designed to so
   </ul>
 
 </p>
+
 <p class = "tutorial-text">
-Previously, Chromium-based browsers (around Chrome 79) had a bug that may cause slight crackling in Audio Worklet based programs. However, we now believe this bug to be fixed (Chrome 80 onwards). If you are experiencing this issue, <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">you can follow the bug </a>and also download and run <a href ="https://www.google.com/chrome/canary/" >Canary (newer beta version of Chrome)</a> or <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">older versions of Chrome</a> to get better results.
+Currently, MaxiInstruments will only work in <strong>Google Chrome</strong>.
 </p>
-<p class = "tutorial-heading">
+
+<!-- <p class = "tutorial-text">
+Previously, Chromium-based browsers (around Chrome 79) had a bug that may cause slight crackling in Audio Worklet based programs. However, we now believe this bug to be fixed (Chrome 80 onwards). If you are experiencing this issue, <a href = "https://bugs.chromium.org/p/chromium/issues/detail?id=1033493#c42">you can follow the bug </a>and also download and run <a href ="https://www.google.com/chrome/canary/" >Canary (newer beta version of Chrome)</a> or <a href = "https://www.slimjet.com/chrome/google-chrome-old-version.php">older versions of Chrome</a> to get better results.
+</p> -->
+
+<p class = "tutorial-heading-big">
+A Simple Example
+</p>
+
+<p class = "tutorial-text">
+Before we look at any of the code, we're going to look at a bare bones MaxiInstruments Synthesiser project. No Machine Learning yet. Just vibes.
+</p>
+
+<p class = "tutorial-text">
+You'll see you get a lovely synth with a bunch of parameters to play around with
+</p>
+
+<p class = "tutorial-text">
+<ol>
+  <li>Unmute it!</li>
+  <li>Try changing the main oscillator (top left)</li>
+  <li>Play around with the parameters, you can try
+    <ul>
+      <li>The amplitude envelope (attack, decay, sustain, release)</li>
+      <li>LFO on the pitch, filter and amplitude</li>
+      <li>Reverb and Delay effects.</li>
+    </ul>
+  </li>
+  <li>If you're unsure of what all the controls do, try some of the Presets </li>
+</ol>
+</p>
+
+{{embedded-project docId = "20d53be4-d662-1f0b-faae-a45114374ed3" height = "700px" manualLoad = false}}
+
+<p class = "tutorial-heading-big">
+Learning the Library
+</p>
+
+<p class = "tutorial-text">
+  If you hit the <strong>Show Code</strong> button in the bottom right on the project above, you can see how its made. Its not a lot of code! The rest of this document will go through this code from the MaxiInstruments library step by step and have you making amazing projects in no time.
+</p>
+
+<p class = "tutorial-text">
+You can follow along looking at the code above, or select <strong>Go To Project</strong> (the big green button) to check out the project in a separate tab. Otherwise, you can make a new project from scratch and follow along that way.
+</p>
+
+<p class = "tutorial-heading-big">
 1. Set up
 </p>
 <p class = "tutorial-text">
-Include the library
+The MaxiInstruments.js library lives on the Mimic website and the first thing we have to do is include the library in our document. You can add the following code to the HTML at the top of your project.
 </p>
 <pre>
 <code>
@@ -28,7 +80,7 @@ Include the library
 </code>
 </pre>
 <p class = "tutorial-text">
-Initialise the object
+Now some Javascript! First thing we need to do is make an instance of the main MaxiInstruments object and save it in a variable to refer to later.
 </p>
 <pre>
 <code>
@@ -36,22 +88,28 @@ const maxiInstruments = new MaxiInstruments();
 </code>
 </pre>
 
-<p class = "tutorial-heading">
+<p class = "tutorial-heading-big">
 2. Add the GUI
 </p>
 <p class = "tutorial-text">
-Give the instruments the HTML element you want to attach the GUI to
+In order to get all the useful interfaces in our project, we need to tell MaxiInstruments.js which <strong>existing HTML element in our project</strong> to attach the synths and samplers to when we make them.
 </p>
 <pre>
 <code>
 instruments.guiElement = document.getElementById("synths");
 </code>
 </pre>
-<p class = "tutorial-heading">
+<p class = "tutorial-heading-big">
 3. Load the modules
 </p>
 <p class = "tutorial-text">
-You need to load in the audio workout modules, when this is done you can start adding instruments
+Before we get down to making our instruments we first need to load the audio worklets processor. To make sure all this set up is done before we get going, we make use of some <strong>asynchronous</strong> functionality in Javascript called <a href = "">Promises</a>.
+</p>
+<p class = "tutorial-text">
+  You don't need to get into the details of this if you don't want! The important thing to know is that after calling <code>instruments.loadModules()</code>, we pass in another function that gets called <strong>after</strong> the modules have been loaded.
+</p>
+<p class = "tutorial-text">
+  Basically, all of the fun stuff happens <strong>within this function</strong>.
 </p>
 <pre>
 <code>
@@ -62,71 +120,152 @@ instruments.loadModules().then(()=> {
 });
 </code>
 </pre>
-<p class = "tutorial-heading">
-4. MaxiSynth
+<p class = "tutorial-heading-big">
+4. Creating An Instrument
 </p>
 <p class = "tutorial-text">
-MaxiSynth is a simple subtractive synthesiser.
+The main <code>MaxiInstruments</code> object in a container for all of your instruments, meaning they can share some functionality, like a global clock to keep them all in time for instance! At the moment there is one synthesiser, <code>MaxiSynth</code> (a simple subtractive synthesiser), and <code>MaxiSampler</code> (which is surprisingly, a sampler!).
 </p>
 <p class = "tutorial-text">
-Use the code below to add one synth, with the synths being stored in the instrument object’s .synth property. You can add up to 8, depending on how much your set up can handle. Each will have its own GUI. The constructor returns the synth, you can also access it from instruments.synths[0].
+  We'll cover the <code>MaxiSynth</code>, as thats what we've been looking at so far. By default, it is a <strong>8 voice polyphonic synthesiser</strong>.
 </p>
-<pre>
-<code>
-const syn = instruments.addSynth();
-</code>
-</pre>
 <p class = "tutorial-text">
-You can either have a two tone synthesiser where the frequency of each oscillator is controller by a slider OR you can have a polyphonic (up to 8 voice) synth where the frequency is specified by either a provided sequence or MIDI controller. Defaults to false.
+Use the code below to add one synth. You can add up to 8 to a single <code>MaxiInstruments</code> object, depending on how much your set up can handle. Each will have its own GUI.
+
+The constructor returns the synth, but you can also access it from the <code>instruments.synths</code> property.
 </p>
 <pre>
 <code>
-syn.useFreqSliders(true);
+const synth = instruments.addSynth();
+//Also can be accessed from instruments.synths[0];
+
+const synth2 = instruments.addSynth();
+//Also can be accessed from instruments.synths[1];
 </code>
 </pre>
-<p class = "tutorial-text">
-You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. The code below shows how you would select the frequencies of the two oscillators to be controlled by your regression model.
-</p>
-<pre>
-<code>
-syn.mapped = ["frequency", "frequency2"];
-</code>
-</pre>
-<p class = "tutorial-text">
-The synth also has a Randomise button that will select random values for your selected parameters. This can help you find fun sounds when making your own mappings.
+<p class = "tutorial-heading-big">
+5. Playing a Song
 </p>
 <p class = "tutorial-heading">
-5. MaxiSampler
+The Clock
 </p>
 <p class = "tutorial-text">
-Add a sampler using the code below. Similarly to the MaxiSynth, you can have up to 8 samplers (each can hold 8 samples). They are stored in the instrument object’s samplers property. Each will have its own GUI, showing the controls for 4 samples at a time.
+There is a global clock that lives in <code>MaxiInstruments</code> object and is shared by all the synths and samplers associated with it. You can set the tempo in bpm.
+</p>
+<p class = "tutorial-text">
+The clock allows for sequencing at the level of <strong>ticks</strong>, with the default, minimal resolution of <strong>24 ticks per beat</strong>.
 </p>
 <pre>
 <code>
-const sam = instruments.addSampler();
-</code>
-</pre>
-<p class = "tutorial-text">
-Load each sample by passing the url and an index (of the 8 slots) to store the sample.
-</p>
-<pre>
-<code>
-sam.loadSample("909.wav", 0);
-</code>
-</pre>
-<p class = "tutorial-text">
-Similarly to the MaxiSynth, you can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. Each samples parameters are identified by an underscored index following the name (this is also visible on the GUI).
-</p>
-<pre>
-<code>
-sam.mapped = ["rate_0", "gain_1"];
+instruments.setTempo(80);
 </code>
 </pre>
 <p class = "tutorial-heading">
-6. Adding the Model
+Setting a Sequence
 </p>
 <p class = "tutorial-text">
-You can now start mapping your chosen parameters to a given input using the Learner.js library. More information about this can be found in this <a href = "https://mimicproject.com/guides/learner">guide</a>. The instruments will work out how many outputs you need, given the mapped parameters you have specified. The second argument of "false" tells Learner.js that you don't need an additional GUI for your regression model, because you have the GUI provided by the instrument.
+In the example above, we are playing a loop of a few chords. To do this, we have made a sequence and set it to the specific instrument that we want to play it (in this case the first synth).
+</p>
+<p class = "tutorial-text">
+A sequence is an <strong>array of note objects</strong>.
+</p>
+<p class = "tutorial-text">
+Each note object is a Javascript object with some of the following properties. You can use the full name or just initial them.
+<ul>
+  <li>pitch or p: MIDI pitch of the note. Can be a single value or array of values</li>
+  <li>freq or f: Frequency in Hz (an alternative to pitch). Can be a single value or array of values</li>
+  <li>start or s: Start in ticks. Can be a single value or array of values</li>
+  <li>end or e: End in ticks</li>
+  <li>length or l: Length in ticks (an alternative to end)</li>
+  <li>velocity or v: Velocity (optional) (0-127)</li>
+</ul>
+</p>
+<pre>
+	<code>
+const synthSeq = [
+    {pitch:60, start:[0, 2, 4], end:12, velocity:127},
+    {p:67, s:49, l:34, v:60},
+    {p:[67, 60, 70], s:49, l:34, v:60},
+    {freq:[440, 606, 2000], start:49, e:134},
+  ];
+synth.setSequence(synthSeq);
+	</code>
+</pre>
+<p class = "tutorial-text">
+When we've built up our <strong>array of note objects</strong>, we can then use the <code>setSequence()</code> to play it on one of our <code>MaxiSynth</code> objects.
+</p>
+<p class = "tutorial-text">
+In the example below, we have passed a second, optional parameter. If we dont provide this, any lengths or positions given in the sequence will be interpretted at the default <strong>24 ticks per beat</strong>. However, if you can also state a ticks per beat yourself. In the example at the top, we have used <strong>4 ticks per beat (1/16ths)</strong>, because don't require more than a resolution of 1/16ths.
+</p>
+<pre>
+	<code>
+synth.setSequence(synthSeq, 4); //4 ticks per beat (1/16ths)
+	</code>
+</pre>
+<p class = "tutorial-heading">
+Loops
+</p>
+<p class = "tutorial-text">
+Finally, you can set your sequence to loop round at a given length. You can set the loop on the main <code>MaxiInstruments</code> object, or you can have individual loops for <strong>each instrument!</strong>.
+</p>
+<p class = "tutorial-text">
+As with <code>setSequence()</code>, we can provide a second, optional parameter. If we dont provide this, the loop length will be interpretted at the default <strong>24 ticks per beat</strong>. However, if you can also state a ticks per beat yourself.
+</p>
+<pre>
+	<code>
+instruments.setLoop(96); //4 Beats, set all instruments (default 24 ticks per beat)
+instruments.setLoop(16, 4); //4 Beats, set all instruments (4 ticks per beat)
+syn.setLoop(96); //Or set individual loops for each instrument
+</code>
+</pre>
+<p class = "tutorial-heading-big">
+6. Controlling Instruments with Machine Learning
+</p>
+<p class = "tutorial-text">
+One of the best things about the <code>MaxiInstruments</code> set up is that their parameters are super easy connected to the  <a href = "https://mimicproject.com/guides/learner">Learner.js</a> library. This means you can drive the sounds they make from a variety of inputs including video, audio and sensors, via a machine learning model.
+</p>
+<p class = "tutorial-heading">
+Body Example
+</p>
+<p class = "tutorial-text">
+The example below show how we can take the <strong>51 inputs</strong> from Google's BodyPix skeleton tracker, and use them to control <strong>9 different parameters</strong> of the <code>MaxiSynth</code>.
+<ol>
+  <li><strong>Check the camera is working</strong>. If it is, you will seem an outline of your body in differeny coloured splodges (its a technical term). If not, try refreshing the example with the play/pause buttons in the bottom right.</li>
+  <li><strong>Find some sounds you like</strong>. We have picked 9 parameters of the synth to map with the machine learning model. Hit the <code>Randomise</code> button and you'll see which ones they are</li>
+  <li><strong>Record some examples</strong>. Stand in the middle of the screen and hit <code>Record</code>, after a couple of seconds, hit <code>Stop</code>.</li>
+  <li>Now find a new sound you like, and record again alongside <strong>a different pose.</strong></li>
+  <li>Click <code>Train</code> to train and start running your model. You should hear the sound change and you move your body!</li>
+</ol>
+</p>
+{{embedded-project docId = "ea907b8a-f71f-0c9a-a93f-f4396894fc80" height = "700px" manualLoad = false}}
+<p class = "tutorial-heading-big">
+Looking at the Code
+</p>
+<p class = "tutorial-heading">
+Picking Your Parameters
+</p>
+<p class = "tutorial-text">
+First, you'll decide which parameters you want to map. The <code>MaxiSynth</code> has 20 you can map.
+</p>
+<p class = "tutorial-text">
+<strong>Pro Tip: </strong> You can use the <code>Print</code> button on a <code>MaxiSynth</code> to log all the current values of your synth into the browsers console. You can use this to get a full list of the mappable parameters!
+</p>
+<p class = "tutorial-text">
+Each synth has a <code>mapped</code> property where we provide an array of the parameters we want to control with <code>Learner.js</code>
+</p>
+<pre>
+<code>
+syn.mapped = ["frequency", "attack"];
+</code>
+</pre>
+<p class = "tutorial-heading">
+Making the Model
+</p>
+<p class = "tutorial-text">
+You can now start mapping your chosen parameters to a given input using the Learner.js library. More information about how to set this up can be found in this <a href = "https://mimicproject.com/guides/learner">guide</a>.
+</p>
+<p class = "tutorial-text">
+We will use a <strong>Regression Model</strong> (because all of our parameters are continuous numbers). What we need to find out it how many outputs we need to control and <code>MaxiInstruments</code> has a method to work this out for us. The second argument of "false" tells Learner.js that you don't need an additional GUI for your regression model, because you have the GUI provided by the instrument.
 </p>
 <p class = "tutorial-text">
 The final argument (10), tells Learner.js to smooth the output over 10 frames.
@@ -137,10 +276,13 @@ learner.addRegression(instruments.getNumMappedOutputs(), false, 10);
 </code>
 </pre>
 <p class = "tutorial-heading">
-7. Providing the input
+Inputting the Camera and Synth data
 </p>
 <p class = "tutorial-text">
-When you are providing a new example, the instruments object will give you all the current values of the mapped parameters of all your instruments with the getMappedOutputs() function
+To build up our dataset, we use the Learner.js <code>newExample()</code> function. We need to make pairs of the current <strong>body coordinates (input)</strong> and <strong>synth parameters (output)</strong>.
+</p>
+<p class = "tutorial-text">
+In order to get the current values from the synthesiser, the <code>MaxiInstruments</code> object will give you all the current values of the mapped parameters of all your instruments with the <code>getMappedOutputs()</code> function.
 </p>
 <p class = "tutorial-text">
 It is important to note that one piece of code (below) serves two purposes.
@@ -151,17 +293,20 @@ It is important to note that one piece of code (below) serves two purposes.
 </p>
 <pre>
 <code>
-const whenYouReceiveNewInputs = (newInputs)=> {
+var onNewCameraData = (newCameraData)=> {
   //Match them with outputs (instrument parameters)
-  learner.newExample(newInputs, instruments.getMappedOutputs());
+  learner.newExample(newCameraData, instruments.getMappedOutputs());
 }
 </code>
 </pre>
 <p class = "tutorial-heading">
-8. Responding to the output
+Updating the Synth from the Model
 </p>
 <p class = "tutorial-text">
-The instruments object can update the mapped parameters provided by the model (in response to inputs) using the updateMappedOutputs(data) function.
+Whenever the model has new outputs (parameters) in response to new inputs (camera data), it calls the <code>onOutput()</code> function in Learner.js.
+</p>
+<p class = "tutorial-text">
+The instruments object can then update the mapped parameters using the <code>updateMappedOutputs(data)</code> function. This will update your synths sounds, and the user interface. Watch them go!
 </p>
 <pre>
 <code>
@@ -171,8 +316,88 @@ learner.onOutput = (data)=> {
 }
 </code>
 </pre>
+
+<p class = "tutorial-text">
+You can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. The code below shows how you would select the frequencies of the two oscillators to be controlled by your regression model.
+</p>
+<pre>
+<code>
+syn.mapped = ["frequency", "frequency2"];
+</code>
+</pre>
+<p class = "tutorial-text">
+The synth also has a Randomise button that will select random values for your selected parameters. This can help you find fun sounds when making your own mappings.
+</p> -->
+<p class = "tutorial-heading-big">
+7. MaxiSampler
+</p>
+<p class = "tutorial-text">
+As with the other examples, click <code>Show Code</code> in the bottom right of the example above to check out the code.
+</p>
+<p class = "tutorial-text">
+Remeber to <strong>Unmute</strong>! Its at the top of the sampler object.
+</p>
+{{embedded-project docId = "40cfa189-14dc-684b-6349-df1c535b2c0c" height = "700px" manualLoad = false}}
 <p class = "tutorial-heading">
-9. Controlling the Instruments
+Creating a Sampler
+</p>
+<p class = "tutorial-text">
+As promised, we also have a sampler! Similarly to the <code>MaxiSynth</code>, you can have up to 8 samplers (each can hold 8 samples). They are stored in the instrument object’s <code>samplers</code> property. Each will have its own GUI, showing the controls for 4 samples at a time.
+</p>
+
+<pre>
+<code>
+  const sampler1 = instruments.addSampler();
+  //Also can be accessed from instruments.samplers[0];
+
+  const sampler2 = instruments.addSampler();
+  //Also can be accessed from instruments.samplers[1];
+</code>
+</pre>
+<p class = "tutorial-heading">
+Loading a Sample
+</p>
+<p class = "tutorial-text">
+Load each sample by passing the url and an index (of the 8 slots) to store the sample.
+</p>
+<pre>
+<code>
+sam.loadSample("909.wav", 0);
+</code>
+</pre>
+<p class = "tutorial-heading">
+Sequencing a Sampler
+</p>
+<p class = "tutorial-text">
+The sequencing is almost exactly the same as with the <code>MaxiSynth</code>, however, instead of using <strong>MIDI note values</strong> for the pitch parameter, we use <strong>sample indexes</strong>.
+</p>
+<pre>
+<code>
+  const samplerSeq = [
+      {pitch:0, start:0, velocity:127}, //play sample 0
+      {pitch:1, start:49}, //play sample 1
+      {p:[1,2,3], s:49}, //play samples 1,2 and 3
+    ],
+  sam.setSequence(samplerSeq);</code>
+</pre>
+
+<p class = "tutorial-heading">
+Mapping a Sampler's Parameters
+</p>
+<p class = "tutorial-text">
+Similarly to the MaxiSynth, you can then pick which parameters of the synth you can like to be controlled by your model by passing an array of names. Each samples parameters are identified by an underscored index following the name (this is also visible on the GUI).
+</p>
+<pre>
+<code>
+sam.mapped = ["rate_0", "gain_1"];
+</code>
+</pre>
+
+<p class = "tutorial-heading-big">
+8. Advanced MaxiInstrument-ing
+</p>
+<p class = "tutorial-heading">
+Manual Triggers
 </p>
 <p class = "tutorial-text">
 Both samplers and synths respond to simple noteon, noteoff commands. If you are using controlling the frequency of your synth externally, you should also provide a frequency. Second velocity argument is optional.
@@ -192,22 +417,9 @@ sam.noteon(2, 60);
 sam.noteon(2);
 </code>
 </pre>
-<p class = "tutorial-text">
-You can also specify a sequence yourself. We use broadly the same structure of NoteSequence used by Google's Magenta project making the libraries nicely interchangeable. We have chosen to adopt the MIDI standard of 24 ticks per beat.
+<p class = "tutorial-heading">
+Hijacking the Clock
 </p>
-<p class = "tutorial-text">
-The MaxiInstruments object has a global clock where you can specify a tempo (bpm) and a loop point (in ticks or beats). All note-ons are released at the end of the loop as a safety measure. You can also play / pause with playPause(), or rewind() to reset the clock to 0.
-</p>
-<pre>
-<code>
-instruments.setTempo(80);
-instruments.setLoop(96); //4 Beats, set all instruments (default 24 ticks per beat)
-instruments.setLoop(16, 4); //4 Beats, set all instruments (4 ticks per beat)
-syn.setLoop(96); //Or set individual loops for each instrument
-instruments.playPause(); //Toggle playback
-instruments.rewind(); //Reset clock to 0
-</code>
-</pre>
 <p class = "tutorial-text">
 The MaxiInstruments object also has a callback called onTick(), called on every tick of the clock, return the playHead for each instrument. If you have the same loop for all instruments, you only need to care about the first item in this array, if not the playheads are returned in the order they were added.
 </p>
@@ -221,38 +433,28 @@ instruments.setOnTick((playHeads)=>{
 })
 </code>
 </pre>
-<p class = "tutorial-text">
-You can then define sequences in terms of noteons and noteoff in ticks, and set them to a specific synth or sampler.
+<p class = "tutorial-heading">
+Continuous Frequency
 </p>
 <p class = "tutorial-text">
-Each note event is a Javascript object with some of the following properties. You can use the full name or just initial them.
-<ul>
-  <li>pitch or p: MIDI pitch of the note. For Samplers, this is the index of the particular sample. Can be a single value or array of values</li>
-  <li>freq or f: Frequency in Hz (an alternative to pitch). Can be a single value or array of values</li>
-  <li>start or s: Start in ticks. Can be a single value or array of values</li>
-  <li>end or e: End in ticks</li>
-  <li>length or l: Length in ticks (an alternative to end)</li>
-  <li>velocity or v: Velocity (optional) (0-127)</li>
-</ul>
+If programming the <code>MaxiSynth</code> using note sequences isn't your jam, you can use it more like a modular oscillator unit. In this mode, it will just output <strong>two continuous tones</strong>.
+</p>
+<p class = "tutorial-text">
+You can either sequence the rhythm and not the pitches, or just trigger one <code>noteon()</code> at the beginning and leave it running. Check out the example for more details
+</p>
+{{embedded-project docId = "73904a62-b60f-d590-70aa-0495da686a47" height = "700px" manualLoad = false}}
+
+<p class = "tutorial-text">
+Each of the frequencies are individually controllable and you'll see two new controls appear on the synthesisers interface (frequency and frequency2). These are also available to map to a Learner.js model!
 </p>
 <pre>
-	<code>
-const synthSeq = [
-    {pitch:60, start:[0, 2, 4], end:12, velocity:127},
-    {p:67, s:49, l:34, v:60},
-    {p:[67, 60, 70], s:49, l:34, v:60},
-    {freq:[440, 606, 2000], start:49, e:134},
-  ];
-syn.setSequence(synthSeq);
-
-const samplerSeq = [
-    {pitch:0, start:0, velocity:127},
-    {pitch:1, start:49},
-    {p:[1,2,3], s:49},
-  ],
-sam.setSequence(samplerSeq);
-	</code>
+<code>
+syn.useFreqSliders(true);
+</code>
 </pre>
+<p class = "tutorial-heading">
+Magenta Sequences
+</p>
 <p class = "tutorial-text">
 You can also input sequences generated from Magenta directly into the synths. Below is an example using one of Magenta's pretrained recurrent neural networks to complete the a given seqeunce, and playing it directly on a MaxiSynth. First import the Magenta library.
 </p>
@@ -304,7 +506,7 @@ rnn.initialize().then(()=> {
 });
 	</code>
 </pre>
-<h2>Example Projects</h2>
+<h2>More Example Projects</h2>
 <p class = "tutorial-text">
 Here are some examples sequenced in various ways, mostly using body tracking as an input.
 <ul>
