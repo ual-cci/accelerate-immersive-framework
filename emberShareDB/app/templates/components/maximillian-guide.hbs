@@ -1,55 +1,147 @@
 <p class = "tutorial-text">
-  Maximilian.js is a javascript library for sound analysis and synthesis. This document is a reference to the maxmilian.js API, illustrated with examples.
+  Maximilian.js is a javascript library for sound analysis and synthesis. This document is a reference to the Maxmilian.js API, illustrated with examples.
 </p>
 
-<h2>Quick Start</h2>
+<p class = "tutorial-heading-big">
+Quick Start
+</p>
 
-Fork the seed project below to get started with maximilian.js
 
 <p class = "tutorial-text">
-{{embedded-project docId = "0a5dd670-06e0-8414-7967-ee732b7eee0f" width="250px" height="370px"}}
+Fork the seed project below to get started with Maximilian.js
 </p>
 
+{{embedded-project docId = "f8452701-1d77-4f42-df1e-75f59cb2c744" width="250px" height="600px"}}
 
-
-<h3>The maximilian() object</h3>
-
-<p class = "tutorial-text">To start maximilian.js, create an instance of the maximilian object, and then use this to create an audio engine.</p>
-
+<p class = "tutorial-heading-big">The Audio Processing Loop</p>
+<p class = "tutorial-text">
+The Maximilian audio engine collects audio through a callback function, which is called once per audio sample.  Browsers usually require that this function is initiated by the user (e.g. from a button press)
+</p>
 <div class='snippet'>
    <pre>
       <code class="javascript">
-        var maxi = maximilian();
-        var maxiEngine = new maxi.maxiAudio();
-      </code>
-    </pre>
-</div>
-
-
-<h3>The audio processing loop</h3>
-
-The maximilian audio engine collects audio through a callback function, which is called once per audio sample.  Browsers usually require that this function is initiated by the user (e.g. from a button press)
-
-<div class='snippet'>
-   <pre>
-      <code class="javascript">
-        let playAudio = () => {
-          //start the audio engine
-          maxiEngine.init();
-
-          //audio code goes here!
-          maxiEngine.play = function() {
-            return osc1.saw(200);
-          }
-
+        var osc1 = new Maximilian.maxiOsc();
+        function play() {
+          return (osc1.saw(100)) * 0.5;
         }
       </code>
     </pre>
 </div>
 
+<p class = "tutorial-heading-big">
+Maximilian.js and AudioWorklets
+</p>
+
+<p class = "tutorial-text">
+As of September 2021, Maximilian.js has undergone quite a large change in order to keep up with the ever changing face of signal processing audio on the web.
+</p>
+
+<p class = "tutorial-text">
+Our previous approach of using the <a href = "https://developer.mozilla.org/en-US/docs/Web/API/ScriptProcessorNode">ScripProcessorNode</a> has broadly been deprecated so the existing library was unusable without some major updating.
+</p>
+
+<p class = "tutorial-text">
+So now, we have the all singing, all dancing <strong>Audio Worklets</strong> version of Maximilian.js. Largely the same functionality and API, with a few additions in the way you set up your projects. This has the <strong>massive advantage</strong> of running on a dedicated audio thread, greatly reducing interference when you're making your internet-based-interactive-audio-spectaculars.
+</p>
+
+<p class = "tutorial-heading">
+Separating Out the Audio Code
+</p>
+
+<p class = "tutorial-text">
+If you look at the example above (hit the <code>Show Code</code> button in the bottom right), you will see there are <strong>two script elements</strong> in the project.
+</p>
+
+<p class = "tutorial-text">
+The top one (with the id <code>myAudioScript</code>) holds the Maximilian code. This will look super familiar if you've used Maximilian before. It exists in its separate script tag because it needs to be passed through to the separate audio processing thread.
+</p>
+
+<p class = "tutorial-heading">
+Setting up the Main Javascript
+</p>
+
+<p class = "tutorial-text">
+There are only two things we need to do initially in the script tags that hold our <strong>non-Maximilian</strong> related Javascript code.
+<ol>
+  <li>Import the <code>maxi</code> Module</li>
+  <li>Tell <code>maxi</code> where to get the audio code from</li>
+</ol>
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        import {
+              maxi
+        } from "https://mimicproject.com/libs/maxi-wrapper.v.0.1.mjs"
+
+        //Get audio code from script element
+        maxi.setAudioCode("myAudioScript")
+      </code>
+    </pre>
+</div>
+</p>
+
+<p class = "tutorial-text">
+  <strong>Pro Tip</strong>: You can also pass in a <strong>URL</strong> that returns some audio code, or just pass in a <code>literal String</code> of the audio code you want to run.
+</p>
+
+<p class = "tutorial-heading">
+  Communicating between Threads
+</p>
+
+<p class = "tutorial-text">
+  One downside of this new implementation is that its slightly more complex to communicate between your audio <code>Maximilian.js</code> code on the audio thread, and your other Javascript code. Luckily, we have some pretty simple additions to make this as smooth as possible
+</p>
+<p class = "tutorial-text">
+  Here we have updated the example above so that the <strong>frequency of the oscillators</strong> is controlled by the <strong>Mouse X coordinate</strong>.
+</p>
+
+{{embedded-project docId = "efd811e7-3880-fe1e-55e3-a9a36c51fe5a" width="250px" height="600px"}}
+
+<p class = "tutorial-text">
+  On the main Javascript side, we collect the data (in this case the mouse position), and use <code>maxi.send()</code> to send it to the audio thread. We do this by specifying an
+  <ol>
+    <li>ID (so we can pick it up on the other side)</li>
+    <li>An array of floats (the values we want to send)</li>
+  </ol>
+</p>
+
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        var onMouseMove = (e) => {
+          const x = e.pageX/window.innerWidth;
+          //Send data to audio worklet
+          maxi.send("fromMain", [x*2000]);
+        }
+        document.addEventListener( 'mousemove', onMouseMove, true )
+      </code>
+    </pre>
+</div>
+
+<p class = "tutorial-text">
+  On the audio side, we make an <code>Input</code> object, telling it the ID of the values we want to recieve. Then, in the <code>audio processing loop</code> we can call <code>input.getValue()</code> to retrieve any new values that have been sent through.
+</p>
+
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        var input = new Input('fromMain');
+        var osc1 = new Maximilian.maxiOsc();
+        var osc2= new Maximilian.maxiOsc();
+        function play() {
+          //Get data from main thread
+          var mousex = input.getValue();
+          return (osc1.saw(mousex) + osc2.saw(mousex+0.5)) * 0.5;
+        }
+      </code>
+    </pre>
+</div>
+
+
+
 <h1>Reference</h1>
 
-<h2>maxiAudio</h2>
+<h2>maxi</h2>
 
 <h3>methods</h3>
 
