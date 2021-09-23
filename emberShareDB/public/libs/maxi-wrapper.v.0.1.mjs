@@ -21,6 +21,9 @@ await maxi.init(origin);
 maxi.play();
 let learner = new Learner();
 maxi.addLearner('l1', learner);
+maxi.addSample = (name, url)=> {
+  maxi.loadSample(name + "----", url, true)
+}
 //What happens is we do a dacOut on the play function
 dspCode = {
   setup: `() => {
@@ -44,24 +47,12 @@ dspCode = {
 }
 
 // dspCode = {
-//   setup: `() => {
-//     let q=this.newq();
-//     let createDSPLoop = ()=> {
-//       return ()=>{return 0}
-//     }
-//     q.play = createDSPLoop();
-//     return q;
-//   }`,
-//   loop: `(q, inputs, mem) => {
-//     this.dacOutAll(q.play());
-//   }`
+//   setup: `() => {let q=this.newq();  q.b0u10 = new Module.maxiSample();\n                      q.b0u10.setSample(this.getSampleBuffer('kick1'));; ;; return q;}`,
+//   loop: `(q, inputs, mem) => {this.dacOutAll((q.b0u10.isReady() ? q.b0u10.playOnZX(1) : 0.0));}`
 // }
+//
+// setTimeout(()=>{maxi.eval(dspCode)},2000);
 
-// dspCode = {
-//   setup: `() => {let q=this.newq();  q.b0u2 = new Module.maxiOsc();\n                      q.b0u2.phaseReset(0);; ; q.b0u4 = new Module.maxiOsc();\n                      q.b0u4.phaseReset(0);; ;; return q;}`,
-//   loop: `(q, inputs, mem) => {this.dacOut(q.b0u2.square(100),0);this.dacOut(q.b0u4.square(200),1);}`,
-//   paramMarkers:[]
-// }
 
 
 

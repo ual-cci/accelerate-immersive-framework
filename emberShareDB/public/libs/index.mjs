@@ -181,10 +181,9 @@ const getBase64 = (str) => {
   } else return false;
 };
 
-const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
 const removePaddingFromBase64 = (input) => {
-  var lkey = Module.maxiTools._keyStr.indexOf(input.charAt(input.length - 1));
+  const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  var lkey = _keyStr.indexOf(input.charAt(input.length - 1));
   if (lkey === 64) {
     return input.substring(0, input.length - 1);
   }
@@ -217,6 +216,7 @@ const loadSampleToArray = (audioContext, sampleObjectName, url, audioWorkletNode
     uarray = new Uint8Array(arrayBuffer);
 
     b64 = b64.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     for (i = 0; i < bytes; i += 3) {
       //get the 3 octects in 4 ascii chars
@@ -1149,30 +1149,36 @@ class Engine {
 	 * is initialised
 	 * @param {*} objectName name of the sample
 	 * @param {*} url relative URL to the origin URL, startgin with `/`
+   * @param {*} absolute true is url given is absolute, if false (default) url is relative to origin
 	 */
-	loadSample(objectName, url) {
+	loadSample(objectName, url, absolute = False) {
 		if (this.audioContext && this.audioWorkletNode) {
-			if (
-				url &&
-				url.length !== 0 &&
-				this.origin &&
-				this.origin.length !== 0 &&
-				new URL(this.origin + url)
-			) {
-				try {
-					loadSampleToArray(
-						this.audioContext,
-						objectName,
-						this.origin + url,
-						this.audioWorkletNode
-					);
-				} catch (error) {
-					console.error(
-						`Error loading sample ${objectName} from ${url}: `,
-						error
-					);
-				}
-			} else throw "Problem with sample relative URL";
+      if(!absolute)
+      {
+        if (
+          url &&
+          url.length !== 0 &&
+          this.origin &&
+          this.origin.length !== 0 &&
+          new URL(this.origin + url)
+        ) {
+          url = this.origin + url;
+        } else throw "Problem with sample relative URL";
+      }
+      try {
+        loadSampleToArray(
+          this.audioContext,
+          objectName,
+          url,
+          this.audioWorkletNode
+        );
+      } catch (error) {
+        console.error(
+          `Error loading sample ${objectName} from ${url}: `,
+          error
+        );
+      }
+
 		} else throw "Engine is not initialised!";
 	}
 }
