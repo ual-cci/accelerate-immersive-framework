@@ -6,8 +6,8 @@ import {
 
 import RingBuffer from "./ringbuf.js";
 
-const origin = "https://mimicproject.com/libs";
-//const origin = "http://localhost:4200/libs";
+//const origin = "https://mimicproject.com/libs";
+const origin = "http://localhost:4200/libs";
 var head = document.getElementsByTagName('HEAD')[0];
 var meta = document.createElement('meta');
 meta.httpEquiv = "origin-trial";
@@ -21,16 +21,49 @@ await maxi.init(origin);
 maxi.play();
 let learner = new Learner();
 maxi.addLearner('l1', learner);
+//What happens is we do a dacOut on the play function
 dspCode = {
-setup: `() => {let q=this.newq();
-  let createDSPLoop = ()=> {
-    return ()=>{return 0}
-  }
-  q.play = createDSPLoop();
-  return q;
-}`,
-loop: `(q, inputs, mem) => {this.dacOutAll(q.play());}`
+  setup: `() => {
+    let q=this.newq();
+    let createDSPLoop = ()=> {
+      return ()=>{return 0}
+    }
+    q.play = createDSPLoop();
+    return q;
+  }`,
+  loop: `(q, inputs, mem) => {
+    var sig = q.play();
+    if(Array.isArray(sig)) {
+      for(let i = 0; i < sig.length; i++) {
+        this.dacOut(sig[i], i);
+      }
+    } else {
+      this.dacOutAll(q.play());
+    }
+  }`
 }
+
+// dspCode = {
+//   setup: `() => {
+//     let q=this.newq();
+//     let createDSPLoop = ()=> {
+//       return ()=>{return 0}
+//     }
+//     q.play = createDSPLoop();
+//     return q;
+//   }`,
+//   loop: `(q, inputs, mem) => {
+//     this.dacOutAll(q.play());
+//   }`
+// }
+
+// dspCode = {
+//   setup: `() => {let q=this.newq();  q.b0u2 = new Module.maxiOsc();\n                      q.b0u2.phaseReset(0);; ; q.b0u4 = new Module.maxiOsc();\n                      q.b0u4.phaseReset(0);; ;; return q;}`,
+//   loop: `(q, inputs, mem) => {this.dacOut(q.b0u2.square(100),0);this.dacOut(q.b0u4.square(200),1);}`,
+//   paramMarkers:[]
+// }
+
+
 
 maxi.addEventListener('onSharedBuffer', (e) => {
     console.log(e)
