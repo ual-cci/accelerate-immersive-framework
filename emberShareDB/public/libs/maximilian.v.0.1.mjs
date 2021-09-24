@@ -21,9 +21,8 @@ await maxi.init(origin)
 let learner = new Learner();
 maxi.addLearner('l1', learner);
 maxi.addSample = (name, url)=> {
-  maxi.loadSample(name + "----", url, true)
+  return maxi.loadSample(name + "----", url, true)
 }
-
 let dspCode = "";
 
 //What happens is we do a dacOut on the play function

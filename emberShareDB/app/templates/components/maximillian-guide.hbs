@@ -28,6 +28,21 @@ The Maximilian audio engine collects audio through a callback function, which is
     </pre>
 </div>
 
+<p class = "tutorial-text">
+Return an array of values to have multi-channel sound (as many channels as are available on your setup)
+</p>
+<div class='snippet'>
+   <pre>
+      <code class="javascript">
+        var osc1 = new Maximilian.maxiOsc();
+        var osc2 = new Maximilian.maxiOsc();
+        function play() {
+          return [osc1.saw(100),osc1.saw(200)];
+        }
+      </code>
+    </pre>
+</div>
+
 <p class = "tutorial-heading-big">
 Maximilian.js and AudioWorklets
 </p>
@@ -71,7 +86,7 @@ There are only two things we need to do initially in the script tags that hold o
       <code class="javascript">
         import {
               maxi
-        } from "https://mimicproject.com/libs/maxi-wrapper.v.0.1.mjs"
+        } from "https://mimicproject.com/libs/maximilian.v.0.1.mjs"
 
         //Get audio code from script element
         maxi.setAudioCode("myAudioScript")
@@ -146,62 +161,94 @@ There are only two things we need to do initially in the script tags that hold o
 <h3>methods</h3>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">init(audioInput=maxi.INPUT_TYPE.NONE)</span>
+  <span style="font-family:monospace">setAudioCode(scriptTag | url | stringLiteral)</span>
 
-  <br>Initialise the audio engine.
+  <br>Supply the Maximilian.js audio code
   <div style="margin-left:100px">
-  <br><span style="font-family:monospace">audioInput</span>: this is an optional argument. You can specify the following:
-  <br>maxi.INPUT_TYPE.NONE: no audio input (default)
-  <br>maxi.INPUT_TYPE.DEFAULT: the system's default audio input
-  <br>an index of the audio input you wish to connect (obtained by looking at the output from listInputDevices())
+  <br><span style="font-family:monospace"></span>You can specify <strong>1</strong> of the following:
+  <ul>
+  <li>The id of a script tag containing the code OR  </li>
+  <li>The URL of a text document containing the code (or the name of a MIMIC tab) OR</li>
+  <li>The literal code as a string</li>
+</ul>
   </div>
 </p>
 <p class = "tutorial-text">
-  <span style="font-family:monospace">outputIsArray( isArray,  numChannels)</span>
-  <br>Call this for multichannel sound output.
+  <span style="font-family:monospace">addSample(name, url)</span>
+  <br>Provide name and sample to load
   <div style="margin-left:100px">
-  <br><span style="font-family:monospace">isArray</span>: true if multichannel audio is required
-  <br><span style="font-family:monospace">numChannels</span>: 2, 4, or 8
+  <br><span style="font-family:monospace">name</span>: name of the sample (use for reference when playing on in audio code)
+  <br><span style="font-family:monospace">url</span>: URL to .wav file, or base64 encoded version. Can just use filename of asset uploaded to Mimic document.
+  <br><span style="font-family:monospace">Returns Promise on completion.</span> Samples should be loaded before audio code is run so can be used with <code>await</code>. See example below
+  <br>
+  <pre>
+     <code class="javascript">
+       await maxi.addSample("drumBreak","drill.wav")
+       //Get audio code from script element
+       maxi.setAudioCode("myAudioScript");
+     </code>
+   </pre>
   </div>
-</p>
-<p class = "tutorial-text">
-{{embedded-project docId = "e722d5e6-131b-3e46-675e-48ab0a27bb77" width="250px" height="370px"}}
+
 </p>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">listInputDevices()</span>
-  <br>Print a list of audio input devices to the console.  You can open an input device by using its index as the first argument to maxiAudio.init
-</p>
-<p class = "tutorial-text">
-{{embedded-project docId = "799ece18-7d46-be38-2b33-05be69888c09" width="250px" height="370px"}}
+{{embedded-project docId = "64b9a233-f617-8f64-b843-2c323e6336bc" width="250px" height="600px"}}
 </p>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">loadSample(sampleUrl, maxiSample)</span>
-  <br>Load a sample from a url, into a maxiSample object.
+  <span style="font-family:monospace">send(name, values)</span>
+  <br>Send data to the audio thread
   <div style="margin-left:100px">
-  <br><span style="font-family:monospace">sampleUrl</span>: the url of a sample
-  <br><span style="font-family:monospace">maxiSample</span>: a maxiSample object
+  <br><span style="font-family:monospace">name</span>: Tag the values with a name (for use with <code>Input()</code> on the audio thread)
+  <br><span style="font-family:monospace">values</span>: An array of floating point numbers to send
   </div>
+
+</p>
+
+
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">connectMediaStream()</span>
+  <div style="margin-left:100px">
+  <br>Asks permission to use microphone input in browser
+  <br>Inputs is supplied as an argument to the play() function
+  <br>
+  <pre>
+     <code class="javascript">
+       function play(inputs) {
+         return inputs * osc.sinewave(200)
+       }
+     </code>
+   </pre>
+ </div>
+</p>
+<p class = "tutorial-text">
+{{embedded-project docId = "254115a6-8ddf-ad16-76a3-01d68c77f9cd" width="250px" height="600px"}}
 </p>
 
 <p class = "tutorial-text">
-{{embedded-project docId = "29b924f0-7a1f-310a-7a7d-fc815f969f87" width="250px" height="370px"}}
+  <span style="font-family:monospace">play()</span>
+  <div style="margin-left:100px">
+  <br>Toggles play / pause of audio (suspends / resumes audio node)
+ </div>
+</p>
+
+<p class = "tutorial-text">
+  <span style="font-family:monospace">hush()</span>
+  <div style="margin-left:100px">
+  <br>Stops playback (suspends audio node)
+ </div>
 </p>
 
 <h3>properties</h3>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">play</span>
-  <br>play is a javascript function that does audio processing in maximilian.js.  This is called once for each sample.  It should return a single value for mono configurations or an array of values for multi-channel configurations.
-  <br>The play function has an optional input parameter that is an array of audio input values (see the microphone example above).
-</p>
-<p class = "tutorial-text">
-  <span style="font-family:monospace">context</span>
+  <span style="font-family:monospace">audioWorkletNode.context</span>
   <br>This is the webaudio context used by the maximilian.js audio engine
 </p>
 <p class = "tutorial-text">
-  <span style="font-family:monospace">maxiAudioProcessor</span>
+  <span style="font-family:monospace">audioWorkletNode</span>
   <br>This is the webaudio node that carries out audio processing in maximilian.js.  You can connect this to other webaudio nodes (for a example a spectral analyser)
 </p>
 
@@ -223,7 +270,7 @@ An oscillator with methods for a number of waveforms
 </p>
 
 <p class = "tutorial-text">
-{{embedded-project docId = "e31c952b-97ba-4fe0-5649-61c96bfeb812" width="250px" height="370px"}}
+{{embedded-project docId = "ba8a4b5b-881c-d01b-6dac-dda27a01147b" width="250px" height="600px"}}
 </p>
 
 
@@ -273,10 +320,10 @@ An oscillator with methods for a number of waveforms
     <br><span style="font-family:monospace">phase</span>: between 0 and 1
   </div>
 </p>
-
+<!--
 <p class = "tutorial-text">
-{{embedded-project docId = "0f5d2ad4-132c-d472-6b80-1e76b7d87099" width="250px" height="370px"}}
-</p>
+{{embedded-project docId = "ba8a4b5b-881c-d01b-6dac-dda27a01147b" width="250px" height="600px"}}
+</p> -->
 
 
 
@@ -284,54 +331,44 @@ An oscillator with methods for a number of waveforms
 <h2>maxiSample</h2>
 
 <p class = "tutorial-text">
-Play and manipulate sound samples.  Load sample data from a url, using loadSample (see above)
+Play and manipulate sound samples.  Load sample data from a url, using <code>addSample()</code> (see above).
 </p>
 
 <h3>methods</h3>
 
 <p class = "tutorial-text">
-  <span style="font-family:monospace">play()</span>
-  <br>plays and loop the sample at normal speed
-</p>
-<p class = "tutorial-text">
-  <span style="font-family:monospace">play(playSpeed)</span>
-  <br>plays and loop the sample at a multiple of the normal speed
+  <span style="font-family:monospace">setSample(bufferData)</span>
+  <br>Set sample using <code>getSampleBuffer(name)</code> function name
   <div style="margin-left:100px">
-  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
-  </div>
+
+  <pre>
+     <code class="javascript">
+       var sample = new Maximilian.maxiSample();
+       sample.setSample(this.getSampleBuffer('kick123'))
+     </code>
+   </pre>
+ </div>
 </p>
+
 <p class = "tutorial-text">
-  <span style="font-family:monospace">play(playSpeed, start, end)</span>
-  <br>plays and loop the sample at a multiple of the normal speed
+  <span style="font-family:monospace">playOnZXAtSpeed(trigger, rate)</span>
+  <br>Play sample at a given playback rate, retriggering back to start on zero crossing
   <div style="margin-left:100px">
-    <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
-    <br><span style="font-family:monospace">start</span>: start point (in samples)
-    <br><span style="font-family:monospace">end</span>: end point (in samples)
+  <br><span style="font-family:monospace">trigger</span>: Trigger signal. Use 1 to just play once, or oscillator to retrigger over time (e.g. for looping). See <code>addSample()</code> example above.
+  <br><span style="font-family:monospace">rate</span>:Playback rate as proportion of original (e.g 1 is normal, 2 is double)
   </div>
 </p>
 
 <p class = "tutorial-text">
-{{embedded-project docId = "5db11ec4-bd90-a94d-5a6b-5d9bc01fe851" width="250px" height="370px"}}
-</p>
-
-<p class = "tutorial-text">
-  <span style="font-family:monospace">playOnce()</span>
-  <br>plays the sample a single time at normal speed (use trigger() to play again - this is useful for sequencing)
-</p>
-<p class = "tutorial-text">
-  <span style="font-family:monospace">playOnce(playRate)</span>
-  <br>plays the sample a single time at a multiple of the normal speed (use trigger() to play again - this is useful for sequencing)
+  <span style="font-family:monospace">playOnZXAtSpeedFromOffset(trigger, rate, offset)</span>
+  <br>Play sample at a given playback rate and given offset, retriggering back to start on zero crossing
   <div style="margin-left:100px">
-  <br><span style="font-family:monospace">playSpeed</span>: a multiple of the normal speed
+  <br><span style="font-family:monospace">trigger</span>: Trigger signal. Use 1 to just play once, or oscillator to retrigger over time (e.g. for looping). See <code>addSample()</code> example above.
+  <br><span style="font-family:monospace">rate</span>:Playback rate as proportion of original (e.g 1 is normal, 2 is double)
+  <br><span style="font-family:monospace">rate</span>:Offset of start position proportion of original (e.g between 0 (beginning) and 1 (end))
   </div>
 </p>
-<p class = "tutorial-text">
-  <span style="font-family:monospace">trigger()</span>
-  <br>set the playhead to zero (use in conjunction with playOnce)
-</p>
-<p class = "tutorial-text">
-{{embedded-project docId = "42f49124-90cb-4852-6572-f7a7d7d697cd" width="250px" height="370px"}}
-</p>
+
 <p class = "tutorial-text">
   <span style="font-family:monospace">isReady()</span>
   <br>returns true if sample is loaded
@@ -340,11 +377,6 @@ Play and manipulate sound samples.  Load sample data from a url, using loadSampl
   <span style="font-family:monospace">getLength()</span>
   <br>returns the length of the sample in samples
 </p>
-
-
-
-
-
 
 
 <h2>maxiFilter</h2>

@@ -192,108 +192,116 @@ const removePaddingFromBase64 = (input) => {
 
 
 const loadSampleToArray = (audioContext, sampleObjectName, url, audioWorkletNode) => {
-  var data = [];
+  return new Promise ((resolve, reject)=> {
+    var data = [];
 
-  //check if url is actually a base64-encoded string
-  var b64 = getBase64(url);
-  if (b64) {
-    //convert to arraybuffer
-    //modified version of this:
-    // https://github.com/danguer/blog-examples/blob/master/js/base64-binary.js
-    var ab_bytes = (b64.length / 4) * 3;
-    var arrayBuffer = new ArrayBuffer(ab_bytes);
+    //check if url is actually a base64-encoded string
+    var b64 = getBase64(url);
+    if (b64) {
+      //convert to arraybuffer
+      //modified version of this:
+      // https://github.com/danguer/blog-examples/blob/master/js/base64-binary.js
+      var ab_bytes = (b64.length / 4) * 3;
+      var arrayBuffer = new ArrayBuffer(ab_bytes);
 
-    b64 = removePaddingFromBase64(removePaddingFromBase64(b64));
+      b64 = removePaddingFromBase64(removePaddingFromBase64(b64));
 
-    var bytes = parseInt((b64.length / 4) * 3, 10);
+      var bytes = parseInt((b64.length / 4) * 3, 10);
 
-    var uarray;
-    var chr1, chr2, chr3;
-    var enc1, enc2, enc3, enc4;
-    var i = 0;
-    var j = 0;
+      var uarray;
+      var chr1, chr2, chr3;
+      var enc1, enc2, enc3, enc4;
+      var i = 0;
+      var j = 0;
 
-    uarray = new Uint8Array(arrayBuffer);
+      uarray = new Uint8Array(arrayBuffer);
 
-    b64 = b64.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-    const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      b64 = b64.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+      const _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-    for (i = 0; i < bytes; i += 3) {
-      //get the 3 octects in 4 ascii chars
-      enc1 = _keyStr.indexOf(b64.charAt(j++));
-      enc2 = _keyStr.indexOf(b64.charAt(j++));
-      enc3 = _keyStr.indexOf(b64.charAt(j++));
-      enc4 = _keyStr.indexOf(b64.charAt(j++));
+      for (i = 0; i < bytes; i += 3) {
+        //get the 3 octects in 4 ascii chars
+        enc1 = _keyStr.indexOf(b64.charAt(j++));
+        enc2 = _keyStr.indexOf(b64.charAt(j++));
+        enc3 = _keyStr.indexOf(b64.charAt(j++));
+        enc4 = _keyStr.indexOf(b64.charAt(j++));
 
-      chr1 = (enc1 << 2) | (enc2 >> 4);
-      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-      chr3 = ((enc3 & 3) << 6) | enc4;
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
 
-      uarray[i] = chr1;
-      if (enc3 !== 64) {
-        uarray[i + 1] = chr2;
-      }
-      if (enc4 !== 64) {
-        uarray[i + 2] = chr3;
-      }
-    }
-
-    // https://webaudio.github.io/web-audio-api/#dom-baseaudiocontext-decodeaudiodata
-    // Asynchronously decodes the audio file data contained in the ArrayBuffer.
-    audioContext.decodeAudioData(
-      arrayBuffer, // has its content-type determined by sniffing
-      function (buffer) { // successCallback, argument is an AudioBuffer representing the decoded PCM audio data.
-        // source.buffer = buffer;
-        // source.loop = true;
-        // source.start(0);
-        let float32ArrayBuffer = buffer.getChannelData(0);
-        if (data !== undefined && audioWorkletNode !== undefined) {
-          // console.log('f32array: ' + float32Array);
-          audioWorkletNode.port.postMessage({
-            "sample":sampleObjectName,
-            "buffer": float32ArrayBuffer,
-          });
+        uarray[i] = chr1;
+        if (enc3 !== 64) {
+          uarray[i + 1] = chr2;
         }
-      },
-      function (buffer) { // errorCallback
-        console.log("Error decoding source!");
+        if (enc4 !== 64) {
+          uarray[i + 2] = chr3;
+        }
       }
-    );
-  } else {
-    // Load asynchronously
-    // NOTE: This is giving me an error
-    // Uncaught ReferenceError: XMLHttpRequest is not defined (index):97 MaxiProcessor Error detected: undefined
-    // NOTE: followed the trail to the wasmmodule.js
-    // when loading on if (typeof XMLHttpRequest !== 'undefined') {
-    // throw new Error("Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers.
-    // Use --embed-file or --preload-file in emcc on the main thread.");
-    var request = new XMLHttpRequest();
-    request.addEventListener("load", () =>
-			console.info(`loading sample '${sampleObjectName}'`)
-		);
-    request.open("GET", url, true);
-    request.responseType = "arraybuffer";
-    request.onload = function () {
+
+      // https://webaudio.github.io/web-audio-api/#dom-baseaudiocontext-decodeaudiodata
+      // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       audioContext.decodeAudioData(
-        request.response,
-        function (buffer) {
+        arrayBuffer, // has its content-type determined by sniffing
+        function (buffer) { // successCallback, argument is an AudioBuffer representing the decoded PCM audio data.
+          // source.buffer = buffer;
+          // source.loop = true;
+          // source.start(0);
           let float32ArrayBuffer = buffer.getChannelData(0);
           if (data !== undefined && audioWorkletNode !== undefined) {
             // console.log('f32array: ' + float32Array);
             audioWorkletNode.port.postMessage({
-              "sample": sampleObjectName,
+              "sample":sampleObjectName,
               "buffer": float32ArrayBuffer,
             });
+            resolve();
           }
         },
-        function (buffer) {
+        function (buffer) { // errorCallback
           console.log("Error decoding source!");
+          reject();
         }
       );
-    };
-    request.send();
-  }
-  return "Loading module";
+    } else {
+      // Load asynchronously
+      // NOTE: This is giving me an error
+      // Uncaught ReferenceError: XMLHttpRequest is not defined (index):97 MaxiProcessor Error detected: undefined
+      // NOTE: followed the trail to the wasmmodule.js
+      // when loading on if (typeof XMLHttpRequest !== 'undefined') {
+      // throw new Error("Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers.
+      // Use --embed-file or --preload-file in emcc on the main thread.");
+      var request = new XMLHttpRequest();
+      request.addEventListener("load", () =>
+        console.info(`loading sample '${sampleObjectName}'`)
+      );
+      request.open("GET", url, true);
+      request.responseType = "arraybuffer";
+      request.onload = function () {
+        audioContext.decodeAudioData(
+          request.response,
+          function (buffer) {
+            let float32ArrayBuffer = buffer.getChannelData(0);
+            if (data !== undefined && audioWorkletNode !== undefined) {
+              // console.log('f32array: ' + float32Array);
+              audioWorkletNode.port.postMessage({
+                "sample": sampleObjectName,
+                "buffer": float32ArrayBuffer,
+              });
+              resolve();
+            }
+          },
+          function (buffer) {
+            console.log("Error decoding source!");
+            reject();
+          }
+        );
+      };
+      request.send();
+    }
+    //return "Loading module";
+
+  })
+
 };
 
 class Event {
@@ -1152,35 +1160,46 @@ class Engine {
    * @param {*} absolute true is url given is absolute, if false (default) url is relative to origin
 	 */
 	loadSample(objectName, url, absolute = False) {
-		if (this.audioContext && this.audioWorkletNode) {
-      if(!absolute)
-      {
-        if (
-          url &&
-          url.length !== 0 &&
-          this.origin &&
-          this.origin.length !== 0 &&
-          new URL(this.origin + url)
-        ) {
-          url = this.origin + url;
-        } else throw "Problem with sample relative URL";
-      }
-      try {
-        loadSampleToArray(
-          this.audioContext,
-          objectName,
-          url,
-          this.audioWorkletNode
-        );
-      } catch (error) {
-        console.error(
-          `Error loading sample ${objectName} from ${url}: `,
-          error
-        );
-      }
+    return new Promise((resolve, reject)=> {
+      if (this.audioContext && this.audioWorkletNode) {
+        if(!absolute)
+        {
+          if (
+            url &&
+            url.length !== 0 &&
+            this.origin &&
+            this.origin.length !== 0 &&
+            new URL(this.origin + url)
+          ) {
+            url = this.origin + url;
+          } else {
+            reject("Problem with sample relative URL");
+          }
+        }
+        try {
+          loadSampleToArray(
+            this.audioContext,
+            objectName,
+            url,
+            this.audioWorkletNode
+          ).then(()=>{
+            resolve();
+          }).catch(()=> {
+            reject();
+          });
+        } catch (error) {
+          console.error(
+            `Error loading sample ${objectName} from ${url}: `,
+            error
+          );
+          reject();
+        }
 
-		} else throw "Engine is not initialised!";
-	}
+  		} else  {
+        reject("Engine is not initialised!");
+      }
+    });
+  }
 }
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
