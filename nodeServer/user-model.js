@@ -317,7 +317,7 @@ var setup = function() {
 var newUser = function(username, password, email) {
 	return new Promise((resolve, reject) => {
 		OAuthUsersModel.find({username:username}, function(err, user) {
-			if(user.length > 0 || err)
+			if(user && (user.length > 0 || err))
 			{
 				reject("user already exists");
 				return;
