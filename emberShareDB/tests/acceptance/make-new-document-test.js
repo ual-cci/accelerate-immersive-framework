@@ -11,14 +11,14 @@ module('Acceptance | make new document', function(hooks) {
     let service = this.owner.lookup('service:documents');
     let session = this.owner.lookup('service:session');
     var done = assert.async(2);
-    session.authenticate('authenticator:oauth2', "louis", "123")
+    session.authenticate('authenticator:oauth2', 'louis', '123')
     .then((response) => {
-      console.log("SIGNED IN", response);
+      console.log('SIGNED IN', response);
       const data = {
-        source : "< some code >",
+        source : '< some code >',
         isPrivate: true,
-        name: "test-doc",
-        tags: ["this-is-a-test"],
+        name: 'test-doc',
+        tags: ['this-is-a-test'],
         assets: []
       }
       done();

@@ -16,7 +16,7 @@ export default Route.extend({
         let example = group.examples[j];
         if(example.id == params.topic)
         {
-          this.get('cs').log("EARLY RETURNING");
+          this.get('cs').log('EARLY RETURNING');
           return example;
         }
       }

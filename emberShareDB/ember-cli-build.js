@@ -7,12 +7,12 @@ module.exports = function(defaults) {
     // Add options here
     codemirror: {
       addons: ['comment/comment.js','mode/simple.js', 'mode/multiplex.js',
-      'hint/javascript-hint.js',"hint/show-hint.js","hint/xml-hint.js","hint/html-hint.js",
-      'hint/css-hint.js','hint/anyword-hint.js', "lint/lint.js", "lint/lint.css",
-      "lint/css-lint.js","hint/show-hint.css", "edit/matchbrackets.js",
-      "search/search.js", "search/searchcursor.js","dialog/dialog.js","dialog/dialog.css",
-      "fold/foldgutter.css","fold/foldcode.js","fold/foldgutter.js", "fold/brace-fold.js",
-    "fold/xml-fold.js", "fold/indent-fold.js", "fold/comment-fold.js","display/autorefresh.js"],
+      'hint/javascript-hint.js','hint/show-hint.js','hint/xml-hint.js','hint/html-hint.js',
+      'hint/css-hint.js','hint/anyword-hint.js', 'lint/lint.js', 'lint/lint.css',
+      'lint/css-lint.js','hint/show-hint.css', 'edit/matchbrackets.js',
+      'search/search.js', 'search/searchcursor.js','dialog/dialog.js','dialog/dialog.css',
+      'fold/foldgutter.css','fold/foldcode.js','fold/foldgutter.js', 'fold/brace-fold.js',
+    'fold/xml-fold.js', 'fold/indent-fold.js', 'fold/comment-fold.js','display/autorefresh.js'],
       modes: ['xml', 'javascript', 'handlebars', 'htmlmixed', 'css'],
       themes: ['monokai'],
       keymaps: ['sublime']

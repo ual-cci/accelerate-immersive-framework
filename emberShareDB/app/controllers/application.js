@@ -9,7 +9,7 @@ export default Controller.extend({
       this.transitionToRoute('login');
     },
     transitionToDocsRoute() {
-      this.transitionToRoute('documents'," ",0,"views");
+      this.transitionToRoute('documents',' ',0,'views');
     },
     transitionToExamplesRoute() {
       this.transitionToRoute('examples', 'root');
@@ -21,7 +21,7 @@ export default Controller.extend({
       this.transitionToRoute('outputs');
     },
     transitionToGuidesRoute() {
-      this.transitionToRoute('guides', "root");
+      this.transitionToRoute('guides', 'root');
     },
     transitionToGSRoute() {
       this.transitionToRoute('getting-started', 'beginner');
@@ -39,8 +39,8 @@ export default Controller.extend({
       this.transitionToRoute('code-editor', doc);
     },
     transitionToUserDocs(user) {
-      console.log("GETTING DOCS FOR USER:",user)
-      this.transitionToRoute('documents', user, 0, "date");
+      console.log('GETTING DOCS FOR USER:',user)
+      this.transitionToRoute('documents', user, 0, 'date');
     },
     transitionToGuide(guide) {
       this.transitionToRoute('guides', guide);
@@ -48,7 +48,7 @@ export default Controller.extend({
     transitionToNewestDoc() {
       const currentUserId = this.get('sessionAccount').currentUserId;
       this.get('store').query('document', {
-        filter: {search: "",
+        filter: {search: '',
           page: 0,
           currentUser: currentUserId,
           sortBy: 'date'}

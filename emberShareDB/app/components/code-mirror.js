@@ -13,10 +13,10 @@ export default Component.extend({
   evalDown:false,
   didInsertElement() {
     this._super(...arguments);
-    const myTextArea = this.element.querySelector("#code-mirror-container");
+    const myTextArea = this.element.querySelector('#code-mirror-container');
     const editor = CodeMirror.fromTextArea(myTextArea, {
-      mode:"htmlmixed",
-      theme:"monokai",
+      mode:'htmlmixed',
+      theme:'monokai',
       lineWrapping:true,
       readOnly:true,
       lineNumbers: true,
@@ -25,9 +25,9 @@ export default Component.extend({
       autocomplete:true,
       foldGutter: true,
       autorefresh:true,
-      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+      gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
     });
-    editor.on("keydown", (cm, event)=> {
+    editor.on('keydown', (cm, event)=> {
       //this.get('cs').log("KEY", event.keyCode);
       //17 = ctrl, 16 = shift, apple cmd = 224 | 91 | 93,
       if (!cm.state.completionActive
@@ -50,7 +50,7 @@ export default Component.extend({
         }
       }
     });
-    editor.on("keyup", (cm, event) => {
+    editor.on('keyup', (cm, event) => {
         //console.log("KEY", event.keyCode);
         if (!cm.state.completionActive
           && !cm.options.readOnly)
@@ -93,29 +93,29 @@ export default Component.extend({
           }
         }
     });
-    editor.setOption("extraKeys", {
-      "Ctrl-Space": "autocomplete",
-      "Cmd-\=": (cm)=> {
-        let elements = document.getElementsByClassName("CodeMirror");
+    editor.setOption('extraKeys', {
+      'Ctrl-Space': 'autocomplete',
+      'Cmd-\=': (cm)=> {
+        let elements = document.getElementsByClassName('CodeMirror');
         const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
-        elements[0].style.fontSize = (currentFontSize + 1) + "pt";
+        elements[0].style.fontSize = (currentFontSize + 1) + 'pt';
       },
-      "Cmd--": (cm)=>  {
-        let elements = document.getElementsByClassName("CodeMirror");
+      'Cmd--': (cm)=>  {
+        let elements = document.getElementsByClassName('CodeMirror');
         const currentFontSize = parseInt(elements[0].style.fontSize.substring(0,2))
-        elements[0].style.fontSize = (currentFontSize - 1) + "pt";
+        elements[0].style.fontSize = (currentFontSize - 1) + 'pt';
       },
-      "Cmd-Enter": (cm)=>  {
-        this.get('cs').log("shift-cmd")
+      'Cmd-Enter': (cm)=>  {
+        this.get('cs').log('shift-cmd')
         this.onReevaluate();
       },
-      "Ctrl-Enter": (cm)=>  {
-        this.get('cs').log("shift-Ctrl")
+      'Ctrl-Enter': (cm)=>  {
+        this.get('cs').log('shift-Ctrl')
         this.onReevaluate();
       },
-      "Cmd-/": (cm)=>  {
+      'Cmd-/': (cm)=>  {
         cm.toggleComment();
-        console.log("COMMENT");
+        console.log('COMMENT');
       }
     });
     var widgets = [];
@@ -124,7 +124,7 @@ export default Component.extend({
     let updateHints = ()=> {
       editor.operation(()=> {
         for (var i = 0; i < widgets.length; ++i){
-          editor.setGutterMarker(widgets[i], "CodeMirror-linenumbers", null)
+          editor.setGutterMarker(widgets[i], 'CodeMirror-linenumbers', null)
         }
         var doc = editor.getDoc();
         var pos = doc.getCursor();
@@ -133,15 +133,15 @@ export default Component.extend({
         const ruleSets = this.get('autocomplete').ruleSets(mode);
 
         let src = editor.getValue();
-        if(mode == "javascript")
+        if(mode == 'javascript')
         {
           //Add script tags around javascript to force js linting
-          src = "<script>" + editor.getValue() + "</script>";
+          src = '<script>' + editor.getValue() + '</script>';
         }
-        else if (mode == "css")
+        else if (mode == 'css')
         {
           //Add style tags around css to force css linting
-          src = "<style>" + editor.getValue() + "</style>";
+          src = '<style>' + editor.getValue() + '</style>';
         }
         var messages = HTMLHint.HTMLHint.verify(src, ruleSets);
         //collate all errors on the same line together
@@ -149,12 +149,12 @@ export default Component.extend({
         for (i = 0; i < messages.length; ++i) {
           let err = messages[i];
           //HTMLHint misclassifies this, ignore
-          if(err.message != "Tag must be paired, no start tag: [ </input> ]" &&
-             err.message != "Unnecessary semicolon.")
+          if(err.message != 'Tag must be paired, no start tag: [ </input> ]' &&
+             err.message != 'Unnecessary semicolon.')
           {
             if(!isEmpty(lines[err.line]))
             {
-              lines[err.line] = lines[err.line] + "\n" + err.message;
+              lines[err.line] = lines[err.line] + '\n' + err.message;
             }
             else
             {
@@ -166,30 +166,30 @@ export default Component.extend({
         for (let line in lines) {
           if (lines.hasOwnProperty(line))
           {
-            let msg = document.createElement("div");
-            msg.style["background-color"] = "transparent";
-            msg.style["width"] = "1000px";
-            msg.style["height"] = "100%";
-            let icon = msg.appendChild(document.createElement("div"));
-            icon.innerHTML = "!!";
-            icon.className = "lint-error-icon";
+            let msg = document.createElement('div');
+            msg.style['background-color'] = 'transparent';
+            msg.style['width'] = '1000px';
+            msg.style['height'] = '100%';
+            let icon = msg.appendChild(document.createElement('div'));
+            icon.innerHTML = '!!';
+            icon.className = 'lint-error-icon';
 
-            let txt = document.createElement("div");
+            let txt = document.createElement('div');
             txt.innerHTML = lines[line];
-            txt.style.display = "none";
+            txt.style.display = 'none';
             msg.appendChild(txt);
-            msg.className = "lint-error";
+            msg.className = 'lint-error';
             icon.onmouseover = ()=> {
-              this.get('cs').log("over");
-              msg.style["background-color"] = "rgba(255,255,255,0.8)";
-              txt.style.display = "inline";
+              this.get('cs').log('over');
+              msg.style['background-color'] = 'rgba(255,255,255,0.8)';
+              txt.style.display = 'inline';
             };
             icon.onmouseout = ()=> {
-              msg.style["background-color"] = "transparent";
-              txt.style.display = "none";
+              msg.style['background-color'] = 'transparent';
+              txt.style.display = 'none';
             }
             //widgets.push(editor.addLineWidget(parseInt(line) - 1, msg, {coverGutter: true, noHScroll: true}));
-            widgets.push(editor.setGutterMarker(parseInt(line) - 1, "CodeMirror-linenumbers", msg));
+            widgets.push(editor.setGutterMarker(parseInt(line) - 1, 'CodeMirror-linenumbers', msg));
           }
         }
       })

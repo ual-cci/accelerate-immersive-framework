@@ -17,7 +17,7 @@ export default Route.extend({
         this.get('cs').log(guide.id == params.topic,guide.id,params.topic);
         if(guide.id == params.topic)
         {
-          this.get('cs').log("EARLY RETURNIGN");
+          this.get('cs').log('EARLY RETURNIGN');
           return guide;
         }
       }

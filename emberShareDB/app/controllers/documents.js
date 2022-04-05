@@ -11,22 +11,22 @@ export default Controller.extend({
   mediaQueries:inject(),
   resizeService:inject('resize'),
   documentService: inject('documents'),
-  docName:"",
+  docName:'',
   isPrivate:true,
   isPrivateText:computed('isPrivate', function() {
-    return this.get('isPrivate') ? "private":"public";
+    return this.get('isPrivate') ? 'private':'public';
   }),
   initialSearchValue:computed('model.filter', {
     set(key, value) {
       return this._initialSearchValue = value;
     },
     get() {
-      const fromURL = this.get("model.filter.search");
-      return fromURL == " " ? null : fromURL;
+      const fromURL = this.get('model.filter.search');
+      return fromURL == ' ' ? null : fromURL;
     }
   }),
-  feedbackMessage: "",
-  sort:"views",
+  feedbackMessage: '',
+  sort:'views',
   page:0,
   sessionAccount: inject('session-account'),
   canGoBack:computed('page', function() {
@@ -42,10 +42,10 @@ export default Controller.extend({
   loadMoreCtr:0,
   sortingFilters:computed(()=>{
     return [
-    {title:"NEWEST", id:"date", isSelected:false, highlightTitle:false},
-    {title:"POPULAR", id:"views", isSelected:false, highlightTitle:false},
-    {title:"MOST REMIXED", id:"forks", isSelected:false, highlightTitle:false},
-    {title:"MOST EDITED", id:"edits", isSelected:false, highlightTitle:false},
+    {title:'NEWEST', id:'date', isSelected:false, highlightTitle:false},
+    {title:'POPULAR', id:'views', isSelected:false, highlightTitle:false},
+    {title:'MOST REMIXED', id:'forks', isSelected:false, highlightTitle:false},
+    {title:'MOST EDITED', id:'edits', isSelected:false, highlightTitle:false},
     // {title:"UPDATED", id:"updated", isSelected:false, highlightTitle:false},
   ]}),
   init: function () {
@@ -63,7 +63,7 @@ export default Controller.extend({
       var all = this.get('sortingFilters');
       let tags = results.data.map((t, i)=> {
         return {
-          title:"#"+t._id, id:"tag-item", isSelected:false, highlightTitle:false
+          title:'#'+t._id, id:'tag-item', isSelected:false, highlightTitle:false
         }
       });
       all = all.concat(tags);
@@ -74,9 +74,9 @@ export default Controller.extend({
   updateSelectedFilter() {
     var newF = []
     this.get('showingFilters').forEach((f)=> {
-      set(f, "isSelected", f.id == this.get('sort'));
+      set(f, 'isSelected', f.id == this.get('sort'));
       const searchTerm = this.getSearchTerm();
-      set(f, "highlightTitle", f.id == this.get('sort') || f.title == searchTerm);
+      set(f, 'highlightTitle', f.id == this.get('sort') || f.title == searchTerm);
       newF.push(f)
     })
     run(()=> {
@@ -84,15 +84,15 @@ export default Controller.extend({
     });
   },
   getSearchTerm() {
-    let searchBar = document.getElementById("searchTerm");
-    let searchTerm = " "
+    let searchBar = document.getElementById('searchTerm');
+    let searchTerm = ' '
     if(!isEmpty(searchBar))
     {
       searchTerm = searchBar.value;
       //Strip uncessary whitespace
-      searchTerm = searchTerm.replace(/^\s+|\s+$|\s+(?=\s)/g, "");
+      searchTerm = searchTerm.replace(/^\s+|\s+$|\s+(?=\s)/g, '');
     }
-    searchTerm = isEmpty(searchTerm) ? " " : searchTerm;
+    searchTerm = isEmpty(searchTerm) ? ' ' : searchTerm;
     return searchTerm;
   },
   updateFiltersToShow() {
@@ -124,10 +124,10 @@ export default Controller.extend({
   },
   updateResults()
   {
-    document.getElementById("document-container").classList.add("fading-out");
+    document.getElementById('document-container').classList.add('fading-out');
     setTimeout(()=> {
       this.get('sessionAccount').getUserFromName();
-      let searchBar = document.getElementById("searchTerm");
+      let searchBar = document.getElementById('searchTerm');
       const searchTerm = this.getSearchTerm();
       this.get('cs').log('transitionToRoute', 'documents', searchTerm, this.get('page'), this.get('sort'));
       this.updateSelectedFilter();
@@ -136,31 +136,31 @@ export default Controller.extend({
   },
   recent() {
     this.set('page', 0);
-    this.set('sort', "date");
+    this.set('sort', 'date');
     this.updateResults();
   },
   popular() {
     this.set('page', 0);
-    this.set('sort', "views");
+    this.set('sort', 'views');
     this.updateResults();
   },
   forked() {
     this.set('page', 0);
-    this.set('sort', "forks");
+    this.set('sort', 'forks');
     this.updateResults();
   },
   editted() {
     this.set('page', 0);
-    this.set('sort', "edits");
+    this.set('sort', 'edits');
     this.updateResults();
   },
   updated() {
     this.set('page', 0);
-    this.set('sort', "updated");
+    this.set('sort', 'updated');
     this.updateResults();
   },
   tag(tag) {
-    document.getElementById("searchTerm").value = tag.substr(1);
+    document.getElementById('searchTerm').value = tag.substr(1);
     this.set('page', 0);
     this.updateResults();
   },
@@ -170,16 +170,16 @@ export default Controller.extend({
       this.updateSelectedFilter();
     },
     openDocument(documentId) {
-      this.transitionToRoute("code-editor", documentId);
+      this.transitionToRoute('code-editor', documentId);
     },
     deleteDocument(documentId) {
       if (confirm('Are you sure you want to delete?')) {
         this.get('documentService').deleteDoc(documentId)
         .then(() => {
-          this.get('cs').log("deleted, updating results");
+          this.get('cs').log('deleted, updating results');
           this.updateResults();
         }).catch((err) => {
-          this.get('cs').log("error deleting", err);
+          this.get('cs').log('error deleting', err);
           this.set('feedbackMessage',err.errors[0]);
         });
       }
@@ -190,14 +190,14 @@ export default Controller.extend({
     createNewDocument() {
       let docName = this.get('docName');
       const isPrivate = this.get('isPrivate');
-      this.get('cs').log("new doc", docName);
+      this.get('cs').log('new doc', docName);
       if(docName.length > 1)
       {
         const src = this.get('documentService').getDefaultSource();
         const data = {name:docName, isPrivate:isPrivate, source:src}
         this.get('documentService').makeNewDoc(data)
           .then(() => {
-            this.get('cs').log("new doc created");
+            this.get('cs').log('new doc created');
             const currentUserId = this.get('sessionAccount').currentUserId;
             this.get('store').query('document', {
               filter: {search: docName,
@@ -205,12 +205,12 @@ export default Controller.extend({
                 currentUser: currentUserId,
                 sortBy: 'date'}
             }).then((documents) => {
-              this.get('cs').log("new doc found, transitioning", documents);
+              this.get('cs').log('new doc found, transitioning', documents);
               this.get('sessionAccount').updateOwnedDocuments();
               this.transitionToRoute('code-editor', documents.firstObject.documentId);
             });
           }).catch((err) => {
-            this.get('cs').log("error making doc", err);
+            this.get('cs').log('error making doc', err);
             this.set('feedbackMessage', err);
           });
       }
@@ -239,23 +239,23 @@ export default Controller.extend({
       this.updateResults();
     },
     filter(f) {
-      if(f.id == "forks")
+      if(f.id == 'forks')
       {
         this.forked()
       }
-      else if(f.id == "date")
+      else if(f.id == 'date')
       {
         this.recent()
       }
-      else if(f.id == "views")
+      else if(f.id == 'views')
       {
         this.popular()
       }
-      else if(f.id == "edits")
+      else if(f.id == 'edits')
       {
         this.editted()
       }
-      else if(f.id == "updated")
+      else if(f.id == 'updated')
       {
         this.updated()
       }
@@ -274,19 +274,19 @@ export default Controller.extend({
     },
     flashResults()
     {
-      const container = document.getElementById("document-container");
+      const container = document.getElementById('document-container');
       if(!isEmpty(container))
       {
-        this.get('cs').log("flashing results")
-        container.classList.add("fading-in");
-        container.classList.remove("fading-out");
+        this.get('cs').log('flashing results')
+        container.classList.add('fading-in');
+        container.classList.remove('fading-out');
         if(!isEmpty(this.get('fadeTimeout')))
         {
           clearTimeout(this.get('fadeTimeout'))
         }
         this.set('fadeTimeout', setTimeout(()=> {
-          container.classList.remove("fading-in");
-          container.classList.remove("fading-out");
+          container.classList.remove('fading-in');
+          container.classList.remove('fading-out');
           this.set('fadeTimeout', null);
         }, 500));
       }

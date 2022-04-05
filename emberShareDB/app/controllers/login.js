@@ -15,25 +15,25 @@ export default Controller.extend({
       this.getProperties('newUsername', 'newUserEmail', 'newUserPassword', 'newUserPasswordAgain');
       if(!newUsername || !newUserPassword || !newUserPasswordAgain)
       {
-        reject("please provide correct info");
+        reject('please provide correct info');
       }
       if(newUserPassword != newUserPasswordAgain)
       {
-        reject("passwords do not match");
+        reject('passwords do not match');
       }
-      const badCharacters = ["*","\"","\'","(",")",";",":","@","&","=","+","$",",","/","?","#","[","]","\"", " "];
+      const badCharacters = ['*','"','\'','(',')',';',':','@','&','=','+','$',',','/','?','#','[',']','"', ' '];
       badCharacters.forEach((char)=> {
         if(newUsername.indexOf(char) !== -1)
         {
-          reject("username must be one word (no spaces) and not contain !*'();:@&=+$,/?#[]")
+          reject('username must be one word (no spaces) and not contain !*\'();:@&=+$,/?#[]')
         }
       });
       resolve();
     });
   },
   clearFeedback() {
-    this.set('loginErrorMessage', "");
-    this.set('registerMessage', "");
+    this.set('loginErrorMessage', '');
+    this.set('registerMessage', '');
   },
   actions: {
     invalidateSession() {
@@ -43,11 +43,11 @@ export default Controller.extend({
       this.clearFeedback();
       let { identification, password } = this.getProperties('identification', 'password');
       this.get('session').authenticate('authenticator:oauth2', identification, password).then((response) => {
-        this.get('cs').log("authenticated", response);
-        this.set('loginErrorMessage', "authenticated");
+        this.get('cs').log('authenticated', response);
+        this.set('loginErrorMessage', 'authenticated');
       }).catch((err) => {
-        console.log("authentication failed", err);
-        this.set('loginErrorMessage', "authentication failed");
+        console.log('authentication failed', err);
+        this.set('loginErrorMessage', 'authentication failed');
       });
     },
     createNewUser() {
@@ -64,7 +64,7 @@ export default Controller.extend({
           created: new Date()
         });
         user.save().then(() => {
-          this.get('cs').log("user created");
+          this.get('cs').log('user created');
           alert('Your new user account has been created, please sign in to continue')
           this.set('registerMessage', 'Your new user account has been created, please sign in to continue');
         }).catch((err) => {
@@ -79,7 +79,7 @@ export default Controller.extend({
       this.clearFeedback();
       let username = this.get('resetUsername');
       this.get('passwordReset').requestReset(username).then(() => {
-        this.get('cs').log("password reset");
+        this.get('cs').log('password reset');
         this.set('resetMessage', 'Password reset request accepted, please check you email to confirm');
       }).catch((err) => {
         this.get('cs').log(err);

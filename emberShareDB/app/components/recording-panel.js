@@ -30,8 +30,8 @@ export default Component.extend({
   }),
   updateOptions:function() {
     this.onOptionsChanged({
-      isRecording:this.get("isRecording"),
-      node:this.get("selectedNode")
+      isRecording:this.get('isRecording'),
+      node:this.get('selectedNode')
     })
   },
   updateSelectedNode:function() {
@@ -42,7 +42,7 @@ export default Component.extend({
       {
         i = 0
       }
-      document.getElementById("rec-select").selectedIndex = i;
+      document.getElementById('rec-select').selectedIndex = i;
       this.set('showUserInput', i === this.get('possibleNodes').length + 1)
       if(this.get('showUserInput'))
       {
@@ -52,7 +52,7 @@ export default Component.extend({
   },
   userNodeSelected:function() {
     const node = {
-      library:"user",
+      library:'user',
       index:this.get('possibleNodes').length + 1,
       variable:this.get('userNode')
     }
@@ -65,7 +65,7 @@ export default Component.extend({
       this.updateOptions()
     },
     onSelectNode(index) {
-      if(index === "user")
+      if(index === 'user')
       {
         this.userNodeSelected()
       }

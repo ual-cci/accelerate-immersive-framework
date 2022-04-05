@@ -4,66 +4,66 @@ import { isEmpty } from '@ember/utils';
 import { computed } from '@ember/object';
 import { inject }  from '@ember/service';
 export default Controller.extend({
-  topic:"",
+  topic:'',
   cs: inject('console'),
   url:config.localOrigin,
   isExample:computed('model', function() {
-    this.get('cs').log("isExample", this.get('model'),Array.isArray(this.get('model')))
+    this.get('cs').log('isExample', this.get('model'),Array.isArray(this.get('model')))
     return !Array.isArray(this.get('model'))
   }),
   isMagnet:computed('model', function() {
-    this.get('cs').log("example model", this.get('model'))
-    return this.get('model').id == "magnet"
+    this.get('cs').log('example model', this.get('model'))
+    return this.get('model').id == 'magnet'
   }),
   isBBcut:computed('model', function() {
     this.get('cs').log(this.get('model'))
-    return this.get('model').id == "bbcut"
+    return this.get('model').id == 'bbcut'
   }),
   isEvolib:computed('model', function() {
     this.get('cs').log(this.get('model'))
-    return this.get('model').id == "evolib"
+    return this.get('model').id == 'evolib'
   }),
   isMario:computed('model', function() {
     this.get('cs').log(this.get('model'))
-    return this.get('model').id == "mario"
+    return this.get('model').id == 'mario'
   }),
   isMerk:computed('model', function() {
     this.get('cs').log(this.get('model'))
-    return this.get('model').id == "merk"
+    return this.get('model').id == 'merk'
   }),
   isMarkov:computed('model', function() {
     this.get('cs').log(this.get('model'))
-    return this.get('model').id == "markov"
+    return this.get('model').id == 'markov'
   }),
   isAudiotrig:computed('model', function() {
-    return this.get('model').id == "audio-trigger"
+    return this.get('model').id == 'audio-trigger'
   }),
   isFace:computed('model', function() {
-    return this.get('model').id == "facesynth"
+    return this.get('model').id == 'facesynth'
   }),
   isRhythm:computed('model', function() {
-    return this.get('model').id == "rhythm-remixer"
+    return this.get('model').id == 'rhythm-remixer'
   }),
   isConceptular:computed('model', function() {
-    return this.get('model').id == "conceptular"
+    return this.get('model').id == 'conceptular'
   }),
   isSpec:computed('model', function() {
-    return this.get('model').id == "specdelay"
+    return this.get('model').id == 'specdelay'
   }),
   isLyric:computed('model', function() {
-    return this.get('model').id == "lyrics"
+    return this.get('model').id == 'lyrics'
   }),
   isSun:computed('model', function() {
-    return this.get('model').id == "sun-on-your-skin"
+    return this.get('model').id == 'sun-on-your-skin'
   }),
   isKicks:computed('model', function() {
-    return this.get('model').id == "kick-classifier"
+    return this.get('model').id == 'kick-classifier'
   }),
   isSpaceDrum:computed('model', function() {
-    return this.get('model').id == "space-drum"
+    return this.get('model').id == 'space-drum'
   }),
   isAutoPilot:computed('model', function() {
-    return this.get('model').id == "auto-pilot"
+    return this.get('model').id == 'auto-pilot'
   }),
   actions: {
     onClick(example) {

@@ -4,7 +4,7 @@ import acorn from 'acorn'
 import walk from 'acorn/dist/walk'
 import config from  '../config/environment';
 import RSVP from 'rsvp';
-import hljs from "highlight.js";
+import hljs from 'highlight.js';
 import { computed, set } from '@ember/object';
 
 export default Service.extend({
@@ -13,30 +13,30 @@ export default Service.extend({
   assetService:inject('assets'),
   sessionAccount:inject('session-account'),
   library:inject(),
-  script:"",
+  script:'',
   savedVals:null,
   hasPVals:false,
   parser:computed(()=>{return new DOMParser()}),
   insertLibrary(lib, source) {
-    let insertAfter = "<head>"
+    let insertAfter = '<head>'
     let index = source.indexOf(insertAfter) + insertAfter.length;
-    let insert = "\n <script src = \"" +
-    config.localOrigin + "/libs/" + this.get('library').url(lib) +
-    "\"></script>"
-    const op = {p: ["source", index], si:insert};
+    let insert = '\n <script src = "' +
+    config.localOrigin + '/libs/' + this.get('library').url(lib) +
+    '"></script>'
+    const op = {p: ['source', index], si:insert};
     return op;
   },
   insertStyleSheets(source, children) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
     let linkStartIndex = 0, tagStartIndex = 0;
-    let searchStrs = ["<link", "/>"];
-    let preamble = "", tag = "";
-    let newSrc = "";
+    let searchStrs = ['<link', '/>'];
+    let preamble = '', tag = '';
+    let newSrc = '';
     let found = false;
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         if(ptr == 0)
         {
-          this.get('cs').log("found start of <link");
+          this.get('cs').log('found start of <link');
           searchIndex = index;
           tagStartIndex = searchIndex;
           preamble = source.substring(prevEnd, searchIndex);
@@ -51,41 +51,41 @@ export default Service.extend({
           searchIndex = index + searchStrs[ptr].length;
           newSrc = newSrc + preamble;
           let added = false;
-          const parsedTag = this.get('parser').parseFromString(tag, "application/xml");
+          const parsedTag = this.get('parser').parseFromString(tag, 'application/xml');
           const attr = parsedTag.documentElement.attributes;
           let styleSheet = false;
           let media;
-          this.get('cs').log("stylesheet", attr);
+          this.get('cs').log('stylesheet', attr);
           for(let i = 0; i < attr.length; i++)
           {
-            if(attr[i].nodeName == "rel" && attr[i].nodeValue == "stylesheet")
+            if(attr[i].nodeName == 'rel' && attr[i].nodeValue == 'stylesheet')
             {
               styleSheet = true;
             }
-            else if(attr[i].nodeName == "media")
+            else if(attr[i].nodeName == 'media')
             {
               media = attr[i].nodeValue
             }
           }
           if(styleSheet)
           {
-            this.get('cs').log("stylesheet", children);
+            this.get('cs').log('stylesheet', children);
             for(let i = 0; i < attr.length; i++)
             {
-              if(attr[i].nodeName == "href")
+              if(attr[i].nodeName == 'href')
               {
                 for(let j = 0; j < children.length; j++)
                 {
                   if(children[j].name == attr[i].nodeValue)
                   {
-                    newSrc = newSrc + "<style type = \"text/css\" ";
+                    newSrc = newSrc + '<style type = "text/css" ';
                     if(media)
                     {
-                      newSrc = newSrc + "media = \"" + media+ "\"";
+                      newSrc = newSrc + 'media = "' + media+ '"';
                     }
-                    newSrc = newSrc + ">\n";
+                    newSrc = newSrc + '>\n';
                     newSrc = newSrc + children[j].source;
-                    newSrc = newSrc +"\n</style>";
+                    newSrc = newSrc +'\n</style>';
                     added = true;
                     //this.get('cs').log(newSrc);
                     break;
@@ -117,39 +117,39 @@ export default Service.extend({
     let newSrc = src;
     if(recordingOptions.isRecording && !isEmpty(recordingOptions.node.variable))
     {
-      newSrc = "";
-      const top = src.includes("<body>") ? "<body>" : "<head>"
+      newSrc = '';
+      const top = src.includes('<body>') ? '<body>' : '<head>'
       let topIndex = src.indexOf(top);
       if(topIndex > 0)
       {
         topIndex += 6;
         newSrc = newSrc + src.substring(0, topIndex);
-        newSrc = newSrc + "\n<script src = \"" + config.localOrigin +
-      "/libs/recorder-wrapper.js\"></script>";
+        newSrc = newSrc + '\n<script src = "' + config.localOrigin +
+      '/libs/recorder-wrapper.js"></script>';
       }
       else
       {
         topIndex = 0;
       }
-      const end = src.includes("</body>") ? "</body>" : "</head>"
+      const end = src.includes('</body>') ? '</body>' : '</head>'
       let endIndex = src.indexOf(end);
       if(endIndex > 0)
       {
         newSrc = newSrc + src.substring(topIndex, endIndex);
         let node = recordingOptions.node.variable;
-        if(recordingOptions.node.library === "maximilian")
+        if(recordingOptions.node.library === 'maximilian')
         {
-          node = node + ".maxiAudioProcessor"
+          node = node + '.maxiAudioProcessor'
         }
-        else if(recordingOptions.node.library === "MaxiInstruments")
+        else if(recordingOptions.node.library === 'MaxiInstruments')
         {
-          node = node + ".node"
+          node = node + '.node'
         }
         if(!isEmpty(node))
         {
-          newSrc = newSrc + "\n<script language=\"javascript\" type=\"text/javascript\">"
-          newSrc = newSrc + "\nconst onRecordLoad = ()=>{initRecorder(" + node + ")}"
-          newSrc = newSrc + "\n</script>\n"
+          newSrc = newSrc + '\n<script language="javascript" type="text/javascript">'
+          newSrc = newSrc + '\nconst onRecordLoad = ()=>{initRecorder(' + node + ')}'
+          newSrc = newSrc + '\n</script>\n'
         }
         newSrc = newSrc + src.substring(endIndex)
       }
@@ -158,26 +158,26 @@ export default Service.extend({
     return newSrc;
   },
   insertTabs(src, children, assets) {
-    let newSrc = "";
+    let newSrc = '';
     const scripts = this.getScripts(src);
     scripts.forEach((script)=> {
       newSrc = newSrc + this.insertStyleSheets(script.preamble, children);
       let added = false;
       if(script.src.length == 0)
       {
-        const parsedTag = this.get('parser').parseFromString(script.scriptTag+"</script>", "application/xml");
+        const parsedTag = this.get('parser').parseFromString(script.scriptTag+'</script>', 'application/xml');
         const attr = parsedTag.documentElement.attributes;
         for(let i = 0; i < attr.length; i++)
         {
           //this.get('cs').log(attr[i].nodeName)
-          if(attr[i].nodeName == "src")
+          if(attr[i].nodeName == 'src')
           {
             for(let j = 0; j < children.length; j++)
             {
               //this.get('cs').log(children[j].data.name, attr[i].nodeValue)
               if(children[j].name == attr[i].nodeValue)
               {
-                newSrc = newSrc + "<script language=\"javascript\" type=\"text/javascript\">\n";
+                newSrc = newSrc + '<script language="javascript" type="text/javascript">\n';
                 newSrc = newSrc + children[j].source;
                 added = true;
                 break;
@@ -199,10 +199,10 @@ export default Service.extend({
         doesnt get past.
         */
         let scriptTag = script.scriptTag
-        if((scriptTag.includes("src=") || scriptTag.includes("src =")) &&
-        (!scriptTag.includes("mimicproject.com"))) {
+        if((scriptTag.includes('src=') || scriptTag.includes('src =')) &&
+        (!scriptTag.includes('mimicproject.com'))) {
           let toFind = /<script /g;
-          let replace = "<script crossorigin ";
+          let replace = '<script crossorigin ';
           scriptTag = scriptTag.replace(toFind, replace);
         }
 
@@ -211,10 +211,10 @@ export default Service.extend({
         for(let j = 0; j < children.length; j++)
         {
           const child = children[j];
-          const url = config.redirectServerHost + "/source/" + child.documentId;
+          const url = config.redirectServerHost + '/source/' + child.documentId;
           //this.get('cs').log("BEFORE", child.name);
-          js = js.replace(new RegExp("\"" + child.name + "\"","gm"), "\"" + url + "\"");
-          js = js.replace(new RegExp("\'" + child.name + "\'","gm"), "\"" + url + "\"");
+          js = js.replace(new RegExp('"' + child.name + '"','gm'), '"' + url + '"');
+          js = js.replace(new RegExp('\'' + child.name + '\'','gm'), '"' + url + '"');
           //this.get('cs').log("AFTER", js);
         };
         newSrc = newSrc + js;
@@ -230,7 +230,7 @@ export default Service.extend({
   insertDatasetId(src, docId)
   {
     const toFind = /new Learner\(\)/g;
-    const replace = "new Learner(\"" + docId + "\")";
+    const replace = 'new Learner("' + docId + '")';
     const newSrc = src.replace(toFind, replace);
     return newSrc;
   },
@@ -241,12 +241,12 @@ export default Service.extend({
   replaceNoCORSResources(src)
   {
     //return src
-    let toFind, replace, newSrc = ""
+    let toFind, replace, newSrc = ''
     toFind = /"https:\/\/doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
-    replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
+    replace = '"https:\/\/mimicproject.com\/libs\/rapidLib.js"';
     src = src.replace(toFind, replace);
     toFind = /"https:\/\/www.doc.gold.ac.uk\/eavi\/rapidmix\/RapidLib.js"/g;
-    replace = "\"https:\/\/mimicproject.com\/libs\/rapidLib.js\"";
+    replace = '"https:\/\/mimicproject.com\/libs\/rapidLib.js"';
     src = src.replace(toFind, replace);
     return src;
   },
@@ -269,28 +269,28 @@ export default Service.extend({
               let exp = script.src.substring(dec.start, dec.end);
               if(!isEmpty(init))
               {
-                if(init.type === "NewExpression" && exp.includes("maxiAudio("))
+                if(init.type === 'NewExpression' && exp.includes('maxiAudio('))
                 {
-                  possibles.push({library:"maximilian", variable:name})
+                  possibles.push({library:'maximilian', variable:name})
                 }
-                else if(init.type === "NewExpression" && exp.includes("MaxiInstruments("))
+                else if(init.type === 'NewExpression' && exp.includes('MaxiInstruments('))
                 {
-                  possibles.push({library:"MaxiInstruments", variable:name})
+                  possibles.push({library:'MaxiInstruments', variable:name})
                 }
-                else if(init.type === "NewExpression" && exp.includes("Node("))
+                else if(init.type === 'NewExpression' && exp.includes('Node('))
                 {
-                  possibles.push({library:"WebAudio", variable:name})
+                  possibles.push({library:'WebAudio', variable:name})
                 }
-                else if(init.type === "CallExpression" && init.callee.property !==undefined)
+                else if(init.type === 'CallExpression' && init.callee.property !==undefined)
                 {
                   const webAudioFactories =
                   [
-                    "createOscillator", "createBufferSource", "createMediaElementSource",
-                    "createBiquadFilter", "createMediaStreamTrackSource", "createDelay",
-                    "createDynamicsCompressor", "createGain", "createPeriodicWave"
+                    'createOscillator', 'createBufferSource', 'createMediaElementSource',
+                    'createBiquadFilter', 'createMediaStreamTrackSource', 'createDelay',
+                    'createDynamicsCompressor', 'createGain', 'createPeriodicWave'
                   ];
                   if(webAudioFactories.some(e => e === init.callee.property.name)) {
-                    possibles.push({library:"WebAudio", variable:name})
+                    possibles.push({library:'WebAudio', variable:name})
                   }
                 }
               }
@@ -301,15 +301,15 @@ export default Service.extend({
         //this.get('cs').log(err);
       }
     }
-    this.get('cs').log("possibles", possibles)
+    this.get('cs').log('possibles', possibles)
     return possibles;
   },
   insertStatefullCallbacks(src, savedVals) {
-    let newSrc = "";
+    let newSrc = '';
     this.set('savedVals', savedVals);
     this.set('hasPVals', false);
     let didEdit = false;
-    this.get('cs').log("inserting stateful callbacks");
+    this.get('cs').log('inserting stateful callbacks');
     const scripts = this.getScripts(src);
     for(let i = 0; i < scripts.length; i++)
     {
@@ -331,22 +331,22 @@ export default Service.extend({
               }
               const init = dec.init;
               let savedVal = this.get('savedVals')[name];
-              const delim = i >= node.declarations.length - 1 ? ";" : ","
+              const delim = i >= node.declarations.length - 1 ? ';' : ','
               let exp = script.src.substring(dec.start, dec.end) + delim;
-              if(name.substring(0,2) == "p_")
+              if(name.substring(0,2) == 'p_')
               {
                 if(!init)
                 {
                   savedVal = savedVal ? savedVal:0;
-                  exp = " = " + savedVal + delim;
+                  exp = ' = ' + savedVal + delim;
                   ops.push({si:exp, p:dec.end})
                 }
                 else
                 {
-                  const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+                  const msg = '\nparent.postMessage(["' + name + '",JSON.stringify(' + name + ')], "*");'
                   let index = dec.end;
                   const end = script.src.substring(index, index + 1);
-                  if(end == ";")
+                  if(end == ';')
                   {
                     index++;
                   }
@@ -375,12 +375,12 @@ export default Service.extend({
               }
             }
             //If an object or a property of it is changed, update with a JSON version of the WHOLE object
-            if(name.substring(0,2)=="p_")
+            if(name.substring(0,2)=='p_')
             {
-              const msg = "\nparent.postMessage([\"" + name + "\",JSON.stringify(" + name + ")], \"*\");"
+              const msg = '\nparent.postMessage(["' + name + '",JSON.stringify(' + name + ')], "*");'
               let index = node.end;
               const end = script.src.substring(index, index + 1);
-              if(end == ";")
+              if(end == ';')
               {
                 index++;
               }
@@ -391,21 +391,21 @@ export default Service.extend({
           CallExpression: (node) => {
             if(!isEmpty(node.callee.object))
             {
-              if(node.callee.object.name === "console")
+              if(node.callee.object.name === 'console')
               {
-                let output = ""
+                let output = ''
                 for(let j = 0; j < node.arguments.length; j++)
                 {
                   const arg = node.arguments[j];
                   const val = script.src.substring(arg.start, arg.end);
-                  let delim = j < node.arguments.length - 1 ? "," : ""
-                  output = output + "JSON.stringify(" + val + ")" + delim;
+                  let delim = j < node.arguments.length - 1 ? ',' : ''
+                  output = output + 'JSON.stringify(' + val + ')' + delim;
                 }
-                this.get('cs').log("adding in console statement");
-                const msg = "\nparent.postMessage([\"console\"," + output + "], \"*\");"
+                this.get('cs').log('adding in console statement');
+                const msg = '\nparent.postMessage(["console",' + output + '], "*");'
                 let index = node.end;
                 const end = script.src.substring(index, index + 1);
-                if(end == ";")
+                if(end == ';')
                 {
                   index++;
                 }
@@ -415,7 +415,7 @@ export default Service.extend({
           }
         });
       } catch (err) {
-        this.get('cs').log("acorn couldnt parse script, probably src")
+        this.get('cs').log('acorn couldnt parse script, probably src')
       }
       if(ops.length > 0)
       {
@@ -456,9 +456,9 @@ export default Service.extend({
   getScripts(source) {
     let searchIndex = 0, index = 0, ptr = 0, prevEnd = 0;
     let scriptStartIndex = 0, tagStartIndex = 0;
-    let searchStrs = ['<script', ">" , "</script>"];
+    let searchStrs = ['<script', '>' , '</script>'];
     let scripts = [];
-    let preamble = "", scriptTag = "";
+    let preamble = '', scriptTag = '';
     while ((index = source.indexOf(searchStrs[ptr], searchIndex)) > -1) {
         if(ptr == 0)
         {
@@ -475,12 +475,12 @@ export default Service.extend({
         else if (ptr == 2)
         {
           searchIndex = index + searchStrs[ptr].length;
-          const src = scriptStartIndex <= (index - 1) ? source.substring(scriptStartIndex, index - 1) : "";
+          const src = scriptStartIndex <= (index - 1) ? source.substring(scriptStartIndex, index - 1) : '';
           scripts.push({
             preamble:preamble,
             scriptTag:scriptTag,
               src:src,
-                post:"\n</script>"
+                post:'\n</script>'
              });
           prevEnd = searchIndex;
         }
@@ -512,9 +512,9 @@ export default Service.extend({
           {
             if(!isEmpty(asset))
             {
-              const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
+              const b64 = 'data:' + fileType + ';charset=utf-8;base64,' + asset.b64data;
               //this.get('cs').log("replaced base64")
-              source = source.replace(new RegExp(toFind,"gm"),b64);
+              source = source.replace(new RegExp(toFind,'gm'),b64);
             }
             else
             {
@@ -523,18 +523,18 @@ export default Service.extend({
               //this.get('cs').log("finding record");
               asset = this.get('store').peekRecord('asset',fileId);
               //this.get('cs').log("found record");
-              const b64 = "data:" + fileType + ";charset=utf-8;base64," + asset.b64data;
-              source = source.replace(new RegExp(toFind,"gm"), b64);
+              const b64 = 'data:' + fileType + ';charset=utf-8;base64,' + asset.b64data;
+              source = source.replace(new RegExp(toFind,'gm'), b64);
             //  this.get('cs').log("replaced base64")
             }
           }
           else
           {
             //Else just use endpoint
-            const url = config.serverHost + "/asset/" + docId + "/" + toFind
+            const url = config.serverHost + '/asset/' + docId + '/' + toFind
             //this.get('cs').log("replaced url", url)
-            source = source.replace(new RegExp("\"" + toFind + "\"","gm"), "\"" + url + "\"");
-            source = source.replace(new RegExp("\'" + toFind + "\'","gm"), "\"" + url + "\"");
+            source = source.replace(new RegExp('"' + toFind + '"','gm'), '"' + url + '"');
+            source = source.replace(new RegExp('\'' + toFind + '\'','gm'), '"' + url + '"');
             //this.get('cs').log(source)
           }
         }
@@ -600,9 +600,9 @@ export default Service.extend({
     //Sort by line to avoid errors with undo (see explanation in comment by indexFromPos)
     delta = delta.sort(compare);
     delta.forEach((change)=> {
-      if(change.origin === "playback")
+      if(change.origin === 'playback')
       {
-        this.get('cs').log("ignoring change")
+        this.get('cs').log('ignoring change')
         return ops;
       }
       if((change.removed[0].length > 0 && change.removed.length === 1) || change.removed.length > 1)
@@ -624,11 +624,11 @@ export default Service.extend({
       if ('sd' in op) {
         const end = start + op.sd.length;
         const to = editor.doc.posFromIndex(end);
-        this.get("cs").log("deleting", from, to)
-        editor.doc.replaceRange("", from, to, "playback");
+        this.get('cs').log('deleting', from, to)
+        editor.doc.replaceRange('', from, to, 'playback');
       } else if ('si' in op) {
-        this.get("cs").log("adding", op.si)
-        editor.doc.replaceRange(op.si, from, null, "playback");
+        this.get('cs').log('adding', op.si)
+        editor.doc.replaceRange(op.si, from, null, 'playback');
       } else {
         throw new Error(`Invalid Operation: ${JSON.stringify(op)}`);
       }
@@ -639,7 +639,7 @@ export default Service.extend({
     editor.refresh();
   },
   getLanguage(source) {
-    let highlightResult = hljs.highlightAuto(source, ["css", "javascript"]);
+    let highlightResult = hljs.highlightAuto(source, ['css', 'javascript']);
     //this.get('cs').log("language", highlightResult.language);
     return highlightResult.language;
   }

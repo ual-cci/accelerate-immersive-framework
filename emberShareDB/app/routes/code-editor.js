@@ -21,7 +21,7 @@ export default Route.extend({
     }
   },
   deactivate: function() {
-    this.get('cs').log("leaving code-editor");
+    this.get('cs').log('leaving code-editor');
     this._super();
     this.get('controller').send('cleanUp');
   },

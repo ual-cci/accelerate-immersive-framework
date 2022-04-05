@@ -5,11 +5,11 @@ export default Component.extend({
   cs: inject('console'),
   init() {
     this._super(...arguments);
-    this.get('cs').log("init op player", this.get('isPlaying'))
+    this.get('cs').log('init op player', this.get('isPlaying'))
   },
   didUpdateAttrs() {
     this._super(...arguments);
-    this.get('cs').log("did upate op player", this.get('isPlaying'))
+    this.get('cs').log('did upate op player', this.get('isPlaying'))
   },
   actions:{
     prev() {

@@ -63,7 +63,7 @@ export default Component.extend({
 
     didUpdateAttrs() {
       this._super(...arguments);
-      const addBtn = document.getElementById(this.get("addButtonId"));
+      const addBtn = document.getElementById(this.get('addButtonId'));
       if(!isEmpty(addBtn))
       {
         if (this.get('editable'))
@@ -83,14 +83,14 @@ export default Component.extend({
 
         // const textInput = document.getElementsByClassName("uncharted-token-input");
         // console.log(textInput);
-        const textInput = $(".uncharted-token-input");
+        const textInput = $('.uncharted-token-input');
         this._textInputElement = textInput;
         textInput
             .on('keydown', this._keydownHandler.bind(this))
             .on('focus', this._focusHandler.bind(this))
             .on('blur', this._inputWasBlurred.bind(this));
 
-        const me = document.getElementsByClassName("uncharted-form-control")[0];
+        const me = document.getElementsByClassName('uncharted-form-control')[0];
         console.log(me)
         me.onkeydown = this._tokenNavigationHandler.bind(this)
         me.onfocus = this._focusHandler.bind(this)
@@ -105,7 +105,7 @@ export default Component.extend({
             .off('focus', this._focusHandler.bind(this))
             .off('blur', this._inputWasBlurred.bind(this));
 
-        const me = document.getElementsByClassName("uncharted-form-control")[0];
+        const me = document.getElementsByClassName('uncharted-form-control')[0];
         console.log(me)
         me.onkeydown = this._tokenNavigationHandler.bind(this)
         me.onfocus = this._focusHandler.bind(this)
@@ -144,7 +144,7 @@ export default Component.extend({
           {
             return;
           }
-          console.log("HERE", token, index);
+          console.log('HERE', token, index);
           this.searchTag(token);
           this.set('selectedTokenIndex', index);
         }
@@ -290,7 +290,7 @@ export default Component.extend({
 
     // Internal methods
     _focusComponent() {
-      const me = document.getElementsByClassName("uncharted-form-control");
+      const me = document.getElementsByClassName('uncharted-form-control');
       console.log(me)
       me.focus();
     },

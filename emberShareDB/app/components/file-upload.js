@@ -7,7 +7,7 @@ import RSVP from 'rsvp';
 export default EmberUploader.FileField.extend({
   sessionAccount:inject('session-account'),
   cs:inject('console'),
-  url:config.serverHost + "/asset",
+  url:config.serverHost + '/asset',
   uploadFile: function (file) {
     return new RSVP.Promise((resolve, reject)=> {
       const uploader = EmberUploader.Uploader.create({
@@ -42,7 +42,7 @@ export default EmberUploader.FileField.extend({
     });
   },
   filesDidChange: async function(files) {
-    this.get('cs').log("files to upload", files)
+    this.get('cs').log('files to upload', files)
     for(var i = 0; i < files.length; i++)
     {
       await this.uploadFile(files[i])
