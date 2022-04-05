@@ -14,6 +14,8 @@ module.exports = {
     browser: true
   },
   rules: {
+    "quotes": ["error", "double"],
+    "semi": true,
   },
   overrides: [
     // node files
