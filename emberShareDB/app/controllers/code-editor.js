@@ -8,8 +8,6 @@ import { htmlSafe } from '@ember/template';
 import { computed } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
 import RSVP from 'rsvp';
-import { bind } from '@ember/runloop';
-import jQuery from 'jquery';
 
 export default Controller.extend({
   //Query Params
@@ -120,7 +118,7 @@ export default Controller.extend({
     // this.hijackConsoleOutput();
     this.set('colabMode', config.colabMode)
     this.get('cs').log('colabMode', this.get('colabMode'))
-    this.get('resizeService').on('didResize', event => {
+    this.get('resizeService').on('didResize', () => {
       if(!this.get('leftCodeEditor'))
       {
         //Bound the code window
@@ -2225,6 +2223,9 @@ export default Controller.extend({
           });
         }
       }
+    },
+    joshFn() {
+      console.log("HELLOOOO")
     }
   }
 });

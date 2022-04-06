@@ -20,12 +20,40 @@
       <div id = {{concat "render-doc-" isOwner}}>
         </div>
           <div id = "transport-container">
+
+
+            <!-- JOSH -->
+            <!-- JOSH -->
+            <!-- JOSH -->
+            <div class="tooltip col-1">
+              {{#bs-button (html-attributes aria-label="Josh Test")
+              icon="glyphicon glyphicon-qrcode" id = "josh-btn"
+              class = "clear-btn transport-btn" onClick=(action "joshFn")}}{{/bs-button}}
+              <span class="tooltiptext">Render Code</span>
+            </div>
+            <!-- JOSH -->
+            <!-- JOSH -->
+            <!-- JOSH -->
+
+
+
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
             <div class="tooltip col-2">
               {{#bs-button (html-attributes aria-label="Render Code")
               icon="glyphicon glyphicon-play" id = "code-play-btn"
               class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
               <span class="tooltiptext">Render Code</span>
             </div>
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+            <!-- BUTTONS I THINK -->
+
             {{#if canEditSource}}
               <div class="tooltip">
                 {{#if showAssets}}
@@ -249,7 +277,6 @@
         {{loading-hud message = hudMessage hideWheel = isEmbedded}}
       {{/if}}
       {{#if isEmbeddedWithCode}}
-      <div id = "embedded-run-container">
         {{#bs-button
           (html-attributes aria-label="play or pause")
           class = "clear-text-btn embedded-menu-button"
@@ -270,7 +297,6 @@
           onClick=(action "showCode")}}Show Code
         {{/bs-button}}
         {{/if}}
-      </div>
       {{/if}}
         {{#if isMobile}}
           <span><strong>SUPORT FOR MOBILES IS LIMITED</strong></span>
