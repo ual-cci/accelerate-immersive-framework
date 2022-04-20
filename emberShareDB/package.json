@@ -83,6 +83,8 @@
     "jshint": "2.10.1",
     "jszip": "3.1.5",
     "log4javascript": "^1.4.15",
-    "reconnecting-websocket": "4.1.0"
+    "reconnecting-websocket": "4.1.0",
+    "safe-eval": "^0.4.1",
+    "three": "^0.139.2"
   }
 }
