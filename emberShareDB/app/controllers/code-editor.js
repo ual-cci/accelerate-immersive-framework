@@ -8,6 +8,7 @@ import { htmlSafe } from '@ember/template'
 import { computed } from '@ember/object'
 import { scheduleOnce } from '@ember/runloop'
 import RSVP from 'rsvp'
+import { parseSnippetError } from '../helpers/snippet-errors'
 
 export default Controller.extend({
   //Query Params
@@ -292,7 +293,6 @@ export default Controller.extend({
         socket = new ReconnectingWebSocket(url)
         this.set('socket', socket)
         socket.onopen = () => {
-          console.log('web socket open')
           if (this.get('leftCodeEditor')) {
             this.get('cs').log(
               'opened connection but had already left code editor'
@@ -1988,9 +1988,15 @@ export default Controller.extend({
       this.syncOutputContainer()
     },
     toggleLibraryDropdown() {
+      document
+        .getElementById('snippetsDropdown')
+        .classList.toggle('show', false)
       document.getElementById('librariesDropdown').classList.toggle('show')
     },
     toggleSnippetsDropdown() {
+      document
+        .getElementById('librariesDropdown')
+        .classList.toggle('show', false)
       document.getElementById('snippetsDropdown').classList.toggle('show')
     },
     insertLibrary(lib) {
@@ -2003,18 +2009,15 @@ export default Controller.extend({
         this.set('surpress', true)
         this.get('codeParser').applyOps([op], this.get('editor'))
         this.set('surpress', false)
-        document.getElementById('libraryDropdown').classList.toggle('show')
+        document.getElementById('librariesDropdown').classList.toggle('show')
       })
     },
     insertSnippet(snippet) {
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
         const op = this.get('codeParser').insertSnippet(source, snippet)
-        if (op < 0) {
-          this.set(
-            'consoleOutput',
-            `Cannot find '${snippet.marker}' tag so I don't know where to insert the ${snippet.title}!`
-          )
+        if (typeof op === 'string') {
+          this.set('consoleOutput', parseSnippetError(op, snippet))
           return
         }
         this.submitOp(op)

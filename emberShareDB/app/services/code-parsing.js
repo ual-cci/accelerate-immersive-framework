@@ -32,10 +32,14 @@ export default Service.extend({
     return op
   },
   insertSnippet(source, snippet) {
-    const { snip, marker, position } = snippet
+    const { snip, marker, position, lib } = snippet
+    if (lib) {
+      const libUrl = this.get('library').url(lib)
+      if (source.indexOf(libUrl) < 0) return 'libNotFound'
+    }
     const index = source.indexOf(marker)
     if (index < 0) {
-      return index
+      return 'markerNotFound'
     }
     const offset = position === 'after' ? marker.length : 0
     const op = { p: ['source', index + offset], si: snip }
