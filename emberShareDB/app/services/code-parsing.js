@@ -5,12 +5,11 @@ import walk from 'acorn/dist/walk'
 import config from '../config/environment'
 import RSVP from 'rsvp'
 import hljs from 'highlight.js'
-import { computed, set } from '@ember/object'
+import { computed } from '@ember/object'
 
 export default Service.extend({
   store: inject('store'),
   cs: inject('console'),
-  snippets: inject('snippets'),
   assetService: inject('assets'),
   sessionAccount: inject('session-account'),
   library: inject(),
@@ -34,20 +33,12 @@ export default Service.extend({
   },
   insertSnippet(source, snippet) {
     const { snip, marker, position } = snippet
-    //if (lib) this.insertLibrary(lib, source)
     const index = source.indexOf(marker)
+    if (index < 0) {
+      return index
+    }
     const offset = position === 'after' ? marker.length : 0
     const op = { p: ['source', index + offset], si: snip }
-    return op
-  },
-  gltfExport(source) {
-    const insertBefore = '</body>'
-    const index = source.indexOf(insertBefore)
-    const insert = `<script src = "${config.localOrigin}/libs/${this.get(
-      'library'
-    ).url('GLTFExporter')}"></script>
-    ${this.get('snippets').exportGLTF}`
-    const op = { p: ['source', index], si: insert }
     return op
   },
   insertStyleSheets(source, children) {

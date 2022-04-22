@@ -117,7 +117,7 @@
                         <div id='snippetsDropdown' class='dropdown-content'>
                           {{#each snippets as |snippet|}}
                             {{#bs-button
-                              class='snippet-btn'
+                              class='library-btn'
                               onClick=(action 'insertSnippet' snippet)
                             }}{{snippet.title}}{{/bs-button}}
                           {{/each}}

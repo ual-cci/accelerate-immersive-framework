@@ -2010,6 +2010,13 @@ export default Controller.extend({
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
         const op = this.get('codeParser').insertSnippet(source, snippet)
+        if (op < 0) {
+          this.set(
+            'consoleOutput',
+            `Cannot find '${snippet.marker}' tag so I don't know where to insert the ${snippet.title}!`
+          )
+          return
+        }
         this.submitOp(op)
         this.set('surpress', true)
         this.get('codeParser').applyOps([op], this.get('editor'))
