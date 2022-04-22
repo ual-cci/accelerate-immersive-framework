@@ -28,7 +28,6 @@ export default Controller.extend({
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
   library: inject(),
-  gltfExporter: inject('gltf-export'),
 
   //Parameters
   con: null,
@@ -1190,7 +1189,7 @@ export default Controller.extend({
     const self = e.target.self
     const drag = self.get('showCodeControls')
     if (e.origin === config.localOrigin && drag && !isEmpty(e.data)) {
-      if (e.data[0].substring(0, 2) == 'p_') {
+      if (e.data[0] && e.data[0].substring(0, 2) == 'p_') {
         let savedVals = self.get('savedVals')
         savedVals[e.data[0]] = e.data[1]
         // if(this.get('isCollaborative'))
