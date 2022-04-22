@@ -2217,6 +2217,22 @@ export default Controller.extend({
         document.getElementById('ace-container').style.opacity = 0.95
       }
     },
+    cycleColourscheme() {
+      const themes = ['cm-s-monokai', 'cm-s-night', 'cm-s-dracula']
+      const prefix = 'cm-s-'
+      const codeMirror = document.getElementsByClassName('CodeMirror')[0]
+      let currentTheme = ''
+      for (const cl of codeMirror.classList.values()) {
+        if (cl.startsWith(prefix)) {
+          currentTheme = cl
+          break
+        }
+      }
+      const newTheme =
+        themes[(themes.indexOf(currentTheme) + 1) % themes.length]
+      codeMirror.classList.remove(currentTheme)
+      codeMirror.classList.add(newTheme)
+    },
     renderCode() {
       this.updateIFrame()
     },
