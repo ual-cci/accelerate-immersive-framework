@@ -10,6 +10,7 @@ import { computed, set } from '@ember/object'
 export default Service.extend({
   store: inject('store'),
   cs: inject('console'),
+  snippets: inject('snippets'),
   assetService: inject('assets'),
   sessionAccount: inject('session-account'),
   library: inject(),
@@ -31,59 +32,21 @@ export default Service.extend({
     const op = { p: ['source', index], si: insert }
     return op
   },
+  insertSnippet(source, snippet) {
+    const { snip, marker, position } = snippet
+    //if (lib) this.insertLibrary(lib, source)
+    const index = source.indexOf(marker)
+    const offset = position === 'after' ? marker.length : 0
+    const op = { p: ['source', index + offset], si: snip }
+    return op
+  },
   gltfExport(source) {
-    console.log(source)
     const insertBefore = '</body>'
     const index = source.indexOf(insertBefore)
-    const insert = `
-    <script src = "${config.localOrigin}/libs/${this.get('library').url(
-      'GLTFExporter'
-    )}"></script>
-    <script  language="javascript" type="text/javascript">
-      function save(blob, filename) {
-        const link = document.createElement('a')
-        link.style.display = 'block'
-        document.body.appendChild(link)
-
-        console.log(blob)
-
-        link.href = URL.createObjectURL(blob)
-        link.download = filename
-        link.click()
-
-      }
-      function saveString(text, filename) {
-        save(new Blob([text], { type: 'text/plain' }), filename)
-      }
-
-      function exportGLTF() {
-        const exporter = new GLTFExporter()
-        const params = {
-          trs: false,
-          onlyVisible: true,
-          truncateDrawRange: true,
-          binary: false,
-          maxTextureSize: 4096,
-        }
-
-        exporter.parse(
-          scene,
-          // called when the gltf has been generated
-          function (gltf) {
-            const output = JSON.stringify(gltf, null, 2)
-            console.log(output)
-            saveString(output, 'scene.gltf')
-          },
-          // called when there is an error in the generation
-          function (error) {
-            console.log('An error happened')
-          },
-          params
-        )
-      }
-      exportGLTF()
-    </script>
-    `
+    const insert = `<script src = "${config.localOrigin}/libs/${this.get(
+      'library'
+    ).url('GLTFExporter')}"></script>
+    ${this.get('snippets').exportGLTF}`
     const op = { p: ['source', index], si: insert }
     return op
   },

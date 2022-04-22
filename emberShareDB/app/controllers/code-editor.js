@@ -28,6 +28,7 @@ export default Controller.extend({
   opsPlayer: inject('ops-player'),
   cs: inject('console'),
   library: inject(),
+  snippet: inject(),
 
   //Parameters
   con: null,
@@ -102,9 +103,10 @@ export default Controller.extend({
     return this.get('editLink') + '?embed=true'
   }),
   libraries: computed('library.libraryMap', function () {
-    const l = this.get('library').libraryMap
-    console.log(l)
-    return l
+    return this.get('library').libraryMap
+  }),
+  snippets: computed('snippet.snippetsMap', function () {
+    return this.get('snippet').snippetsMap
   }),
 
   //Functions
@@ -1986,7 +1988,10 @@ export default Controller.extend({
       this.syncOutputContainer()
     },
     toggleLibraryDropdown() {
-      document.getElementById('myDropdown').classList.toggle('show')
+      document.getElementById('librariesDropdown').classList.toggle('show')
+    },
+    toggleSnippetsDropdown() {
+      document.getElementById('snippetsDropdown').classList.toggle('show')
     },
     insertLibrary(lib) {
       this.updateSourceFromSession().then(() => {
@@ -1996,9 +2001,20 @@ export default Controller.extend({
         )
         this.submitOp(op)
         this.set('surpress', true)
-        const deltas = this.get('codeParser').applyOps([op], this.get('editor'))
+        this.get('codeParser').applyOps([op], this.get('editor'))
         this.set('surpress', false)
-        document.getElementById('myDropdown').classList.toggle('show')
+        document.getElementById('libraryDropdown').classList.toggle('show')
+      })
+    },
+    insertSnippet(snippet) {
+      this.updateSourceFromSession().then(() => {
+        const source = this.get('model.source')
+        const op = this.get('codeParser').insertSnippet(source, snippet)
+        this.submitOp(op)
+        this.set('surpress', true)
+        this.get('codeParser').applyOps([op], this.get('editor'))
+        this.set('surpress', false)
+        document.getElementById('snippetsDropdown').classList.toggle('show')
       })
     },
     toggleShowShare() {
@@ -2314,16 +2330,6 @@ export default Controller.extend({
           })
         }
       }
-    },
-    gltfExport() {
-      this.updateSourceFromSession().then(() => {
-        const op = this.get('codeParser').gltfExport(this.get('model.source'))
-        this.submitOp(op)
-        this.set('surpress', true)
-        this.get('codeParser').applyOps([op], this.get('editor'))
-        this.set('surpress', false)
-        document.getElementById('myDropdown').classList.toggle('show')
-      })
     },
   },
 })
