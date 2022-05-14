@@ -23,13 +23,18 @@ export default Service.extend({
       { title: 'Nexus', id: 'nexusUI', url: 'nexusUI.js' },
       { title: 'Processing', id: 'processing.js', url: 'processing.js' },
       { title: 'p5', id: 'p5', url: 'p5.min.js' },
-      { title: 'SoundJS', id: 'SoundJS', url: 'soundjs.js' },
+      { title: 'SoundJS', id: 'soundjs', url: 'soundjs.js' },
       { title: 'Marked', id: 'Marked', url: 'marked.js' },
-      { title: 'ThreeJS', id: 'ThreeJS', url: 'three.min.js' },
-      { title: 'A-Frame', id: 'A-Frame', url: 'aframe.min.js' },
+      { title: 'ThreeJS', id: 'threejs', url: 'three.min.js' },
+      { title: 'A-Frame', id: 'aFrame', url: 'aframe.min.js' },
+      {
+        title: 'A-Frame Effects',
+        id: 'a-frame-effects',
+        url: 'aframe-effects.min.js',
+      },
       {
         title: 'GLTFExporter',
-        id: 'GLTFExporter',
+        id: 'gltfExporter',
         url: 'GLTFExporter.js',
       },
       {
