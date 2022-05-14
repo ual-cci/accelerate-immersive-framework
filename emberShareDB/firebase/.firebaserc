@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "mimic-238710"
-  }
+    "default": "mimic-238710",
+    "staging": "accelerate-editor"
+  },
+  "targets": {}
 }
