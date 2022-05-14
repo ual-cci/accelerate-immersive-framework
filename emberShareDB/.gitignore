@@ -25,3 +25,4 @@ package.json.ember-try
 /firebase/public/
 
 *.gltf
+firebase_console_stuff.js
