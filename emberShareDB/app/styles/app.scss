@@ -1,12 +1,13 @@
 // Required
 @import 'ember-bootstrap/bootstrap';
 
-$mimic-orange: #ed3d05;
-$mimic-yellow: #ffce00;
-$mimic-green: #0ed779;
-$mimic-pink: #f79994;
-$mimic-blue: #4d42eb;
+$mimic-orange: #7cea9c;
+$mimic-yellow: #55d6be;
+$mimic-green: #2e5eaa;
+$mimic-pink: #5b4e77;
+$mimic-blue: #593959;
 $max-site-width: 950px;
+$footer-grey: #303030;
 
 .main-delete-button {
   background-color: rgba(0, 0, 0, 0);
@@ -547,7 +548,7 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #main-site-container {
-  height: calc(100vh - 30px);
+  height: 100vh;
   margin-top: -10px;
 }
 
@@ -794,7 +795,6 @@ input[id='docName']:-ms-input-placeholder {
   background-color: rgba(100, 100, 100, 0.6);
   top: 30px;
   left: -13px;
-  height: 130px;
   width: 40px;
   z-index: 15;
 }
@@ -1335,7 +1335,7 @@ input[id='docName']:-ms-input-placeholder {
   float: right !important;
   position: absolute;
   right: 10px;
-  top: 115px;
+  top: 10px;
 }
 
 #login-button {
@@ -1573,8 +1573,6 @@ input[id='searchTerm']:-ms-input-placeholder {
 #about-container {
 }
 
-$footer-grey: #303030;
-
 #about-header-image {
   position: absolute;
   left: 250px;
@@ -1586,9 +1584,7 @@ $footer-grey: #303030;
 
 #about-overlay-title {
   background-color: rgba(237, 61, 5, 0.95);
-  width: 60%;
-  max-width: $max-site-width;
-  left: 20vw;
+  width: 100%;
   height: auto;
   position: absolute;
   top: 250px;

@@ -7,7 +7,6 @@ import { computed } from '@ember/object'
 export default Component.extend({
   mediaQueries: inject(),
   colours: computed(() => {
-    console.log(config.colours)
     return config.colours.map((col) => `${col}F2`)
   }),
   docURL: config.localOrigin + '/getting-started/beginner',
