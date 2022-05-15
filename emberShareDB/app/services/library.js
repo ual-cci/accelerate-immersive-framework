@@ -24,9 +24,9 @@ export default Service.extend({
       { title: 'Processing', id: 'processing.js', url: 'processing.js' },
       { title: 'p5', id: 'p5', url: 'p5.min.js' },
       { title: 'SoundJS', id: 'soundjs', url: 'soundjs.js' },
-      { title: 'Marked', id: 'Marked', url: 'marked.js' },
+      { title: 'Marked', id: 'marked', url: 'marked.js' },
       { title: 'ThreeJS', id: 'threejs', url: 'three.min.js' },
-      { title: 'A-Frame', id: 'aFrame', url: 'aframe.js' },
+      { title: 'A-Frame', id: 'a-frame', url: 'aframe.js' },
       {
         title: 'A-Frame Effects',
         id: 'a-frame-effects',
