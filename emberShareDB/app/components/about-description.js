@@ -6,16 +6,15 @@ import { computed } from '@ember/object'
 
 export default Component.extend({
   mediaQueries: inject(),
-  colours: computed(() => {
-    return config.colours.map((col) => `${col}F2`)
-  }),
+  colours: computed(() => config.colours.map((col) => `${col}F2`)),
   docURL: config.localOrigin + '/getting-started/beginner',
   didRender() {
     this._super(...arguments)
-    let colour1 = Math.floor(Math.random() * 5)
-    let colour2 = Math.floor(Math.random() * 5)
+    const numColours = config.colours.length
+    let colour1 = Math.floor(Math.random() * numColours)
+    let colour2 = Math.floor(Math.random() * numColours)
     while (colour2 == colour1) {
-      colour2 = Math.floor(Math.random() * 5)
+      colour2 = Math.floor(Math.random() * numColours)
     }
     document.getElementById('about-overlay-title').style['background-color'] =
       this.get('colours')[colour1]
