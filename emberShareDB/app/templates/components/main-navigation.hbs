@@ -1,106 +1,176 @@
-<div id = "mimic-navbar" class = "limited-width-container">
-<img src={{logoURL}} alt = "main logo" id = "main-logo">
-{{#bs-nav type="pills" as |nav|}}
-{{#if mediaQueries.isBurger}}
-  {{#nav.dropdown as |dd|}}
-    {{#dd.toggle class = "nav-dropdown burger-btn" }} ≡ <span class="caret"></span>{{/dd.toggle}}
-    {{#dd.menu as |ddm|}}
-      {{#ddm.item}}
-      <a {{action 'about'}} href = {{concat url "/about"}} class = "nav-button dropdown-item">about</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'people'}}  href = {{concat url "/people"}} class = "nav-button dropdown-item">people</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'inputs'}} href = {{concat url "/inputs"}} class = "nav-button dropdown-item">inputs</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'outputs'}} href = {{concat url "/outputs"}} class = "nav-button dropdown-item">outputs</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button dropdown-item">projects</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'examples'}} href = {{concat url "/examples"}} class = "nav-button dropdown-item">examples</a>
-      {{/ddm.item}}
+<div id='mimic-navbar' class='limited-width-container'>
+  {{#bs-nav type='pills' as |nav|}}
+    {{#if mediaQueries.isBurger}}
+      {{#nav.dropdown as |dd|}}
+        {{#dd.toggle class='nav-dropdown burger-btn'}}
+          ≡
+          <span class='caret'></span>{{/dd.toggle}}
+        {{#dd.menu as |ddm|}}
+          {{#ddm.item}}
+            <a
+              {{action 'about'}}
+              href={{concat url '/about'}}
+              class='nav-button dropdown-item'
+            >about</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'gettingStarted'}}
+              href={{concat url '/getting-started/beginner'}}
+              class='nav-button dropdown-item'
+            >getting started</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'guides'}}
+              href={{concat url '/guides/root'}}
+              class='nav-button dropdown-item'
+            >guides</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'people'}}
+              href={{concat url '/people'}}
+              class='nav-button dropdown-item'
+            >people</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'docs'}}
+              href={{concat url '/d/ /views/0'}}
+              class='nav-button dropdown-item'
+            >projects</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'examples'}}
+              href={{concat url '/examples'}}
+              class='nav-button dropdown-item'
+            >examples</a>
+          {{/ddm.item}}
 
-      {{#ddm.item}}
-      <a {{action 'docs'}} href = {{concat url "/d/" sessionAccount.currentUserName "/views/0"}}  class = "nav-button dropdown-item">my projects</a>
-      {{/ddm.item}}
-    {{/dd.menu}}
-  {{/nav.dropdown}}
-{{else}}
-{{#nav.dropdown as |dd|}}
-  {{#dd.toggle class = "nav-dropdown" }} about <span class="caret"></span>{{/dd.toggle}}
-  {{#dd.menu as |ddm|}}
-    {{#ddm.item}}
-    <a {{action 'about'}} href = {{concat url "/onAbout"}}  class = "nav-button dropdown-item">about</a>
-    {{/ddm.item}}
-    {{#ddm.item}}
-    <a {{action 'people'}}  href = {{concat url "/people"}} class = "nav-button dropdown-item">people</a>
-    {{/ddm.item}}
-  {{/dd.menu}}
-{{/nav.dropdown}}
-  {{#nav.dropdown as |dd|}}
-    {{#dd.toggle class = "nav-dropdown" }} explore <span class="caret"></span>{{/dd.toggle}}
-    {{#dd.menu as |ddm|}}
-      {{#ddm.item}}
-      <a {{action 'examples'}} href = {{concat url "/examples/root"}} class = "nav-button dropdown-item">examples</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'inputs'}} href = {{concat url "/inputs"}} class = "nav-button dropdown-item">inputs</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'outputs'}} href = {{concat url "/outputs"}} class = "nav-button dropdown-item">outputs</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'docs'}} href = {{concat url "/d/ /views/0"}}  class = "nav-button dropdown-item">projects</a>
-      {{/ddm.item}}
-    {{/dd.menu}}
-  {{/nav.dropdown}}
-  {{#nav.dropdown as |dd|}}
-    {{#dd.toggle class = "nav-dropdown" }} learn <span class="caret"></span>{{/dd.toggle}}
-    {{#dd.menu as |ddm|}}
-      {{#ddm.item}}
-      <a {{action 'gettingStarted'}} href = {{concat url "/getting-started/beginner"}}  class = "nav-button dropdown-item">getting started</a>
-      {{/ddm.item}}
-      {{#ddm.item}}
-      <a {{action 'guides'}}  href = {{concat url "/guides/root"}} class = "nav-button dropdown-item">guides</a>
-      {{/ddm.item}}
-    {{/dd.menu}}
-  {{/nav.dropdown}}
+          {{#ddm.item}}
+            <a
+              {{action 'docs'}}
+              href={{concat
+                url
+                '/d/'
+                sessionAccount.currentUserName
+                '/views/0'
+              }}
+              class='nav-button dropdown-item'
+            >my projects</a>
+          {{/ddm.item}}
+        {{/dd.menu}}
+      {{/nav.dropdown}}
+    {{else}}
+      {{#nav.dropdown as |dd|}}
+        {{#dd.toggle class='nav-dropdown'}}
+          about
+          <span class='caret'></span>{{/dd.toggle}}
+        {{#dd.menu as |ddm|}}
+          {{#ddm.item}}
+            <a
+              {{action 'about'}}
+              href={{concat url '/onAbout'}}
+              class='nav-button dropdown-item'
+            >about</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'people'}}
+              href={{concat url '/people'}}
+              class='nav-button dropdown-item'
+            >people</a>
+          {{/ddm.item}}
+        {{/dd.menu}}
+      {{/nav.dropdown}}
+      {{#nav.dropdown as |dd|}}
+        {{#dd.toggle class='nav-dropdown'}}
+          explore
+          <span class='caret'></span>{{/dd.toggle}}
+        {{#dd.menu as |ddm|}}
+          {{#ddm.item}}
+            <a
+              {{action 'examples'}}
+              href={{concat url '/examples/root'}}
+              class='nav-button dropdown-item'
+            >examples</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'docs'}}
+              href={{concat url '/d/ /views/0'}}
+              class='nav-button dropdown-item'
+            >projects</a>
+          {{/ddm.item}}
+        {{/dd.menu}}
+      {{/nav.dropdown}}
+      {{#nav.dropdown as |dd|}}
+        {{#dd.toggle class='nav-dropdown'}}
+          learn
+          <span class='caret'></span>{{/dd.toggle}}
+        {{#dd.menu as |ddm|}}
+          {{#ddm.item}}
+            <a
+              {{action 'gettingStarted'}}
+              href={{concat url '/getting-started/beginner'}}
+              class='nav-button dropdown-item'
+            >getting started</a>
+          {{/ddm.item}}
+          {{#ddm.item}}
+            <a
+              {{action 'guides'}}
+              href={{concat url '/guides/root'}}
+              class='nav-button dropdown-item'
+            >guides</a>
+          {{/ddm.item}}
+        {{/dd.menu}}
+      {{/nav.dropdown}}
+      {{#if session.isAuthenticated}}
+        {{#nav.dropdown as |dd|}}
+          {{#dd.toggle class='nav-dropdown'}}my projects
+            <span class='caret'></span>{{/dd.toggle}}
+          {{#dd.menu as |ddm|}}
+            {{#each ownedDocuments as |doc|}}
+              {{#ddm.item}}
+                <a
+                  class='dropdown-item'
+                  {{action 'openDoc' doc.id}}
+                >{{doc.name}}</a>
+              {{/ddm.item}}
+            {{/each}}
+            <a
+              id='create-doc-dropdown-item'
+              class='dropdown-item'
+              {{action 'allDocs'}}
+            >...</a>
+            <a
+              id='create-doc-dropdown-item'
+              class='dropdown-item'
+              {{action 'createDoc'}}
+            >+</a>
+          {{/dd.menu}}
+        {{/nav.dropdown}}
+      {{/if}}
+    {{/if}}
+  {{/bs-nav}}
   {{#if session.isAuthenticated}}
-    {{#nav.dropdown as |dd|}}
-      {{#dd.toggle class = "nav-dropdown" }}my projects <span  class="caret"></span>{{/dd.toggle}}
-      {{#dd.menu as |ddm|}}
-        {{#each ownedDocuments as |doc|}}
-        {{#ddm.item}}
-            <a class="dropdown-item" {{action 'openDoc' doc.id}}>{{doc.name}}</a>
-        {{/ddm.item}}
-        {{/each}}
-        <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'allDocs'}}>...</a>
-        <a id = "create-doc-dropdown-item" class="dropdown-item" {{action 'createDoc'}}>+</a>
-      {{/dd.menu}}
-    {{/nav.dropdown}}
-  {{/if}}
-{{/if}}
-{{/bs-nav}}
-{{#if session.isAuthenticated}}
-  <div id = "login-container">
-    <div style = "float:right;" class="tooltip">
-      <a {{action 'logout'}} id = "login-button" class="navbar-btn navbar-right pull-right">log out</a>
-      <span class="tooltiptext">logged in as {{sessionAccount.currentUserName}}</span>
+    <div id='login-container'>
+      <div style='float:right;' class='tooltip'>
+        <a
+          {{action 'logout'}}
+          id='login-button'
+          class='navbar-btn navbar-right pull-right'
+        >log out</a>
+        <span class='tooltiptext'>logged in as
+          {{sessionAccount.currentUserName}}</span>
+      </div>
     </div>
-  </div>
-{{else}}
-<div id = "login-container">
- <a {{action 'login'}} id = "login-button" class="navbar-right">sign up/log in</a>
-</div>
-{{/if}}
+  {{else}}
+    <div id='login-container'>
+      <a {{action 'login'}} id='login-button' class='navbar-right'>sign up/log
+        in</a>
+    </div>
+  {{/if}}
 </div>

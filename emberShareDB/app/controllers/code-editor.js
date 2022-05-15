@@ -729,11 +729,12 @@ export default Controller.extend({
     }
     const toUpdate = this.get('cursors')
     const prev = toUpdate[op.owner]
-    const colours = ['#ED3D05', '#FFCE00', '#0ED779', '#F79994', '#4D42EB']
     if (!isEmpty(prev)) {
       prev.marker.clear()
     } else {
-      toUpdate[op.owner] = { colour: colours[Math.floor(Math.random() * 5)] }
+      toUpdate[op.owner] = {
+        colour: config.colours[Math.floor(Math.random() * 5)],
+      }
       this.get('cs').log(toUpdate[op.owner].colour)
     }
 
