@@ -109,7 +109,7 @@ export default Service.extend({
       },
       {
         title: 'A-Frame Effect: Toon',
-        snip: `\neffects="colors"\ncolors="mode:hqprtom; mul: 0.66 0.5 0.66; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"`,
+        snip: `\neffects="colors"\ncolors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"`,
         position: 'after',
         marker: '<a-scene',
         libs: ['a-frame', 'a-frame-effects'],
