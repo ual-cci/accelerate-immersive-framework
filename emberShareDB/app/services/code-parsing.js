@@ -32,8 +32,8 @@ export default Service.extend({
     return op
   },
   insertSnippet(source, snippet) {
-    const { snip, marker, position, lib } = snippet
-    if (lib) {
+    const { snip, marker, position, libs } = snippet
+    for (const lib of libs) {
       const libUrl = this.get('library').url(lib)
       if (source.indexOf(libUrl) < 0) return 'libNotFound'
     }
