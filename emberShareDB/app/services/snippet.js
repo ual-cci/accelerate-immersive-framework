@@ -118,6 +118,21 @@ export default Service.extend({
         libs: ['a-frame'],
       },
       {
+        title: 'A-Frame Light',
+        snip: `
+      <a-entity light="type: point;
+                       intensity: 0.9;
+                       distance: 50;
+                       decay: 1.4;
+                       castShadow: true;"
+          	    position="-3 5 3">
+      </a-entity>
+        `,
+        position: 'before',
+        marker: '</a-scene>',
+        libs: ['a-frame'],
+      },
+      {
         title: 'A-Frame GLB Model',
         snip: `
           <a-assets>
