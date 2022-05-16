@@ -73,6 +73,16 @@ export default Service.extend({
         libs: ['a-frame'],
       },
       {
+        title: 'A-Frame Empty Scene',
+        snip: `
+          <a-scene>
+          </a-scene>
+          `,
+        position: 'before',
+        marker: '</body>',
+        libs: ['a-frame'],
+      },
+      {
         title: 'A-Frame Box',
         snip: '<a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>\n',
         position: 'before',
@@ -103,6 +113,21 @@ export default Service.extend({
       {
         title: 'A-Frame Sky',
         snip: '<a-sky color="#ECECEC"></a-sky>\n',
+        position: 'before',
+        marker: '</a-scene>',
+        libs: ['a-frame'],
+      },
+      {
+        title: 'A-Frame Light',
+        snip: `
+      <a-entity light="type: point;
+                       intensity: 0.9;
+                       distance: 50;
+                       decay: 1.4;
+                       castShadow: true;"
+          	    position="-3 5 3">
+      </a-entity>
+        `,
         position: 'before',
         marker: '</a-scene>',
         libs: ['a-frame'],
