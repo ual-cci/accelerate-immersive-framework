@@ -108,6 +108,18 @@ export default Service.extend({
         libs: ['a-frame'],
       },
       {
+        title: 'A-Frame GLB Model',
+        snip: `
+          <a-assets>
+            <a-asset-item id="YOUR-ID" src="INSERT-NAME-OF-MODEL.glb"></a-asset-item>
+          </a-assets>
+
+          <a-entity gltf-model="#YOUR-ID"></a-entity>`,
+        position: 'before',
+        marker: '</a-scene>',
+        libs: ['a-frame'],
+      },
+      {
         title: 'A-Frame Effect: Toon',
         snip: `\neffects="colors"\ncolors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"`,
         position: 'after',
