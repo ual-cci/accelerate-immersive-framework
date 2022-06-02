@@ -151,6 +151,27 @@ export default Service.extend({
         marker: '<a-scene',
         libs: ['a-frame', 'a-frame-effects'],
       },
+      {
+        title: 'TEST OBJECT',
+        fn: ({ position, color }) => ({
+          snip: `\n<a-box position="${position}" rotation="0 45 0" color="${color}"></a-box>\n`,
+          position: 'after',
+          marker: '<a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            type: 'string',
+            default: '0 0 0',
+          },
+          {
+            name: 'color',
+            type: 'string',
+            default: '#FF0000',
+          },
+        ],
+      },
     ]
   }),
 })

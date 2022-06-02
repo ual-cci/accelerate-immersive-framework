@@ -881,7 +881,7 @@ input[id='docName']:-ms-input-placeholder {
   display: inline;
   position: relative;
   font-size: 14pt;
-  width: 420px;
+  width: 500px;
 }
 
 #doc-title {
@@ -2159,4 +2159,21 @@ input[id='searchTerm']:-ms-input-placeholder {
   padding: 0;
   z-index: 100;
   position: absolute;
+}
+
+.snippet-editor {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: $mimic-orange;
+  width: 200px;
+  z-index: 1000;
+}
+
+.opened {
+  display: block;
+}
+
+.closed {
+  display: none;
 }
