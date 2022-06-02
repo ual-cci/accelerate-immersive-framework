@@ -1,7 +1,7 @@
 <div class='snippet-editor'>
   <p>{{snippet.title}}</p>
   <form id='snippet-editor-form' {{action 'done' snippet.fn on='submit'}}>
-    <ui class='list-group new-user-group'>
+    <ul class='list-group new-user-group'>
       {{#each snippet.props as |prop|}}
 
         <li>
@@ -16,7 +16,7 @@
         </li>
 
       {{/each}}
-    </ui>
-    <p><button class='login-btn' type='submit'>Insert</button></p>
+    </ul>
+    <p><button type='submit'>Insert</button></p>
   </form>
 </div>

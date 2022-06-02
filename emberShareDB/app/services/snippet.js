@@ -152,9 +152,9 @@ export default Service.extend({
         libs: ['a-frame', 'a-frame-effects'],
       },
       {
-        title: 'TEST OBJECT',
-        fn: ({ position, color }) => ({
-          snip: `\n<a-box position="${position}" rotation="0 45 0" color="${color}"></a-box>\n`,
+        title: 'A-Frame Box',
+        fn: ({ position, color, rotation }) => ({
+          snip: `\n<a-box position="${position}" rotation="${rotation}" color="${color}"></a-box>\n`,
           position: 'after',
           marker: '<a-scene>',
           libs: ['a-frame'],
@@ -162,6 +162,11 @@ export default Service.extend({
         props: [
           {
             name: 'position',
+            type: 'string',
+            default: '0 0 0',
+          },
+          {
+            name: 'rotation',
             type: 'string',
             default: '0 0 0',
           },

@@ -2166,14 +2166,35 @@ input[id='searchTerm']:-ms-input-placeholder {
   top: 20px;
   left: 20px;
   background-color: $mimic-orange;
-  width: 200px;
+  width: 300px;
   z-index: 1000;
+  font-size: large;
 }
 
-.opened {
-  display: block;
+.snippet-editor * {
+  margin: 0;
+  padding: 0;
 }
 
-.closed {
-  display: none;
+.snippet-editor ul {
+  list-style-type: none;
+  display: inline-block;
+  width: 100%;
+}
+
+.snippet-editor li {
+  height: 24px;
+  margin: 4px 0;
+  display: inline-block;
+}
+
+.snippet-editor label {
+  width: 50%;
+}
+
+.snippet-editor input {
+  float: right;
+  width: 50%;
+  height: 24px;
+  border: none;
 }
