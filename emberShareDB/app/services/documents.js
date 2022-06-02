@@ -11,7 +11,20 @@ export default Service.extend({
   codeParser: inject('code-parsing'),
   cs: inject('console'),
   getDefaultSource() {
-    return '<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<script language="javascript" type="text/javascript">\n\n</script>\n</body>\n</html>'
+    return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src = "http://localhost:4200/libs/aframe.js"></script>
+    <script src = "http://localhost:4200/libs/aframe-effects.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+</a-scene>
+  </body>
+</html>
+`
   },
   makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {
