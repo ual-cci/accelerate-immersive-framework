@@ -2024,7 +2024,9 @@ export default Controller.extend({
         this.get('codeParser').applyOps([op], this.get('editor'))
         this.set('surpress', false)
         document.getElementById('snippetsDropdown').classList.toggle('show')
-        this.updateIFrame()
+        if (this.get('autoRender')) {
+          this.updateIFrame()
+        }
       })
     },
     toggleShowShare() {
