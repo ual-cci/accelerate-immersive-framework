@@ -1,57 +1,99 @@
-<div id = "main-login-container" class = "limited-width-container">
+<div id='main-login-container' class='limited-width-container'>
   {{#if loginErrorMessage}}
-    <p class = "login-message-label">{{loginErrorMessage}}</p>
+    <p class='login-message-label'>{{loginErrorMessage}}</p>
   {{/if}}
-<form {{action 'authenticate' on='submit'}}>
-  <ui class="list-group">
-    <li class="list-group-item">
-      <label class = "login-label" for="identification">Username</label>
-      {{input class = "login-input" id='identification' placeholder='' value=identification}}
-    </li>
-    <li class="list-group-item">
-      <label class = "login-label" for="password">Password</label>
-      {{input class = "login-input" id='password' placeholder='' type='password' value=password}}
-    </li>
-  </ui>
-  <p><button class = "login-btn" type="submit">Login</button></p>
+  <form {{action 'authenticate' on='submit'}}>
+    <ui class='list-group login-list-group'>
+      <li class='list-group-item list-group-title'>Login:</li>
+      <li class='list-group-item'>
+        <label class='login-label' for='identification'>Username</label>
+        {{input
+          class='login-input'
+          id='identification'
+          placeholder=''
+          value=identification
+        }}
+      </li>
+      <li class='list-group-item'>
+        <label class='login-label' for='password'>Password</label>
+        {{input
+          class='login-input'
+          id='password'
+          placeholder=''
+          type='password'
+          value=password
+        }}
+      </li>
+    </ui>
+    <p><button class='login-btn' type='submit'>Login</button></p>
 
-</form>
-{{#if registerMessage}}
-  <p class = "login-message-label">{{registerMessage}}</p>
-{{/if}}
-<form {{action 'createNewUser' on='submit'}}>
-  <ui class="list-group">
-    <li class="list-group-item">
-      <label class = "login-label" for="newUsername">Username</label>
-      {{input class = "login-input" id='newUsername' placeholder='' value=newUsername}}
-    </li>
-    <li class="list-group-item">
-      <label class = "login-label" for="newUserEmail">Email (optional)</label>
-      {{input class = "login-input" id='newUserEmail' placeholder='' value=newUserEmail}}
-      <p style = "margin:10px 10px 0px 10px;">****If you do not give an email you will not be able to reset your password****</p>
-    </li>
-    <li class="list-group-item">
-      <label class = "login-label" for="newUserPassword">Password</label>
-      {{input class = "login-input" id='newUserPassword' placeholder='' type='password' value=newUserPassword}}
-    </li>
-    <li class="list-group-item">
-      <label class = "login-label" for="newUserPasswordAgain">Password (again)</label>
-      {{input class = "login-input" id='newUserPasswordAgain' placeholder='' type='password' value=newUserPasswordAgain}}
-    </li>
-  </ui>
-    <p><button class = "login-btn" type="submit">Create New User</button></p>
-
-</form>
-<form {{action 'resetPassword' on='submit'}}>
-  <ui class="list-group">
-    <li class="list-group-item">
-      <label class = "login-label" for="resetUsername">Username</label>
-      {{input class = "login-input" id='resetUsername' placeholder='' value=resetUsername}}
-    </li>
-  </ui>
-  <p><button class = "login-btn" type="submit">Reset Password</button></p>
-  {{#if resetMessage}}
-    <p>{{resetMessage}}</p>
+  </form>
+  {{#if registerMessage}}
+    <p class='login-message-label'>{{registerMessage}}</p>
   {{/if}}
-</form>
+  <form {{action 'createNewUser' on='submit'}}>
+    <ui class='list-group new-user-group'>
+      <li class='list-group-item list-group-title'>Create New User:</li>
+      <li class='list-group-item'>
+        <label class='login-label' for='newUsername'>Username</label>
+        {{input
+          class='login-input'
+          id='newUsername'
+          placeholder=''
+          value=newUsername
+        }}
+      </li>
+      <li class='list-group-item'>
+        <label class='login-label' for='newUserEmail'>Email (optional)</label>
+        {{input
+          class='login-input'
+          id='newUserEmail'
+          placeholder=''
+          value=newUserEmail
+        }}
+        <p style='margin:10px 10px 0px 10px;'>****If you do not give an email
+          you will not be able to reset your password****</p>
+      </li>
+      <li class='list-group-item'>
+        <label class='login-label' for='newUserPassword'>Password</label>
+        {{input
+          class='login-input'
+          id='newUserPassword'
+          placeholder=''
+          type='password'
+          value=newUserPassword
+        }}
+      </li>
+      <li class='list-group-item'>
+        <label class='login-label' for='newUserPasswordAgain'>Password (again)</label>
+        {{input
+          class='login-input'
+          id='newUserPasswordAgain'
+          placeholder=''
+          type='password'
+          value=newUserPasswordAgain
+        }}
+      </li>
+    </ui>
+    <p><button class='login-btn' type='submit'>Create New User</button></p>
+
+  </form>
+  <form {{action 'resetPassword' on='submit'}}>
+    <ui class='list-group reset-password-group'>
+      <li class='list-group-item list-group-title'>Reset Password:</li>
+      <li class='list-group-item'>
+        <label class='login-label' for='resetUsername'>Username</label>
+        {{input
+          class='login-input'
+          id='resetUsername'
+          placeholder=''
+          value=resetUsername
+        }}
+      </li>
+    </ui>
+    <p><button class='login-btn' type='submit'>Reset Password</button></p>
+    {{#if resetMessage}}
+      <p>{{resetMessage}}</p>
+    {{/if}}
+  </form>
 </div>

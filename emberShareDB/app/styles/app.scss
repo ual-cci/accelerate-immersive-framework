@@ -1378,6 +1378,10 @@ input[id='docName']:-ms-input-placeholder {
   cursor: pointer;
 }
 
+.login-section {
+  background-color: red;
+}
+
 .row {
   margin-left: 0px !important;
   margin-right: 0px !important;
@@ -1564,13 +1568,32 @@ input[id='searchTerm']:-ms-input-placeholder {
   border-radius: 3px;
   border: none;
   padding: 5px 15px 5px 15px;
+  font-size: large;
 }
 
 .login-input {
   width: 250px;
 }
 
-#about-container {
+.list-group-title {
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.login-list-group > li {
+  background-color: $mimic-orange;
+}
+
+.new-user-group > li {
+  background-color: $mimic-yellow;
+}
+
+.reset-password-group {
+  color: white;
+}
+
+.reset-password-group > li {
+  background-color: $footer-grey;
 }
 
 #about-header-image {
