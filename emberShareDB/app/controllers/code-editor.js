@@ -42,7 +42,7 @@ export default Controller.extend({
   canEditSource: false,
   canEditSettings: false,
   isOwner: false,
-  autoRender: false,
+  autoRender: true,
   codeTimerRefresh: 500,
   collapsed: true,
   showShare: false,
@@ -2024,6 +2024,9 @@ export default Controller.extend({
         this.get('codeParser').applyOps([op], this.get('editor'))
         this.set('surpress', false)
         document.getElementById('snippetsDropdown').classList.toggle('show')
+        if (this.get('autoRender')) {
+          this.updateIFrame()
+        }
       })
     },
     toggleShowShare() {
