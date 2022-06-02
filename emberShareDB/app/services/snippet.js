@@ -82,41 +82,7 @@ export default Service.extend({
         marker: '</body>',
         libs: ['a-frame'],
       },
-      {
-        title: 'A-Frame Box',
-        snip: '<a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Sphere',
-        snip: '<a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Cylinder',
-        snip: '<a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Plane',
-        snip: '<a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Sky',
-        snip: '<a-sky color="#ECECEC"></a-sky>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
+
       {
         title: 'A-Frame Light',
         snip: `
@@ -151,6 +117,7 @@ export default Service.extend({
         marker: '<a-scene',
         libs: ['a-frame', 'a-frame-effects'],
       },
+
       {
         title: 'A-Frame Box',
         fn: ({ position, color, rotation }) => ({
@@ -174,6 +141,118 @@ export default Service.extend({
             name: 'color',
             type: 'string',
             default: '#FF0000',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Sphere',
+        fn: ({ position, color, radius }) => ({
+          snip: `\n<a-sphere position="${position}" radius="${radius}" color="${color}"></a-sphere>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            type: 'string',
+            default: '0 0 0',
+          },
+          {
+            name: 'radius',
+            type: 'string',
+            default: '1',
+          },
+          {
+            name: 'color',
+            type: 'string',
+            default: '#EF2D5E',
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame Cylinder',
+        fn: ({ position, color, radius, height }) => ({
+          snip: `\n<a-cylinder position="${position}" radius="${radius}" height="${height}" color="${color}"></a-cylinder>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            type: 'string',
+            default: '0 0 0',
+          },
+          {
+            name: 'radius',
+            type: 'string',
+            default: '1',
+          },
+          {
+            name: 'height',
+            type: 'string',
+            default: '1.5',
+          },
+          {
+            name: 'color',
+            type: 'string',
+            default: '#FFC65D',
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame Plane',
+        fn: ({ position, color, rotation, height, width }) => ({
+          snip: `\n<a-plane position="${position}" rotation="${rotation}" height="${height}" width="${width}" color="${color}"></a-plane>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            type: 'string',
+            default: '0 0 -4',
+          },
+          {
+            name: 'rotation',
+            type: 'string',
+            default: '-90 0 0',
+          },
+          {
+            name: 'height',
+            type: 'string',
+            default: '4',
+          },
+          {
+            name: 'width',
+            type: 'string',
+            default: '4',
+          },
+          {
+            name: 'color',
+            type: 'string',
+            default: '#7BC8A4',
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame Sky',
+        fn: ({ color }) => ({
+          snip: `\n<a-sky color="${color}"></a-sky>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            type: 'string',
+            default: '#ECECEC',
           },
         ],
       },

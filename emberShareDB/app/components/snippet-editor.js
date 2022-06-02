@@ -10,8 +10,9 @@ export default Component.extend({
       for (var [key, value] of formData.entries()) {
         opts[key] = value
       }
-      const ttt = fn(opts)
-      this.submit(ttt)
+      const snip = fn(opts)
+      this.toggle()
+      this.submit(snip)
     },
   },
 })

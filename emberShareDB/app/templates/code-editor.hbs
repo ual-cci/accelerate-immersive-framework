@@ -394,7 +394,11 @@
   </header>
   <main>
     {{#if showSnippetEditor}}
-      {{snippet-editor snippet=currentSnip submit=(action 'insertSnippet')}}
+      {{snippet-editor
+        snippet=currentSnip
+        submit=(action 'insertSnippet')
+        toggle=(action 'toggleSnippetEditor')
+      }}
     {{/if}}
     <div id='fullscreen'>
       <div id='main-code-container'>
