@@ -351,6 +351,9 @@
             {{/if}}
           </div>
         {{/if}}
+        {{#if showErrorBar}}
+          {{error-bar error=snippetError hide=(action 'closeErrorBar')}}
+        {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}
             {{#if model.isCollaborative}}

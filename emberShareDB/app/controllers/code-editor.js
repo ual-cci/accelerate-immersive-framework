@@ -83,6 +83,8 @@ export default Controller.extend({
   evalPtr: 0,
   highContrast: false,
   showSnippetEditor: false,
+  showErrorBar: false,
+  snippetError: '',
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -2017,10 +2019,6 @@ export default Controller.extend({
         document.getElementById('librariesDropdown').classList.toggle('show')
       })
     },
-    quickTest(thing) {
-      console.log('quick test', thing)
-      this.get('insertSnippet', thing)
-    },
     insertSnippet(snippet) {
       // I think something renders twice and sends two things to this func,
       // one of which is some junk, hence:
@@ -2033,7 +2031,10 @@ export default Controller.extend({
         const source = this.get('model.source')
         const op = this.get('codeParser').insertSnippet(source, snippet)
         if (typeof op === 'string') {
-          this.set('consoleOutput', parseSnippetError(op, snippet))
+          const error = parseSnippetError(op, snippet)
+          this.set('snippetError', error)
+          this.set('showErrorBar', true)
+          this.syncOutputContainer()
           return
         }
         this.submitOp(op)
@@ -2048,6 +2049,11 @@ export default Controller.extend({
     },
     toggleShowShare() {
       this.toggleProperty('showShare')
+    },
+    closeErrorBar() {
+      this.set('snippetError', '')
+      this.set('showErrorBar', false)
+      this.syncOutputContainer()
     },
     toggleShowRecordingPanel() {
       this.updateSourceFromSession().then(() => {
