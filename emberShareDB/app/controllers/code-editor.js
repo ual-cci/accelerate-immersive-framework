@@ -603,7 +603,7 @@ export default Controller.extend({
       const editor = this.get('editor')
       this.get('cs').log('didReceiveDoc', doc.get('type'))
       this.setLanguage()
-      this.set('surpress', true)
+      this.set('', true)
       editor.setValue(doc.get('source'))
       editor.clearHistory()
       editor.refresh()
@@ -2022,14 +2022,19 @@ export default Controller.extend({
     insertSnippet(snippet) {
       // I think something renders twice and sends two things to this func,
       // one of which is some junk, hence:
-      if (!snippet.hasOwnProperty('snip')) {
-        this.set('consoleOutput', 'Error with the snippet')
+      if (
+        !snippet.hasOwnProperty('snip') ||
+        !snippet.hasOwnProperty('effect')
+      ) {
+        this.set('snippetError', 'Error with the snippet')
+        this.set('showErrorBar', true)
+        this.syncOutputContainer()
         return
       }
 
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
-        const op = this.get('codeParser').insertSnippet(
+        const ops = this.get('codeParser').insertSnippet(
           source,
           snippet,
           this.get('editor')
@@ -2041,14 +2046,17 @@ export default Controller.extend({
           this.syncOutputContainer()
           return
         }
-        this.submitOp(op)
-        this.set('surpress', true)
-        this.get('codeParser').applyOps([op], this.get('editor'))
-        this.set('surpress', false)
-        document.getElementById('snippetsDropdown').classList.toggle('show')
-        if (this.get('autoRender')) {
-          this.updateIFrame()
-        }
+        ops.forEach((op) => {
+          this.submitOp(op)
+          this.set('surpress', true)
+          this.get('codeParser').applyOps([op], this.get('editor'))
+          this.set('surpress', false)
+          document.getElementById('snippetsDropdown').classList.toggle('show')
+
+          if (this.get('autoRender')) {
+            this.updateIFrame()
+          }
+        })
       })
     },
     toggleShowShare() {

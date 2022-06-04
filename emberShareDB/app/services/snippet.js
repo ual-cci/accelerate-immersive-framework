@@ -197,7 +197,6 @@ export default Service.extend({
       {
         title: 'A-Frame Effect: Toon',
         fn: () => ({
-          snip: '',
           type: 'effect',
           name: 'colors',
           effect:
@@ -210,7 +209,6 @@ export default Service.extend({
       {
         title: 'A-Frame Effect: Bloom',
         fn: ({ strength, radius }) => ({
-          snip: '',
           type: 'effect',
           name: 'bloom',
           effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
@@ -232,7 +230,6 @@ export default Service.extend({
       {
         title: 'A-Frame Effect: God Rays',
         fn: ({ source, threshold, intensity }) => ({
-          snip: '',
           type: 'effect',
           name: 'godrays',
           effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,

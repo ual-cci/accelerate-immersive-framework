@@ -45,23 +45,24 @@ export default Service.extend({
     // -- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
+    const ops = []
     if (isEffect) {
       // Extract text between '<a-scene' and '>'
       const currentEffect = extractEffect(source)
       if (currentEffect.indexOf('effects="') >= 0) {
         // Find 'effects=' and add new effect name
         effectSnippet = currentEffect.replace(
-          /(.*effects=")(\w+)(\w?".*)/,
-          `$1$2, ${snippet.name}$3`
+          /(effects="[^"]*)/,
+          `$1, ${snippet.name}`
         )
-        // Add new effect
         effectSnippet += `\n${snippet.effect}\n`
 
-        const [a, b] = getMarkers(source, '<a-scene', '>')
-        const from = editor.doc.posFromIndex(a)
-        const to = editor.doc.posFromIndex(b)
-        editor.doc.replaceRange('', from, to, 'playback')
-        editor.refresh()
+        // Deleting the old effect needs to be it's own op
+        const [a, _] = getMarkers(source, '<a-scene', '>')
+        ops.push({
+          p: ['source', a],
+          sd: currentEffect,
+        })
       } else {
         effectSnippet = makeFirstEffect(snippet)
       }
@@ -72,11 +73,11 @@ export default Service.extend({
       return 'markerNotFound'
     }
     const offset = position === 'after' ? marker.length : 0
-    const op = {
+    ops.push({
       p: ['source', index + offset],
       si: isEffect ? effectSnippet : snip,
-    }
-    return op
+    })
+    return ops
   },
   insertStyleSheets(source, children) {
     let searchIndex = 0,
