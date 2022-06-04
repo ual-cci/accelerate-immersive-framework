@@ -2029,7 +2029,11 @@ export default Controller.extend({
 
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
-        const op = this.get('codeParser').insertSnippet(source, snippet)
+        const op = this.get('codeParser').insertSnippet(
+          source,
+          snippet,
+          this.get('editor')
+        )
         if (typeof op === 'string') {
           const error = parseSnippetError(op, snippet)
           this.set('snippetError', error)

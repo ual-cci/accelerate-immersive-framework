@@ -6,6 +6,11 @@ import config from '../config/environment'
 import RSVP from 'rsvp'
 import hljs from 'highlight.js'
 import { computed } from '@ember/object'
+import {
+  extractEffect,
+  makeFirstEffect,
+  getMarkers,
+} from '../helpers/snippet-insert'
 
 export default Service.extend({
   store: inject('store'),
@@ -31,18 +36,44 @@ export default Service.extend({
     const op = { p: ['source', index], si: insert }
     return op
   },
-  insertSnippet(source, snippet) {
-    const { snip, marker, position, libs } = snippet
+  insertSnippet(source, snippet, editor) {
+    const { snip, type, marker, position, libs } = snippet
     for (const lib of libs) {
       const libUrl = this.get('library').url(lib)
       if (source.indexOf(libUrl) < 0) return 'libNotFound'
+    }
+    let isEffect = type === 'effect'
+    let effectSnippet = ''
+    if (isEffect) {
+      // Extract text between '<a-scene' and '>'
+      const currentEffect = extractEffect(source)
+      if (currentEffect.indexOf('effects="') >= 0) {
+        // Find 'effects=' and add new effect name
+        effectSnippet = currentEffect.replace(
+          /(.*effects=")(\w+)(\w?".*)/,
+          `$1$2 ${snippet.name}$3`
+        )
+        // Add new effect
+        effectSnippet += `\n${snippet.effect}\n`
+
+        const [a, b] = getMarkers(source, '<a-scene', '>')
+        const from = editor.doc.posFromIndex(a)
+        const to = editor.doc.posFromIndex(b)
+        editor.doc.replaceRange('', from, to, 'playback')
+        editor.refresh()
+      } else {
+        effectSnippet = makeFirstEffect(snippet)
+      }
     }
     const index = source.indexOf(marker)
     if (index < 0) {
       return 'markerNotFound'
     }
     const offset = position === 'after' ? marker.length : 0
-    const op = { p: ['source', index + offset], si: snip }
+    const op = {
+      p: ['source', index + offset],
+      si: isEffect ? effectSnippet : snip,
+    }
     return op
   },
   insertStyleSheets(source, children) {

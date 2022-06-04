@@ -110,10 +110,27 @@ export default Service.extend({
         marker: '</a-scene>',
         libs: ['a-frame'],
       },
+
       {
         title: 'A-Frame Effect: Toon',
         fn: () => ({
-          snip: `\neffects="colors"\ncolors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"`,
+          snip: '',
+          type: 'effect',
+          name: 'colors',
+          effect:
+            'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+      },
+      {
+        title: 'A-Frame Effect: Bloom',
+        fn: () => ({
+          snip: '',
+          type: 'effect',
+          name: 'bloom',
+          effect: 'bloom="filter: bloom.filter; strength: 0.3; radius:1.0"',
           position: 'after',
           marker: '<a-scene',
           libs: ['a-frame', 'a-frame-effects'],
@@ -124,8 +141,8 @@ export default Service.extend({
         title: 'A-Frame Box',
         fn: ({ position, color, rotation }) => ({
           snip: `\n<a-box position="${position}" rotation="${rotation}" color="${color}"></a-box>\n`,
-          position: 'after',
-          marker: '<a-scene>',
+          position: 'before',
+          marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
