@@ -26,10 +26,10 @@ export default Component.extend({
           this.removeToken();
         },
         selectToken() {
-          console.log("CAN DELETE?",this.get('canDelete'))
+          console.log('CAN DELETE?',this.get('canDelete'))
           if(!this.get('canDelete'))
           {
-            console.log("mouseDown");
+            console.log('mouseDown');
             this.mouseDown();
           }
         },

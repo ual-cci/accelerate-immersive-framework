@@ -6,7 +6,7 @@ import config from  '../config/environment';
 
 import RSVP from 'rsvp';
 export default Component.extend({
-  guide:"",
+  guide:'',
   description:computed('guide', function() {
     return this.get('guide').desc
   }),
@@ -20,11 +20,11 @@ export default Component.extend({
   store:inject('store'),
   index: 0,
   colourId:computed('index', function() {
-    return "tile" + this.get('index') % 5;
+    return 'tile' + this.get('index') % 5;
   }),
   actions:{
     onClick() {
-      this.get('onClick')(this.get("guide"))
+      this.get('onClick')(this.get('guide'))
     },
     onover() {
       this.set('isSelected', true);

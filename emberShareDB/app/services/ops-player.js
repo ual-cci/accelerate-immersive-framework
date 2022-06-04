@@ -2,8 +2,6 @@ import Service, { inject } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import RSVP from 'rsvp';
 import config from  '../config/environment';
-import { bind } from '@ember/runloop';
-
 
 export default Service.extend({
   parser:inject('code-parsing'),
@@ -11,7 +9,7 @@ export default Service.extend({
   cs:inject('console'),
   ops: null,
   opsToApply:null,
-  fromPlayer:[],
+  fromPlayer:null,
   prevDir: null,
   doc:null,
   reset(doc) {
@@ -20,9 +18,9 @@ export default Service.extend({
   },
   getToSend() {
     let toSend = [];
-    if(this.get("fromPlayer").length > 0) {
+    if(this.get('fromPlayer').length > 0) {
       toSend = JSON.parse(JSON.stringify(this.get('fromPlayer')))
-      this.set("fromPlayer",[]);
+      this.set('fromPlayer',[]);
     }
     return toSend
   },
@@ -31,9 +29,9 @@ export default Service.extend({
   executeUntil(time, justSource=false) {
     return new RSVP.Promise((resolve, reject) => {
       let toSend = [];
-      if(!isEmpty(this.get("ops")))
+      if(!isEmpty(this.get('ops')))
       {
-        this.get("ops").forEach((currentOp)=>
+        this.get('ops').forEach((currentOp)=>
         {
           let send = false;
           //Docs made earlier than 20/3/21 wont work with this (no dates!)
@@ -47,7 +45,7 @@ export default Service.extend({
                 hasDate = true
                 if(op.oi.date < time)
                 {
-                  this.get("cs").log(op.oi.date - time)
+                  this.get('cs').log(op.oi.date - time)
                   send = true;
                 }
               }
@@ -58,7 +56,7 @@ export default Service.extend({
               hasDate = true
               if(op.date < time)
               {
-                this.get("cs").log(op.date - time)
+                this.get('cs').log(op.date - time)
                 send = true;
               }
             }
@@ -67,13 +65,13 @@ export default Service.extend({
               //Dont send if no date, unless first op
               send = currentOp.v < 2;
             }
-            if(justSource && op.p[0] !== "source")
+            if(justSource && op.p[0] !== 'source')
             {
               send = false;
             }
           })
           if(send) {
-            this.get("cs").log("sending",currentOp.v,currentOp.op[0].p[0],justSource,currentOp.op[0])
+            this.get('cs').log('sending',currentOp.v,currentOp.op[0].p[0],justSource,currentOp.op[0])
             toSend.push(currentOp)
           } else {
             //this.get("cs").log("skipping",currentOp,justSource)
@@ -81,8 +79,8 @@ export default Service.extend({
         })
       }
       toSend.forEach((currentOp)=>{
-        this.set("latestVersion", currentOp.v + 1)
-        this.get("fromPlayer").push(currentOp)
+        this.set('latestVersion', currentOp.v + 1)
+        this.get('fromPlayer').push(currentOp)
         //Remove ops once sent
         const index = this.get('ops').indexOf(currentOp);
         if (index > -1) {
@@ -93,23 +91,23 @@ export default Service.extend({
     });
   },
   fastForwardsLatestVersion() {
-    if(!isEmpty(this.get("ops")))
+    if(!isEmpty(this.get('ops')))
     {
-      this.get("ops").forEach((op)=>
+      this.get('ops').forEach((op)=>
       {
-        if(this.get("latestVersion")< op.v)
+        if(this.get('latestVersion')< op.v)
         {
-          this.set("latestVersion", op.v)
+          this.set('latestVersion', op.v)
         }
       })
     }
-    this.set("latestVersion", this.get("latestVersion") + 1)
-    this.get("cs").log("fastforwarded to ", this.get("latestVersion"))
+    this.set('latestVersion', this.get('latestVersion') + 1)
+    this.get('cs').log('fastforwarded to ', this.get('latestVersion'))
   },
   //Called when document is loaded from code-editor.js
   startTimer(editor) {
     return new RSVP.Promise((resolve, reject)=> {
-      this.set("latestVersion", 0);
+      this.set('latestVersion', 0);
       //Load all the ops
       this.loadOps(0).then(()=>{
         const lag = 10000;
@@ -120,16 +118,16 @@ export default Service.extend({
         //Set the latestVersion to the most recent op
         this.fastForwardsLatestVersion();
         //Clear all the ops
-        this.set("ops", [])
+        this.set('ops', [])
         //Start counter to update ops every "lag" seconds
-        this.get("cs").log("starting op timer", lag)
-        this.set("updateOpsInterval",setInterval(()=>{
-          this.loadOps(this.get("latestVersion")).then(()=>{
+        this.get('cs').log('starting op timer', lag)
+        this.set('updateOpsInterval',setInterval(()=>{
+          this.loadOps(this.get('latestVersion')).then(()=>{
             justSource = false;
           });
         },lag));
         //Start counter to check for ops to playback every "interval" seconds
-        this.set("schedulerInteval",setInterval(()=>{
+        this.set('schedulerInteval',setInterval(()=>{
           now = new Date().getTime() - lag;
           this.executeUntil(now, justSource)
         },interval))
@@ -145,7 +143,7 @@ export default Service.extend({
       {
         if(ops.op.length > 0)
         {
-          if(ops.op[0].p[0] === "newEval" || ops.op[0].p[0] === "source")
+          if(ops.op[0].p[0] === 'newEval' || ops.op[0].p[0] === 'source')
           {
             sourceOps.push(ops)
           }
@@ -156,12 +154,12 @@ export default Service.extend({
   },
   loadOps(from=0) {
     const doc = this.get('doc');
-    this.get('cs').log("loading ops", doc, from);
+    this.get('cs').log('loading ops', doc, from);
     return new RSVP.Promise((resolve, reject) => {
-      let url = config.serverHost + "/documents/ops/" + doc
-      url = url + "?version="+from;
+      let url = config.serverHost + '/documents/ops/' + doc
+      url = url + '?version='+from;
       $.ajax({
-          type: "GET",
+          type: 'GET',
           url:url,
           //headers: {'Authorization': 'Bearer ' + this.get('sessionAccount.bearerToken')}
         }).then((res) => {
@@ -171,28 +169,29 @@ export default Service.extend({
           else {
             this.set('ops', [])
           }
-          this.get('cs').log("GOT OPS",from, this.get('ops').length)
+         // eslint-disable-next-line
+          this.get('cs').log('GOT OPS',from, this.get('ops').length)
           // for(const op of this.get('ops')) {
           //   this.get('cs').log(op)
           // }
           resolve(this.get('ops'));
         }).catch((err) => {
-          this.get("cs").log("op GET rejected", err)
+          this.get('cs').log('op GET rejected', err)
           reject(err);
         });
     });
   },
   //Clears all the timers
   cleanUp() {
-    this.get("cs").log("cleaned up op player")
-    this.set("latestVersion", 0);
-    if(!isEmpty(this.get("schedulerInteval"))) {
-      clearInterval(this.get("schedulerInteval"))
-      this.set("schedulerInteval", null)
+    this.get('cs').log('cleaned up op player')
+    this.set('latestVersion', 0);
+    if(!isEmpty(this.get('schedulerInteval'))) {
+      clearInterval(this.get('schedulerInteval'))
+      this.set('schedulerInteval', null)
     }
-    if(!isEmpty(this.get("updateOpsInterval"))) {
-      clearInterval(this.get("updateOpsInterval"))
-      this.set("updateOpsInterval", null)
+    if(!isEmpty(this.get('updateOpsInterval'))) {
+      clearInterval(this.get('updateOpsInterval'))
+      this.set('updateOpsInterval', null)
     }
   },
   applyTransform(editor) {

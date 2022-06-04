@@ -9,28 +9,28 @@ export default Service.extend({
   uuid: inject(),
   store: inject(),
   cs:inject('console'),
-  currentUserName:"",
+  currentUserName:'',
   currentUserId:null,
-  bearerToken:"",
-  currentDoc:"",
+  bearerToken:'',
+  currentDoc:'',
   ownedDocuments:null,
   getSessionID() {
-    if(isEmpty(this.get("sessionID")))
+    if(isEmpty(this.get('sessionID')))
     {
-      this.set("sessionID", this.get("uuid").guid())
+      this.set('sessionID', this.get('uuid').guid())
     }
-    return this.get("sessionID")
+    return this.get('sessionID')
   },
   updateOwnedDocuments() {
     return new RSVP.Promise((resolve, reject) => {
       let currentUser = this.get('currentUserName');
       if(!currentUser)
       {
-        currentUser = "";
+        currentUser = '';
       }
       let userID = this.get('currentUserId');
       const filter = {
-        filter:{search:currentUser, page:0, currentUser:userID, sortBy:"updated"}
+        filter:{search:currentUser, page:0, currentUser:userID, sortBy:'updated'}
       }
       this.get('store').query('document', filter).then((results) => {
         var myDocs = results.map(function(doc){
@@ -47,15 +47,15 @@ export default Service.extend({
     return new RSVP.Promise((resolve, reject) => {
       const username = this.get('currentUserName');
       const token = this.get('bearerToken');
-      this.get('cs').log("getUserFromName")
+      this.get('cs').log('getUserFromName')
       $.ajax({
-          type: "GET",
-          url: config.serverHost + "/accounts",
+          type: 'GET',
+          url: config.serverHost + '/accounts',
           beforeSend: function(xhr){xhr.setRequestHeader('Authorization', token);},
           data:{username:username}
         }).then(bind((res) => {
-          this.get('cs').log("USERID", res.data.attr.accountId)
-          this.set("currentUserId", res.data.attr.accountId);
+          this.get('cs').log('USERID', res.data.attr.accountId)
+          this.set('currentUserId', res.data.attr.accountId);
           resolve(res);
         })).catch(bind((err) => {
           this.get('cs').log(err)

@@ -17,7 +17,7 @@ export default Component.extend(FileSaverMixin, {
       let zip = new JSZip();
       this.get('documentService').getCombinedSource(data.id)
       .then((source) => {
-        zip.file("index.html", source, { type: 'string' });
+        zip.file('index.html', source, { type: 'string' });
         for(let asset of data.assets)
         {
           const storeAsset = this.get('store').peekRecord('asset',asset.fileId);
@@ -26,9 +26,9 @@ export default Component.extend(FileSaverMixin, {
             zip.file(asset.name, storeAsset.b64data, {base64: true});
           }
         }
-        zip.generateAsync({type : "blob"})
+        zip.generateAsync({type : 'blob'})
         .then((blob) => {
-          this.saveFileAs(data.name + "-MIMIC.zip", blob, 'application/zip');
+          this.saveFileAs(data.name + '-MIMIC.zip', blob, 'application/zip');
         });
       }).catch((err)=>this.get('cs').log(err));
     }

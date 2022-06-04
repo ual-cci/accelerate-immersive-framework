@@ -8,6 +8,6 @@ export default Route.extend({
     return params.endpoint;
   },
   redirect: function() {
-    window.location = config.serverHost + "/" + this.get('endpoint');
+    window.location = config.serverHost + '/' + this.get('endpoint');
   }
 });

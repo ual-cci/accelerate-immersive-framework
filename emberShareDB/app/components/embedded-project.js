@@ -3,17 +3,17 @@ import config from  '../config/environment';
 import { computed } from '@ember/object';
 
 export default Component.extend({
-  docId:"",
+  docId:'',
   url:config.localOrigin,
-  height:"490px",
+  height:'490px',
   loaded:false,
   manualLoad:false,
-  srcURL:"about:none",
+  srcURL:'about:none',
   buttonTop:computed('height', function() {
     let height = this.get('height');
     height = height.substring(0, height.length - 2);
     height = parseInt(height)
-    return height / 2 + "px";
+    return height / 2 + 'px';
   }),
   didInsertElement() {
     this._super(...arguments);
@@ -30,10 +30,10 @@ export default Component.extend({
       entries.forEach(entry => {
 
         if(!this.get('loaded') &&  entry.intersectionRatio > 0) {
-          let src = this.get("url") + "/code/" + this.get("docId") +  "?embed=true&showCode=true";
-          console.log("onscreen", src);
-          this.set("srcURL", src)
-          this.set("loaded", true);
+          let src = this.get('url') + '/code/' + this.get('docId') +  '?embed=true&showCode=true';
+          console.log('onscreen', src);
+          this.set('srcURL', src)
+          this.set('loaded', true);
         }
       });
     }, options);
@@ -42,10 +42,10 @@ export default Component.extend({
  },
  actions:{
    loadProject() {
-     this.set("manualLoad", false);
-     let src = this.get("url") + "/code/" + this.get("docId") +  "?embed=true&showCode=true";
-     this.set("srcURL", src)
-     this.set("loaded", true);
+     this.set('manualLoad', false);
+     let src = this.get('url') + '/code/' + this.get('docId') +  '?embed=true&showCode=true';
+     this.set('srcURL', src)
+     this.set('loaded', true);
    }
  }
  });

@@ -1,395 +1,587 @@
-<div id = "document-container">
+<div id='document-container'>
   <header>
-  <div id = "code-header-container" class = "limited-width-container">
-  <h4><span>{{feedbackMessage}}</span></h4>
-  {{#if isEmbedded}}
-  <div></div>
-  {{else}}
-  <div id = "doc-title-container">
-    {{#if isNotEdittingDocName}}
-        <span id = "doc-title" class="label label-default"
-        role = "button" tabIndex = "0"
-        {{action 'doEditDocName'}} for="doc-name">{{titleName}}</span>
-    {{else}}
-      {{input role = "form" value=titleNoName
-      type="form-control" id="doc-name-input"
-      name="doc-name-input" focusOut=(action 'endEdittingDocName')}}
-    {{/if}}
-    {{#if mediaQueries.isDesktop}}
-    <div id = "doc-controls-container">
-      <div id = {{concat "render-doc-" isOwner}}>
-        </div>
-          <div id = "transport-container">
-            <div class="tooltip col-2">
-              {{#bs-button (html-attributes aria-label="Render Code")
-              icon="glyphicon glyphicon-play" id = "code-play-btn"
-              class = "clear-btn transport-btn" onClick=(action "playOrPause")}}{{/bs-button}}
-              <span class="tooltiptext">Render Code</span>
-            </div>
-            {{#if canEditSource}}
-              <div class="tooltip">
-                {{#if showAssets}}
-                  {{#bs-button (html-attributes aria-label="hide assets")
-                  class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up"
-                  onClick=(action "toggleShowAssets")}}{{/bs-button}}
-                {{else}}
-                  {{#bs-button (html-attributes aria-label="show assets")
-                  class = "clear-btn transport-btn" icon = "glyphicon glyphicon-file"
-                  onClick=(action "toggleShowAssets")}}{{/bs-button}}
-                {{/if}}
-                <span class="tooltiptext">Add Files to Use</span>
+    <div id='code-header-container' class='limited-width-container'>
+      <h4><span>{{feedbackMessage}}</span></h4>
+      {{#if isEmbedded}}
+        <div></div>
+      {{else}}
+        <div id='doc-title-container'>
+          {{#if isNotEdittingDocName}}
+            <span
+              id='doc-title'
+              class='label label-default'
+              role='button'
+              tabIndex='0'
+              {{action 'doEditDocName'}}
+              for='doc-name'
+            >{{titleName}}</span>
+          {{else}}
+            {{input
+              role='form'
+              value=titleNoName
+              type='form-control'
+              id='doc-name-input'
+              name='doc-name-input'
+              focusOut=(action 'endEdittingDocName')
+            }}
+          {{/if}}
+          {{#if mediaQueries.isDesktop}}
+            <div id='doc-controls-container'>
+              <div id={{concat 'render-doc-' isOwner}}>
               </div>
-              {{#if isRoot}}
-              <div class="tooltip">
-                <div class="dropdown">
-                  {{#bs-button (html-attributes aria-label="add library")
-                  id = "add-library-btn" class = "clear-btn transport-btn"
-                  icon = "glyphicon glyphicon-briefcase" onClick=(action "toggleLibraryDropdown")}}{{/bs-button}}
-                 <div id="myDropdown" class="dropdown-content">
-                  {{#each libraries as |lib|}}
-                    {{#bs-button class = "library-btn"  onClick=(action "insertLibrary" lib)}}{{lib.title}}{{/bs-button}}
-                  {{/each}}
-                 </div>
+              <!-- BUTTONS -->
+              <!-- BUTTONS -->
+              <!-- BUTTONS -->
+              <div id='transport-container'>
+                <div class='tooltip'>
+                  {{#bs-button
+                    (html-attributes aria-label='Render Code')
+                    icon='glyphicon glyphicon-play'
+                    id='code-play-btn'
+                    class='clear-btn transport-btn'
+                    onClick=(action 'playOrPause')
+                  }}{{/bs-button}}
+                  <span class='tooltiptext'>Render Code</span>
                 </div>
-                <span class="tooltiptext">Add libraries</span>
+
+                {{#if canEditSource}}
+                  <div class='tooltip'>
+                    {{#if showAssets}}
+                      {{#bs-button
+                        (html-attributes aria-label='hide assets')
+                        class='clear-btn transport-btn'
+                        icon='glyphicon glyphicon-chevron-up'
+                        onClick=(action 'toggleShowAssets')
+                      }}{{/bs-button}}
+                    {{else}}
+                      {{#bs-button
+                        (html-attributes aria-label='show assets')
+                        class='clear-btn transport-btn'
+                        icon='glyphicon glyphicon-file'
+                        onClick=(action 'toggleShowAssets')
+                      }}{{/bs-button}}
+                    {{/if}}
+                    <span class='tooltiptext'>Add Files to Use</span>
+                  </div>
+                  {{#if isRoot}}
+
+                    <div class='tooltip'>
+                      <div class='dropdown'>
+                        {{#bs-button
+                          (html-attributes aria-label='add library')
+                          id='add-library-btn'
+                          class='clear-btn transport-btn'
+                          icon='glyphicon glyphicon-briefcase'
+                          onClick=(action 'toggleLibraryDropdown')
+                        }}{{/bs-button}}
+                        <div id='librariesDropdown' class='dropdown-content'>
+                          {{#each libraries as |lib|}}
+                            {{#bs-button
+                              class='library-btn'
+                              onClick=(action 'insertLibrary' lib)
+                            }}{{lib.title}}{{/bs-button}}
+                          {{/each}}
+                        </div>
+                      </div>
+                      <span class='tooltiptext'>Add libraries</span>
+                    </div>
+
+                    <!-- SNIPPETS -->
+                    <div class='tooltip'>
+                      <div class='dropdown'>
+                        {{#bs-button
+                          (html-attributes aria-label='add snippet')
+                          id='add-snippet-btn'
+                          class='clear-btn transport-btn'
+                          icon='glyphicon glyphicon-plus'
+                          onClick=(action 'toggleSnippetsDropdown')
+                        }}{{/bs-button}}
+                        <div id='snippetsDropdown' class='dropdown-content'>
+                          {{#each snippets as |snippet|}}
+                            {{#bs-button
+                              class='library-btn'
+                              onClick=(action 'toggleSnippetEditor' snippet)
+                            }}{{snippet.title}}{{/bs-button}}
+                          {{/each}}
+                        </div>
+                      </div>
+                      <span class='tooltiptext'>Add Code Snippet</span>
+                    </div>
+                    <!-- SNIPPETS -->
+
+                  {{/if}}
+                {{/if}}
+                <div class='tooltip'>
+                  {{#if showSettings}}
+                    {{#bs-button
+                      (html-attributes aria-label='hide settings')
+                      id='settings-btn'
+                      class='clear-btn transport-btn'
+                      icon='glyphicon glyphicon-chevron-up'
+                      onClick=(action 'toggleShowSettings')
+                    }}{{/bs-button}}
+                  {{else}}
+                    {{#bs-button
+                      (html-attributes aria-label='show settings')
+                      id='settings-btn'
+                      class='clear-btn transport-btn'
+                      icon='glyphicon glyphicon-cog'
+                      onClick=(action 'toggleShowSettings')
+                    }}{{/bs-button}}
+                  {{/if}}
+                  <span class='tooltiptext'>Show Document Settings</span>
+                </div>
+                <div class='tooltip'>
+                  {{#if showRecordingPanel}}
+                    {{#bs-button
+                      (html-attributes aria-label='hide Recording')
+                      class='clear-btn transport-btn'
+                      icon='glyphicon glyphicon-chevron-up'
+                      onClick=(action 'toggleShowRecordingPanel')
+                    }}{{/bs-button}}
+                  {{else}}
+                    {{#bs-button
+                      (html-attributes aria-label='show Recording')
+                      class='clear-btn transport-btn'
+                      icon='glyphicon glyphicon-record'
+                      onClick=(action 'toggleShowRecordingPanel')
+                    }}{{/bs-button}}
+                  {{/if}}
+                  <span class='tooltiptext'>Recording Options</span>
+                </div>
+                <div class='tooltip col-2'>
+                  {{download-button doc=parentData}}
+                  <span class='tooltiptext'>Download Project as Zip</span>
+                </div>
+                <div class='tooltip col-2'>
+                  {{#bs-button
+                    (html-attributes aria-label='full screen')
+                    style='font-size:16pt;'
+                    icon='glyphicon glyphicon-fullscreen'
+                    class='clear-btn transport-btn'
+                    onClick=(action 'enterFullscreen')
+                  }}{{/bs-button}}
+                  <span class='tooltiptext'>Enter Fullscreen</span>
+                </div>
+                {{#if isOwner}}
+                  <div class='tooltip col-2'>
+                    {{#bs-button
+                      (html-attributes aria-label='delete document')
+                      icon='glyphicon glyphicon-remove'
+                      id='code-delete-btn'
+                      class='clear-btn transport-btn'
+                      onClick=(action 'deleteDoc')
+                    }}{{/bs-button}}
+                    <span class='tooltiptext'>Delete Document</span>
+                  </div>
+                {{/if}}
               </div>
+              <!-- BUTTONS END -->
+              <!-- BUTTONS END -->
+              <!-- BUTTONS END -->
+            </div>
+          {{else}}
+            <div
+              class='tooltip'
+              style='float:right;padding-top:18px;padding-right:18px;'
+            >
+              {{#bs-button
+                (html-attributes aria-label='render code')
+                icon='glyphicon glyphicon-play'
+                id='mobile-play-btn'
+                class='clear-btn floated-right'
+                onClick=(action 'playOrPause')
+              }}{{/bs-button}}
+              <span class='tooltiptext'>Render Code</span>
+            </div>
+          {{/if}}
+        </div>
+        {{#if showShare}}
+          <div id='share-container'>
+            <p>Editable Link : {{editLink}}</p>
+            <p>Embed Link : {{embedLink}}</p>
+          </div>
+        {{/if}}
+        {{#if showRecordingPanel}}
+          <div id='recording-panel-container'>
+            {{recording-panel
+              possibleNodes=possibleRecordingNodes
+              options=recordingOptions
+              onOptionsChanged=(action 'onRecordingOptionsChanged')
+            }}
+          </div>
+        {{/if}}
+        {{#if showSettings}}
+          <div id='settings-container'>
+            {{#if session.isAuthenticated}}
+              <div class='tooltip'>
+                {{#bs-button
+                  (html-attributes aria-label='fork document')
+                  tabIndex='0'
+                  class='clear-text-btn'
+                  onClick=(action 'forkDocument')
+                }}FORK{{/bs-button}}
+                <span class='tooltiptext'>Make Your Own Copy</span>
+              </div>
+              <div class='tooltip'>
+                {{#bs-button
+                  (html-attributes aria-label='flag document')
+                  tabIndex='0'
+                  class='clear-text-btn'
+                  onClick=(action 'flagDocument')
+                }}FLAG{{/bs-button}}
+                <span class='tooltiptext'>Report as Inappropriate</span>
+              </div>
+            {{/if}}
+            {{#if isOwner}}
+              <div class='tooltip'>
+                <label
+                  class='doc-checkbox'
+                  for='privacyCheckbox'
+                >PRIVATE</label>
+                {{input
+                  tabIndex='0'
+                  type='checkbox'
+                  id='privacyCheckbox'
+                  checked=model.isPrivate
+                  click=(action 'togglePrivacy')
+                }}
+                <span class='tooltiptext'>Other users can discover</span>
+              </div>
+              <div class='tooltip'>
+                <label class='doc-checkbox' for='readOnlyCheckbox'>READ ONLY</label>
+                {{input
+                  type='checkbox'
+                  tabIndex='0'
+                  id='readOnlyCheckbox'
+                  checked=model.readOnly
+                  click=(action 'toggleReadOnly')
+                }}
+                <span class='tooltiptext'>WARNING! Other users can edit your
+                  code</span>
+              </div>
+              <div class='tooltip'>
+                <label class='doc-checkbox' for='playCheckbox'>DONT PLAY ON OPEN</label>
+                {{input
+                  tabIndex='0'
+                  type='checkbox'
+                  checked=model.dontPlay
+                  click=(action 'toggleDontPlay')
+                }}
+                <span class='tooltiptext'>Dont play on open</span>
+              </div>
+              {{#if colabMode}}
+                <div class='tooltip'>
+                  <label
+                    class='doc-checkbox'
+                    id='colab-checkbox'
+                    for='colabCheckbox'
+                  >COLLABORATIVE?</label>
+                  {{input
+                    tabIndex='0'
+                    type='checkbox'
+                    checked=model.isCollaborative
+                    click=(action 'toggleCollaborative')
+                  }}
+                  <span class='tooltiptext'>COLLABORATIVE EDITTING</span>
+                </div>
               {{/if}}
             {{/if}}
-            <div class="tooltip">
-              {{#if showSettings}}
-                {{#bs-button (html-attributes aria-label="hide settings")
-                id = "settings-btn" class = "clear-btn transport-btn"
-                icon = "glyphicon glyphicon-chevron-up"
-                onClick=(action "toggleShowSettings")}}{{/bs-button}}
-              {{else}}
-                {{#bs-button (html-attributes aria-label="show settings")
-                id = "settings-btn" class = "clear-btn transport-btn"
-                icon = "glyphicon glyphicon-cog" onClick=(action "toggleShowSettings")}}{{/bs-button}}
-              {{/if}}
-              <span class="tooltiptext">Show Document Settings</span>
-            </div>
-            <div class="tooltip">
-              {{#if showRecordingPanel}}
-                {{#bs-button (html-attributes aria-label="hide Recording")
-                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-chevron-up"
-                onClick=(action "toggleShowRecordingPanel")}}{{/bs-button}}
-              {{else}}
-                {{#bs-button (html-attributes aria-label="show Recording")
-                class = "clear-btn transport-btn" icon = "glyphicon glyphicon-record"
-                onClick=(action "toggleShowRecordingPanel")}}{{/bs-button}}
-              {{/if}}
-              <span class="tooltiptext">Recording Options</span>
-            </div>
-            <div class="tooltip col-2">
-              {{download-button doc = parentData}}
-              <span class="tooltiptext">Download Project as Zip</span>
-            </div>
-            <div class="tooltip col-2">
-              {{#bs-button (html-attributes aria-label="full screen") style = "font-size:16pt;" icon="glyphicon glyphicon-fullscreen" class = "clear-btn transport-btn" onClick=(action "enterFullscreen")}}{{/bs-button}}
-              <span class="tooltiptext">Enter Fullscreen</span>
-            </div>
-            {{#if isOwner}}
-              <div class="tooltip col-2">
-                {{#bs-button (html-attributes aria-label="delete document") icon="glyphicon glyphicon-remove" id = "code-delete-btn" class = "clear-btn transport-btn" onClick=(action "deleteDoc")}}{{/bs-button}}
-                <span class="tooltiptext">Delete Document</span>
+            {{#if canEditSource}}
+              <div class='tooltip'>
+                <label class='doc-checkbox' for='autoRenderCheckbox'>AUTO RENDER</label>
+                {{input
+                  tabIndex='0'
+                  type='checkbox'
+                  id='autoRenderCheckbox'
+                  checked=autoRender
+                  click=(action 'toggleAutoRender')
+                }}
+                <span class='tooltiptext'>Render Code Whilst Typing</span>
               </div>
             {{/if}}
           </div>
-    </div>
-    {{else}}
-      <div class="tooltip" style ="float:right;padding-top:18px;padding-right:18px;">
-        {{#bs-button (html-attributes aria-label="render code") icon="glyphicon glyphicon-play" id = "mobile-play-btn" class = "clear-btn floated-right" onClick=(action "playOrPause")}}{{/bs-button}}
-        <span class="tooltiptext">Render Code</span>
-      </div>
-    {{/if}}
-  </div>
-  {{#if showShare}}
-  <div id = "share-container">
-    <p>Editable Link : {{editLink}}</p>
-    <p>Embed Link : {{embedLink}}</p>
-  </div>
-  {{/if}}
-  {{#if showRecordingPanel}}
-  <div id = "recording-panel-container">
-    {{recording-panel
-      possibleNodes = possibleRecordingNodes
-      options = recordingOptions
-      onOptionsChanged = (action "onRecordingOptionsChanged")
-    }}
-  </div>
-  {{/if}}
-  {{#if showSettings}}
-  <div id = "settings-container">
-    {{#if session.isAuthenticated}}
-      <div class="tooltip">
-        {{#bs-button (html-attributes aria-label="fork document")
-        tabIndex = "0"
-        class = "clear-text-btn"
-        onClick=(action "forkDocument")}}FORK{{/bs-button}}
-        <span class="tooltiptext">Make Your Own Copy</span>
-      </div>
-      <div class="tooltip">
-        {{#bs-button (html-attributes aria-label="flag document")
-        tabIndex = "0"
-        class = "clear-text-btn"
-        onClick=(action "flagDocument")}}FLAG{{/bs-button}}
-        <span class="tooltiptext">Report as Inappropriate</span>
-      </div>
-    {{/if}}
-    {{#if isOwner}}
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="privacyCheckbox">PRIVATE</label>
-        {{input tabIndex = "0" type="checkbox" id='privacyCheckbox' checked=model.isPrivate click=(action 'togglePrivacy')}}
-        <span class="tooltiptext">Other users can discover</span>
-      </div>
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="readOnlyCheckbox">READ ONLY</label>
-        {{input type="checkbox" tabIndex = "0" id='readOnlyCheckbox' checked=model.readOnly click=(action 'toggleReadOnly')}}
-        <span class="tooltiptext">WARNING! Other users can edit your code</span>
-      </div>
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="playCheckbox">DONT PLAY ON OPEN</label>
-        {{input tabIndex = "0" type="checkbox" checked=model.dontPlay click=(action 'toggleDontPlay')}}
-        <span class="tooltiptext">Dont play on open</span>
-      </div>
-      {{#if colabMode}}
-      <div class="tooltip">
-        <label class = "doc-checkbox" id ="colab-checkbox" for="colabCheckbox">COLLABORATIVE?</label>
-        {{input tabIndex = "0" type="checkbox" checked=model.isCollaborative click=(action 'toggleCollaborative')}}
-        <span class="tooltiptext">COLLABORATIVE EDITTING</span>
-      </div>
-      {{/if}}
-    {{/if}}
-    {{#if canEditSource}}
-      <div class="tooltip">
-        <label class = "doc-checkbox" for="autoRenderCheckbox">AUTO RENDER</label>
-        {{input tabIndex = "0" type="checkbox" id='autoRenderCheckbox' checked=autoRender click=(action 'toggleAutoRender')}}
-        <span class="tooltiptext">Render Code Whilst Typing</span>
-      </div>
-    {{/if}}
-  </div>
-  {{/if}}
-  {{#if showAssets}}
-    <div class = "file-upload-container">
-         <div id = "uploaded-assets-container">
-          {{#each model.assets as |asset|}}
-            <div class = "asset-container">
-              <p class = "file-text file-name">{{asset.name}}</p>
-              {{#bs-button (html-attributes aria-label="delete asset")
-              tabIndex = "0"
-              class = "clear-btn file-btn"
-              icon="glyphicon glyphicon-remove"
-              onClick=(action "deleteAsset" asset.name)}}{{/bs-button}}
-              {{#bs-button (html-attributes aria-label="preview asset")
-              tabIndex = "0"
-              class = "clear-btn file-btn"
-              icon="glyphicon glyphicon-eye-open"
-              onClick=(action "previewAsset" asset)}}{{/bs-button}}
+        {{/if}}
+        {{#if showAssets}}
+          <div class='file-upload-container'>
+            <div id='uploaded-assets-container'>
+              {{#each model.assets as |asset|}}
+                <div class='asset-container'>
+                  <p class='file-text file-name'>{{asset.name}}</p>
+                  {{#bs-button
+                    (html-attributes aria-label='delete asset')
+                    tabIndex='0'
+                    class='clear-btn file-btn'
+                    icon='glyphicon glyphicon-remove'
+                    onClick=(action 'deleteAsset' asset.name)
+                  }}{{/bs-button}}
+                  {{#bs-button
+                    (html-attributes aria-label='preview asset')
+                    tabIndex='0'
+                    class='clear-btn file-btn'
+                    icon='glyphicon glyphicon-eye-open'
+                    onClick=(action 'previewAsset' asset)
+                  }}{{/bs-button}}
+                </div>
+              {{/each}}
             </div>
-          {{/each}}
-        </div>
-      {{#if canEditSource}}
-      <div id = "asset-progress"></div>
-      <div class = "file-upload">
-        {{file-upload
-          multiple = true
-          onProgress = (action 'assetProgress')
-          onCompletion = (action 'assetUploaded')
-          onAllCompletion = (action 'assetUploadingComplete')
-          onError = (action 'assetError')
-        }}
-      </div>
-      {{/if}}
-    </div>
-  {{/if}}
-  {{#if mediaQueries.isDesktop}}
-    {{#if showSettings}}
-      {{#if model.isCollaborative}}
-        {{#if canEditSettings}}
-          {{tokenfield-input
-            elementId="collaborators"
-            tokens=model.collaborators
-            allowDuplicates=false
-            placeholder="Enter Collaborators"
-            editable=canEditSettings
-            searchTag=(action 'searchCollaborator')
-            tokensChanged=(action 'collaboratorsChanged')
-            inputToggled=(action 'syncOutputContainer')
-          }}
+            {{#if canEditSource}}
+              <div id='asset-progress'></div>
+              <div class='file-upload'>
+                {{file-upload
+                  multiple=true
+                  onProgress=(action 'assetProgress')
+                  onCompletion=(action 'assetUploaded')
+                  onAllCompletion=(action 'assetUploadingComplete')
+                  onError=(action 'assetError')
+                }}
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
+        {{#if showErrorBar}}
+          {{error-bar error=snippetError hide=(action 'closeErrorBar')}}
+        {{/if}}
+        {{#if mediaQueries.isDesktop}}
+          {{#if showSettings}}
+            {{#if model.isCollaborative}}
+              {{#if canEditSettings}}
+                {{tokenfield-input
+                  elementId='collaborators'
+                  tokens=model.collaborators
+                  allowDuplicates=false
+                  placeholder='Enter Collaborators'
+                  editable=canEditSettings
+                  searchTag=(action 'searchCollaborator')
+                  tokensChanged=(action 'collaboratorsChanged')
+                  inputToggled=(action 'syncOutputContainer')
+                }}
+              {{/if}}
+            {{/if}}
+          {{else}}
+            {{tokenfield-input
+              tokens=model.tags
+              elementId='tags'
+              allowDuplicates=false
+              placeholder='Enter Tags'
+              editable=canEditSettings
+              searchTag=(action 'searchTag')
+              tokensChanged=(action 'tagsChanged')
+              inputToggled=(action 'syncOutputContainer')
+            }}
+          {{/if}}
         {{/if}}
       {{/if}}
-    {{else}}
-      {{tokenfield-input
-        tokens=model.tags
-        elementId="tags"
-        allowDuplicates=false
-        placeholder="Enter Tags"
-        editable=canEditSettings
-        searchTag=(action 'searchTag')
-        tokensChanged=(action 'tagsChanged')
-        inputToggled=(action 'syncOutputContainer')
+    </div>
+    {{#if mediaQueries.isDesktop}}
+      {{project-tabs
+        parent=parentData
+        tabs=tabs
+        onSelect=(action 'tabSelected')
+        onDelete=(action 'tabDeleted')
+        onCreate=(action 'newTab')
       }}
     {{/if}}
-  {{/if}}
-  {{/if}}
-  </div>
-  {{#if mediaQueries.isDesktop}}
-      {{project-tabs
-        parent = parentData
-        tabs = tabs
-        onSelect = (action 'tabSelected')
-        onDelete = (action 'tabDeleted')
-        onCreate = (action 'newTab')}}
-  {{/if}}
   </header>
   <main>
-    <div id = "fullscreen">
-    <div id = "main-code-container">
-      {{#if showHUD}}
-        {{loading-hud message = hudMessage hideWheel = isEmbedded}}
-      {{/if}}
-      {{#if isEmbeddedWithCode}}
-      <div id = "embedded-run-container">
-        {{#bs-button
-          (html-attributes aria-label="play or pause")
-          class = "clear-text-btn embedded-menu-button"
-          id = "embedded-run-button"
-          icon="glyphicon glyphicon-play"
-          onClick=(action "playOrPause") }}
-        {{/bs-button}}
-        {{#if isShowingCode}}
-        {{#bs-button
-          (html-attributes aria-label="hide code")
-          class = "clear-text-btn embedded-menu-button"
-          onClick=(action "hideCode")}}Hide Code
-        {{/bs-button}}
-        {{else}}
-        {{#bs-button
-          (html-attributes aria-label="show code")
-          class = "clear-text-btn embedded-menu-button"
-          onClick=(action "showCode")}}Show Code
-        {{/bs-button}}
+    {{#if showSnippetEditor}}
+      {{snippet-editor
+        snippet=currentSnip
+        submit=(action 'insertSnippet')
+        toggle=(action 'toggleSnippetEditor')
+      }}
+    {{/if}}
+    <div id='fullscreen'>
+      <div id='main-code-container'>
+        {{#if showHUD}}
+          {{loading-hud message=hudMessage hideWheel=isEmbedded}}
         {{/if}}
-      </div>
-      {{/if}}
+        {{#if isEmbeddedWithCode}}
+          {{#bs-button
+            (html-attributes aria-label='play or pause')
+            class='clear-text-btn embedded-menu-button'
+            id='embedded-run-button'
+            icon='glyphicon glyphicon-play'
+            onClick=(action 'playOrPause')
+          }}{{/bs-button}}
+          {{#if isShowingCode}}
+            {{#bs-button
+              (html-attributes aria-label='hide code')
+              class='clear-text-btn embedded-menu-button'
+              onClick=(action 'hideCode')
+            }}Hide Code
+            {{/bs-button}}
+          {{else}}
+            {{#bs-button
+              (html-attributes aria-label='show code')
+              class='clear-text-btn embedded-menu-button'
+              onClick=(action 'showCode')
+            }}Show Code
+            {{/bs-button}}
+          {{/if}}
+        {{/if}}
         {{#if isMobile}}
           <span><strong>SUPORT FOR MOBILES IS LIMITED</strong></span>
         {{else}}
-        {{#if showCodeControls}}
-        <div id = "drag-container">
-          {{#if isShowingCode}}
-            {{#bs-button (html-attributes aria-label="hide code")
-            class = "hide-code-btn" icon="glyphicon glyphicon-menu-right"
-            onClick=(action "hideCode")}}{{/bs-button}}
-          {{else}}
-            {{#bs-button (html-attributes aria-label="show code")
-            class = "hide-code-btn" icon="glyphicon glyphicon-menu-left"
-            onClick=(action "showCode")}}{{/bs-button}}
-          {{/if}}
-          <div id = "drag-button" onmousedown={{action "mouseDown"}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}></div>
-            {{#if isShowingCode}}
-            {{#if isEmbeddedWithCode}}
-            <div></div>
-            {{else}}
-            <div id = "playback-container">
-              <!-- <p class = "side-menu-label">code</p> -->
-              <div class="tooltip">
-                <span class="tooltiptext">Play / Pause program</span>
-              {{#bs-button
-                (html-attributes aria-label="play or pause")
-                class = "clear-btn"
-                id = "embedded-run-button"
-                icon="glyphicon glyphicon-play"
-                onClick=(action "playOrPause") }}
-              {{/bs-button}}
-            </div>
-              <!-- {{ops-player
+          {{#if showCodeControls}}
+            <div id='drag-container'>
+              {{#if isShowingCode}}
+                {{#bs-button
+                  (html-attributes aria-label='hide code')
+                  class='hide-code-btn'
+                  icon='glyphicon glyphicon-menu-right'
+                  onClick=(action 'hideCode')
+                }}{{/bs-button}}
+              {{else}}
+                {{#bs-button
+                  (html-attributes aria-label='show code')
+                  class='hide-code-btn'
+                  icon='glyphicon glyphicon-menu-left'
+                  onClick=(action 'showCode')
+                }}{{/bs-button}}
+              {{/if}}
+              <div
+                id='drag-button'
+                onmousedown={{action 'mouseDown'}}
+                onmouseup={{action 'mouseUp'}}
+                onmousemove={{action 'mouseMove'}}
+              ></div>
+              {{#if isShowingCode}}
+                {{#if isEmbeddedWithCode}}
+                  <div></div>
+                {{else}}
+                  <div id='playback-container'>
+                    <!-- <p class = "side-menu-label">code</p> -->
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Play / Pause program</span>
+                      {{#bs-button
+                        (html-attributes aria-label='play or pause')
+                        class='clear-btn'
+                        id='embedded-run-button'
+                        icon='glyphicon glyphicon-play'
+                        onClick=(action 'playOrPause')
+                      }}{{/bs-button}}
+                    </div>
+                    <!-- {{ops-player
                 onSkip = (action 'skipOp')
                 onPlay = (action 'playOps')
                 onRewind = (action 'rewindOps')
                 onPause = (action 'pauseOps')
                 isPlaying = isPlayingOps
               }} -->
-              <div class="tooltip">
-                <span class="tooltiptext">Bigger Font</span>
-                {{#bs-button
-                  class = "clear-btn"
-                  icon="glyphicon glyphicon-zoom-in"
-                  onClick=(action "zoomIn")}}
-                {{/bs-button}}
-              </div>
-              <div class="tooltip">
-                <span class="tooltiptext">Smaller Font</span>
-                {{#bs-button
-                  class = "clear-btn"
-                  icon="glyphicon glyphicon-zoom-out"
-                  onClick=(action "zoomOut")}}
-                {{/bs-button}}
-              </div>
-              <div class="tooltip">
-                <span class="tooltiptext">Toggle Contrast</span>
-                {{#bs-button
-                  class = "clear-btn"
-                  icon="glyphicon glyphicon-text-background"
-                  onClick=(action "toggleHighContrast")}}
-                {{/bs-button}}
-              </div>
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Bigger Font</span>
+                      {{#bs-button
+                        class='clear-btn'
+                        icon='glyphicon glyphicon-zoom-in'
+                        onClick=(action 'zoomIn')
+                      }}{{/bs-button}}
+                    </div>
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Smaller Font</span>
+                      {{#bs-button
+                        class='clear-btn'
+                        icon='glyphicon glyphicon-zoom-out'
+                        onClick=(action 'zoomOut')
+                      }}{{/bs-button}}
+                    </div>
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Toggle Contrast</span>
+                      {{#bs-button
+                        class='clear-btn'
+                        icon='glyphicon glyphicon-text-background'
+                        onClick=(action 'toggleHighContrast')
+                      }}{{/bs-button}}
+                    </div>
+                    <!-- Cycle Colorschemes -->
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Cycle Colourschemes</span>
+                      {{#bs-button
+                        class='clear-btn'
+                        icon='glyphicon glyphicon-text-color'
+                        onClick=(action 'cycleColourscheme')
+                      }}{{/bs-button}}
+                    </div>
+                    <!-- Cycle Colorschemes -->
+                  </div>
+                {{/if}}
+              {{/if}}
             </div>
-            {{/if}}
-            {{/if}}
-          </div>
-        {{/if}}
+          {{/if}}
         {{/if}}
 
-        <div id = "ace-container" style = {{aceStyle}} onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
+        <div
+          id='ace-container'
+          style={{aceStyle}}
+          onmouseup={{action 'mouseUp'}}
+          onmousemove={{action 'mouseMove'}}
+        >
           {{#if isEmbeddedWithCode}}
             <div></div>
           {{else}}
             {{#if showReadOnly}}
-            {{#if isShowingCode}}
-              <div class = "code-warning-overlay" id = "read-only-overlay">
-                <p id = "read-only-text" >This document is read only, logged in users can fork to edit their own version</p>
-                {{#if session.isAuthenticated}}
-                  {{#bs-button
-                    (html-attributes aria-label="fork document")
-                    class = "clear-text-btn"
-                    id = "read-only-fork-button"
-                    onClick=(action "forkDocument") }}
-                    Fork
-                  {{/bs-button}}
-                {{/if}}
-              </div>
-            {{/if}}
+              {{#if isShowingCode}}
+                <div class='code-warning-overlay' id='read-only-overlay'>
+                  <p id='read-only-text'>This document is read only, logged in
+                    users can fork to edit their own version</p>
+                  {{#if session.isAuthenticated}}
+                    {{#bs-button
+                      (html-attributes aria-label='fork document')
+                      class='clear-text-btn'
+                      id='read-only-fork-button'
+                      onClick=(action 'forkDocument')
+                    }}
+                      Fork
+                    {{/bs-button}}
+                  {{/if}}
+                </div>
+              {{/if}}
             {{/if}}
           {{/if}}
           {{#if showConnectionWarning}}
-            <div class = "code-warning-overlay" id = "connection-warning-container">
-                 <p id = "connection-warning-text"> {{connectionWarning}}</p>
+            <div class='code-warning-overlay' id='connection-warning-container'>
+              <p id='connection-warning-text'> {{connectionWarning}}</p>
             </div>
           {{/if}}
 
           {{code-mirror
             onReady=(action 'onEditorReady')
-            onChange = (action 'onSessionChange')
-            onReevaluate = (action 'onReevaluate')
-            suggestCompletions = (action 'suggestCompletions')
+            onChange=(action 'onSessionChange')
+            onReevaluate=(action 'onReevaluate')
+            suggestCompletions=(action 'suggestCompletions')
           }}
-          </div>
+        </div>
       </div>
       <!-- if this is in the main-output-container, strange things happen with anchor links in chrome ¯\_(ツ)_/¯ -->
-      <div id = "output-container" onmouseup={{action "mouseUp"}} onmousemove={{action "mouseMove"}}>
-        <iframe title = "output-frame" id = "output-iframe" srcdoc = "" frameBorder="0" name = {{iframeTitle}}></iframe>
+      <div
+        id='output-container'
+        onmouseup={{action 'mouseUp'}}
+        onmousemove={{action 'mouseMove'}}
+      >
+        <iframe
+          title='output-frame'
+          id='output-iframe'
+          srcdoc=''
+          frameBorder='0'
+          name={{iframeTitle}}
+        ></iframe>
       </div>
     </div>
-    </main>
-      {{#if isMobile}}
-        <div></div>
-      {{else}}
-        {{#if isEmbedded}}
-          <div></div>
-        {{else}}
-          <textarea readonly id="console" rows="5" wrap="hard" maxlength = 500>{{consoleOutput}}</textarea>
-          <label style = "color:transparent;" for="console">output console</label>
-        {{/if}}
-      {{/if}}
+  </main>
+  {{#if isMobile}}
+    <div></div>
+  {{else}}
+    {{#if isEmbedded}}
+      <div></div>
+    {{else}}
+      <textarea
+        readonly
+        id='console'
+        rows='5'
+        wrap='hard'
+        maxlength='500'
+      >{{consoleOutput}}</textarea>
+      <label style='color:transparent;' for='console'>output console</label>
+    {{/if}}
+  {{/if}}
 </div>

@@ -11,13 +11,13 @@ export default Service.extend({
   assets:(assets)=> {
     return assets.map((asset)=>{return asset.name});
   },
-  stringProps:("charAt charCodeAt indexOf lastIndexOf substring substr slice trim trimLeft trimRight " +
-  "toUpperCase toLowerCase split concat match replace search").split(" "),
-  arrayProps:("length concat join splice push pop shift unshift slice reverse sort indexOf " +
-  "lastIndexOf every some filter forEach map reduce reduceRight ").split(" "),
-  funcProps:"prototype apply call bind".split(" "),
-  javascriptKeywords:("break case catch class const continue debugger default delete do else export extends false finally for function " +
-  "if in import instanceof new null return super switch this throw true try typeof var void while with yield").split(" "),
+  stringProps:('charAt charCodeAt indexOf lastIndexOf substring substr slice trim trimLeft trimRight ' +
+  'toUpperCase toLowerCase split concat match replace search').split(' '),
+  arrayProps:('length concat join splice push pop shift unshift slice reverse sort indexOf ' +
+  'lastIndexOf every some filter forEach map reduce reduceRight ').split(' '),
+  funcProps:'prototype apply call bind'.split(' '),
+  javascriptKeywords:('break case catch class const continue debugger default delete do else export extends false finally for function ' +
+  'if in import instanceof new null return super switch this throw true try typeof var void while with yield').split(' '),
   forEach(arr, f) {
     for (var i = 0, e = arr.length; i < e; ++i) f(arr[i]);
   },
@@ -47,7 +47,7 @@ export default Service.extend({
       if (str.lastIndexOf(start, 0) == 0 && !this.arrayContains(found, str)) found.push(str);
     }
     let gatherCompletions = (obj)=> {
-      if (typeof obj == "string") this.forEach(this.get('stringProps'), maybeAdd);
+      if (typeof obj == 'string') this.forEach(this.get('stringProps'), maybeAdd);
       else if (obj instanceof Array) this.forEach(this.get('arrayProps'), maybeAdd);
       else if (obj instanceof Function) this.forEach(this.get('funcProps'), maybeAdd);
       this.forAllProps(obj, maybeAdd)
@@ -57,16 +57,16 @@ export default Service.extend({
       // If this is a property, see if it belongs to some object we can
       // find in the current environment.
       var obj = context.pop(), base;
-      if (obj.type && obj.type.indexOf("variable") === 0) {
+      if (obj.type && obj.type.indexOf('variable') === 0) {
         if (options && options.additionalContext)
         base = options.additionalContext[obj.string];
         if (!options || options.useGlobalScope !== false)
         base = base || global[obj.string];
-      } else if (obj.type == "string") {
-        base = "";
-      } else if (obj.type == "atom") {
+      } else if (obj.type == 'string') {
+        base = '';
+      } else if (obj.type == 'atom') {
         base = 1;
-      } else if (obj.type == "function") {
+      } else if (obj.type == 'function') {
         if (global.jQuery != null && (obj.string == '$' || obj.string == 'jQuery') &&
         (typeof global.jQuery == 'function'))
         base = global.jQuery();
@@ -92,13 +92,13 @@ export default Service.extend({
     var cur = editor.getCursor(), token = getToken(editor, cur);
     if (/\b(?:string|comment)\b/.test(token.type)) return;
     var innerMode = CodeMirror.innerMode(editor.getMode(), token.state);
-    if (innerMode.mode.helperType === "json") return;
+    if (innerMode.mode.helperType === 'json') return;
     token.state = innerMode.state;
 
     // If it's not a 'word-style' token, ignore the token.
     if (!/^[\w$_]*$/.test(token.string)) {
-      token = {start: cur.ch, end: cur.ch, string: "", state: token.state,
-      type: token.string == "." ? "property" : null};
+      token = {start: cur.ch, end: cur.ch, string: '', state: token.state,
+      type: token.string == '.' ? 'property' : null};
     } else if (token.end > cur.ch) {
       token.end = cur.ch;
       token.string = token.string.slice(0, cur.ch - token.start);
@@ -106,9 +106,9 @@ export default Service.extend({
 
     var tprop = token;
     // If it is a property, find out what it is a property of.
-    while (tprop.type == "property") {
+    while (tprop.type == 'property') {
       tprop = getToken(editor, CodeMirror.Pos(cur.line, tprop.start));
-      if (tprop.string != ".") return;
+      if (tprop.string != '.') return;
       tprop = getToken(editor, CodeMirror.Pos(cur.line, tprop.start));
       if (!context) var context = [];
       context.push(tprop);
@@ -160,36 +160,36 @@ export default Service.extend({
   ruleSets(docType) {
     //this.get('cs').log("getting rule set for" ,docType);
     let ruleSets = {
-      "tagname-lowercase": true,
-      "attr-lowercase": true,
-      "attr-value-double-quotes": false,
-      "tag-pair": true,
-      "spec-char-escape": true,
-      "id-unique": true,
-      "src-not-empty": true,
-      "attr-no-duplication": true,
-      "csslint": {
-        "display-property-grouping": true,
-        "known-properties": true
+      'tagname-lowercase': true,
+      'attr-lowercase': true,
+      'attr-value-double-quotes': false,
+      'tag-pair': true,
+      'spec-char-escape': true,
+      'id-unique': true,
+      'src-not-empty': true,
+      'attr-no-duplication': true,
+      'csslint': {
+        'display-property-grouping': true,
+        'known-properties': true
       },
-      "jshint": {"esversion": 6, "asi" : true}
+      'jshint': {'esversion': 6, 'asi' : true}
     }
-    if(docType == "javascript")
+    if(docType == 'javascript')
     {
       ruleSets = {
-        "tagname-lowercase": false,
-        "attr-lowercase": false,
-        "attr-value-double-quotes": false,
-        "tag-pair": false,
-        "spec-char-escape": false,
-        "id-unique": false,
-        "src-not-empty": false,
-        "attr-no-duplication": false,
-        "csslint": {
-          "display-property-grouping": false,
-          "known-properties": false
+        'tagname-lowercase': false,
+        'attr-lowercase': false,
+        'attr-value-double-quotes': false,
+        'tag-pair': false,
+        'spec-char-escape': false,
+        'id-unique': false,
+        'src-not-empty': false,
+        'attr-no-duplication': false,
+        'csslint': {
+          'display-property-grouping': false,
+          'known-properties': false
         },
-        "jshint": {"esversion": 6, "asi" : true}
+        'jshint': {'esversion': 6, 'asi' : true}
       }
     }
     return ruleSets;

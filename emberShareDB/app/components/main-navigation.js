@@ -10,7 +10,7 @@ export default Component.extend({
   sessionAccount: inject('session-account'),
   store: inject('store'),
   cs: inject('console'),
-  logoURL:config.localOrigin + "/images/logo-animation-cropped.gif",
+  logoURL:config.localOrigin + '/images/logo-animation-cropped.gif',
   url:config.localOrigin,
   ownedDocuments: computed('sessionAccount.ownedDocuments', function(){
     return this.get('sessionAccount').ownedDocuments;
@@ -19,7 +19,7 @@ export default Component.extend({
   actions: {
     createDoc() {
       const src = this.get('documentService').getDefaultSource();
-      const data = {name:"New Project", isPrivate:false, source:src}
+      const data = {name:'New Project', isPrivate:false, source:src}
       this.get('documentService').makeNewDoc(data).then(() => {
           this.get('onCreateDoc')();
       });

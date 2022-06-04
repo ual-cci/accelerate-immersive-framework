@@ -7,7 +7,7 @@ export default Controller.extend({
   passwordReset: inject('password-reset'),
   cs:inject('console'),
   hasValidToken:false,
-  resetMessage:"",
+  resetMessage:'',
   isTokenValid () {
     let username = this.get('username');
     let token = this.get('token');
@@ -24,11 +24,11 @@ export default Controller.extend({
       let { password, passwordAgain } = this.getProperties('password', 'passwordAgain');
       if(!password || !passwordAgain)
       {
-        reject("please provide correct info");
+        reject('please provide correct info');
       }
       if(password != passwordAgain)
       {
-        reject("passwords do not match");
+        reject('passwords do not match');
       }
       resolve();
     });

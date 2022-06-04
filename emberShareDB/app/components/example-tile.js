@@ -6,7 +6,7 @@ import config from  '../config/environment';
 
 import RSVP from 'rsvp';
 export default Component.extend({
-  example:"",
+  example:'',
   description:computed('example', function() {
     return this.get('example').desc
   }),
@@ -17,10 +17,10 @@ export default Component.extend({
   }),
   index: 0,
   thumbnailUrl:computed('example', function() {
-    return config.localOrigin + "/images/" + this.get('example').thumbnailId
+    return config.localOrigin + '/images/' + this.get('example').thumbnailId
   }),
   colourId:computed('index', function() {
-    return "tile" + this.get('index') % 5;
+    return 'tile' + this.get('index') % 5;
   }),
   didReceiveAttrs() {
     this._super(...arguments);
@@ -32,7 +32,7 @@ export default Component.extend({
   },
   actions:{
     onClick() {
-      this.get('onClick')(this.get("example"))
+      this.get('onClick')(this.get('example'))
     },
     onover() {
       this.set('isSelected', true);

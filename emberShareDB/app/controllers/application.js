@@ -1,61 +1,68 @@
-import Controller from '@ember/controller';
-import { inject } from '@ember/service';
+import Controller from '@ember/controller'
+import { inject } from '@ember/service'
 
 export default Controller.extend({
   store: inject(),
   sessionAccount: inject('session-account'),
   actions: {
     transitionToLoginRoute() {
-      this.transitionToRoute('login');
+      this.transitionToRoute('login')
     },
     transitionToDocsRoute() {
-      this.transitionToRoute('documents'," ",0,"views");
+      this.transitionToRoute('documents', ' ', 0, 'views')
     },
     transitionToExamplesRoute() {
-      this.transitionToRoute('examples', 'root');
+      this.transitionToRoute('examples', 'root')
     },
     transitionToInputsRoute() {
-      this.transitionToRoute('inputs');
+      this.transitionToRoute('inputs')
     },
     transitionToOutputsRoute() {
-      this.transitionToRoute('outputs');
+      this.transitionToRoute('outputs')
     },
     transitionToGuidesRoute() {
-      this.transitionToRoute('guides', "root");
+      this.transitionToRoute('guides', 'root')
     },
     transitionToGSRoute() {
-      this.transitionToRoute('getting-started', 'beginner');
+      this.transitionToRoute('getting-started', 'beginner')
     },
     transitionToAboutRoute() {
-      this.transitionToRoute('about');
+      this.transitionToRoute('about')
     },
     transitionToPeopleRoute() {
-      this.transitionToRoute('people');
+      this.transitionToRoute('people')
     },
     transitionToTermsRoute() {
-      this.transitionToRoute('terms');
+      this.transitionToRoute('terms')
     },
     transitionToDoc(doc) {
-      this.transitionToRoute('code-editor', doc);
+      this.transitionToRoute('code-editor', doc)
     },
     transitionToUserDocs(user) {
-      console.log("GETTING DOCS FOR USER:",user)
-      this.transitionToRoute('documents', user, 0, "date");
+      console.log('GETTING DOCS FOR USER:', user)
+      this.transitionToRoute('documents', user, 0, 'date')
     },
     transitionToGuide(guide) {
-      this.transitionToRoute('guides', guide);
+      this.transitionToRoute('guides', guide)
     },
     transitionToNewestDoc() {
-      const currentUserId = this.get('sessionAccount').currentUserId;
-      this.get('store').query('document', {
-        filter: {search: "",
-          page: 0,
-          currentUser: currentUserId,
-          sortBy: 'date'}
-      }).then((documents) => {
-        this.get('sessionAccount').updateOwnedDocuments();
-        this.transitionToRoute('code-editor', documents.firstObject.documentId);
-      });
-    }
-  }
-});
+      const currentUserId = this.get('sessionAccount').currentUserId
+      this.get('store')
+        .query('document', {
+          filter: {
+            search: '',
+            page: 0,
+            currentUser: currentUserId,
+            sortBy: 'date',
+          },
+        })
+        .then((documents) => {
+          this.get('sessionAccount').updateOwnedDocuments()
+          this.transitionToRoute(
+            'code-editor',
+            documents.firstObject.documentId
+          )
+        })
+    },
+  },
+})

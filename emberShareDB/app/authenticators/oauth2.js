@@ -14,7 +14,7 @@ export default OAuth2PasswordGrant.extend({
   cs: inject('console'),
   authenticate(identification, password, scope = [], headers = {}) {
     return new RSVP.Promise((resolve, reject) => {
-      this.get('cs').log("trying to authenticate");
+      this.get('cs').log('trying to authenticate');
       const data = { 'grant_type': 'password', username: identification, password };
       const serverTokenEndpoint = this.get('serverTokenEndpoint');
       const useResponse = this.get('rejectWithResponse');
@@ -52,7 +52,7 @@ export default OAuth2PasswordGrant.extend({
           data: data,
           contentType: 'application/x-www-form-urlencoded',
           headers: {
-              Authorization: "Basic " + btoa(client_id + ":" + client_secret)
+              Authorization: 'Basic ' + btoa(client_id + ':' + client_secret)
           }
       });
   }

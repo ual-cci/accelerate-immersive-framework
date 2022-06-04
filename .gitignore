@@ -69,3 +69,8 @@ typings/
 emberShareDB/config/environment.js
 config.js
 noderServer/runner.sh
+
+*.gltf
+*.glb
+
+screen-recording/*

@@ -27,10 +27,10 @@ export default Component.extend({
       this.get('store').findRecord('document', docId)
       .then((doc) => {
         const toggled = !doc.data.dontPlay;
-        const op = {p:["dontPlay"], oi:toggled ? "true":"false"}
+        const op = {p:['dontPlay'], oi:toggled ? 'true':'false'}
         this.get('documentService').submitOp(op, docId);
       }).catch((err) => {
-        this.get('cs').log("ERROR", err);
+        this.get('cs').log('ERROR', err);
       });
     }
   }

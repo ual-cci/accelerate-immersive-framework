@@ -11,11 +11,11 @@ module('Unit | Service | documents', function(hooks) {
     run(()=> {
       var done = assert.async();
       service.getPopularTags(5).then((resp)=> {
-        console.log("NUM TAGS", resp.data.length);
+        console.log('NUM TAGS', resp.data.length);
         assert.equal(resp.data.length,5);
         done();
       }).catch((err)=> {
-        assert.ok( false, "false fails" );
+        assert.ok( false, 'false fails' );
       });
     });
   });
@@ -24,14 +24,14 @@ module('Unit | Service | documents', function(hooks) {
     let service = this.owner.lookup('service:documents');
     let session = this.owner.lookup('service:session');
     run(()=> {
-      session.authenticate('authenticator:oauth2', "louis", "123")
+      session.authenticate('authenticator:oauth2', 'louis', '123')
       .then((response) => {
-        console.log("SIGNED IN", response);
+        console.log('SIGNED IN', response);
         const data = {
-          source : "< some code >",
+          source : '< some code >',
           isPrivate: true,
-          name: "test-doc",
-          tags: ["this-is-a-test"],
+          name: 'test-doc',
+          tags: ['this-is-a-test'],
           assets: []
         }
         done();
@@ -41,7 +41,7 @@ module('Unit | Service | documents', function(hooks) {
           done();
         })
       }).catch((err) => {
-        assert.ok( false, "false fails" );
+        assert.ok( false, 'false fails' );
       });
     });
   });
