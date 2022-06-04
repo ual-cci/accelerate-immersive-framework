@@ -15,5 +15,8 @@ export default Component.extend({
       this.toggle()
       this.submit(snip)
     },
+    close() {
+      this.toggle()
+    },
   },
 })

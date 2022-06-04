@@ -2169,6 +2169,16 @@ input[id='searchTerm']:-ms-input-placeholder {
   width: 400px;
   z-index: 1000;
   font-size: large;
+  padding: 10px;
+}
+
+.snippet-editor h3 {
+  font-weight: bold;
+  width: 100%;
+  background-color: $mimic-yellow;
+  margin-bottom: 8px;
+  padding: 6px 0;
+  text-align: center;
 }
 
 .snippet-editor * {
@@ -2182,7 +2192,6 @@ input[id='searchTerm']:-ms-input-placeholder {
 }
 
 .snippet-editor li {
-  height: 24px;
   margin: 4px 0;
   display: inline-block;
   width: 100%;
@@ -2190,13 +2199,28 @@ input[id='searchTerm']:-ms-input-placeholder {
 
 .snippet-editor label {
   width: 50%;
+  padding: 4px;
 }
 
 .snippet-editor input {
   float: right;
   width: 50%;
-  height: 24px;
   border: none;
+  padding: 4px;
+}
+
+.snippet-editor button {
+  border: none;
+  width: 100%;
+  height: 30px;
+  margin-top: 6px;
+  font-weight: bold;
+  background-color: $mimic-pink;
+  color: white;
+}
+
+.snippet-editor button:hover {
+  background-color: $mimic-blue;
 }
 
 .error-bar {
