@@ -15,13 +15,23 @@ export default Service.extend({
 <!DOCTYPE html>
 <html>
   <head>
-    <script src = "http://localhost:4200/libs/aframe.js"></script>
-    <script src = "http://localhost:4200/libs/aframe-effects.min.js"></script>
+    <script src="http://localhost:4200/libs/aframe.js"></script>
+    <script src="http://localhost:4200/libs/aframe-effects.min.js"></script>
+    <script src="http://localhost:4200/libs/a-game/a-game-0.47.0.js"></script>
   </head>
   <body>
-    <a-scene>
-      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-</a-scene>
+    <a-scene physics>
+      <a-sky color="#ECECEC"></a-sky>
+      <a-box position="0 0 -3"
+             rotation="0 0 0"
+             color="lightgreen"
+             width="10"
+             height="1"
+             depth="10"
+             body="type:static;"
+             grabbable="physics:true;"
+             floor></a-box>
+    </a-scene>
   </body>
 </html>
 `

@@ -252,8 +252,25 @@ export default Service.extend({
 
       {
         title: 'A-Frame Box',
-        fn: ({ position, color, rotation }) => ({
-          snip: `\n<a-box position="${position}" rotation="${rotation}" color="${color}"></a-box>\n`,
+        fn: ({
+          position,
+          color,
+          width,
+          height,
+          depth,
+          rotation,
+          body,
+          floor,
+        }) => ({
+          snip: `\n<a-box position="${position}"
+rotation="${rotation}"
+color="${color}"
+width="${width}"
+height="${height}"
+depth="${depth}"
+body="type:${body};"
+grabbable="physics:true;"
+${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -261,25 +278,42 @@ export default Service.extend({
         props: [
           {
             name: 'position',
-            type: 'string',
             default: '0 0 0',
           },
           {
             name: 'rotation',
-            type: 'string',
             default: '0 0 0',
           },
           {
+            name: 'width',
+            default: '1',
+          },
+          {
+            name: 'height',
+            default: '1',
+          },
+          {
+            name: 'depth',
+            default: '1',
+          },
+          {
             name: 'color',
-            type: 'string',
             default: '#FF0000',
+          },
+          {
+            name: 'body',
+            default: 'static',
+          },
+          {
+            name: 'floor',
+            default: 'false',
           },
         ],
       },
       {
         title: 'A-Frame Sphere',
-        fn: ({ position, color, radius }) => ({
-          snip: `\n<a-sphere position="${position}" radius="${radius}" color="${color}"></a-sphere>\n`,
+        fn: ({ position, color, radius, body }) => ({
+          snip: `\n<a-sphere position="${position}" radius="${radius}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-sphere>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -287,26 +321,27 @@ export default Service.extend({
         props: [
           {
             name: 'position',
-            type: 'string',
             default: '0 0 0',
           },
           {
             name: 'radius',
-            type: 'string',
             default: '1',
           },
           {
             name: 'color',
-            type: 'string',
             default: '#EF2D5E',
+          },
+          {
+            name: 'body',
+            default: 'static',
           },
         ],
       },
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ position, color, radius, height }) => ({
-          snip: `\n<a-cylinder position="${position}" radius="${radius}" height="${height}" color="${color}"></a-cylinder>\n`,
+        fn: ({ position, color, radius, height, body }) => ({
+          snip: `\n<a-cylinder position="${position}" radius="${radius}" height="${height}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-cylinder>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -314,23 +349,23 @@ export default Service.extend({
         props: [
           {
             name: 'position',
-            type: 'string',
             default: '0 0 0',
           },
           {
             name: 'radius',
-            type: 'string',
             default: '1',
           },
           {
             name: 'height',
-            type: 'string',
             default: '1.5',
           },
           {
             name: 'color',
-            type: 'string',
             default: '#FFC65D',
+          },
+          {
+            name: 'body',
+            default: 'static',
           },
         ],
       },
@@ -346,27 +381,22 @@ export default Service.extend({
         props: [
           {
             name: 'position',
-            type: 'string',
             default: '0 0 -4',
           },
           {
             name: 'rotation',
-            type: 'string',
             default: '-90 0 0',
           },
           {
             name: 'height',
-            type: 'string',
             default: '4',
           },
           {
             name: 'width',
-            type: 'string',
             default: '4',
           },
           {
             name: 'color',
-            type: 'string',
             default: '#7BC8A4',
           },
         ],
@@ -383,7 +413,6 @@ export default Service.extend({
         props: [
           {
             name: 'color',
-            type: 'string',
             default: '#ECECEC',
           },
         ],
