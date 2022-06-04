@@ -149,7 +149,7 @@ export default Service.extend({
 
       {
         title: 'A-Frame GLB Model',
-        fn: ({ filename, position, scale, rotation, shadow }) => ({
+        fn: ({ filename, position, scale, rotation, shadow, body }) => ({
           snip: `
 <a-assets>
   <a-asset-item id="${filename}" src="${filename}.glb"></a-asset-item>
@@ -159,6 +159,8 @@ export default Service.extend({
           rotation="${rotation}"
           scale="${scale}"
           shadow="cast: ${shadow}"
+          body="type:${body};"
+          grabbable="physics:true;"
 ></a-entity>`,
           position: 'before',
           marker: '</a-scene>',
@@ -184,6 +186,10 @@ export default Service.extend({
           {
             name: 'shadow',
             default: 'true',
+          },
+          {
+            name: 'body',
+            default: 'static',
           },
         ],
       },
@@ -341,7 +347,13 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
       {
         title: 'A-Frame Cylinder',
         fn: ({ position, color, radius, height, body }) => ({
-          snip: `\n<a-cylinder position="${position}" radius="${radius}" height="${height}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-cylinder>\n`,
+          snip: `\n<a-cylinder position="${position}"
+radius="${radius}"
+height="${height}"
+color="${color}"
+rotation="${rotation}"
+body="type:${body};"
+grabbable="physics:true;"></a-cylinder>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -358,6 +370,10 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           {
             name: 'height',
             default: '1.5',
+          },
+          {
+            name: 'rotation',
+            default: '0 0 0',
           },
           {
             name: 'color',
