@@ -15,9 +15,9 @@ export default Service.extend({
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="http://localhost:4200/libs/aframe.js"></script>
-    <script src="http://localhost:4200/libs/aframe-effects.min.js"></script>
-    <script src="http://localhost:4200/libs/a-game/a-game-0.47.0.js"></script>
+    <script src="${config.localOrigin}/libs/aframe.js"></script>
+    <script src="${config.localOrigin}/libs/aframe-effects.min.js"></script>
+    <script src="${config.localOrigin}/libs/a-game/a-game-0.47.0.js"></script>
   </head>
   <body>
     <a-scene physics>
