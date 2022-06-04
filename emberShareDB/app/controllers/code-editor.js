@@ -30,6 +30,7 @@ export default Controller.extend({
   cs: inject('console'),
   library: inject(),
   snippet: inject(),
+  currentSnip: {},
 
   //Parameters
   con: null,
@@ -81,6 +82,9 @@ export default Controller.extend({
   updateSourceInterval: undefined,
   evalPtr: 0,
   highContrast: false,
+  showSnippetEditor: false,
+  showErrorBar: false,
+  snippetError: '',
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -1998,6 +2002,10 @@ export default Controller.extend({
         .classList.toggle('show', false)
       document.getElementById('snippetsDropdown').classList.toggle('show')
     },
+    toggleSnippetEditor(snippet) {
+      this.toggleProperty('showSnippetEditor')
+      this.set('currentSnip', snippet)
+    },
     insertLibrary(lib) {
       this.updateSourceFromSession().then(() => {
         const op = this.get('codeParser').insertLibrary(
@@ -2012,11 +2020,25 @@ export default Controller.extend({
       })
     },
     insertSnippet(snippet) {
+      // I think something renders twice and sends two things to this func,
+      // one of which is some junk, hence:
+      if (!snippet.hasOwnProperty('snip')) {
+        this.set('consoleOutput', 'Error with the snippet')
+        return
+      }
+
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
-        const op = this.get('codeParser').insertSnippet(source, snippet)
+        const op = this.get('codeParser').insertSnippet(
+          source,
+          snippet,
+          this.get('editor')
+        )
         if (typeof op === 'string') {
-          this.set('consoleOutput', parseSnippetError(op, snippet))
+          const error = parseSnippetError(op, snippet)
+          this.set('snippetError', error)
+          this.set('showErrorBar', true)
+          this.syncOutputContainer()
           return
         }
         this.submitOp(op)
@@ -2031,6 +2053,11 @@ export default Controller.extend({
     },
     toggleShowShare() {
       this.toggleProperty('showShare')
+    },
+    closeErrorBar() {
+      this.set('snippetError', '')
+      this.set('showErrorBar', false)
+      this.syncOutputContainer()
     },
     toggleShowRecordingPanel() {
       this.updateSourceFromSession().then(() => {

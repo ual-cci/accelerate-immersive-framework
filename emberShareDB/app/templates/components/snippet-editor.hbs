@@ -1,0 +1,22 @@
+<div class='snippet-editor'>
+  <p>{{snippet.title}}</p>
+  <form id='snippet-editor-form' {{action 'insert' snippet.fn on='submit'}}>
+    <ul class='list-group new-user-group'>
+      {{#each snippet.props as |prop|}}
+
+        <li>
+          <label for={{prop.name}}>{{prop.name}}</label>
+          {{input
+            class='login-input'
+            id=prop.name
+            placeholder=''
+            name=prop.name
+            value=prop.default
+          }}
+        </li>
+
+      {{/each}}
+    </ul>
+    <p><button type='submit'>Insert</button></p>
+  </form>
+</div>

@@ -7,7 +7,8 @@ export default Service.extend({
       {
         title: 'Export Scene as GLTF',
         id: 'exportGLTF',
-        snip: `
+        fn: () => ({
+          snip: `
           <script  language="javascript" type="text/javascript">
             function save(blob, filename) {
               const link = document.createElement('a')
@@ -53,13 +54,15 @@ export default Service.extend({
             exportGLTF()
           </script>
         `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['threejs'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['threejs'],
+        }),
       },
       {
         title: 'A-Frame Basic Scene',
-        snip: `
+        fn: () => ({
+          snip: `
           <a-scene>
             <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
             <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
@@ -68,88 +71,351 @@ export default Service.extend({
             <a-sky color="#ECECEC"></a-sky>
           </a-scene>
           `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['a-frame'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['a-frame'],
+        }),
       },
       {
         title: 'A-Frame Empty Scene',
-        snip: `
+        fn: () => ({
+          snip: `
           <a-scene>
           </a-scene>
           `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['a-frame'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['a-frame'],
+        }),
       },
       {
+        title: 'A-Frame Light: Basic Lighting',
+        fn: ({ ambientColor, directionalColor, directionalIntensity }) => ({
+          snip: `\n<a-entity light="type: ambient; color: ${ambientColor}"></a-entity>
+<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'ambientColor',
+            default: '#BBBBBB',
+          },
+          {
+            name: 'directionalColor',
+            default: '#FFFFFF',
+          },
+          {
+            name: 'directionalIntensity',
+            default: '0.6',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Light: Ambient',
+        fn: ({ color }) => ({
+          snip: `\n<a-entity light="type: ambient; color: ${color}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: '#BBBBBB',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Light: Directional',
+        fn: ({ color, intensity }) => ({
+          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: '#FFFFFF',
+          },
+          {
+            name: 'intensity',
+            default: '0.6',
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame GLB Model',
+        fn: ({ filename, position, scale, rotation, shadow }) => ({
+          snip: `
+<a-assets>
+  <a-asset-item id="${filename}" src="${filename}.glb"></a-asset-item>
+</a-assets>
+<a-entity gltf-model="#${filename}"
+          position="${position}"
+          rotation="${rotation}"
+          scale="${scale}"
+          shadow="cast: ${shadow}"
+></a-entity>`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'filename',
+            default: '',
+          },
+          {
+            name: 'position',
+            default: '0 0 0',
+          },
+          {
+            name: 'scale',
+            default: '1 1 1',
+          },
+          {
+            name: 'rotation',
+            default: '0 0 0',
+          },
+          {
+            name: 'shadow',
+            default: 'true',
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame Effect: Toon',
+        fn: () => ({
+          snip: '',
+          type: 'effect',
+          name: 'colors',
+          effect:
+            'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+      },
+      {
+        title: 'A-Frame Effect: Bloom',
+        fn: ({ strength, radius }) => ({
+          snip: '',
+          type: 'effect',
+          name: 'bloom',
+          effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+        props: [
+          {
+            name: 'strength',
+            default: '0.3',
+          },
+          {
+            name: 'radius',
+            default: '1.0',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Effect: God Rays',
+        fn: ({ source, threshold, intensity }) => ({
+          snip: '',
+          type: 'effect',
+          name: 'godrays',
+          effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+        props: [
+          {
+            name: 'source',
+            default: '',
+          },
+          {
+            name: 'threshold',
+            default: '0 0.33',
+          },
+          {
+            name: 'intensity',
+            default: '2',
+          },
+        ],
+      },
+
+      {
         title: 'A-Frame Box',
-        snip: '<a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
+        fn: ({
+          position,
+          color,
+          width,
+          height,
+          depth,
+          rotation,
+          body,
+          floor,
+        }) => ({
+          snip: `\n<a-box position="${position}"
+rotation="${rotation}"
+color="${color}"
+width="${width}"
+height="${height}"
+depth="${depth}"
+body="type:${body};"
+grabbable="physics:true;"
+${floor === 'true' ? 'floor' : ''}></a-box>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            default: '0 0 0',
+          },
+          {
+            name: 'rotation',
+            default: '0 0 0',
+          },
+          {
+            name: 'width',
+            default: '1',
+          },
+          {
+            name: 'height',
+            default: '1',
+          },
+          {
+            name: 'depth',
+            default: '1',
+          },
+          {
+            name: 'color',
+            default: '#FF0000',
+          },
+          {
+            name: 'body',
+            default: 'static',
+          },
+          {
+            name: 'floor',
+            default: 'false',
+          },
+        ],
       },
       {
         title: 'A-Frame Sphere',
-        snip: '<a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
+        fn: ({ position, color, radius, body }) => ({
+          snip: `\n<a-sphere position="${position}" radius="${radius}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-sphere>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            default: '0 0 0',
+          },
+          {
+            name: 'radius',
+            default: '1',
+          },
+          {
+            name: 'color',
+            default: '#EF2D5E',
+          },
+          {
+            name: 'body',
+            default: 'static',
+          },
+        ],
       },
+
       {
         title: 'A-Frame Cylinder',
-        snip: '<a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
+        fn: ({ position, color, radius, height, body }) => ({
+          snip: `\n<a-cylinder position="${position}" radius="${radius}" height="${height}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-cylinder>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            default: '0 0 0',
+          },
+          {
+            name: 'radius',
+            default: '1',
+          },
+          {
+            name: 'height',
+            default: '1.5',
+          },
+          {
+            name: 'color',
+            default: '#FFC65D',
+          },
+          {
+            name: 'body',
+            default: 'static',
+          },
+        ],
       },
+
       {
         title: 'A-Frame Plane',
-        snip: '<a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
+        fn: ({ position, color, rotation, height, width }) => ({
+          snip: `\n<a-plane position="${position}" rotation="${rotation}" height="${height}" width="${width}" color="${color}"></a-plane>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'position',
+            default: '0 0 -4',
+          },
+          {
+            name: 'rotation',
+            default: '-90 0 0',
+          },
+          {
+            name: 'height',
+            default: '4',
+          },
+          {
+            name: 'width',
+            default: '4',
+          },
+          {
+            name: 'color',
+            default: '#7BC8A4',
+          },
+        ],
       },
+
       {
         title: 'A-Frame Sky',
-        snip: '<a-sky color="#ECECEC"></a-sky>\n',
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Light',
-        snip: `
-      <a-entity light="type: point;
-                       intensity: 0.9;
-                       distance: 50;
-                       decay: 1.4;
-                       castShadow: true;"
-          	    position="-3 5 3">
-      </a-entity>
-        `,
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame GLB Model',
-        snip: `
-          <a-assets>
-            <a-asset-item id="YOUR-ID" src="INSERT-NAME-OF-MODEL.glb"></a-asset-item>
-          </a-assets>
-
-          <a-entity gltf-model="#YOUR-ID"></a-entity>`,
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
-      {
-        title: 'A-Frame Effect: Toon',
-        snip: `\neffects="colors"\ncolors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"`,
-        position: 'after',
-        marker: '<a-scene',
-        libs: ['a-frame', 'a-frame-effects'],
+        fn: ({ color }) => ({
+          snip: `\n<a-sky color="${color}"></a-sky>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: '#ECECEC',
+          },
+        ],
       },
     ]
   }),

@@ -32,6 +32,7 @@ export default Service.extend({
         id: 'a-frame-effects',
         url: 'aframe-effects.min.js',
       },
+      { title: 'A-Game', id: 'a-game', url: 'a-game/a-game-0.47.0.js' },
       {
         title: 'GLTFExporter',
         id: 'gltfExporter',

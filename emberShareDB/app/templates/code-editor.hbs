@@ -34,7 +34,18 @@
               <!-- BUTTONS -->
               <div id='transport-container'>
 
-                <div class='tooltip col-2'>
+                <div class='tooltip'>
+                  {{#bs-button
+                    (html-attributes aria-label='open snippet editor')
+                    id='snippet-editor-btn'
+                    class='clear-btn transport-btn'
+                    icon='glyphicon glyphicon-plus'
+                    onClick=(action 'toggleSnippetEditor')
+                  }}{{/bs-button}}
+                  <span class='tooltiptext'>Open Snippet Editor</span>
+                </div>
+
+                <div class='tooltip'>
                   {{#bs-button
                     (html-attributes aria-label='Render Code')
                     icon='glyphicon glyphicon-play'
@@ -101,7 +112,7 @@
                           {{#each snippets as |snippet|}}
                             {{#bs-button
                               class='library-btn'
-                              onClick=(action 'insertSnippet' snippet)
+                              onClick=(action 'toggleSnippetEditor' snippet)
                             }}{{snippet.title}}{{/bs-button}}
                           {{/each}}
                         </div>
@@ -340,6 +351,9 @@
             {{/if}}
           </div>
         {{/if}}
+        {{#if showErrorBar}}
+          {{error-bar error=snippetError hide=(action 'closeErrorBar')}}
+        {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}
             {{#if model.isCollaborative}}
@@ -382,6 +396,13 @@
     {{/if}}
   </header>
   <main>
+    {{#if showSnippetEditor}}
+      {{snippet-editor
+        snippet=currentSnip
+        submit=(action 'insertSnippet')
+        toggle=(action 'toggleSnippetEditor')
+      }}
+    {{/if}}
     <div id='fullscreen'>
       <div id='main-code-container'>
         {{#if showHUD}}
