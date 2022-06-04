@@ -2166,7 +2166,7 @@ input[id='searchTerm']:-ms-input-placeholder {
   top: 20px;
   left: 20px;
   background-color: $mimic-orange;
-  width: 300px;
+  width: 400px;
   z-index: 1000;
   font-size: large;
 }
@@ -2179,13 +2179,13 @@ input[id='searchTerm']:-ms-input-placeholder {
 .snippet-editor ul {
   list-style-type: none;
   display: inline-block;
-  width: 100%;
 }
 
 .snippet-editor li {
   height: 24px;
   margin: 4px 0;
   display: inline-block;
+  width: 100%;
 }
 
 .snippet-editor label {

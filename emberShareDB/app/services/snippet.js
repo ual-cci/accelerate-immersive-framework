@@ -7,7 +7,8 @@ export default Service.extend({
       {
         title: 'Export Scene as GLTF',
         id: 'exportGLTF',
-        snip: `
+        fn: () => ({
+          snip: `
           <script  language="javascript" type="text/javascript">
             function save(blob, filename) {
               const link = document.createElement('a')
@@ -53,13 +54,15 @@ export default Service.extend({
             exportGLTF()
           </script>
         `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['threejs'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['threejs'],
+        }),
       },
       {
         title: 'A-Frame Basic Scene',
-        snip: `
+        fn: () => ({
+          snip: `
           <a-scene>
             <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
             <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
@@ -68,47 +71,121 @@ export default Service.extend({
             <a-sky color="#ECECEC"></a-sky>
           </a-scene>
           `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['a-frame'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['a-frame'],
+        }),
       },
       {
         title: 'A-Frame Empty Scene',
-        snip: `
+        fn: () => ({
+          snip: `
           <a-scene>
           </a-scene>
           `,
-        position: 'before',
-        marker: '</body>',
-        libs: ['a-frame'],
+          position: 'before',
+          marker: '</body>',
+          libs: ['a-frame'],
+        }),
+      },
+      {
+        title: 'A-Frame Light: Basic Lighting',
+        fn: ({ ambientColor, directionalColor, directionalIntensity }) => ({
+          snip: `\n<a-entity light="type: ambient; color: ${ambientColor}"></a-entity>
+<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'ambientColor',
+            default: '#BBBBBB',
+          },
+          {
+            name: 'directionalColor',
+            default: '#FFFFFF',
+          },
+          {
+            name: 'directionalIntensity',
+            default: '0.6',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Light: Ambient',
+        fn: ({ color }) => ({
+          snip: `\n<a-entity light="type: ambient; color: ${color}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: '#BBBBBB',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Light: Directional',
+        fn: ({ color, intensity }) => ({
+          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}"></a-entity>\n`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: '#FFFFFF',
+          },
+          {
+            name: 'intensity',
+            default: '0.6',
+          },
+        ],
       },
 
-      {
-        title: 'A-Frame Light',
-        snip: `
-      <a-entity light="type: point;
-                       intensity: 0.9;
-                       distance: 50;
-                       decay: 1.4;
-                       castShadow: true;"
-          	    position="-3 5 3">
-      </a-entity>
-        `,
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
-      },
       {
         title: 'A-Frame GLB Model',
-        snip: `
-          <a-assets>
-            <a-asset-item id="YOUR-ID" src="INSERT-NAME-OF-MODEL.glb"></a-asset-item>
-          </a-assets>
-
-          <a-entity gltf-model="#YOUR-ID"></a-entity>`,
-        position: 'before',
-        marker: '</a-scene>',
-        libs: ['a-frame'],
+        fn: ({ filename, position, scale, rotation, shadow }) => ({
+          snip: `
+<a-assets>
+  <a-asset-item id="${filename}" src="${filename}.glb"></a-asset-item>
+</a-assets>
+<a-entity gltf-model="#${filename}"
+          position="${position}"
+          rotation="${rotation}"
+          scale="${scale}"
+          shadow="cast: ${shadow}"
+></a-entity>`,
+          position: 'before',
+          marker: '</a-scene>',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'filename',
+            default: '',
+          },
+          {
+            name: 'position',
+            default: '0 0 0',
+          },
+          {
+            name: 'scale',
+            default: '1 1 1',
+          },
+          {
+            name: 'rotation',
+            default: '0 0 0',
+          },
+          {
+            name: 'shadow',
+            default: 'true',
+          },
+        ],
       },
 
       {
@@ -126,15 +203,51 @@ export default Service.extend({
       },
       {
         title: 'A-Frame Effect: Bloom',
-        fn: () => ({
+        fn: ({ strength, radius }) => ({
           snip: '',
           type: 'effect',
           name: 'bloom',
-          effect: 'bloom="filter: bloom.filter; strength: 0.3; radius:1.0"',
+          effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
           position: 'after',
           marker: '<a-scene',
           libs: ['a-frame', 'a-frame-effects'],
         }),
+        props: [
+          {
+            name: 'strength',
+            default: '0.3',
+          },
+          {
+            name: 'radius',
+            default: '1.0',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Effect: God Rays',
+        fn: ({ source, threshold, intensity }) => ({
+          snip: '',
+          type: 'effect',
+          name: 'godrays',
+          effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+        props: [
+          {
+            name: 'source',
+            default: '',
+          },
+          {
+            name: 'threshold',
+            default: '0 0.33',
+          },
+          {
+            name: 'intensity',
+            default: '2',
+          },
+        ],
       },
 
       {

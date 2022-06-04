@@ -42,6 +42,7 @@ export default Service.extend({
       const libUrl = this.get('library').url(lib)
       if (source.indexOf(libUrl) < 0) return 'libNotFound'
     }
+    // -- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
     if (isEffect) {
@@ -51,7 +52,7 @@ export default Service.extend({
         // Find 'effects=' and add new effect name
         effectSnippet = currentEffect.replace(
           /(.*effects=")(\w+)(\w?".*)/,
-          `$1$2 ${snippet.name}$3`
+          `$1$2, ${snippet.name}$3`
         )
         // Add new effect
         effectSnippet += `\n${snippet.effect}\n`
@@ -65,6 +66,7 @@ export default Service.extend({
         effectSnippet = makeFirstEffect(snippet)
       }
     }
+    // -- EFFECTS END ---
     const index = source.indexOf(marker)
     if (index < 0) {
       return 'markerNotFound'
