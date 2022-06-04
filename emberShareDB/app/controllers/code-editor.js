@@ -2023,8 +2023,7 @@ export default Controller.extend({
       // I think something renders twice and sends two things to this func,
       // one of which is some junk, hence:
       if (
-        !snippet.hasOwnProperty('snip') ||
-        !snippet.hasOwnProperty('effect')
+        !(snippet.hasOwnProperty('snip') || snippet.hasOwnProperty('effect'))
       ) {
         this.set('snippetError', 'Error with the snippet')
         this.set('showErrorBar', true)
