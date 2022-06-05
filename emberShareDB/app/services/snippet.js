@@ -1,5 +1,8 @@
 import Service from '@ember/service'
 import { computed } from '@ember/object'
+import { randRange, randomAframeAttr } from '../helpers/snippet-insert'
+import { randomColor } from '../helpers/colors'
+import config from '../config/environment'
 
 export default Service.extend({
   snippetsMap: computed(() => {
@@ -111,6 +114,13 @@ export default Service.extend({
             default: '0.6',
           },
         ],
+        samples: [
+          {
+            name: () => 'random',
+            ambientColor: () => randomColor(),
+            directionalColor: () => randomColor(),
+          },
+        ],
       },
       {
         title: 'A-Frame Light: Ambient',
@@ -124,6 +134,12 @@ export default Service.extend({
           {
             name: 'color',
             default: '#BBBBBB',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            color: () => randomColor(),
           },
         ],
       },
@@ -145,30 +161,40 @@ export default Service.extend({
             default: '0.6',
           },
         ],
+        samples: [
+          {
+            name: () => 'random',
+            color: () => randomColor(),
+          },
+        ],
       },
 
       {
         title: 'A-Frame GLB Model',
-        fn: ({ filename, position, scale, rotation, shadow, body }) => ({
+        fn: ({ name, src, position, scale, rotation, shadow, body }) => ({
           snip: `
 <a-assets>
-  <a-asset-item id="${filename}" src="${filename}.glb"></a-asset-item>
+  <a-asset-item id="${name}" src="${src}"></a-asset-item>
 </a-assets>
-<a-entity gltf-model="#${filename}"
+<a-entity gltf-model="#${name}"
           position="${position}"
           rotation="${rotation}"
           scale="${scale}"
-          shadow="cast: ${shadow}"
+          shadow="castShadow: ${shadow}"
           body="type:${body};"
           grabbable="physics:true;"
-></a-entity>`,
+></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
           {
-            name: 'filename',
+            name: 'name',
+            default: '',
+          },
+          {
+            name: 'src',
             default: '',
           },
           {
@@ -190,6 +216,25 @@ export default Service.extend({
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'fox',
+            src: () => `${config.localOrigin}/libs/a-game/fox.glb`,
+            position: () => '0 1 -3',
+          },
+          {
+            name: () => 'rabbit',
+            src: () => `${config.localOrigin}/libs/a-game/rabbit.glb`,
+            position: () => '0 0.5 -3',
+            scale: () => '0.08 0.08 0.08',
+          },
+          {
+            name: () => 'tree',
+            src: () => `${config.localOrigin}/libs/a-game/tree.glb`,
+            position: () => '0 0 -3',
+            scale: () => '0.005 0.005 0.005',
           },
         ],
       },
@@ -273,6 +318,7 @@ height="${height}"
 depth="${depth}"
 body="type:${body};"
 grabbable="physics:true;"
+shadow="receive: true;"
 ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           position: 'before',
           marker: '</a-scene>',
@@ -312,6 +358,17 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
             default: 'false',
           },
         ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            width: () => randRange(1, 10),
+            height: () => randRange(1, 10),
+            depth: () => randRange(1, 10),
+            color: () => randomColor(),
+          },
+        ],
       },
       {
         title: 'A-Frame Sphere',
@@ -337,6 +394,14 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            radius: () => randRange(1, 10),
+            color: () => randomColor(),
           },
         ],
       },
@@ -379,6 +444,16 @@ grabbable="physics:true;"></a-cylinder>\n`,
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            radius: () => randRange(1, 10),
+            height: () => randRange(0.4, 10, 1),
+            color: () => randomColor(),
           },
         ],
       },
@@ -427,6 +502,16 @@ grabbable="physics:true;"></a-cylinder>\n`,
           {
             name: 'color',
             default: '#ECECEC',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            radius: () => randRange(1, 10),
+            height: () => randRange(0.4, 10, 1),
+            color: () => randomColor(),
           },
         ],
       },

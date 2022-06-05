@@ -13,3 +13,11 @@ export function extractEffect(source) {
 export function makeFirstEffect({ name, effect }) {
   return `\neffects="${name}"\n${effect}`
 }
+
+export function randRange(from, to, fixed = 0) {
+  return (Math.random() * (to - from) + from).toFixed(fixed)
+}
+
+export function randomAframeAttr(from, to) {
+  return `${randRange(from, to)} ${randRange(from, to)} ${randRange(from, to)}`
+}
