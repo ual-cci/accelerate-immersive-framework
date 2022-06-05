@@ -93,9 +93,14 @@ export default Service.extend({
       },
       {
         title: 'A-Frame Light: Basic Lighting',
-        fn: ({ ambientColor, directionalColor, directionalIntensity }) => ({
+        fn: ({
+          ambientColor,
+          directionalColor,
+          directionalIntensity,
+          shadow,
+        }) => ({
           snip: `\n<a-entity light="type: ambient; color: ${ambientColor}"></a-entity>
-<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}"></a-entity>\n`,
+<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -112,6 +117,10 @@ export default Service.extend({
           {
             name: 'directionalIntensity',
             default: '0.6',
+          },
+          {
+            name: 'shadow',
+            default: 'true',
           },
         ],
         samples: [
@@ -145,8 +154,8 @@ export default Service.extend({
       },
       {
         title: 'A-Frame Light: Directional',
-        fn: ({ color, intensity }) => ({
-          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}"></a-entity>\n`,
+        fn: ({ color, intensity, shadow }) => ({
+          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -159,6 +168,10 @@ export default Service.extend({
           {
             name: 'intensity',
             default: '0.6',
+          },
+          {
+            name: 'shadow',
+            default: 'true',
           },
         ],
         samples: [
@@ -180,7 +193,7 @@ export default Service.extend({
           position="${position}"
           rotation="${rotation}"
           scale="${scale}"
-          shadow="castShadow: ${shadow}"
+          shadow="cast: ${shadow}"
           body="type:${body};"
           grabbable="physics:true;"
 ></a-entity>\n`,
@@ -373,8 +386,13 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
       },
       {
         title: 'A-Frame Sphere',
-        fn: ({ position, color, radius, body }) => ({
-          snip: `\n<a-sphere position="${position}" radius="${radius}" color="${color}" body="type:${body};" grabbable="physics:true;"></a-sphere>\n`,
+        fn: ({ position, color, radius, body, shadow }) => ({
+          snip: `\n<a-sphere position="${position}"
+radius="${radius}"
+color="${color}"
+body="type:${body};"
+shadow="cast: ${shadow};"
+grabbable="physics:true;"></a-sphere>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -396,6 +414,10 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
             name: 'body',
             default: 'static',
           },
+          {
+            name: 'shadow',
+            default: 'true',
+          },
         ],
         samples: [
           {
@@ -409,13 +431,14 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ position, color, radius, height, body }) => ({
+        fn: ({ position, color, radius, height, body, shadow }) => ({
           snip: `\n<a-cylinder position="${position}"
 radius="${radius}"
 height="${height}"
 color="${color}"
 rotation="${rotation}"
 body="type:${body};"
+shadow="cast: ${shadow};"
 grabbable="physics:true;"></a-cylinder>\n`,
           position: 'before',
           marker: '</a-scene>',
@@ -443,6 +466,10 @@ grabbable="physics:true;"></a-cylinder>\n`,
             default: '#FFC65D',
           },
           {
+            name: 'shadow',
+            default: 'true',
+          },
+          {
             name: 'body',
             default: 'static',
           },
@@ -461,8 +488,14 @@ grabbable="physics:true;"></a-cylinder>\n`,
 
       {
         title: 'A-Frame Plane',
-        fn: ({ position, color, rotation, height, width }) => ({
-          snip: `\n<a-plane position="${position}" rotation="${rotation}" height="${height}" width="${width}" color="${color}"></a-plane>\n`,
+        fn: ({ position, color, rotation, height, width, shadow }) => ({
+          snip: `\n<a-plane position="${position}"
+rotation="${rotation}"
+height="${height}"
+width="${width}"
+color="${color}"
+shadow="receive: ${shadow}"
+></a-plane>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -487,6 +520,10 @@ grabbable="physics:true;"></a-cylinder>\n`,
           {
             name: 'color',
             default: '#7BC8A4',
+          },
+          {
+            name: 'shadow',
+            default: 'true',
           },
         ],
       },
