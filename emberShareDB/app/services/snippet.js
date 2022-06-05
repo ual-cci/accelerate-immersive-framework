@@ -1,5 +1,7 @@
 import Service from '@ember/service'
 import { computed } from '@ember/object'
+import { randRange, randomAframeAttr } from '../helpers/snippet-insert'
+import { randomColor } from '../helpers/colors'
 import config from '../config/environment'
 
 export default Service.extend({
@@ -201,7 +203,7 @@ export default Service.extend({
           {
             name: 'fox',
             src: `${config.localOrigin}/libs/a-game/fox.glb`,
-            position: '0 0 -3',
+            position: '0 1 -3',
           },
           {
             name: 'rabbit',
@@ -335,6 +337,17 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           {
             name: 'floor',
             default: 'false',
+          },
+        ],
+        samples: [
+          {
+            name: 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            width: () => randRange(1, 10),
+            height: () => randRange(1, 10),
+            depth: () => randRange(1, 10),
+            color: () => randomColor(),
           },
         ],
       },

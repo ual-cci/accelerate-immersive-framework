@@ -21,7 +21,7 @@ export default Component.extend({
     addSample(sample) {
       for (const prop in sample) {
         const el = document.getElementById(prop)
-        if (el) el.value = sample[prop]
+        if (el) el.value = sample[prop]()
       }
     },
   },

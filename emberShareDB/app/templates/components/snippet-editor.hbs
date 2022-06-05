@@ -2,11 +2,17 @@
   <h3>{{snippet.title}}</h3>
   <form id='snippet-editor-form' {{action 'insert' snippet.fn on='submit'}}>
     <ul class='list-group new-user-group'>
-      {{#each snippet.samples as |sample|}}
-        {{#bs-button
-          onClick=(action 'addSample' sample)
-        }}{{sample.name}}{{/bs-button}}
-      {{/each}}
+      {{#if snippet.samples}}
+        <div class='sample-btn-container'>
+          {{#each snippet.samples as |sample|}}
+            {{#bs-button
+              (html-attributes aria-label='Add GLB')
+              class='insert-sample-btn'
+              onClick=(action 'addSample' sample)
+            }}{{sample.name}}{{/bs-button}}
+          {{/each}}
+        </div>
+      {{/if}}
       {{#each snippet.props as |prop|}}
         <li>
           <label for={{prop.name}}>{{prop.name}}</label>
@@ -21,7 +27,13 @@
 
       {{/each}}
     </ul>
-    <p><button type='submit'>Insert</button></p>
-    <p><button {{action 'close'}}>Cancel</button></p>
+    <p><button
+        class='snippet-editor-submit-btn'
+        type='submit'
+      >Insert</button></p>
+    <p><button
+        class='snippet-editor-submit-btn'
+        {{action 'close'}}
+      >Cancel</button></p>
   </form>
 </div>

@@ -2170,6 +2170,26 @@ input[id='searchTerm']:-ms-input-placeholder {
   z-index: 1000;
   font-size: large;
   padding: 10px;
+
+  .sample-btn-container {
+    display: flex;
+    flex-direction: horizontal;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .insert-sample-btn {
+    width: 80px;
+    height: 30px;
+    flex-grow: 1;
+    border: none;
+    border-radius: 0;
+    background-color: $mimic-pink;
+    color: white;
+    font-size: large;
+  }
 }
 
 .snippet-editor h3 {
@@ -2209,7 +2229,7 @@ input[id='searchTerm']:-ms-input-placeholder {
   padding: 4px;
 }
 
-.snippet-editor button {
+.snippet-editor-submit-btn {
   border: none;
   width: 100%;
   height: 30px;
