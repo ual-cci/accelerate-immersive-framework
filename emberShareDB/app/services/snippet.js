@@ -223,6 +223,7 @@ export default Service.extend({
             name: () => 'fox',
             src: () => `${config.localOrigin}/libs/a-game/fox.glb`,
             position: () => '0 1 -3',
+            scale: () => '3 3 3',
           },
           {
             name: () => 'rabbit',
