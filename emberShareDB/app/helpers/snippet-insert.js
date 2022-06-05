@@ -14,8 +14,8 @@ export function makeFirstEffect({ name, effect }) {
   return `\neffects="${name}"\n${effect}`
 }
 
-export function randRange(from, to) {
-  return Math.floor(Math.random() * (to - from) + from)
+export function randRange(from, to, fixed = 0) {
+  return (Math.random() * (to - from) + from).toFixed(fixed)
 }
 
 export function randomAframeAttr(from, to) {

@@ -2177,7 +2177,8 @@ input[id='searchTerm']:-ms-input-placeholder {
     flex-wrap: nowrap;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 6px;
+    margin-top: 3px;
+    width: 100%;
   }
 
   .insert-sample-btn {
@@ -2186,9 +2187,13 @@ input[id='searchTerm']:-ms-input-placeholder {
     flex-grow: 1;
     border: none;
     border-radius: 0;
-    background-color: $mimic-pink;
+    background-color: $mimic-green;
     color: white;
     font-size: large;
+
+    &:hover {
+      background-color: $mimic-blue;
+    }
   }
 }
 
@@ -2207,6 +2212,7 @@ input[id='searchTerm']:-ms-input-placeholder {
 }
 
 .snippet-editor ul {
+  width: 100%;
   list-style-type: none;
   display: inline-block;
 }

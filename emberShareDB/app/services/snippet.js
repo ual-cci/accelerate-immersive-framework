@@ -114,6 +114,13 @@ export default Service.extend({
             default: '0.6',
           },
         ],
+        samples: [
+          {
+            name: () => 'random',
+            ambientColor: () => randomColor(),
+            directionalColor: () => randomColor(),
+          },
+        ],
       },
       {
         title: 'A-Frame Light: Ambient',
@@ -127,6 +134,12 @@ export default Service.extend({
           {
             name: 'color',
             default: '#BBBBBB',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            color: () => randomColor(),
           },
         ],
       },
@@ -146,6 +159,12 @@ export default Service.extend({
           {
             name: 'intensity',
             default: '0.6',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            color: () => randomColor(),
           },
         ],
       },
@@ -201,21 +220,21 @@ export default Service.extend({
         ],
         samples: [
           {
-            name: 'fox',
-            src: `${config.localOrigin}/libs/a-game/fox.glb`,
-            position: '0 1 -3',
+            name: () => 'fox',
+            src: () => `${config.localOrigin}/libs/a-game/fox.glb`,
+            position: () => '0 1 -3',
           },
           {
-            name: 'rabbit',
-            src: `${config.localOrigin}/libs/a-game/rabbit.glb`,
-            position: '0 0.5 -3',
-            scale: '0.08 0.08 0.08',
+            name: () => 'rabbit',
+            src: () => `${config.localOrigin}/libs/a-game/rabbit.glb`,
+            position: () => '0 0.5 -3',
+            scale: () => '0.08 0.08 0.08',
           },
           {
-            name: 'tree',
-            src: `${config.localOrigin}/libs/a-game/tree.glb`,
-            position: '0 0 -3',
-            scale: '0.005 0.005 0.005',
+            name: () => 'tree',
+            src: () => `${config.localOrigin}/libs/a-game/tree.glb`,
+            position: () => '0 0 -3',
+            scale: () => '0.005 0.005 0.005',
           },
         ],
       },
@@ -341,7 +360,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
         ],
         samples: [
           {
-            name: 'random',
+            name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             rotation: () => randomAframeAttr(0, 360),
             width: () => randRange(1, 10),
@@ -375,6 +394,14 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            radius: () => randRange(1, 10),
+            color: () => randomColor(),
           },
         ],
       },
@@ -417,6 +444,16 @@ grabbable="physics:true;"></a-cylinder>\n`,
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            radius: () => randRange(1, 10),
+            height: () => randRange(0.4, 10, 1),
+            color: () => randomColor(),
           },
         ],
       },
@@ -465,6 +502,16 @@ grabbable="physics:true;"></a-cylinder>\n`,
           {
             name: 'color',
             default: '#ECECEC',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            position: () => randomAframeAttr(-10, 10),
+            rotation: () => randomAframeAttr(0, 360),
+            radius: () => randRange(1, 10),
+            height: () => randRange(0.4, 10, 1),
+            color: () => randomColor(),
           },
         ],
       },
