@@ -1,5 +1,6 @@
 import Service from '@ember/service'
 import { computed } from '@ember/object'
+import config from '../config/environment'
 
 export default Service.extend({
   snippetsMap: computed(() => {
@@ -149,26 +150,30 @@ export default Service.extend({
 
       {
         title: 'A-Frame GLB Model',
-        fn: ({ filename, position, scale, rotation, shadow, body }) => ({
+        fn: ({ name, src, position, scale, rotation, shadow, body }) => ({
           snip: `
 <a-assets>
-  <a-asset-item id="${filename}" src="${filename}.glb"></a-asset-item>
+  <a-asset-item id="${name}" src="${src}"></a-asset-item>
 </a-assets>
-<a-entity gltf-model="#${filename}"
+<a-entity gltf-model="#${name}"
           position="${position}"
           rotation="${rotation}"
           scale="${scale}"
-          shadow="cast: ${shadow}"
+          shadow="castShadow: ${shadow}"
           body="type:${body};"
           grabbable="physics:true;"
-></a-entity>`,
+></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
           {
-            name: 'filename',
+            name: 'name',
+            default: '',
+          },
+          {
+            name: 'src',
             default: '',
           },
           {
@@ -190,6 +195,25 @@ export default Service.extend({
           {
             name: 'body',
             default: 'static',
+          },
+        ],
+        samples: [
+          {
+            name: 'fox',
+            src: `${config.localOrigin}/libs/a-game/fox.glb`,
+            position: '0 0 -3',
+          },
+          {
+            name: 'rabbit',
+            src: `${config.localOrigin}/libs/a-game/rabbit.glb`,
+            position: '0 0.5 -3',
+            scale: '0.08 0.08 0.08',
+          },
+          {
+            name: 'tree',
+            src: `${config.localOrigin}/libs/a-game/tree.glb`,
+            position: '0 0 -3',
+            scale: '0.005 0.005 0.005',
           },
         ],
       },
@@ -273,6 +297,7 @@ height="${height}"
 depth="${depth}"
 body="type:${body};"
 grabbable="physics:true;"
+shadow="receive: true;"
 ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           position: 'before',
           marker: '</a-scene>',
