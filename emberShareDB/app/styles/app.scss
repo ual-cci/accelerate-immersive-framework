@@ -2255,3 +2255,16 @@ input[id='searchTerm']:-ms-input-placeholder {
   background-color: tomato;
   cursor: pointer;
 }
+
+#alpha-badge {
+  background-color: $mimic-yellow;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-240px, -100px) rotate(-45deg);
+  height: 200px;
+  padding: 0 200px;
+  text-align: center;
+  line-height: 320px;
+  font-size: xx-large;
+}
