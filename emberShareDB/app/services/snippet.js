@@ -341,7 +341,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
         props: [
           {
             name: 'position',
-            default: '0 0 0',
+            default: '0 1 -3',
           },
           {
             name: 'rotation',

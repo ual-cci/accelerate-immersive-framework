@@ -2045,12 +2045,12 @@ export default Controller.extend({
           this.syncOutputContainer()
           return
         }
+        this.set('showSnippetEditor', false)
         ops.forEach((op) => {
           this.submitOp(op)
           this.set('surpress', true)
           this.get('codeParser').applyOps([op], this.get('editor'))
           this.set('surpress', false)
-          document.getElementById('snippetsDropdown').classList.toggle('show')
 
           if (this.get('autoRender')) {
             this.updateIFrame()
