@@ -431,7 +431,7 @@ grabbable="physics:true;"></a-sphere>\n`,
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ position, color, radius, height, body, shadow }) => ({
+        fn: ({ position, color, radius, rotation, height, body, shadow }) => ({
           snip: `\n<a-cylinder position="${position}"
 radius="${radius}"
 height="${height}"
