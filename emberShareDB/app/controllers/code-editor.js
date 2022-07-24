@@ -31,6 +31,7 @@ export default Controller.extend({
   library: inject(),
   snippet: inject(),
   currentSnip: {},
+  // TODO: Inject aframeCommunicator service.
 
   //Parameters
   con: null,
@@ -156,6 +157,7 @@ export default Controller.extend({
         this.syncOutputContainer()
       }
     })
+    window.addEventListener('message', (e) => console.log(e))
   },
   begin: function () {
     this.get('cs').log('beginning')

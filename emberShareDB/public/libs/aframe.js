@@ -68818,7 +68818,8 @@ function getFuzzyPatchVersion (version) {
 }
 
 var INSPECTOR_DEV_URL = 'https://aframe.io/aframe-inspector/dist/aframe-inspector.js';
-var INSPECTOR_RELEASE_URL = 'https://unpkg.com/aframe-inspector@' + getFuzzyPatchVersion(pkg.version) + '/dist/aframe-inspector.min.js';
+//var INSPECTOR_RELEASE_URL = 'https://unpkg.com/aframe-inspector@' + getFuzzyPatchVersion(pkg.version) + '/dist/aframe-inspector.min.js';
+var INSPECTOR_RELEASE_URL = 'http://localhost:4200/libs/aframe-inspector.min.js'
 var INSPECTOR_URL = process.env.INSPECTOR_VERSION === 'dev' ? INSPECTOR_DEV_URL : INSPECTOR_RELEASE_URL;
 var LOADING_MESSAGE = 'Loading Inspector';
 var LOADING_ERROR_MESSAGE = 'Error loading Inspector';
@@ -68882,6 +68883,7 @@ module.exports.Component = registerComponent('inspector', {
     // Inject.
     script = document.createElement('script');
     script.src = this.data.url;
+					console.log(script.src);
     script.setAttribute('data-name', 'aframe-inspector');
     script.setAttribute(AFRAME_INJECTED, '');
     script.onload = function () {
