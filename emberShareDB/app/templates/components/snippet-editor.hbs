@@ -19,7 +19,7 @@
         <div class='sample-btn-container'>
           {{#each snippet.samples as |sample|}}
             {{#bs-button
-              (html-attributes aria-label='Add GLB')
+              (html-attributes aria-label='Insert Snippet')
               class='insert-sample-btn'
               onClick=(action 'addSample' sample)
             }}{{runFn sample.name}}{{/bs-button}}

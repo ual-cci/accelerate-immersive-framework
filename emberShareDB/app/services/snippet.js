@@ -253,64 +253,64 @@ export default Service.extend({
         ],
       },
 
-      {
-        title: 'A-Frame Effect: Toon',
-        fn: () => ({
-          type: 'effect',
-          name: 'colors',
-          effect:
-            'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-      },
-      {
-        title: 'A-Frame Effect: Bloom',
-        fn: ({ strength, radius }) => ({
-          type: 'effect',
-          name: 'bloom',
-          effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-        props: [
-          {
-            name: 'strength',
-            default: '0.3',
-          },
-          {
-            name: 'radius',
-            default: '1.0',
-          },
-        ],
-      },
-      {
-        title: 'A-Frame Effect: God Rays',
-        fn: ({ source, threshold, intensity }) => ({
-          type: 'effect',
-          name: 'godrays',
-          effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-        props: [
-          {
-            name: 'source',
-            default: '',
-          },
-          {
-            name: 'threshold',
-            default: '0 0.33',
-          },
-          {
-            name: 'intensity',
-            default: '2',
-          },
-        ],
-      },
+      //{
+      //title: 'A-Frame Effect: Toon',
+      //fn: () => ({
+      //type: 'effect',
+      //name: 'colors',
+      //effect:
+      //'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
+      //position: 'after',
+      //marker: '<a-scene',
+      //libs: ['a-frame', 'a-frame-effects'],
+      //}),
+      //},
+      //{
+      //title: 'A-Frame Effect: Bloom',
+      //fn: ({ strength, radius }) => ({
+      //type: 'effect',
+      //name: 'bloom',
+      //effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
+      //position: 'after',
+      //marker: '<a-scene',
+      //libs: ['a-frame', 'a-frame-effects'],
+      //}),
+      //props: [
+      //{
+      //name: 'strength',
+      //default: '0.3',
+      //},
+      //{
+      //name: 'radius',
+      //default: '1.0',
+      //},
+      //],
+      //},
+      //{
+      //title: 'A-Frame Effect: God Rays',
+      //fn: ({ source, threshold, intensity }) => ({
+      //type: 'effect',
+      //name: 'godrays',
+      //effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
+      //position: 'after',
+      //marker: '<a-scene',
+      //libs: ['a-frame', 'a-frame-effects'],
+      //}),
+      //props: [
+      //{
+      //name: 'source',
+      //default: '',
+      //},
+      //{
+      //name: 'threshold',
+      //default: '0 0.33',
+      //},
+      //{
+      //name: 'intensity',
+      //default: '2',
+      //},
+      //],
+      //},
 
       {
         title: 'A-Frame Box',
