@@ -21,3 +21,7 @@ export function randRange(from, to, fixed = 0) {
 export function randomAframeAttr(from, to) {
   return `${randRange(from, to)} ${randRange(from, to)} ${randRange(from, to)}`
 }
+
+export function randInt(length) {
+  return Math.floor(Math.random() * Math.pow(10, length))
+}

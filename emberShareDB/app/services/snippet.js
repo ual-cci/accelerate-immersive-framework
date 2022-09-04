@@ -1,6 +1,6 @@
 import Service from '@ember/service'
 import { computed } from '@ember/object'
-import { randRange, randomAframeAttr } from '../helpers/snippet-insert'
+import { randRange, randomAframeAttr, randInt } from '../helpers/snippet-insert'
 import { randomColor } from '../helpers/colors'
 import config from '../config/environment'
 
@@ -315,6 +315,7 @@ export default Service.extend({
       {
         title: 'A-Frame Box',
         fn: ({
+          id,
           position,
           color,
           width,
@@ -324,7 +325,8 @@ export default Service.extend({
           body,
           floor,
         }) => ({
-          snip: `\n<a-box position="${position}"
+          snip: `\n<a-box id="${id}"
+position="${position}"
 rotation="${rotation}"
 color="${color}"
 width="${width}"
@@ -339,6 +341,10 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `box_${randInt(4)}`
+          },
           {
             name: 'position',
             default: '0 1 -3',
@@ -374,6 +380,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
         ],
         samples: [
           {
+            id: () => `box_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             rotation: () => randomAframeAttr(0, 360),
@@ -386,8 +393,9 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
       },
       {
         title: 'A-Frame Sphere',
-        fn: ({ position, color, radius, body, shadow }) => ({
-          snip: `\n<a-sphere position="${position}"
+        fn: ({ id, position, color, radius, body, shadow }) => ({
+          snip: `\n<a-sphere id="${id}"
+position="${position}"
 radius="${radius}"
 color="${color}"
 body="type:${body};"
@@ -398,6 +406,10 @@ grabbable="physics:true;"></a-sphere>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `sphere_${randInt(4)}`
+          },
           {
             name: 'position',
             default: '0 0 0',
@@ -421,6 +433,7 @@ grabbable="physics:true;"></a-sphere>\n`,
         ],
         samples: [
           {
+            id: () => `sphere_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             radius: () => randRange(1, 10),
@@ -431,8 +444,9 @@ grabbable="physics:true;"></a-sphere>\n`,
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ position, color, radius, rotation, height, body, shadow }) => ({
-          snip: `\n<a-cylinder position="${position}"
+        fn: ({ id, position, color, radius, rotation, height, body, shadow }) => ({
+          snip: `\n<a-cylinder id="${id}"
+position="${position}"
 radius="${radius}"
 height="${height}"
 color="${color}"
@@ -445,6 +459,10 @@ grabbable="physics:true;"></a-cylinder>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `cylinder_${randInt(4)}`
+          },
           {
             name: 'position',
             default: '0 0 0',
@@ -476,6 +494,7 @@ grabbable="physics:true;"></a-cylinder>\n`,
         ],
         samples: [
           {
+            id: () => `cylinder_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             rotation: () => randomAframeAttr(0, 360),
@@ -487,8 +506,9 @@ grabbable="physics:true;"></a-cylinder>\n`,
       },
       {
         title: 'A-Frame Plane',
-        fn: ({ position, color, rotation, height, width, shadow }) => ({
-          snip: `\n<a-plane position="${position}"
+        fn: ({ id, position, color, rotation, height, width, shadow }) => ({
+          snip: `\n<a-plane id="${id}"
+position="${position}"
 rotation="${rotation}"
 height="${height}"
 width="${width}"
@@ -500,6 +520,10 @@ shadow="receive: ${shadow}"
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `plane_${randInt(4)}`
+          },
           {
             name: 'position',
             default: '0 0 -4',
@@ -529,13 +553,17 @@ shadow="receive: ${shadow}"
 
       {
         title: 'A-Frame Sky',
-        fn: ({ color }) => ({
-          snip: `\n<a-sky color="${color}"></a-sky>\n`,
+        fn: ({ id, color }) => ({
+          snip: `\n<a-sky id="${id}" color="${color}"></a-sky>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `sky_${randInt(4)}`
+          },
           {
             name: 'color',
             default: '#ECECEC',
@@ -543,11 +571,8 @@ shadow="receive: ${shadow}"
         ],
         samples: [
           {
+            id: () => `sky_${randInt(4)}`,
             name: () => 'random',
-            position: () => randomAframeAttr(-10, 10),
-            rotation: () => randomAframeAttr(0, 360),
-            radius: () => randRange(1, 10),
-            height: () => randRange(0.4, 10, 1),
             color: () => randomColor(),
           },
         ],
@@ -555,6 +580,7 @@ shadow="receive: ${shadow}"
       {
         title: 'THROW ERROR',
         fn: () => ({
+          // Will throw as does not contain a snip fn
           position: () => randomAframeAttr(-10, 10),
         })
 

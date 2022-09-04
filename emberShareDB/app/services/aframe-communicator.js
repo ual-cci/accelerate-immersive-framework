@@ -17,6 +17,7 @@ export default Service.extend({
       const match = regex.exec(source)
       if (!match) {
         // If no ID, throw error for the error bar
+        // TODO: Better handling for error amongst multiple object changes (eg. 1 ID missing)
         const msg = ['Make sure the objects you are editing have an ID!',
           'Could not apply changes:',
           JSON.stringify(changes, null, 2)].join('\n')
