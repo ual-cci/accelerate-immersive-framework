@@ -36,12 +36,12 @@ export default Service.extend({
     const op = { p: ['source', index], si: insert }
     return op
   },
-  insertSnippet(source, snippet, editor) {
+  insertSnippet(source, snippet) {
     const { snip, type, marker, position, libs } = snippet
-    for (const lib of libs) {
-      const libUrl = this.get('library').url(lib)
-      if (source.indexOf(libUrl) < 0) return 'libNotFound'
-    }
+    //for (const lib of libs) {
+    //const libUrl = this.get('library').url(lib)
+    //if (source.indexOf(libUrl) < 0) return `Could not find library: ${lib}`
+    //}
     // -- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
@@ -670,7 +670,7 @@ export default Service.extend({
 
     return ops
   },
-  applyOps: function (ops, editor) {
+  applyOps: function(ops, editor) {
     let opToDelta = (op) => {
       const start = op.p[op.p.length - 1]
       const from = editor.doc.posFromIndex(start)

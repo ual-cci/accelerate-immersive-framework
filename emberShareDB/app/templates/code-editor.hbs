@@ -340,7 +340,7 @@
           </div>
         {{/if}}
         {{#if showErrorBar}}
-          {{error-bar error=snippetError hide=(action 'closeErrorBar')}}
+          {{error-bar error=errorMsg hide=(action 'closeErrorBar')}}
         {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}

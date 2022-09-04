@@ -1,24 +1,8 @@
 import Service from '@ember/service'
-import config from '../config/environment'
 
 // TODO: Rename to something better
 export default Service.extend({
-  init() {
-    window.addEventListener('message', (e) => console.log(e))
-  },
-  receiveMessage(e) {
-    if (!e.origin === config.localOrigin) return
-
-    const { data } = e
-
-    if (!typeof data === 'string') return
-
-    /* TODO: Run this.updateFile
-     * updateFile should produce a series of ops to send back to the parser
-     * or maybe one big op which replaces the entire file.
-     */
-  },
-  updateFile(source, changes) {
+  updateFile(source, changes, errorHandler) {
     // Matches any character including line breaks.
     const element = '(<a-[\\w]+)'
     const filler = '([^]*?)'
@@ -32,6 +16,11 @@ export default Service.extend({
       )
       const match = regex.exec(source)
       if (!match) {
+        // If no ID, throw error for the error bar
+        const msg = ['Make sure the objects you are editing have an ID!',
+          'Could not apply changes:',
+          JSON.stringify(changes, null, 2)].join('\n')
+        errorHandler(msg)
         return
       }
 
@@ -81,7 +70,7 @@ export default Service.extend({
               const propertyRegex = new RegExp(
                 `(${propertyDelimit})${property}:(.*?)([";])`
               )
-              propertyMatch = propertyRegex.exec(attributeMatch)
+              const propertyMatch = propertyRegex.exec(attributeMatch)
 
               if (propertyMatch) {
                 // Modify property.

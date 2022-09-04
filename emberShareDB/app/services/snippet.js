@@ -485,7 +485,6 @@ grabbable="physics:true;"></a-cylinder>\n`,
           },
         ],
       },
-
       {
         title: 'A-Frame Plane',
         fn: ({ position, color, rotation, height, width, shadow }) => ({
@@ -553,6 +552,13 @@ shadow="receive: ${shadow}"
           },
         ],
       },
+      {
+        title: 'THROW ERROR',
+        fn: () => ({
+          position: () => randomAframeAttr(-10, 10),
+        })
+
+      }
     ]
   }),
 })

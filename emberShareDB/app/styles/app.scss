@@ -2251,9 +2251,11 @@ input[id='searchTerm']:-ms-input-placeholder {
 
 .error-bar {
   width: 100%;
-  height: 30px;
-  background-color: tomato;
   cursor: pointer;
+  pre {
+    font-weight: 900;
+    background-color: indianRed;
+  }
 }
 
 #alpha-badge {
