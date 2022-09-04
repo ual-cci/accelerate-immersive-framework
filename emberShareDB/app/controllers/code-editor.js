@@ -2087,8 +2087,8 @@ export default Controller.extend({
           snippet,
         )
         // If it's a string, it's an error.
-        if (typeof op === 'string') {
-          const error = parseSnippetError(op, snippet)
+        if (typeof ops === 'string') {
+          const error = parseSnippetError(ops, snippet)
           this.set('errorMsg', error)
           this.set('showErrorBar', true)
           this.syncOutputContainer()

@@ -38,10 +38,10 @@ export default Service.extend({
   },
   insertSnippet(source, snippet) {
     const { snip, type, marker, position, libs } = snippet
-    //for (const lib of libs) {
-    //const libUrl = this.get('library').url(lib)
-    //if (source.indexOf(libUrl) < 0) return `Could not find library: ${lib}`
-    //}
+    for (const lib of libs) {
+      const libUrl = this.get('library').url(lib)
+      if (source.indexOf(libUrl) < 0) return 'libNotFound'
+    }
     // -- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
