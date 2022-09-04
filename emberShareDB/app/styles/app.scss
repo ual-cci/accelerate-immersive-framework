@@ -2253,8 +2253,10 @@ input[id='searchTerm']:-ms-input-placeholder {
   width: 100%;
   cursor: pointer;
   pre {
-    font-weight: 900;
-    background-color: indianRed;
+    color: black;
+    font-weight: 500;
+    background: rgba(255, 99, 71, 0.5);
+    border: 4px solid tomato;
   }
 }
 
