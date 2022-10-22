@@ -65,6 +65,7 @@ export default Service.extend({
       {
         title: 'A-Frame Basic Scene',
         fn: () => ({
+          type: 'scene',
           snip: `
           <a-scene>
             <a-box id="box_${randInt(4)}"
@@ -103,6 +104,7 @@ export default Service.extend({
       {
         title: 'A-Frame Empty Scene',
         fn: () => ({
+          type: 'scene',
           snip: `
           <a-scene>
           </a-scene>

@@ -4,10 +4,11 @@ export function getMarkers(source, from, to) {
 
   return [a, b]
 }
-export function extractEffect(source) {
-  const [a, b] = getMarkers(source, '<a-scene', '>')
-  const currentEffect = source.slice(a, b)
-  return currentEffect
+
+export function extract(source, markerA, markerB) {
+  const [a, b] = getMarkers(source, markerA, markerB)
+  const currentChunk = source.slice(a, b)
+  return currentChunk
 }
 
 export function makeFirstEffect({ name, effect }) {

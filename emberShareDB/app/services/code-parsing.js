@@ -7,7 +7,7 @@ import RSVP from 'rsvp'
 import hljs from 'highlight.js'
 import { computed } from '@ember/object'
 import {
-  extractEffect,
+  extract,
   makeFirstEffect,
   getMarkers,
 } from '../helpers/snippet-insert'
@@ -42,13 +42,14 @@ export default Service.extend({
       const libUrl = this.get('library').url(lib)
       if (source.indexOf(libUrl) < 0) return 'libNotFound'
     }
-    // -- EFFECTS ---
+    const ops = []
+    // --- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
-    const ops = []
     if (isEffect) {
       // Extract text between '<a-scene' and '>'
-      const currentEffect = extractEffect(source)
+      const currentEffect = extract(source, '<a-scene', '>')
+      // If there are already effects
       if (currentEffect.indexOf('effects="') >= 0) {
         // Find 'effects=' and add new effect name
         effectSnippet = currentEffect.replace(
@@ -67,7 +68,21 @@ export default Service.extend({
         effectSnippet = makeFirstEffect(snippet)
       }
     }
-    // -- EFFECTS END ---
+    // --- EFFECTS END ---
+
+    // --- SCENE ---
+    /* Create an op to delete the current scene */
+    let isScene = type === 'scene'
+    if(isScene) {
+      const currentScene = extract(source, '<a-scene>', '</a-scene>')
+       const [a, _] = getMarkers(source, '<a-scene>', '</a-scene>')
+        ops.push({
+          p: ['source', a],
+          sd: currentScene,
+        })
+    }
+    // --- SCENE END ---
+
     const index = source.indexOf(marker)
     if (index < 0) {
       return 'markerNotFound'
