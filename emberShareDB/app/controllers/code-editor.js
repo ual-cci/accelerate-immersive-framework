@@ -2314,6 +2314,17 @@ export default Controller.extend({
       codeMirror.classList.remove(currentTheme)
       codeMirror.classList.add(newTheme)
     },
+  autoFormat() {
+    function getSelectedRange() {
+      return { from: editor.getCursor(true), to: editor.getCursor(false) };
+    }
+
+    const editor = this.get('editor')
+    editor.execCommand('selectAll')
+    var range = getSelectedRange();
+    editor.focus()
+    editor.autoFormatRange(range.from, range.to);
+  },
     renderCode() {
       this.updateIFrame()
     },
