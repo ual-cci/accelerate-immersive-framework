@@ -67,11 +67,11 @@ export default Service.extend({
         fn: () => ({
           snip: `
           <a-scene>
-            <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-            <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-            <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-            <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-            <a-sky color="#ECECEC"></a-sky>
+            <a-box id="box_${randInt(4)}" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+            <a-sphere id="sphere_${randInt(4)}" position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+            <a-cylinder id="cylinder_${randInt(4)}" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+            <a-plane id="plane_${randInt(4)}" position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+            <a-sky id="sky_${randInt(4)}" color="#ECECEC"></a-sky>
           </a-scene>
           `,
           position: 'before',
@@ -99,8 +99,8 @@ export default Service.extend({
           directionalIntensity,
           shadow,
         }) => ({
-          snip: `\n<a-entity light="type: ambient; color: ${ambientColor}"></a-entity>
-<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
+          snip: `\n<a-entity id="ambient-light_${randInt(4)}" light="type: ambient; color: ${ambientColor}"></a-entity>
+<a-entity id="directional-light" light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -134,7 +134,7 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Ambient',
         fn: ({ color }) => ({
-          snip: `\n<a-entity light="type: ambient; color: ${color}"></a-entity>\n`,
+          snip: `\n<a-entity id="ambient-light_${randInt(4)}" light="type: ambient; color: ${color}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -155,7 +155,7 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Directional',
         fn: ({ color, intensity, shadow }) => ({
-          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
+          snip: `\n<a-entity id="directional-light_${randInt(4)}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
