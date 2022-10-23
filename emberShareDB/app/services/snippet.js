@@ -96,8 +96,8 @@ export default Service.extend({
             </a-sky>
           </a-scene>
           `,
-          position: 'before',
-          marker: '</body>',
+          position: 'after',
+          marker: '<body>',
           libs: ['a-frame'],
         }),
       },
@@ -106,11 +106,10 @@ export default Service.extend({
         fn: () => ({
           type: 'scene',
           snip: `
-          <a-scene>
-          </a-scene>
-          `,
-          position: 'before',
-          marker: '</body>',
+  <a-scene>
+  </a-scene>`,
+          position: 'after',
+          marker: '<body>',
           libs: ['a-frame'],
         }),
       },

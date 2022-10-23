@@ -74,12 +74,12 @@ export default Service.extend({
     /* Create an op to delete the current scene */
     let isScene = type === 'scene'
     if(isScene) {
-      const currentScene = extract(source, '<a-scene>', '</a-scene>')
-       const [a, _] = getMarkers(source, '<a-scene>', '</a-scene>')
-        ops.push({
-          p: ['source', a],
-          sd: currentScene,
-        })
+      const currentScene = extract(source, '<a-scene', '</a-scene>', true)
+      const [a, _] = getMarkers(source, '<a-scene', '</a-scene>', true)
+      ops.push({
+        p: ['source', a],
+        sd: currentScene,
+      })
     }
     // --- SCENE END ---
 

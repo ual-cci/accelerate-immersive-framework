@@ -1,12 +1,12 @@
-export function getMarkers(source, from, to) {
-  const a = source.indexOf(from) + from.length
-  const b = source.slice(a).indexOf(to) + a
+export function getMarkers(source, from, to, inculsive=false) {
+  const a = source.indexOf(from) + (inculsive ? 0 : from.length)
+  const b = source.slice(a).indexOf(to) + a + (inculsive ? to.length : 0)
 
   return [a, b]
 }
 
-export function extract(source, markerA, markerB) {
-  const [a, b] = getMarkers(source, markerA, markerB)
+export function extract(source, markerA, markerB, inclusive=false) {
+  const [a, b] = getMarkers(source, markerA, markerB, inclusive)
   const currentChunk = source.slice(a, b)
   return currentChunk
 }
