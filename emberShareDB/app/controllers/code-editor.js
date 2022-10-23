@@ -1016,6 +1016,19 @@ export default Controller.extend({
     return selection
   },
 
+  getSelectedRange() {
+    const editor = this.get('editor')
+    return { from: editor.getCursor(true), to: editor.getCursor(false) };
+  },
+
+  autoFormat() {
+    const editor = this.get('editor')
+    editor.execCommand('selectAll')
+    var range = this.getSelectedRange();
+    editor.focus()
+    editor.autoFormatRange(range.from, range.to);
+  },
+
   updateIFrame: function(selection = false) {
     this.updateSourceFromSession()
       .then(() => {
@@ -1708,6 +1721,9 @@ export default Controller.extend({
       })
   },
   actions: {
+    autoFormat() {
+      this.autoFormat()
+    },
     //codemirror
     onEditorReady(editor) {
       this.set('editor', editor)
@@ -2106,6 +2122,7 @@ export default Controller.extend({
           }
         })
       })
+      this.autoFormat()
     },
     toggleShowShare() {
       this.toggleProperty('showShare')
@@ -2314,17 +2331,6 @@ export default Controller.extend({
       codeMirror.classList.remove(currentTheme)
       codeMirror.classList.add(newTheme)
     },
-  autoFormat() {
-    function getSelectedRange() {
-      return { from: editor.getCursor(true), to: editor.getCursor(false) };
-    }
-
-    const editor = this.get('editor')
-    editor.execCommand('selectAll')
-    var range = getSelectedRange();
-    editor.focus()
-    editor.autoFormatRange(range.from, range.to);
-  },
     renderCode() {
       this.updateIFrame()
     },
