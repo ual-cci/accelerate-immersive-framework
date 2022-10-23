@@ -121,7 +121,9 @@ export default Service.extend({
           directionalIntensity,
           shadow,
         }) => ({
-          snip: `\n<a-entity id="ambient-light_${randInt(4)}" light="type: ambient; color: ${ambientColor}"></a-entity>
+          snip: `\n<a-entity id="ambient-light_${randInt(
+            4
+          )}" light="type: ambient; color: ${ambientColor}"></a-entity>
 <a-entity id="directional-light" light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
@@ -156,7 +158,9 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Ambient',
         fn: ({ color }) => ({
-          snip: `\n<a-entity id="ambient-light_${randInt(4)}" light="type: ambient; color: ${color}"></a-entity>\n`,
+          snip: `\n<a-entity id="ambient-light_${randInt(
+            4
+          )}" light="type: ambient; color: ${color}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -177,7 +181,9 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Directional',
         fn: ({ color, intensity, shadow }) => ({
-          snip: `\n<a-entity id="directional-light_${randInt(4)}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
+          snip: `\n<a-entity id="directional-light_${randInt(
+            4
+          )}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -275,64 +281,72 @@ export default Service.extend({
         ],
       },
 
-      //{
-      //title: 'A-Frame Effect: Toon',
-      //fn: () => ({
-      //type: 'effect',
-      //name: 'colors',
-      //effect:
-      //'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
-      //position: 'after',
-      //marker: '<a-scene',
-      //libs: ['a-frame', 'a-frame-effects'],
-      //}),
-      //},
-      //{
-      //title: 'A-Frame Effect: Bloom',
-      //fn: ({ strength, radius }) => ({
-      //type: 'effect',
-      //name: 'bloom',
-      //effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
-      //position: 'after',
-      //marker: '<a-scene',
-      //libs: ['a-frame', 'a-frame-effects'],
-      //}),
-      //props: [
-      //{
-      //name: 'strength',
-      //default: '0.3',
-      //},
-      //{
-      //name: 'radius',
-      //default: '1.0',
-      //},
-      //],
-      //},
-      //{
-      //title: 'A-Frame Effect: God Rays',
-      //fn: ({ source, threshold, intensity }) => ({
-      //type: 'effect',
-      //name: 'godrays',
-      //effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
-      //position: 'after',
-      //marker: '<a-scene',
-      //libs: ['a-frame', 'a-frame-effects'],
-      //}),
-      //props: [
-      //{
-      //name: 'source',
-      //default: '',
-      //},
-      //{
-      //name: 'threshold',
-      //default: '0 0.33',
-      //},
-      //{
-      //name: 'intensity',
-      //default: '2',
-      //},
-      //],
-      //},
+      /*
+       * Effects do not work with A-Frame 1.3.0 and it doesn't look like there is much work
+       * happening on the A-Frame Effects repo.. I've played around a little bit seeing if
+       * I could get a few of the functions working which were throwing errors, but other
+       * problems occur which don't seem lilke quick fixes.
+       * See: https://github.com/wizgrav/aframe-effects/issues/21
+       */
+      /*
+      {
+        title: 'A-Frame Effect: Toon',
+        fn: () => ({
+          type: 'effect',
+          name: 'colors',
+          effect:
+            'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+      },
+      {
+        title: 'A-Frame Effect: Bloom',
+        fn: ({ strength, radius }) => ({
+          type: 'effect',
+          name: 'bloom',
+          effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+        props: [
+          {
+            name: 'strength',
+            default: '0.3',
+          },
+          {
+            name: 'radius',
+            default: '1.0',
+          },
+        ],
+      },
+      {
+        title: 'A-Frame Effect: God Rays',
+        fn: ({ source, threshold, intensity }) => ({
+          type: 'effect',
+          name: 'godrays',
+          effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame', 'a-frame-effects'],
+        }),
+        props: [
+          {
+            name: 'source',
+            default: '',
+          },
+          {
+            name: 'threshold',
+            default: '0 0.33',
+          },
+          {
+            name: 'intensity',
+            default: '2',
+          },
+        ],
+      }, */
 
       {
         title: 'A-Frame Box',
@@ -365,7 +379,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
         props: [
           {
             name: 'id',
-            default: `box_${randInt(4)}`
+            default: `box_${randInt(4)}`,
           },
           {
             name: 'position',
@@ -430,7 +444,7 @@ grabbable="physics:true;"></a-sphere>\n`,
         props: [
           {
             name: 'id',
-            default: `sphere_${randInt(4)}`
+            default: `sphere_${randInt(4)}`,
           },
           {
             name: 'position',
@@ -466,7 +480,16 @@ grabbable="physics:true;"></a-sphere>\n`,
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ id, position, color, radius, rotation, height, body, shadow }) => ({
+        fn: ({
+          id,
+          position,
+          color,
+          radius,
+          rotation,
+          height,
+          body,
+          shadow,
+        }) => ({
           snip: `\n<a-cylinder id="${id}"
 position="${position}"
 radius="${radius}"
@@ -483,7 +506,7 @@ grabbable="physics:true;"></a-cylinder>\n`,
         props: [
           {
             name: 'id',
-            default: `cylinder_${randInt(4)}`
+            default: `cylinder_${randInt(4)}`,
           },
           {
             name: 'position',
@@ -544,7 +567,7 @@ shadow="receive: ${shadow}"
         props: [
           {
             name: 'id',
-            default: `plane_${randInt(4)}`
+            default: `plane_${randInt(4)}`,
           },
           {
             name: 'position',
@@ -584,7 +607,7 @@ shadow="receive: ${shadow}"
         props: [
           {
             name: 'id',
-            default: `sky_${randInt(4)}`
+            default: `sky_${randInt(4)}`,
           },
           {
             name: 'color',
@@ -604,9 +627,8 @@ shadow="receive: ${shadow}"
         fn: () => ({
           // Will throw as does not contain a snip fn
           position: () => randomAframeAttr(-10, 10),
-        })
-
-      }
+        }),
+      },
     ]
   }),
 })
