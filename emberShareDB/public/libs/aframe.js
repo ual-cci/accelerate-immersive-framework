@@ -68818,7 +68818,8 @@ function getFuzzyPatchVersion (version) {
 }
 
 var INSPECTOR_DEV_URL = 'https://aframe.io/aframe-inspector/dist/aframe-inspector.js';
-var INSPECTOR_RELEASE_URL = 'https://unpkg.com/aframe-inspector@' + getFuzzyPatchVersion(pkg.version) + '/dist/aframe-inspector.min.js';
+//var INSPECTOR_RELEASE_URL = 'https://unpkg.com/aframe-inspector@' + getFuzzyPatchVersion(pkg.version) + '/dist/aframe-inspector.min.js';
+var INSPECTOR_RELEASE_URL = 'http://localhost:4200/libs/aframe-inspector.js'
 var INSPECTOR_URL = process.env.INSPECTOR_VERSION === 'dev' ? INSPECTOR_DEV_URL : INSPECTOR_RELEASE_URL;
 var LOADING_MESSAGE = 'Loading Inspector';
 var LOADING_ERROR_MESSAGE = 'Error loading Inspector';
@@ -68853,7 +68854,7 @@ module.exports.Component = registerComponent('inspector', {
   onKeydown: function (evt) {
     var shortcutPressed = evt.keyCode === 73 && evt.ctrlKey && evt.altKey;
     if (!this.data || !shortcutPressed) { return; }
-    this.injectInspector();
+    //this.injectInspector();
   },
 
   showLoader: function () {
@@ -68884,10 +68885,12 @@ module.exports.Component = registerComponent('inspector', {
     script.src = this.data.url;
     script.setAttribute('data-name', 'aframe-inspector');
     script.setAttribute(AFRAME_INJECTED, '');
+					console.log(script.src)
     script.onload = function () {
-      AFRAME.INSPECTOR.open();
+			AFRAME.INSPECTOR.open();
       self.hideLoader();
       self.removeEventListeners();
+			console.log("Script loaded");
     };
     script.onerror = function () {
       self.loadingMessageEl.innerHTML = LOADING_ERROR_MESSAGE;

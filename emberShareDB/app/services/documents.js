@@ -15,9 +15,9 @@ export default Service.extend({
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="${config.localOrigin}/libs/aframe.js"></script>
-    <script src="${config.localOrigin}/libs/aframe-effects.min.js"></script>
+    <script src="${config.localOrigin}/libs/aframe-v1.3.0.min.js"></script>
     <script src="${config.localOrigin}/libs/a-game/a-game-0.47.0.js"></script>
+    <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
   </head>
   <body>
     <a-scene physics>
@@ -129,7 +129,7 @@ export default Service.extend({
       $.ajax({
         type: 'POST',
         url: config.serverHost + '/submitOp',
-        beforeSend: function (xhr) {
+        beforeSend: function(xhr) {
           xhr.setRequestHeader('Authorization', token)
         },
         data: { op: op, documentId: doc },
@@ -220,7 +220,7 @@ export default Service.extend({
             $.ajax({
               type: 'DELETE',
               url: config.serverHost + '/documents/' + docId,
-              beforeSend: function (xhr) {
+              beforeSend: function(xhr) {
                 xhr.setRequestHeader('Authorization', token)
               },
             })
@@ -254,7 +254,7 @@ export default Service.extend({
       $.ajax({
         type: 'GET',
         url: config.serverHost + '/flagDoc' + params,
-        beforeSend: function (xhr) {
+        beforeSend: function(xhr) {
           xhr.setRequestHeader('Authorization', token)
         },
       })

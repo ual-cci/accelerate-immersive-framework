@@ -1,6 +1,6 @@
 import Service from '@ember/service'
 import { computed } from '@ember/object'
-import { randRange, randomAframeAttr } from '../helpers/snippet-insert'
+import { randRange, randomAframeAttr, randInt } from '../helpers/snippet-insert'
 import { randomColor } from '../helpers/colors'
 import config from '../config/environment'
 
@@ -65,29 +65,51 @@ export default Service.extend({
       {
         title: 'A-Frame Basic Scene',
         fn: () => ({
+          type: 'scene',
           snip: `
           <a-scene>
-            <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-            <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-            <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-            <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-            <a-sky color="#ECECEC"></a-sky>
+            <a-box id="box_${randInt(4)}"
+                   position="-1 0.5 -3"
+                   rotation="0 45 0"
+                   color="#4CC3D9">
+            </a-box>
+            <a-sphere id="sphere_${randInt(4)}"
+                      position="0 1.25 -5"
+                      radius="1.25"
+                      color="#EF2D5E">
+            </a-sphere>
+            <a-cylinder id="cylinder_${randInt(4)}"
+                        position="1 0.75 -3"
+                        radius="0.5"
+                        height="1.5"
+                        color="#FFC65D">
+            </a-cylinder>
+            <a-plane id="plane_${randInt(4)}"
+                     position="0 0 -4"
+                     rotation="-90 0 0"
+                     width="4"
+                     height="4"
+                     color="#7BC8A4">
+            </a-plane>
+            <a-sky id="sky_${randInt(4)}"
+                   color="#ECECEC">
+            </a-sky>
           </a-scene>
           `,
-          position: 'before',
-          marker: '</body>',
+          position: 'after',
+          marker: '<body>',
           libs: ['a-frame'],
         }),
       },
       {
         title: 'A-Frame Empty Scene',
         fn: () => ({
+          type: 'scene',
           snip: `
-          <a-scene>
-          </a-scene>
-          `,
-          position: 'before',
-          marker: '</body>',
+  <a-scene>
+  </a-scene>`,
+          position: 'after',
+          marker: '<body>',
           libs: ['a-frame'],
         }),
       },
@@ -99,8 +121,10 @@ export default Service.extend({
           directionalIntensity,
           shadow,
         }) => ({
-          snip: `\n<a-entity light="type: ambient; color: ${ambientColor}"></a-entity>
-<a-entity light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
+          snip: `\n<a-entity id="ambient-light_${randInt(
+            4
+          )}" light="type: ambient; color: ${ambientColor}"></a-entity>
+<a-entity id="directional-light" light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -134,7 +158,9 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Ambient',
         fn: ({ color }) => ({
-          snip: `\n<a-entity light="type: ambient; color: ${color}"></a-entity>\n`,
+          snip: `\n<a-entity id="ambient-light_${randInt(
+            4
+          )}" light="type: ambient; color: ${color}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -155,7 +181,9 @@ export default Service.extend({
       {
         title: 'A-Frame Light: Directional',
         fn: ({ color, intensity, shadow }) => ({
-          snip: `\n<a-entity light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
+          snip: `\n<a-entity id="directional-light_${randInt(
+            4
+          )}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -253,6 +281,14 @@ export default Service.extend({
         ],
       },
 
+      /*
+       * Effects do not work with A-Frame 1.3.0 and it doesn't look like there is much work
+       * happening on the A-Frame Effects repo.. I've played around a little bit seeing if
+       * I could get a few of the functions working which were throwing errors, but other
+       * problems occur which don't seem lilke quick fixes.
+       * See: https://github.com/wizgrav/aframe-effects/issues/21
+       */
+      /*
       {
         title: 'A-Frame Effect: Toon',
         fn: () => ({
@@ -310,11 +346,12 @@ export default Service.extend({
             default: '2',
           },
         ],
-      },
+      }, */
 
       {
         title: 'A-Frame Box',
         fn: ({
+          id,
           position,
           color,
           width,
@@ -324,7 +361,8 @@ export default Service.extend({
           body,
           floor,
         }) => ({
-          snip: `\n<a-box position="${position}"
+          snip: `\n<a-box id="${id}"
+position="${position}"
 rotation="${rotation}"
 color="${color}"
 width="${width}"
@@ -339,6 +377,10 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `box_${randInt(4)}`,
+          },
           {
             name: 'position',
             default: '0 1 -3',
@@ -374,6 +416,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
         ],
         samples: [
           {
+            id: () => `box_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             rotation: () => randomAframeAttr(0, 360),
@@ -386,8 +429,9 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
       },
       {
         title: 'A-Frame Sphere',
-        fn: ({ position, color, radius, body, shadow }) => ({
-          snip: `\n<a-sphere position="${position}"
+        fn: ({ id, position, color, radius, body, shadow }) => ({
+          snip: `\n<a-sphere id="${id}"
+position="${position}"
 radius="${radius}"
 color="${color}"
 body="type:${body};"
@@ -398,6 +442,10 @@ grabbable="physics:true;"></a-sphere>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `sphere_${randInt(4)}`,
+          },
           {
             name: 'position',
             default: '0 0 0',
@@ -421,6 +469,7 @@ grabbable="physics:true;"></a-sphere>\n`,
         ],
         samples: [
           {
+            id: () => `sphere_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             radius: () => randRange(1, 10),
@@ -431,8 +480,18 @@ grabbable="physics:true;"></a-sphere>\n`,
 
       {
         title: 'A-Frame Cylinder',
-        fn: ({ position, color, radius, rotation, height, body, shadow }) => ({
-          snip: `\n<a-cylinder position="${position}"
+        fn: ({
+          id,
+          position,
+          color,
+          radius,
+          rotation,
+          height,
+          body,
+          shadow,
+        }) => ({
+          snip: `\n<a-cylinder id="${id}"
+position="${position}"
 radius="${radius}"
 height="${height}"
 color="${color}"
@@ -445,6 +504,10 @@ grabbable="physics:true;"></a-cylinder>\n`,
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `cylinder_${randInt(4)}`,
+          },
           {
             name: 'position',
             default: '0 0 0',
@@ -476,6 +539,7 @@ grabbable="physics:true;"></a-cylinder>\n`,
         ],
         samples: [
           {
+            id: () => `cylinder_${randInt(4)}`,
             name: () => 'random',
             position: () => randomAframeAttr(-10, 10),
             rotation: () => randomAframeAttr(0, 360),
@@ -485,11 +549,11 @@ grabbable="physics:true;"></a-cylinder>\n`,
           },
         ],
       },
-
       {
         title: 'A-Frame Plane',
-        fn: ({ position, color, rotation, height, width, shadow }) => ({
-          snip: `\n<a-plane position="${position}"
+        fn: ({ id, position, color, rotation, height, width, shadow }) => ({
+          snip: `\n<a-plane id="${id}"
+position="${position}"
 rotation="${rotation}"
 height="${height}"
 width="${width}"
@@ -501,6 +565,10 @@ shadow="receive: ${shadow}"
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `plane_${randInt(4)}`,
+          },
           {
             name: 'position',
             default: '0 0 -4',
@@ -530,13 +598,17 @@ shadow="receive: ${shadow}"
 
       {
         title: 'A-Frame Sky',
-        fn: ({ color }) => ({
-          snip: `\n<a-sky color="${color}"></a-sky>\n`,
+        fn: ({ id, color }) => ({
+          snip: `\n<a-sky id="${id}" color="${color}"></a-sky>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `sky_${randInt(4)}`,
+          },
           {
             name: 'color',
             default: '#ECECEC',
@@ -544,14 +616,18 @@ shadow="receive: ${shadow}"
         ],
         samples: [
           {
+            id: () => `sky_${randInt(4)}`,
             name: () => 'random',
-            position: () => randomAframeAttr(-10, 10),
-            rotation: () => randomAframeAttr(0, 360),
-            radius: () => randRange(1, 10),
-            height: () => randRange(0.4, 10, 1),
             color: () => randomColor(),
           },
         ],
+      },
+      {
+        title: 'THROW ERROR',
+        fn: () => ({
+          // Will throw as does not contain a snip fn
+          position: () => randomAframeAttr(-10, 10),
+        }),
       },
     ]
   }),

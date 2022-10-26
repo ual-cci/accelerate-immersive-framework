@@ -30,7 +30,8 @@ export default Controller.extend({
   cs: inject('console'),
   library: inject(),
   snippet: inject(),
-  currentSnip: {},
+  currentSnip: null,
+  aframeCom: inject('aframe-communicator'),
 
   //Parameters
   con: null,
@@ -84,7 +85,7 @@ export default Controller.extend({
   highContrast: false,
   showSnippetEditor: false,
   showErrorBar: false,
-  snippetError: '',
+  errorMsg: '',
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -93,7 +94,7 @@ export default Controller.extend({
 
   //Computed parameters
 
-  aceStyle: computed('codeW', function () {
+  aceStyle: computed('codeW', function() {
     this.updateDragPos()
     const codeW = this.get('codeW')
     const display = this.get('showCodeControls') ? 'inline' : 'none'
@@ -101,21 +102,21 @@ export default Controller.extend({
     return htmlSafe('width: ' + codeW + '; display: ' + display + ';')
   }),
   titleNoName: '',
-  editLink: computed('model', function () {
+  editLink: computed('model', function() {
     return config.localOrigin + '/code/' + this.get('model').id
   }),
-  embedLink: computed('editLink', function () {
+  embedLink: computed('editLink', function() {
     return this.get('editLink') + '?embed=true'
   }),
-  libraries: computed('library.libraryMap', function () {
+  libraries: computed('library.libraryMap', function() {
     return this.get('library').libraryMap
   }),
-  snippets: computed('snippet.snippetsMap', function () {
+  snippets: computed('snippet.snippetsMap', function() {
     return this.get('snippet').snippetsMap
   }),
 
   //Functions
-  init: function () {
+  init: function() {
     this._super()
     this.set('tabs', [])
     this.set('droppedOps', [])
@@ -142,7 +143,7 @@ export default Controller.extend({
         this.set(
           'isMobile',
           !this.get('mediaQueries').isDesktop &&
-            (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded'))
+          (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded'))
         )
         this.get('cs').log('isMobile', this.get('isMobile'))
         document.getElementById('ace-container').style.visibility = this.get(
@@ -156,8 +157,56 @@ export default Controller.extend({
         this.syncOutputContainer()
       }
     })
+    window.addEventListener('message', (e) => this.receiveMessage(e))
   },
-  begin: function () {
+  receiveMessage: function(e) {
+    try {
+      if (!e.origin === config.localOrigin) throw ('Data is from an incorrect source.')
+      const { data } = e
+      if (!typeof data === 'string') return
+
+      const parsedData = JSON.parse(data)
+      this.updateSourceFromSession().then(() => {
+        const source = this.get('model.source')
+        const errorHandler = (msg) => {
+          this.set('errorMsg', msg)
+          this.set('showErrorBar', true)
+          this.syncOutputContainer()
+        }
+        const newFile = this.get('aframeCom').updateFile(
+          source,
+          parsedData,
+          errorHandler
+        )
+        const clear = {
+          p: ['source', 0],
+          sd: source,
+        }
+        const create = {
+          p: ['source', 0],
+          si: newFile,
+        }
+
+        const ops = [clear, create]
+
+        ops.forEach((op) => {
+          this.submitOp(op)
+          this.set('surpress', true)
+          this.get('codeParser').applyOps([op], this.get('editor'))
+          this.set('surpress', false)
+
+          if (this.get('autoRender')) {
+            this.updateIFrame()
+          }
+
+        })
+
+      })
+    } catch (error) {
+      console.warn(`[Aframe Communicator]: Invalid Data: ${JSON.stringify(e.data, null, 2)}`)
+    }
+  },
+  begin: function() {
     this.get('cs').log('beginning')
     this.set('hudMessage', '')
     this.set('showHUD', true)
@@ -174,7 +223,7 @@ export default Controller.extend({
       this.addWindowListener()
     })
   },
-  initViewer: function () {
+  initViewer: function() {
     //Can't be a viewer and an editor
     if (this.get('canEditSource')) {
       this.set('isViewer', false)
@@ -184,7 +233,7 @@ export default Controller.extend({
       this.resetOpsPlayer()
     }
   },
-  resetOpsPlayer: function () {
+  resetOpsPlayer: function() {
     if (this.get('isViewer')) {
       this.cleanUpOpPlayer()
       this.get('cs').log('starting op time (code editor)')
@@ -211,16 +260,16 @@ export default Controller.extend({
         })
     }
   },
-  initShareDB: function () {
+  initShareDB: function() {
     this.get('cs').log('initShareDB')
     this.set('leftCodeEditor', false)
     this.initWebSockets()
   },
-  initFromUrl: function () {
+  initFromUrl: function() {
     this.set('isEmbedded', this.get('embed') == 'true')
     this.set('isEmbeddedWithCode', this.get('showCode') == 'true')
   },
-  initUI: function () {
+  initUI: function() {
     //this.set('collapsed', true);
     setTimeout(() => {
       const embed = this.get('isEmbedded')
@@ -228,7 +277,7 @@ export default Controller.extend({
       this.set(
         'isMobile',
         !this.get('mediaQueries').isDesktop &&
-          (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded'))
+        (!this.get('isEmbeddedWithCode') || !this.get('isEmbedded'))
       )
       this.get('cs').log('isMobile', this.get('isMobile'))
       this.set(
@@ -272,7 +321,7 @@ export default Controller.extend({
       this.get('cs').observers.push(this)
     }, 50)
   },
-  initWebSockets: function (onSelectDoc) {
+  initWebSockets: function(onSelectDoc) {
     let socket = this.get('socket')
     this.get('cs').log('init websockets', socket)
     if (!isEmpty(socket) && socket.state == 1) {
@@ -333,7 +382,7 @@ export default Controller.extend({
       }
     }
   },
-  cleanUpOpPlayer: function () {
+  cleanUpOpPlayer: function() {
     //this.set("isViewer",false);
     this.set('prevEvalReceived', 0)
     this.set('gotFirstEval', false)
@@ -343,7 +392,7 @@ export default Controller.extend({
       this.set('viewerInterval', null)
     }
   },
-  cleanUpShareDB: function () {
+  cleanUpShareDB: function() {
     if (this.get('wsAvailable') && !isEmpty(this.get('sharedDBDoc'))) {
       this.get('cs').log('clearning up sharedb')
       try {
@@ -354,7 +403,7 @@ export default Controller.extend({
       this.set('sharedDBDoc', null)
     }
   },
-  cleanUpConnections: function () {
+  cleanUpConnections: function() {
     return new RSVP.Promise((resolve, reject) => {
       this.cleanUpShareDB()
       this.set('currentDoc', null)
@@ -378,7 +427,7 @@ export default Controller.extend({
       resolve()
     })
   },
-  websocketError: function () {
+  websocketError: function() {
     this.get('cs').log('websocket error')
     this.set('wsAvailable', false)
     this.cleanUpConnections().then(() => {
@@ -388,7 +437,7 @@ export default Controller.extend({
       }
     })
   },
-  newDocSelected: function (docId) {
+  newDocSelected: function(docId) {
     this.get('cs').log('newDocSelected')
     return new RSVP.Promise((resolve, reject) => {
       let doc = this.get('currentDoc')
@@ -413,7 +462,7 @@ export default Controller.extend({
       }
     })
   },
-  selectRootDoc: function () {
+  selectRootDoc: function() {
     this.get('cs').log('selectRootDoc')
     return new RSVP.Promise((resolve, reject) => {
       this.newDocSelected(this.get('model').id).then(() => {
@@ -445,7 +494,7 @@ export default Controller.extend({
   },
   //This function does really work well for viewer or collaborate modes
   //because its at odds with the ops (disabled at the moment)
-  startSyncTimer: function () {
+  startSyncTimer: function() {
     if (this.get('updateSourceOnInterval') && this.get('isViewer')) {
       this.get('cs').log('setting update source interval')
       if (!isEmpty(this.get('updateSourceInterval'))) {
@@ -460,7 +509,7 @@ export default Controller.extend({
       )
     }
   },
-  connectToDoc: function (docId) {
+  connectToDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('cs').log('connectToDoc doc')
       this.set('fetchingDoc', true)
@@ -495,7 +544,7 @@ export default Controller.extend({
       }
     })
   },
-  fetchDoc: function (docId) {
+  fetchDoc: function(docId) {
     return new RSVP.Promise((resolve, reject) => {
       this.get('store')
         .findRecord('document', docId)
@@ -506,7 +555,7 @@ export default Controller.extend({
     })
   },
   //A check to see if we have drifted or lost ops, resyncs if necessary
-  updateSessionFromServer: function () {
+  updateSessionFromServer: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc')
       this.get('documentService')
@@ -534,7 +583,7 @@ export default Controller.extend({
         })
     })
   },
-  updateSourceFromSession: function () {
+  updateSourceFromSession: function() {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc')
       if (!isEmpty(doc) && this.get('droppedOps').length == 0) {
@@ -555,7 +604,7 @@ export default Controller.extend({
       }
     })
   },
-  reloadDoc: function () {
+  reloadDoc: function() {
     const scrollPos = this.get('editor').getCursor(true)
     const editor = this.get('editor')
     this.get('cs').log('reloading doc')
@@ -576,7 +625,7 @@ export default Controller.extend({
       })
     })
   },
-  setLanguage: function () {
+  setLanguage: function() {
     const editor = this.get('editor')
     const doc = this.get('currentDoc')
     let lang = 'htmlmixed'
@@ -589,7 +638,7 @@ export default Controller.extend({
     }
     editor.setOption('mode', lang)
   },
-  didReceiveDoc: function () {
+  didReceiveDoc: function() {
     this.get('cs').log('didReceiveDoc', this.get('isMobile'))
     document.getElementById('ace-container').style.visibility = this.get(
       'isMobile'
@@ -638,7 +687,7 @@ export default Controller.extend({
       resolve()
     })
   },
-  setParentData: function (data) {
+  setParentData: function(data) {
     const currentDoc = this.get('currentDoc')
     let isSelected = true
     if (!isEmpty(currentDoc)) {
@@ -653,7 +702,7 @@ export default Controller.extend({
       isSelected: isSelected,
     })
   },
-  clearTabs: function () {
+  clearTabs: function() {
     this.setParentData({
       name: '',
       id: '',
@@ -663,7 +712,7 @@ export default Controller.extend({
     })
     this.set('tabs', [])
   },
-  setTabs: function (data) {
+  setTabs: function(data) {
     const currentDoc = this.get('currentDoc')
     const tabs = data.map((child) => {
       const canDelete = this.get('canEditSettings') && child.id == currentDoc.id
@@ -678,7 +727,7 @@ export default Controller.extend({
     this.set('tabs', tabs)
     this.syncOutputContainer()
   },
-  fetchChildren: function () {
+  fetchChildren: function() {
     this.get('cs').log('fetchChildren')
     return new RSVP.Promise((resolve, reject) => {
       let model = this.get('model')
@@ -766,7 +815,7 @@ export default Controller.extend({
     toUpdate[op.owner].marker = cm.setBookmark(cursorPos, { widget: container })
     this.set('cursors', toUpdate)
   },
-  didReceiveOp: function (ops, source, version = 0) {
+  didReceiveOp: function(ops, source, version = 0) {
     const editor = this.get('editor')
     const canReceiveOp = () => {
       return (
@@ -867,7 +916,7 @@ export default Controller.extend({
       }
     }
   },
-  submitOp: function (op, retry = 0) {
+  submitOp: function(op, retry = 0) {
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc')
       const error = () => {
@@ -924,7 +973,7 @@ export default Controller.extend({
       }
     })
   },
-  doPlayOnLoad: function () {
+  doPlayOnLoad: function() {
     let model = this.get('model')
     const embed = this.get('isEmbedded')
     if (embed) {
@@ -932,7 +981,7 @@ export default Controller.extend({
     }
     return model.get('dontPlay') === 'false' || !model.get('dontPlay')
   },
-  preloadAssets: function () {
+  preloadAssets: function() {
     this.get('cs').log('preloadAssets')
     return new RSVP.Promise((resolve, reject) => {
       let model = this.get('model')
@@ -956,7 +1005,7 @@ export default Controller.extend({
       }
     })
   },
-  getSelectedText: function () {
+  getSelectedText: function() {
     const doc = this.get('editor').getDoc()
     let selection = doc.getSelection()
     if (selection.length === 0) {
@@ -967,7 +1016,20 @@ export default Controller.extend({
     return selection
   },
 
-  updateIFrame: function (selection = false) {
+  getSelectedRange() {
+    const editor = this.get('editor')
+    return { from: editor.getCursor(true), to: editor.getCursor(false) };
+  },
+
+  autoFormat() {
+    const editor = this.get('editor')
+    editor.execCommand('selectAll')
+    var range = this.getSelectedRange();
+    editor.focus()
+    editor.autoFormatRange(range.from, range.to);
+  },
+
+  updateIFrame: function(selection = false) {
     this.updateSourceFromSession()
       .then(() => {
         this.fetchChildren()
@@ -1039,7 +1101,7 @@ export default Controller.extend({
         this.get('cs').log(err)
       })
   },
-  writeIframeContent: function (src) {
+  writeIframeContent: function(src) {
     const viewer = document.getElementById('output-iframe')
     if (!isEmpty(viewer)) {
       const cd = viewer.contentDocument
@@ -1074,7 +1136,7 @@ export default Controller.extend({
       }
     }
   },
-  flashAutoRender: function () {
+  flashAutoRender: function() {
     // let autoInput = document.getElementsByClassName('CodeMirror').item(0)
     // autoInput.style["border-style"] = "solid"
     // autoInput.style["border-width"] = "5px"
@@ -1083,7 +1145,7 @@ export default Controller.extend({
     //     autoInput.style["border-style"] = "none"
     // }, 250);
   },
-  flashSelectedText: function (pos) {
+  flashSelectedText: function(pos) {
     const editor = this.get('editor')
     let start = editor.getCursor(true)
     let end = editor.getCursor(false)
@@ -1107,7 +1169,7 @@ export default Controller.extend({
     }, 500)
     return { start: start, end: end }
   },
-  onCodingFinished: function () {
+  onCodingFinished: function() {
     if (this.get('autoRender')) {
       this.flashAutoRender()
       //this.writeIframeContent("");
@@ -1115,7 +1177,7 @@ export default Controller.extend({
     }
     this.set('codeTimer', null)
   },
-  restartCodeTimer: function () {
+  restartCodeTimer: function() {
     if (this.get('codeTimer')) {
       clearTimeout(this.get('codeTimer'))
     }
@@ -1126,7 +1188,7 @@ export default Controller.extend({
       }, this.get('codeTimerRefresh'))
     )
   },
-  onSessionChange: function (delta) {
+  onSessionChange: function(delta) {
     //dont send up the op if we're embedded (allows local code changes)
     if (this.get('isEmbeddedWithCode')) {
       return
@@ -1159,7 +1221,7 @@ export default Controller.extend({
       this.restartCodeTimer()
     }
   },
-  addWindowListener: function () {
+  addWindowListener: function() {
     this.removeWindowListener()
     var eventMethod = window.addEventListener
       ? 'addEventListener'
@@ -1168,7 +1230,7 @@ export default Controller.extend({
     window.self = this
     var messageEvent = eventMethod === 'attachEvent' ? 'onmessage' : 'message'
     eventer(messageEvent, this.handleWindowEvent, false)
-    window.onclick = function (event) {
+    window.onclick = function(event) {
       if (!event.target.matches('.dropbtn')) {
         var dropdowns = document.getElementsByClassName('dropdown-content')
         var i
@@ -1181,7 +1243,7 @@ export default Controller.extend({
       }
     }
   },
-  removeWindowListener: function () {
+  removeWindowListener: function() {
     var eventMethod = window.removeEventListener
       ? 'removeEventListener'
       : 'detachEvent'
@@ -1221,7 +1283,7 @@ export default Controller.extend({
       }
     }
   },
-  printFl: function (self) {
+  printFl: function(self) {
     self
       .get('opsPlayer')
       .loadOps()
@@ -1235,12 +1297,12 @@ export default Controller.extend({
         })
       })
   },
-  update: function () {
+  update: function() {
     this.set('consoleOutput', this.get('cs').output)
     var textarea = document.getElementById('console')
     textarea.scrollTop = textarea.scrollHeight
   },
-  isCollaborator: function () {
+  isCollaborator: function() {
     let currentUserName = this.get('sessionAccount').currentUserName
     if (isEmpty(currentUserName)) {
       currentUserName = ''
@@ -1257,7 +1319,7 @@ export default Controller.extend({
     }
     return false
   },
-  setCanEditDoc: function () {
+  setCanEditDoc: function() {
     const currentUser = this.get('sessionAccount').currentUserId
     let currentUserName = this.get('sessionAccount').currentUserName
     if (isEmpty(currentUserName)) {
@@ -1316,7 +1378,7 @@ export default Controller.extend({
       this.set('canEditSettings', false)
     }
   },
-  deleteCurrentDocument: function () {
+  deleteCurrentDocument: function() {
     let model = this.get('model')
     if (confirm('Are you sure you want to delete?')) {
       this.get('cs').log('deleting root doc')
@@ -1333,7 +1395,7 @@ export default Controller.extend({
         })
     }
   },
-  resetScrollPositions: function () {
+  resetScrollPositions: function() {
     var scrollPositions = {}
     scrollPositions[this.get('model').id] = 0
     this.get('children').forEach((child) => {
@@ -1341,11 +1403,11 @@ export default Controller.extend({
     })
     this.set('scrollPositions', scrollPositions)
   },
-  updateScrollPosition: function () {
+  updateScrollPosition: function() {
     this.get('scrollPositions')[this.get('currentDoc').id] =
       this.get('editor').getCursor(true)
   },
-  scrollToSavedPosition: function () {
+  scrollToSavedPosition: function() {
     const pos = this.get('scrollPositions')[this.get('currentDoc').id]
     this.get('editor').scrollIntoView(pos)
   },
@@ -1355,7 +1417,7 @@ export default Controller.extend({
   we do stuff like drop downs or scroll bars appearing, the code container shifts
   down appropirately but the output doesnt. We use this method to keep them in sync
   */
-  syncOutputContainer: function () {
+  syncOutputContainer: function() {
     setTimeout(() => {
       const ace = $('#ace-container')
       if (!isEmpty(ace)) {
@@ -1364,7 +1426,7 @@ export default Controller.extend({
       }
     }, 50)
   },
-  updateDragPos: function () {
+  updateDragPos: function() {
     this.syncOutputContainer()
     const codeW = parseInt(
       this.get('codeW').substring(0, this.get('codeW').length - 2)
@@ -1385,7 +1447,7 @@ export default Controller.extend({
       }
     }
   },
-  skipOp: function (prev, rewind = false) {
+  skipOp: function(prev, rewind = false) {
     const update = () => {
       return new RSVP.Promise((resolve, reject) => {
         const editor = this.get('editor')
@@ -1411,7 +1473,7 @@ export default Controller.extend({
       this.get('cs').log('UNSURPRESSING')
     })
   },
-  updateSavedVals: function () {
+  updateSavedVals: function() {
     return new RSVP.Promise((resolve, reject) => {
       const savedVals = this.get('savedVals')
       if (isEmpty(savedVals)) {
@@ -1436,7 +1498,7 @@ export default Controller.extend({
       }
     })
   },
-  updateEditStats: function () {
+  updateEditStats: function() {
     return new RSVP.Promise((resolve, reject) => {
       let model = this.get('model')
       let stats = model.get('stats')
@@ -1466,7 +1528,7 @@ export default Controller.extend({
         })
     })
   },
-  refreshDoc: function () {
+  refreshDoc: function() {
     const doc = this.get('currentDoc')
     if (!isEmpty(doc)) {
       const fn = () => {
@@ -1498,7 +1560,7 @@ export default Controller.extend({
         })
     }
   },
-  showFeedback: function (msg) {
+  showFeedback: function(msg) {
     this.set('feedbackMessage', msg)
     if (!isEmpty(this.get('feedbackTimer'))) {
       clearTimeout(this.get('feedbackTimer'))
@@ -1511,13 +1573,13 @@ export default Controller.extend({
       }, 5000)
     )
   },
-  pauseOps: function () {
+  pauseOps: function() {
     this.set('isPlayingOps', false)
     if (this.get('opsInterval')) {
       clearInterval(this.get('opsInterval'))
     }
   },
-  playOps: function () {
+  playOps: function() {
     this.pauseOps()
     this.set('isPlayingOps', true)
     this.set(
@@ -1531,8 +1593,8 @@ export default Controller.extend({
       }, 100)
     )
   },
-  hijackConsoleOutput: function () {
-    ;(() => {
+  hijackConsoleOutput: function() {
+    ; (() => {
       let oldLog = this.get('cs').log
       this.get('cs').log = (msg) => {
         if (config.debugConsole) {
@@ -1556,7 +1618,7 @@ export default Controller.extend({
       }
     })()
   },
-  updatePlayButton: function () {
+  updatePlayButton: function() {
     let update = (button) => {
       if (!isEmpty(button)) {
         if (!this.get('doPlay')) {
@@ -1575,14 +1637,14 @@ export default Controller.extend({
     update(document.getElementById('code-play-btn'))
     update(document.getElementById('embedded-run-button'))
   },
-  updateTabbarLocation: function () {
+  updateTabbarLocation: function() {
     const codeW = this.get('codeW')
     let tab = document.getElementById('project-tabs')
     if (tab) {
       tab.style.width = codeW
     }
   },
-  foldHead: function () {
+  foldHead: function() {
     const editor = this.get('editor')
     this.get('cs').log('FOLDING HEAD')
     editor.operation(() => {
@@ -1594,7 +1656,7 @@ export default Controller.extend({
       }
     })
   },
-  hideCode: function (doHide) {
+  hideCode: function(doHide) {
     let container = document.getElementById('ace-container')
     container.classList.add(doHide ? 'hiding-code' : 'showing-code')
     container.classList.remove(!doHide ? 'hiding-code' : 'showing-code')
@@ -1659,6 +1721,9 @@ export default Controller.extend({
       })
   },
   actions: {
+    autoFormat() {
+      this.autoFormat()
+    },
     //codemirror
     onEditorReady(editor) {
       this.set('editor', editor)
@@ -1731,7 +1796,7 @@ export default Controller.extend({
     doEditDocName() {
       if (this.get('canEditSettings')) {
         this.set('isNotEdittingDocName', false)
-        scheduleOnce('afterRender', function () {
+        scheduleOnce('afterRender', function() {
           $('#doc-name-input').focus()
         })
       }
@@ -2025,7 +2090,7 @@ export default Controller.extend({
       if (
         !(snippet.hasOwnProperty('snip') || snippet.hasOwnProperty('effect'))
       ) {
-        this.set('snippetError', 'Error with the snippet')
+        this.set('errorMsg', 'Error with the snippet')
         this.set('showErrorBar', true)
         this.syncOutputContainer()
         return
@@ -2036,11 +2101,11 @@ export default Controller.extend({
         const ops = this.get('codeParser').insertSnippet(
           source,
           snippet,
-          this.get('editor')
         )
-        if (typeof op === 'string') {
-          const error = parseSnippetError(op, snippet)
-          this.set('snippetError', error)
+        // If it's a string, it's an error.
+        if (typeof ops === 'string') {
+          const error = parseSnippetError(ops, snippet)
+          this.set('errorMsg', error)
           this.set('showErrorBar', true)
           this.syncOutputContainer()
           return
@@ -2057,12 +2122,13 @@ export default Controller.extend({
           }
         })
       })
+      this.autoFormat()
     },
     toggleShowShare() {
       this.toggleProperty('showShare')
     },
     closeErrorBar() {
-      this.set('snippetError', '')
+      this.set('errorMsg', '')
       this.set('showErrorBar', false)
       this.syncOutputContainer()
     },

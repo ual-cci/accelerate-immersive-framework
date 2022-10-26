@@ -7,7 +7,7 @@ import RSVP from 'rsvp'
 import hljs from 'highlight.js'
 import { computed } from '@ember/object'
 import {
-  extractEffect,
+  extract,
   makeFirstEffect,
   getMarkers,
 } from '../helpers/snippet-insert'
@@ -36,19 +36,20 @@ export default Service.extend({
     const op = { p: ['source', index], si: insert }
     return op
   },
-  insertSnippet(source, snippet, editor) {
+  insertSnippet(source, snippet) {
     const { snip, type, marker, position, libs } = snippet
     for (const lib of libs) {
       const libUrl = this.get('library').url(lib)
       if (source.indexOf(libUrl) < 0) return 'libNotFound'
     }
-    // -- EFFECTS ---
+    const ops = []
+    // --- EFFECTS ---
     let isEffect = type === 'effect'
     let effectSnippet = ''
-    const ops = []
     if (isEffect) {
       // Extract text between '<a-scene' and '>'
-      const currentEffect = extractEffect(source)
+      const currentEffect = extract(source, '<a-scene', '>')
+      // If there are already effects
       if (currentEffect.indexOf('effects="') >= 0) {
         // Find 'effects=' and add new effect name
         effectSnippet = currentEffect.replace(
@@ -67,7 +68,22 @@ export default Service.extend({
         effectSnippet = makeFirstEffect(snippet)
       }
     }
-    // -- EFFECTS END ---
+    // --- EFFECTS END ---
+
+    // --- SCENE ---
+    /* Create an op to delete the current scene */
+    const snippetIsScene = type === 'scene'
+    const sourceHasScene = source.indexOf('<a-scene') >= 0 
+    if(snippetIsScene && sourceHasScene) {
+        const currentScene = extract(source, '<a-scene', '</a-scene>', true)
+        const [a, _] = getMarkers(source, '<a-scene', '</a-scene>', true)
+        ops.push({
+          p: ['source', a],
+          sd: currentScene,
+        })
+    }
+    // --- SCENE END ---
+
     const index = source.indexOf(marker)
     if (index < 0) {
       return 'markerNotFound'
@@ -670,7 +686,7 @@ export default Service.extend({
 
     return ops
   },
-  applyOps: function (ops, editor) {
+  applyOps: function(ops, editor) {
     let opToDelta = (op) => {
       const start = op.p[op.p.length - 1]
       const from = editor.doc.posFromIndex(start)
