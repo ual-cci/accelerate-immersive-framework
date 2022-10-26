@@ -2131,7 +2131,7 @@ export default Controller.extend({
           }
         })
       })
-      this.autoFormat()
+      this.syncOutputContainer()
     },
     toggleShowShare() {
       this.toggleProperty('showShare')
