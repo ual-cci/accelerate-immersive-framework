@@ -511,6 +511,14 @@
                         onClick=(action 'autoFormat')
                       }}{{/bs-button}}
                     </div>
+                    <div class='tooltip'>
+                      <span class='tooltiptext'>Toggle Linewrap</span>
+                      {{#bs-button
+                        class='clear-btn'
+                        icon='glyphicon glyphicon-indent-right'
+                        onClick=(action 'toggleLinewrap')
+                      }}{{/bs-button}}
+                    </div>
                   </div>
                 {{/if}}
               {{/if}}

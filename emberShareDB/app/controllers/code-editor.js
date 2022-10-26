@@ -92,6 +92,8 @@ export default Controller.extend({
 
   renderedSource: '',
 
+  lineWrap: true,
+
   //Computed parameters
 
   aceStyle: computed('codeW', function () {
@@ -1729,6 +1731,11 @@ export default Controller.extend({
     autoFormat() {
       this.autoFormat()
     },
+    toggleLinewrap() {
+      this.set('lineWrap', !this.get('lineWrap'))
+      this.get('editor').setOption('lineWrapping', this.get('lineWrap'))
+    },
+
     //codemirror
     onEditorReady(editor) {
       this.set('editor', editor)
