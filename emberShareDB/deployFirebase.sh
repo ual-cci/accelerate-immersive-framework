@@ -1,4 +1,4 @@
-!/bin/bash
+#!/usr/bin/bash
 #FILE="$PWD/public/libs/maxiSynthProcessor.v.0.4.js"
 #tail -n +2 "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
 #(echo "import Maximilian from \"https://mimicproject.com/libs/maximilian.wasmmodule.v.0.3.js\"" && cat $FILE) > $FILE.tmp && mv $FILE.tmp $FILE
