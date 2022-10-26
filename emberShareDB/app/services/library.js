@@ -26,7 +26,11 @@ export default Service.extend({
       { title: 'SoundJS', id: 'soundjs', url: 'soundjs.js' },
       { title: 'Marked', id: 'marked', url: 'marked.js' },
       { title: 'ThreeJS', id: 'threejs', url: 'three.min.js' },
-      { title: 'A-Frame', id: 'a-frame', url: 'aframe-v1.3.0.min.js' },
+      {
+        title: 'A-Frame',
+        id: 'a-frame',
+        url: 'aframe-v1.3.0.min.js',
+      },
       {
         title: 'A-Frame Effects',
         id: 'a-frame-effects',

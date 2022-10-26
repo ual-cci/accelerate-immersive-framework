@@ -6,11 +6,7 @@ import config from '../config/environment'
 import RSVP from 'rsvp'
 import hljs from 'highlight.js'
 import { computed } from '@ember/object'
-import {
-  extract,
-  makeFirstEffect,
-  getMarkers,
-} from '../helpers/snippet-insert'
+import { extract, makeFirstEffect, getMarkers } from '../helpers/snippet-insert'
 
 export default Service.extend({
   store: inject('store'),
@@ -73,14 +69,14 @@ export default Service.extend({
     // --- SCENE ---
     /* Create an op to delete the current scene */
     const snippetIsScene = type === 'scene'
-    const sourceHasScene = source.indexOf('<a-scene') >= 0 
-    if(snippetIsScene && sourceHasScene) {
-        const currentScene = extract(source, '<a-scene', '</a-scene>', true)
-        const [a, _] = getMarkers(source, '<a-scene', '</a-scene>', true)
-        ops.push({
-          p: ['source', a],
-          sd: currentScene,
-        })
+    const sourceHasScene = source.indexOf('<a-scene') >= 0
+    if (snippetIsScene && sourceHasScene) {
+      const currentScene = extract(source, '<a-scene', '</a-scene>', true)
+      const [a, _] = getMarkers(source, '<a-scene', '</a-scene>', true)
+      ops.push({
+        p: ['source', a],
+        sd: currentScene,
+      })
     }
     // --- SCENE END ---
 
@@ -686,7 +682,7 @@ export default Service.extend({
 
     return ops
   },
-  applyOps: function(ops, editor) {
+  applyOps: function (ops, editor) {
     let opToDelta = (op) => {
       const start = op.p[op.p.length - 1]
       const from = editor.doc.posFromIndex(start)
