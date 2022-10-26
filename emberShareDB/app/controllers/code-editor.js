@@ -84,8 +84,10 @@ export default Controller.extend({
   evalPtr: 0,
   highContrast: false,
   showSnippetEditor: false,
-  showErrorBar: false,
-  errorMsg: '',
+  showInfoBar: false,
+  isError: true,
+  msg: '',
+  isCollaborative: false,
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -172,8 +174,9 @@ export default Controller.extend({
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
         const errorHandler = (msg) => {
-          this.set('errorMsg', msg)
-          this.set('showErrorBar', true)
+          this.set('msg', msg)
+          this.set('isError', true)
+          this.set('showInfoBar', true)
           this.syncOutputContainer()
         }
         const newFile = this.get('aframeCom').updateFile(
@@ -1322,6 +1325,16 @@ export default Controller.extend({
       const isCollaborator =
         collaborators.includes(currentUserName) &&
         this.get('model.isCollaborative')
+
+      const owner = this.get('model.owner')
+      const docName = this.get('model.name')
+      const msg = `You are currently collaborating with <strong><u>${owner}</u></strong> on their document "${docName}".`
+      this.set('isCollaborative', true)
+      this.set('msg', msg)
+      this.set('isError', false)
+      this.set('showInfoBar', true)
+      this.syncOutputContainer()
+
       return isCollaborator
     }
     return false
@@ -1735,6 +1748,22 @@ export default Controller.extend({
       this.set('lineWrap', !this.get('lineWrap'))
       this.get('editor').setOption('lineWrapping', this.get('lineWrap'))
     },
+    showCollaborators() {
+      let collaborators = this.get('model.collaborators').map((i) =>
+        i.toLowerCase()
+      )
+      if (!isEmpty(collaborators)) {
+        const owner = this.get('model.owner')
+
+        this.set(
+          'msg',
+          `Owner: ${owner}, Collaborators: ${collaborators.join(', ')}`
+        )
+        this.set('isError', false)
+        this.set('showInfoBar', true)
+        this.syncOutputContainer()
+      }
+    },
 
     //codemirror
     onEditorReady(editor) {
@@ -2102,8 +2131,9 @@ export default Controller.extend({
       if (
         !(snippet.hasOwnProperty('snip') || snippet.hasOwnProperty('effect'))
       ) {
-        this.set('errorMsg', 'Error with the snippet')
-        this.set('showErrorBar', true)
+        this.set('msg', 'Error with the snippet')
+        this.set('isError', true)
+        this.set('showInfoBar', true)
         this.syncOutputContainer()
         return
       }
@@ -2114,8 +2144,9 @@ export default Controller.extend({
         // If it's a string, it's an error.
         if (typeof ops === 'string') {
           const error = parseSnippetError(ops, snippet)
-          this.set('errorMsg', error)
-          this.set('showErrorBar', true)
+          this.set('msg', error)
+          this.set('isError', true)
+          this.set('showInfoBar', true)
           this.syncOutputContainer()
           return
         }
@@ -2136,9 +2167,9 @@ export default Controller.extend({
     toggleShowShare() {
       this.toggleProperty('showShare')
     },
-    closeErrorBar() {
-      this.set('errorMsg', '')
-      this.set('showErrorBar', false)
+    closeInfoBar() {
+      this.set('msg', '')
+      this.set('showInfoBar', false)
       this.syncOutputContainer()
     },
     toggleShowRecordingPanel() {

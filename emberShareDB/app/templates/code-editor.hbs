@@ -33,6 +33,20 @@
               <!-- BUTTONS -->
               <!-- BUTTONS -->
               <div id='transport-container'>
+
+                {{#if isCollaborative}}
+                  <div class='tooltip'>
+                    {{#bs-button
+                      (html-attributes aria-label='Show Collaborators')
+                      icon='glyphicon glyphicon-user'
+                      id='code-collaborators-btn'
+                      class='clear-btn transport-btn'
+                      onClick=(action 'showCollaborators')
+                    }}{{/bs-button}}
+                    <span class='tooltiptext'>Show Collaborators</span>
+                  </div>
+                {{/if}}
+
                 <div class='tooltip'>
                   {{#bs-button
                     (html-attributes aria-label='Render Code')
@@ -339,8 +353,8 @@
             {{/if}}
           </div>
         {{/if}}
-        {{#if showErrorBar}}
-          {{error-bar error=errorMsg hide=(action 'closeErrorBar')}}
+        {{#if showInfoBar}}
+          {{info-bar msg=msg isError=isError hide=(action 'closeInfoBar')}}
         {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}
