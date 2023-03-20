@@ -21,7 +21,7 @@ export default Service.extend({
   </head>
   <body>
     <a-scene physics>
-      <a-player locomotion grabbing></a-player>
+      <a-player id="player" locomotion grabbing></a-player>
       <a-sky color="#ECECEC"></a-sky>
       <a-box id="floor_0001"
              position="0 0 -3"
