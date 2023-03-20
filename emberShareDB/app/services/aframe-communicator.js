@@ -8,6 +8,7 @@ export default Service.extend({
     const filler = '([^]*?)'
     const whitespace = '[\\s\\n]'
     const propertyDelimit = '["\\s;]'
+    /* const closing = '[\\w]+>' */
 
     Object.keys(changes).forEach((id) => {
       // Scan for ID in file.
@@ -31,7 +32,11 @@ export default Service.extend({
       const originalEntityString = entityString
 
       if(changes[id].remove === true) {
-        source = source.replace(originalEntityString, '')
+        const nameReg = new RegExp(element)
+        const name = nameReg.exec(originalEntityString)
+        const closing = name[0].replace('<', '</') + '>'
+
+        source = source.replace(originalEntityString + closing, '')
       }
 
       // Post-process regex to get only last occurence.
