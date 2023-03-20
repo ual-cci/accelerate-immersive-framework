@@ -179,8 +179,14 @@ export default Controller.extend({
       if (!typeof data === 'string') return
       if (!data) return
 
+      /* TODO: Don't update IFrame if user is still in VR mode and moving things around.
+      Make all those changes at the end. */
       const parsedData = JSON.parse(data)
       if(!parsedData.target === 'accelerate-editor') throw 'Data is not from the inspector.'
+
+      if(parsedData.respawn){
+        this.updateIFrame()
+      }
 
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
