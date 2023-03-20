@@ -172,13 +172,16 @@ export default Controller.extend({
      * it will updages the doc using the aframe-commiunicator
      */
     try {
-      if (!e.origin === config.localOrigin) {
+      if (!e.origin === config.localOrigin || e.data.target) {
         throw 'Data is from an incorrect source.'
       }
       const { data } = e
       if (!typeof data === 'string') return
+      if (!data) return
 
       const parsedData = JSON.parse(data)
+      if(!parsedData.target === 'accelerate-editor') throw 'Data is not from the inspector.'
+
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
         const errorHandler = (msg) => {
@@ -189,7 +192,7 @@ export default Controller.extend({
         }
         const newFile = this.get('aframeCom').updateFile(
           source,
-          parsedData,
+          parsedData.changes,
           errorHandler
         )
         const clear = {
