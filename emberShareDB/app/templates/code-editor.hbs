@@ -275,6 +275,21 @@
                   code</span>
               </div>
               <div class='tooltip'>
+                <label
+                  class='doc-checkbox'
+                  for='suppressWarningsCheckbox'
+                >SUPPRESS SNIPPET WARNINGS?</label>
+                {{input
+                  type='checkbox'
+                  tabIndex='0'
+                  id='suppressWarningsCheckbox'
+                  checked=suppressSnippetWarnings
+                  click=(action 'toggleSuppressSnippetWarnings')
+                }}
+                <span class='tooltiptext'>WARNING! Other users can edit your
+                  code</span>
+              </div>
+              <div class='tooltip'>
                 <label class='doc-checkbox' for='playCheckbox'>DONT PLAY ON OPEN</label>
                 {{input
                   tabIndex='0'
@@ -354,7 +369,12 @@
           </div>
         {{/if}}
         {{#if showInfoBar}}
-          {{info-bar msg=msg isError=isError hide=(action 'closeInfoBar')}}
+          {{info-bar
+            msg=msg
+            button=infoBarButton
+            isError=isError
+            hide=(action 'closeInfoBar')
+          }}
         {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}

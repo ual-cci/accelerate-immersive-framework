@@ -6,7 +6,13 @@ import config from '../config/environment'
 import RSVP from 'rsvp'
 import hljs from 'highlight.js'
 import { computed } from '@ember/object'
-import { extract, makeFirstEffect, getMarkers } from '../helpers/snippet-insert'
+import {
+  extract,
+  makeFirstEffect,
+  getMarkers,
+  makeFirstAsset,
+  makeAsset,
+} from '../helpers/snippet-insert'
 
 export default Service.extend({
   store: inject('store'),
@@ -32,11 +38,20 @@ export default Service.extend({
     const op = { p: ['source', index], si: insert }
     return op
   },
-  insertSnippet(source, snippet) {
-    const { snip, type, marker, position, libs } = snippet
-    for (const lib of libs) {
-      const libUrl = this.get('library').url(lib)
-      if (source.indexOf(libUrl) < 0) return 'libNotFound'
+  insertSnippet(source, snippet, suppressWarnings) {
+    const { snip, asset, type, marker, position, libs } = snippet
+    if (!suppressWarnings) {
+      for (const lib of libs) {
+        const libDesc = this.get('library').desc(lib)
+        if (source.indexOf(libDesc.url) < 0) {
+          for (const alternative of libDesc.search) {
+            if (source.indexOf(alternative) > 0) {
+              return 'alternativeFound'
+            }
+          }
+          return 'libNotFound'
+        }
+      }
     }
     const ops = []
     // --- EFFECTS ---
@@ -66,6 +81,37 @@ export default Service.extend({
     }
     // --- EFFECTS END ---
 
+    // --- ASSETS ---
+    const isAsset = type === 'asset'
+    let assetLength = 0
+    if (isAsset) {
+      const currentAssets = extract(source, '<a-assets>', '</a-assets>', false)
+      const { name, src } = asset
+      if (currentAssets !== '') {
+        // Assets already in scene
+        if (currentAssets.indexOf(`id="${name}"`) < 0) {
+          // This asset not yet already loaded
+          const [_, b] = getMarkers(source, '<a-assets>', '</a-assets>', false)
+          const assetSnip = makeAsset({ name, src })
+          assetLength = assetSnip.length
+          ops.push({
+            p: ['source', b],
+            si: assetSnip,
+          })
+        }
+      } else {
+        // Assets not yet in scene
+        const [_, b] = getMarkers(source, '<a-scene', '</a-scene>', false)
+        const assetSnip = makeFirstAsset({ name, src })
+        assetLength = assetSnip.length
+        ops.push({
+          p: ['source', b],
+          si: assetSnip,
+        })
+      }
+    }
+    // --- ASSETS END ---
+
     // --- SCENE ---
     /* Create an op to delete the current scene */
     const snippetIsScene = type === 'scene'
@@ -86,7 +132,7 @@ export default Service.extend({
     }
     const offset = position === 'after' ? marker.length : 0
     ops.push({
-      p: ['source', index + offset],
+      p: ['source', index + offset + assetLength],
       si: isEffect ? effectSnippet : snip,
     })
     return ops

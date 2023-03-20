@@ -85,9 +85,12 @@ export default Controller.extend({
   highContrast: false,
   showSnippetEditor: false,
   showInfoBar: false,
+  showingCollaborators: false,
   isError: true,
   msg: '',
   isCollaborative: false,
+  suppressSnippetWarnings: false,
+  infoBarButton: null,
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -164,9 +167,14 @@ export default Controller.extend({
     window.addEventListener('message', (e) => this.receiveMessage(e))
   },
   receiveMessage: function (e) {
+    /* This functions listens for any postMessage.
+     * If from the right origin and cntains vlaid data
+     * it will updages the doc using the aframe-commiunicator
+     */
     try {
-      if (!e.origin === config.localOrigin)
+      if (!e.origin === config.localOrigin) {
         throw 'Data is from an incorrect source.'
+      }
       const { data } = e
       if (!typeof data === 'string') return
 
@@ -329,6 +337,8 @@ export default Controller.extend({
       container.style['padding-right'] = embed ? '0%' : '8%'
       this.updateDragPos()
       this.get('cs').observers.push(this)
+
+      this.hideCode(true)
     }, 50)
   },
   initWebSockets: function (onSelectDoc) {
@@ -1317,25 +1327,35 @@ export default Controller.extend({
     if (isEmpty(currentUserName)) {
       currentUserName = ''
     }
-    currentUserName = currentUserName.toLowerCase()
-    let collaborators = this.get('model.collaborators').map((i) =>
-      i.toLowerCase()
-    )
+    currentUserName = currentUserName
+    let collaborators = this.get('model.collaborators')
     if (!isEmpty(collaborators)) {
-      const isCollaborator =
-        collaborators.includes(currentUserName) &&
-        this.get('model.isCollaborative')
-
+      const isCollaborative = this.get('model.isCollaborative')
       const owner = this.get('model.owner')
+      const isCollaborator = collaborators.includes(currentUserName)
       const docName = this.get('model.name')
-      const msg = `You are currently collaborating with <strong><u>${owner}</u></strong> on their document "${docName}".`
+      let msg = ''
+
+      if (isCollaborator) {
+        msg = `You are currently collaborating with <strong><u>${owner}</u></strong> on their document "${docName}".`
+      } else {
+        /* Is owner */
+        const collaboratorsString =
+          collaborators.length > 1
+            ? `<strong>${collaborators.join(
+                '</strong>, <strong>'
+              )}</strong> are`
+            : `<strong>${collaborators[0]}</strong> is`
+        msg = `${collaboratorsString} collaborating with you on your document <strong>${docName}</strong>.`
+      }
+
       this.set('isCollaborative', true)
       this.set('msg', msg)
       this.set('isError', false)
       this.set('showInfoBar', true)
       this.syncOutputContainer()
 
-      return isCollaborator
+      return isCollaborative
     }
     return false
   },
@@ -1383,6 +1403,8 @@ export default Controller.extend({
       return
     } else {
       //signed in and is the owner
+      this.set('isCollaborative', this.isCollaborator())
+      console.log('isCollaborative', this.get('isCollaborative'))
       this.set('isOwner', true)
       this.set('canEditSource', true)
       this.set('canEditSettings', true)
@@ -1749,18 +1771,24 @@ export default Controller.extend({
       this.get('editor').setOption('lineWrapping', this.get('lineWrap'))
     },
     showCollaborators() {
-      let collaborators = this.get('model.collaborators').map((i) =>
-        i.toLowerCase()
-      )
+      if (this.get('showingCollaborators') && this.get('showInfoBar')) {
+        /* Toggle Bar */
+        this.set('showingCollaborators', false)
+        this.set('showInfoBar', false)
+        this.syncOutputContainer()
+        return
+      }
+
+      let collaborators = this.get('model.collaborators')
       if (!isEmpty(collaborators)) {
         const owner = this.get('model.owner')
-
         this.set(
           'msg',
           `Owner: ${owner}, Collaborators: ${collaborators.join(', ')}`
         )
         this.set('isError', false)
         this.set('showInfoBar', true)
+        this.set('showingCollaborators', true)
         this.syncOutputContainer()
       }
     },
@@ -2058,6 +2086,9 @@ export default Controller.extend({
           })
       }
     },
+    toggleSuppressSnippetWarnings() {
+      this.set('suppressSnippetWarnings', !this.get('suppressSnippetWarnings'))
+    },
     toggleDontPlay() {
       if (this.get('isOwner')) {
         let model = this.get('model')
@@ -2076,6 +2107,7 @@ export default Controller.extend({
       if (this.get('canEditSettings')) {
         let model = this.get('model')
         model.set('isCollaborative', !model.get('isCollaborative'))
+        this.set('isCollaborative', model.get('isCollaborative'))
         const checkbox = document.getElementById('colab-checkbox')
         if (model.get('isCollaborative')) {
           checkbox.classList.add('orange-checkbox')
@@ -2140,15 +2172,30 @@ export default Controller.extend({
 
       this.updateSourceFromSession().then(() => {
         const source = this.get('model.source')
-        const ops = this.get('codeParser').insertSnippet(source, snippet)
+        const ops = this.get('codeParser').insertSnippet(
+          source,
+          snippet,
+          this.get('suppressSnippetWarnings')
+        )
         // If it's a string, it's an error.
-        if (typeof ops === 'string') {
-          const error = parseSnippetError(ops, snippet)
-          this.set('msg', error)
-          this.set('isError', true)
-          this.set('showInfoBar', true)
-          this.syncOutputContainer()
-          return
+        if (!this.get('suppressSnippetWarnings')) {
+          if (typeof ops === 'string') {
+            const error = parseSnippetError(ops, snippet)
+            this.set('msg', error)
+            if (ops === 'alternativeFound') {
+              this.set('infoBarButton', {
+                text: 'Suppress Warnings',
+                fn: () => {
+                  this.set('suppressSnippetWarnings', true)
+                },
+              })
+            }
+            this.set('isError', true)
+            this.set('showInfoBar', true)
+            this.syncOutputContainer()
+
+            return
+          }
         }
         this.set('showSnippetEditor', false)
         ops.forEach((op) => {
@@ -2156,11 +2203,10 @@ export default Controller.extend({
           this.set('surpress', true)
           this.get('codeParser').applyOps([op], this.get('editor'))
           this.set('surpress', false)
-
-          if (this.get('autoRender')) {
-            this.updateIFrame()
-          }
         })
+        if (this.get('autoRender')) {
+          this.updateIFrame()
+        }
       })
       this.syncOutputContainer()
     },

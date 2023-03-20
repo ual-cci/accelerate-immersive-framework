@@ -71,28 +71,28 @@ export default Service.extend({
             <a-box id="box_${randInt(4)}"
                    position="-1 0.5 -3"
                    rotation="0 45 0"
-                   color="#4CC3D9">
+                   color="lightblue">
             </a-box>
             <a-sphere id="sphere_${randInt(4)}"
                       position="0 1.25 -5"
                       radius="1.25"
-                      color="#EF2D5E">
+                      color="tomato">
             </a-sphere>
             <a-cylinder id="cylinder_${randInt(4)}"
                         position="1 0.75 -3"
                         radius="0.5"
                         height="1.5"
-                        color="#FFC65D">
+                        color="orange">
             </a-cylinder>
             <a-plane id="plane_${randInt(4)}"
                      position="0 0 -4"
                      rotation="-90 0 0"
                      width="4"
                      height="4"
-                     color="#7BC8A4">
+                     color="teal">
             </a-plane>
             <a-sky id="sky_${randInt(4)}"
-                   color="#ECECEC">
+                   color="lightgrey">
             </a-sky>
           </a-scene>
           `,
@@ -124,7 +124,7 @@ export default Service.extend({
           snip: `\n<a-entity id="ambient-light_${randInt(
             4
           )}" light="type: ambient; color: ${ambientColor}"></a-entity>
-<a-entity id="directional-light" light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}"></a-entity>\n`,
+<a-entity id="directional-light" light="type: directional; color: ${directionalColor}; intensity: ${directionalIntensity}; castShadow: ${shadow}" position="-0.5 1 1"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -180,10 +180,10 @@ export default Service.extend({
       },
       {
         title: 'A-Frame Light: Directional',
-        fn: ({ color, intensity, shadow }) => ({
+        fn: ({ color, intensity, shadow, position }) => ({
           snip: `\n<a-entity id="directional-light_${randInt(
             4
-          )}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}"></a-entity>\n`,
+          )}" light="type: directional; color: ${color}; intensity: ${intensity}; castShadow: ${shadow}" position="${position}"></a-entity>\n`,
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
@@ -201,23 +201,68 @@ export default Service.extend({
             name: 'shadow',
             default: 'true',
           },
+          {
+            name: 'position',
+            default: '-0.5 1 1',
+          },
         ],
         samples: [
           {
             name: () => 'random',
             color: () => randomColor(),
+            intensity: () => randRange(0, 1, 2),
+            position: () => randomAframeAttr(-100, 100),
+          },
+        ],
+      },
+
+      {
+        title: 'A-Frame Fog',
+        fn: ({ color, type, near, far, density }) => ({
+          snip: ` fog="type: ${type}; color: ${color}; near: ${near}; far: ${far}; density: ${density};"`,
+          position: 'after',
+          marker: '<a-scene',
+          libs: ['a-frame'],
+        }),
+        props: [
+          {
+            name: 'color',
+            default: 'lightgray',
+          },
+          {
+            name: 'type',
+            default: 'linear',
+          },
+          {
+            name: 'near',
+            default: '1',
+          },
+          {
+            name: 'far',
+            default: '20',
+          },
+          {
+            name: 'density',
+            default: '0.00025',
+          },
+        ],
+        samples: [
+          {
+            name: () => 'random',
+            color: () => randomColor(),
+            near: () => randRange(1, 20),
+            far: () => randRange(20, 1000),
+            density: () => randRange(0, 0.05, 5),
           },
         ],
       },
 
       {
         title: 'A-Frame GLB Model',
-        fn: ({ name, src, position, scale, rotation, shadow, body }) => ({
-          snip: `
-<a-assets>
-  <a-asset-item id="${name}" src="${src}"></a-asset-item>
-</a-assets>
-<a-entity gltf-model="#${name}"
+        fn: ({ id, name, src, position, scale, rotation, shadow, body }) => ({
+          type: 'asset',
+          snip: `\n<a-entity id="${id}"
+          gltf-model="#${name}"
           position="${position}"
           rotation="${rotation}"
           scale="${scale}"
@@ -225,11 +270,16 @@ export default Service.extend({
           body="type:${body};"
           grabbable="physics:true;"
 ></a-entity>\n`,
+          asset: { name, src },
           position: 'before',
           marker: '</a-scene>',
           libs: ['a-frame'],
         }),
         props: [
+          {
+            name: 'id',
+            default: `glb_${randInt(4)}`,
+          },
           {
             name: 'name',
             default: '',
@@ -261,22 +311,25 @@ export default Service.extend({
         ],
         samples: [
           {
+            id: () => `fox_${randInt(4)}`,
             name: () => 'fox',
             src: () => `${config.localOrigin}/libs/a-game/fox.glb`,
             position: () => '0 1 -3',
             scale: () => '3 3 3',
           },
           {
+            id: () => `rabbit_${randInt(4)}`,
             name: () => 'rabbit',
             src: () => `${config.localOrigin}/libs/a-game/rabbit.glb`,
             position: () => '0 0.5 -3',
             scale: () => '0.08 0.08 0.08',
           },
           {
+            id: () => `tree_${randInt(4)}`,
             name: () => 'tree',
             src: () => `${config.localOrigin}/libs/a-game/tree.glb`,
             position: () => '0 0 -3',
-            scale: () => '0.005 0.005 0.005',
+            scale: () => '0.8 0.8 0.8',
           },
         ],
       },
@@ -403,7 +456,7 @@ ${floor === 'true' ? 'floor' : ''}></a-box>\n`,
           },
           {
             name: 'color',
-            default: '#FF0000',
+            default: 'red',
           },
           {
             name: 'body',
@@ -456,7 +509,7 @@ grabbable="physics:true;"></a-sphere>\n`,
           },
           {
             name: 'color',
-            default: '#EF2D5E',
+            default: 'tomato',
           },
           {
             name: 'body',
@@ -510,7 +563,7 @@ grabbable="physics:true;"></a-cylinder>\n`,
           },
           {
             name: 'position',
-            default: '0 0 0',
+            default: '0 1.25 -3',
           },
           {
             name: 'radius',
@@ -526,7 +579,7 @@ grabbable="physics:true;"></a-cylinder>\n`,
           },
           {
             name: 'color',
-            default: '#FFC65D',
+            default: 'orange',
           },
           {
             name: 'shadow',
@@ -587,7 +640,7 @@ shadow="receive: ${shadow}"
           },
           {
             name: 'color',
-            default: '#7BC8A4',
+            default: 'teal',
           },
           {
             name: 'shadow',
@@ -611,7 +664,7 @@ shadow="receive: ${shadow}"
           },
           {
             name: 'color',
-            default: '#ECECEC',
+            default: 'lightgrey',
           },
         ],
         samples: [
@@ -622,13 +675,13 @@ shadow="receive: ${shadow}"
           },
         ],
       },
-      {
+      /* {
         title: 'THROW ERROR',
         fn: () => ({
           // Will throw as does not contain a snip fn
           position: () => randomAframeAttr(-10, 10),
         }),
-      },
+      }, */
     ]
   }),
 })

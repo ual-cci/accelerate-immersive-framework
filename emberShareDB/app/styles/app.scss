@@ -951,7 +951,6 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #settings-container {
-  height: 35px;
   background-color: gray;
   padding-left: 10px;
 }
@@ -2256,6 +2255,27 @@ input[id='searchTerm']:-ms-input-placeholder {
     color: black;
     font-weight: 500;
     text-align: center;
+    margin: 0;
+  }
+  .centre-flex {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    button {
+      width: 100%;
+      background-color: rgba(255, 99, 71, 0.7);
+      border: 4px solid tomato;
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: large;
+
+      &:hover {
+        background-color: tomato;
+      }
+    }
   }
 }
 

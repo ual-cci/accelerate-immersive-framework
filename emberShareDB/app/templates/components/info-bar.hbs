@@ -1,1 +1,11 @@
-<div class='info-bar' onclick={{action 'close'}}><pre>{{{msg}}}</pre></div>
+<div class='info-bar' onclick={{action 'close'}}>
+  <pre>{{{msg}}}</pre>
+  {{#if button}}
+    <div class='centre-flex'>
+      <button
+        role='button'
+        onclick={{action 'handleClick' button.fn}}
+      >{{button.text}}</button>
+    </div>
+  {{/if}}
+</div>

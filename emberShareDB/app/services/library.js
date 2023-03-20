@@ -30,6 +30,12 @@ export default Service.extend({
         title: 'A-Frame',
         id: 'a-frame',
         url: 'aframe-v1.3.0.min.js',
+        search: ['a-frame', 'aframe'],
+      },
+      {
+        title: 'A-Frame Inspector',
+        id: 'a-frame-inspector',
+        url: 'aframe-inspector/aframe-inspector.min.js',
       },
       {
         title: 'A-Frame Effects',
@@ -57,5 +63,14 @@ export default Service.extend({
       }
     })
     return url
+  },
+  desc(id) {
+    let desc = null
+    this.get('libraryMap').forEach((lib) => {
+      if (lib.id == id) {
+        desc = lib
+      }
+    })
+    return desc
   },
 })

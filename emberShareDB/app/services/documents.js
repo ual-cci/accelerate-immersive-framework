@@ -23,13 +23,15 @@ export default Service.extend({
     <a-scene physics>
       <a-player locomotion grabbing></a-player>
       <a-sky color="#ECECEC"></a-sky>
-      <a-box position="0 0 -3"
+      <a-box id="floor_0001"
+             position="0 0 -3"
              rotation="0 0 0"
              color="lightgreen"
              width="10"
              height="1"
              depth="10"
              body="type:static;"
+             shadow="receive: true"
              grabbable="physics:true;"
              floor></a-box>
     </a-scene>
@@ -129,7 +131,7 @@ export default Service.extend({
       $.ajax({
         type: 'POST',
         url: config.serverHost + '/submitOp',
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
           xhr.setRequestHeader('Authorization', token)
         },
         data: { op: op, documentId: doc },
@@ -220,7 +222,7 @@ export default Service.extend({
             $.ajax({
               type: 'DELETE',
               url: config.serverHost + '/documents/' + docId,
-              beforeSend: function(xhr) {
+              beforeSend: function (xhr) {
                 xhr.setRequestHeader('Authorization', token)
               },
             })
@@ -254,7 +256,7 @@ export default Service.extend({
       $.ajax({
         type: 'GET',
         url: config.serverHost + '/flagDoc' + params,
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
           xhr.setRequestHeader('Authorization', token)
         },
       })

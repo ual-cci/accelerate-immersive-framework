@@ -7,5 +7,8 @@ export default Component.extend({
     close() {
       this.hide()
     },
+    handleClick(fn) {
+      fn()
+    },
   },
 })

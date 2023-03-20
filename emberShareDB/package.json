@@ -67,7 +67,7 @@
     "jquery": "^3.5.0",
     "loader.js": "^4.2.3",
     "sass": "1.20.1",
-    "sharedb": "1.0.0-beta.15",
+    "sharedb": "^1.0.0",
     "sharedb-string-binding": "^1.0.0",
     "utf-8-validate": "^5.0.2"
   },

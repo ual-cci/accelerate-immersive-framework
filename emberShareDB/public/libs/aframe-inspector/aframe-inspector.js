@@ -35788,7 +35788,7 @@ class Toolbar extends _react2.default.Component {
       fa: true,
       'fa-save': true
     });
-    var watcherTitle = 'Write changes with aframe-watcher.';
+    var watcherTitle = 'Write changes to the document.';
 
     return _react2.default.createElement(
       'div',
@@ -35812,7 +35812,7 @@ class Toolbar extends _react2.default.Component {
             className: 'gltfIcon',
             title: 'Export to GLTF',
             onClick: this.exportSceneToGLTF },
-          _react2.default.createElement('img', { src:  true ? 'https://aframe.io/aframe-inspector/assets/gltf.svg' : '../assets/gltf.svg' })
+          _react2.default.createElement('img', { src: '../../images/gltf.svg' })
         ),
         _react2.default.createElement('a', {
           className: watcherClassNames,
