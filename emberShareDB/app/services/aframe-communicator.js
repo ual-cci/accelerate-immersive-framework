@@ -30,6 +30,10 @@ export default Service.extend({
       let entityString = '<a-' + entitySplit[entitySplit.length - 1]
       const originalEntityString = entityString
 
+      if(changes[id].remove === true) {
+        source = source.replace(originalEntityString, '')
+      }
+
       // Post-process regex to get only last occurence.
       const idWhitespaceMatch = match[3]
 
