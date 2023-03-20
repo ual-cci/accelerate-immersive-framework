@@ -16,7 +16,7 @@ export default Service.extend({
 <html>
   <head>
     <script src="${config.localOrigin}/libs/aframe-v1.3.0.min.js"></script>
-    <script src="${config.localOrigin}/libs/a-game/a-game-0.47.0.js"></script>
+    <script src="${config.localOrigin}/libs/a-game/a-game.min.js"></script>
     <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
   </head>
   <body>
