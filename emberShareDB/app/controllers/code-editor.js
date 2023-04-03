@@ -165,11 +165,12 @@ export default Controller.extend({
       }
     })
     window.addEventListener('message', (e) => this.receiveMessage(e))
+    window.firebaseConfig = config.firebaseConfig
   },
   receiveMessage: function (e) {
     /* This functions listens for any postMessage.
-     * If from the right origin and cntains vlaid data
-     * it will updages the doc using the aframe-commiunicator
+     * If from the correct origin and contains valid data
+     * it will updates the doc using the aframe-communicator
      */
     try {
       if (!e.origin === config.localOrigin || e.data.target) {
