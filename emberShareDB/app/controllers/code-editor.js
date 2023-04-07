@@ -584,6 +584,22 @@ export default Controller.extend({
         })
     })
   },
+  getIndicesOf(searchStr, str, caseSensitive) {
+    var searchStrLen = searchStr.length;
+    if (searchStrLen == 0) {
+        return [];
+    }
+    var startIndex = 0, index, indices = [];
+    if (!caseSensitive) {
+        str = str.toLowerCase();
+        searchStr = searchStr.toLowerCase();
+    }
+    while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+        indices.push(index);
+        startIndex = index + searchStrLen;
+    }
+    return indices;
+  },
   //A check to see if we have drifted or lost ops, resyncs if necessary
   updateSessionFromServer: function () {
     return new RSVP.Promise((resolve, reject) => {
@@ -617,7 +633,35 @@ export default Controller.extend({
     return new RSVP.Promise((resolve, reject) => {
       const doc = this.get('currentDoc')
       if (!isEmpty(doc) && this.get('droppedOps').length == 0) {
-        const source = this.get('editor').getValue()
+        let source = this.get('editor').getValue()
+
+        let doctypeIndices = this.getIndicesOf('<!DOCTYPE', source, true)
+        if(doctypeIndices.length > 1) {
+          console.log('Preventing duplication of doc')
+          const newFile = source.slice(0, doctypeIndices[1])
+
+          const clear = {
+            p: ['source', 0],
+            sd: source,
+          }
+          const create = {
+            p: ['source', 0],
+            si: newFile,
+            }
+
+          const ops = [clear, create]
+
+          ops.forEach((op) => {
+            this.submitOp(op)
+            this.set('surpress', true)
+            this.get('codeParser').applyOps([op], this.get('editor'))
+            this.set('surpress', false)
+
+            if (this.get('autoRender')) {
+              this.updateIFrame()
+            }
+          })
+        }
         //THIS DOESNT UPDATE THE ON THE SERVER, ONLY UPDATES THE EMBERDATA MODEL
         //BECAUSE THE "PATCH" REST CALL IGNORES THE SOURCE FIELD
         const actions = [
@@ -1095,6 +1139,7 @@ export default Controller.extend({
                       date: new Date().getTime(),
                     }
                     this.set('evalPtr', this.get('evalPtr') + 1)
+                    debugger
                     let op = {
                       p: ['newEval'],
                       oi: toSend,
