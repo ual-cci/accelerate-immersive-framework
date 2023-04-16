@@ -18,15 +18,43 @@ export default Service.extend({
     <script src="${config.localOrigin}/libs/aframe-v1.3.0.min.js"></script>
     <script src="${config.localOrigin}/libs/a-game/a-game.min.js"></script>
     <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
+    <script src="${config.localOrigin}/libs/naf/networked-aframe.js"></script>
+    <script src="${config.localOrigin}/libs/naf/naf-firebase-adapter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-app.js" integrity="sha512-xMRCzOTjDJ11FB7kcSaei0DtKn4RcWQTf6mDnnyckVnEjsrFDwzBegw38vSvz0YEpqHd9C4hwB7z3TG9AlWwDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-auth.min.js" integrity="sha512-XED9cD3dr51//hI8GbU6xalb5USHAwmwr58sHNCujabNPp0XTr6HwpieEM+W/gIkAlj0xtfx+JISIc47HEeZiQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-database.min.js" integrity="sha512-VwEb0SF/mWiYaPh2cN1r2R7+HTwrLf/pEuefq+wF4v3ts9iZh/phaZLwdQX72Y4Btfsfpe3Pmt4kWQTqLUnXjA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <body>
-    <a-scene physics>
-      <a-player id="player" locomotion grabbing></a-player>
+    <a-scene physics networked-scene="room: ${this.generateRandomRoomName()}; adapter: firebase;">
+      <a-assets>
+        <template id="avatar-template">
+          <a-entity class="avatar">
+            <a-sphere class="head" color="#5985ff" position="0 1 0" scale="0.45 0.5 0.4" random-color></a-sphere>
+            <a-entity class="face" position="0 1 0">
+              <a-sphere class="eye" color="#efefef" position="0.16 0.1 -0.35" scale="0.12 0.12 0.12">
+                <a-sphere class="pupil" color="#000" position="0 0 -1" scale="0.2 0.2 0.2"></a-sphere>
+              </a-sphere>
+              <a-sphere class="eye" color="#efefef" position="-0.16 0.1 -0.35" scale="0.12 0.12 0.12">
+                <a-sphere class="pupil" color="#000" position="0 0 -1" scale="0.2 0.2 0.2"></a-sphere>
+              </a-sphere>
+            </a-entity>
+          </a-entity>
+        </template>
+      </a-assets>
+
+      <!-- <a-player id="player" locomotion grabbing></a-player> -->
+      <a-player id="player"
+                networked="template:#avatar-template;attachTemplateToLocal:false;"
+                wasd-controls
+                look-controls
+                position="0 1.3 0">
+      </a-player>
+
       <a-sky color="#ECECEC"></a-sky>
       <a-box id="floor_0001"
              position="0 0 -3"
              rotation="0 0 0"
-             color="lightgreen"
+             material="color: #46aa46"
              width="30"
              height="1"
              depth="30"
@@ -36,8 +64,30 @@ export default Service.extend({
              floor></a-box>
     </a-scene>
   </body>
+  <script>
+    NAF.schemas.add({
+      template: '#avatar-template',
+      components: [
+        'position',
+        'rotation',
+        {
+          selector: '.head',
+          component: 'material',
+          property: 'color'
+        },
+      ]
+    });
+  </script>
 </html>
 `
+  },
+  generateRandomRoomName() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    let roomName = ''
+    for (let i = 0; i < 10; i++) {
+      roomName += chars[Math.floor(Math.random() * chars.length)]
+    }
+    return roomName
   },
   makeNewDoc(data, forkedFrom = null, parent = null) {
     return new RSVP.Promise((resolve, reject) => {

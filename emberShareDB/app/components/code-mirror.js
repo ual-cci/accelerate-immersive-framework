@@ -12,15 +12,15 @@ export default Component.extend({
   evalDown: false,
   didInsertElement() {
     // Applies automatic formatting to the specified range
-    CodeMirror.defineExtension("autoFormatRange", function (from, to) {
+    CodeMirror.defineExtension('autoFormatRange', function (from, to) {
       var cm = this;
-      var outer = cm.getMode(), text = cm.getRange(from, to).split("\n");
+      var outer = cm.getMode(), text = cm.getRange(from, to).split('\n');
       var state = CodeMirror.copyState(outer, cm.getTokenAt(from).state);
-      var tabSize = cm.getOption("tabSize");
+      var tabSize = cm.getOption('tabSize');
 
-      var out = "", lines = 0, atSol = from.ch == 0;
+      var out = '', lines = 0, atSol = from.ch == 0;
       function newline() {
-        out += "\n";
+        out += '\n';
         atSol = true;
         ++lines;
       }
@@ -36,7 +36,7 @@ export default Component.extend({
             atSol = false;
           }
           if (!atSol && inner.mode.newlineAfterToken &&
-              inner.mode.newlineAfterToken(style, cur, stream.string.slice(stream.pos) || text[i+1] || "", inner.state))
+              inner.mode.newlineAfterToken(style, cur, stream.string.slice(stream.pos) || text[i+1] || '', inner.state))
             newline();
         }
         if (!stream.pos && outer.blankLine) outer.blankLine(state);
@@ -46,7 +46,7 @@ export default Component.extend({
       cm.operation(function () {
         cm.replaceRange(out, from, to);
         for (var cur = from.line + 1, end = from.line + lines; cur <= end; ++cur)
-          cm.indentLine(cur, "smart");
+          cm.indentLine(cur, 'smart');
         cm.setSelection(from, cm.getCursor(false));
       });
     })
@@ -56,7 +56,7 @@ export default Component.extend({
     const editor = CodeMirror.fromTextArea(myTextArea, {
       mode: 'htmlmixed',
       theme: 'monokai',
-      lineWrapping: true,
+      lineWrapping: false,
       readOnly: true,
       lineNumbers: true,
       matchBrackets: true,

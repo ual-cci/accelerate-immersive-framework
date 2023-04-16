@@ -1523,13 +1523,13 @@ input[id='searchTerm']:-ms-input-placeholder {
   opacity: 0;
   visibility: hidden;
   width: 120px;
-  background-color: #555;
+  background-color: $lightpurple;
   color: #fff;
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
-  bottom: 125%;
+  top: 125%;
   left: 50%;
   margin-left: -60px;
   transition: opacity 0.3s;

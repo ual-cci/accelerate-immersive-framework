@@ -98,7 +98,7 @@ export default Controller.extend({
 
   renderedSource: '',
 
-  lineWrap: true,
+  lineWrap: false,
 
   //Computed parameters
 
