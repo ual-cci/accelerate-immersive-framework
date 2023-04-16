@@ -1,20 +1,22 @@
 <div id='document-container'>
   <header>
-    <div id='code-header-container' class='limited-width-container'>
+    <div id='code-header-container' >
       <h4><span>{{feedbackMessage}}</span></h4>
       {{#if isEmbedded}}
         <div></div>
       {{else}}
         <div id='doc-title-container'>
+        <div class="doc-title-with-name">
           {{#if isNotEdittingDocName}}
             <span
               id='doc-title'
-              class='label label-default'
+              class='doc-title label label-default'
               role='button'
               tabIndex='0'
               {{action 'doEditDocName'}}
               for='doc-name'
-            >{{titleName}}</span>
+            >{{titleNoName}}</span>
+            <span class="doc-author">by {{author}}</span>
           {{else}}
             {{input
               role='form'
@@ -24,7 +26,7 @@
               name='doc-name-input'
               focusOut=(action 'endEdittingDocName')
             }}
-          {{/if}}
+          {{/if}}</div>
           {{#if mediaQueries.isDesktop}}
             <div id='doc-controls-container'>
               <div id={{concat 'render-doc-' isOwner}}>
@@ -375,36 +377,7 @@
             hide=(action 'closeInfoBar')
           }}
         {{/if}}
-        {{#if mediaQueries.isDesktop}}
-          {{#if showSettings}}
-            {{#if model.isCollaborative}}
-              {{#if canEditSettings}}
-                {{tokenfield-input
-                  elementId='collaborators'
-                  tokens=model.collaborators
-                  allowDuplicates=false
-                  placeholder='Enter Collaborators'
-                  editable=canEditSettings
-                  searchTag=(action 'searchCollaborator')
-                  tokensChanged=(action 'collaboratorsChanged')
-                  inputToggled=(action 'syncOutputContainer')
-                }}
-              {{/if}}
-            {{/if}}
-          {{else}}
-            {{tokenfield-input
-              tokens=model.tags
-              elementId='tags'
-              allowDuplicates=false
-              placeholder='Enter Tags'
-              editable=canEditSettings
-              searchTag=(action 'searchTag')
-              tokensChanged=(action 'tagsChanged')
-              inputToggled=(action 'syncOutputContainer')
-            }}
-          {{/if}}
         {{/if}}
-      {{/if}}
     </div>
     {{#if mediaQueries.isDesktop}}
       {{project-tabs

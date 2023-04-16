@@ -8,6 +8,7 @@ const Router = EmberRouter.extend(GoogleAnalyticsRoute, {
 })
 
 Router.map(function () {
+  this.route('home')
   this.route('login')
   this.route('code-editor', { path: '/code/:document_id' })
   this.route('documents', { path: '/d/:search/:page/:sort' })
@@ -18,13 +19,13 @@ Router.map(function () {
   this.route('guides', { path: '/guides/:topic' })
   this.route('examples', { path: '/examples/:topic' })
   this.route('api', { path: '/api/*endpoint' })
-  this.route('inputs')
-  this.route('outputs')
-  this.route('people')
-  this.route('nime2020')
-  this.route('futurelearn')
-  this.route('crash-course')
-  this.route('techyard')
+  /* this.route('inputs') */
+  /* this.route('outputs') */
+  /* this.route('people') */
+  /* this.route('nime2020') */
+  /* this.route('futurelearn') */
+  /* this.route('crash-course') */
+  /* this.route('techyard') */
 })
 
 export default Router

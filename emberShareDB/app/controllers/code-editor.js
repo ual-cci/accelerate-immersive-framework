@@ -65,6 +65,7 @@ export default Controller.extend({
   hideEditor: 'false',
   embed: 'false',
   titleName: '',
+  author: '',
   wsAvailable: true,
   editCtr: 0,
   fontSize: 14,
@@ -337,7 +338,7 @@ export default Controller.extend({
         this.hideCode(true)
       }
       const nav = document.getElementById('mimic-navbar')
-      nav.style.display = embed ? 'none' : 'block'
+      /* nav.style.display = embed ? 'none' : 'block' */
       const log = document.getElementById('login-container')
       log.style.top = '20px'
       const footer = document.getElementById('mimic-footer')
@@ -750,7 +751,8 @@ export default Controller.extend({
       )
       this.set('showHUD', false)
       this.scrollToSavedPosition()
-      this.set('titleName', doc.get('name') + ' by ' + this.get('model.owner'))
+      this.set('titleName', doc.get('name'))
+      this.set('author', this.get('model.owner'))
       this.set('titleNoName', doc.get('name'))
       this.get('sessionAccount').set('currentDoc', this.get('model').id)
       this.set('fetchingDoc', false)
@@ -1518,8 +1520,8 @@ export default Controller.extend({
     setTimeout(() => {
       const ace = $('#ace-container')
       if (!isEmpty(ace)) {
-        document.getElementById('output-container').style.top =
-          ace.offset().top + 'px'
+        document.getElementById('output-container').style.top = '85px'
+        /* document.getElementById('output-container').style.top = ace.offset().top */
       }
     }, 50)
   },

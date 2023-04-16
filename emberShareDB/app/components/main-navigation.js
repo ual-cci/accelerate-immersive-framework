@@ -28,6 +28,9 @@ export default Component.extend({
       this.get('cs').log(this.get('sessionAccount').currentUserName);
       this.get('openUserDocs')(this.get('sessionAccount').currentUserName);
     },
+    home() {
+      this.get('onHome')();
+    },
     login() {
       this.get('onLogin')();
     },

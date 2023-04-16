@@ -1,4 +1,5 @@
-<div id='mimic-navbar' class='limited-width-container'>
+<div id='mimic-navbar' class='blur-background'>
+  <a {{action 'home'}} class='home-button'>home</a>
   {{#bs-nav type='pills' as |nav|}}
     {{#if mediaQueries.isBurger}}
       {{#nav.dropdown as |dd|}}
@@ -6,13 +7,6 @@
           ≡
           <span class='caret'></span>{{/dd.toggle}}
         {{#dd.menu as |ddm|}}
-          {{#ddm.item}}
-            <a
-              {{action 'about'}}
-              href={{concat url '/about'}}
-              class='nav-button dropdown-item'
-            >about</a>
-          {{/ddm.item}}
           {{#ddm.item}}
             <a
               {{action 'gettingStarted'}}
@@ -57,20 +51,8 @@
         {{/dd.menu}}
       {{/nav.dropdown}}
     {{else}}
-      {{#nav.dropdown as |dd|}}
-        {{#dd.toggle class='nav-dropdown'}}
-          about
-          <span class='caret'></span>{{/dd.toggle}}
-        {{#dd.menu as |ddm|}}
-          {{#ddm.item}}
-            <a
-              {{action 'about'}}
-              href={{concat url '/about'}}
-              class='nav-button dropdown-item'
-            >about</a>
-          {{/ddm.item}}
-        {{/dd.menu}}
-      {{/nav.dropdown}}
+
+
       {{#nav.dropdown as |dd|}}
         {{#dd.toggle class='nav-dropdown'}}
           explore
@@ -146,17 +128,13 @@
       <div style='float:right;' class='tooltip'>
         <a
           {{action 'logout'}}
-          id='login-button'
-          class='navbar-btn navbar-right pull-right'
+          class='login-button'
         >log out</a>
         <span class='tooltiptext'>logged in as
           {{sessionAccount.currentUserName}}</span>
       </div>
     </div>
   {{else}}
-    <div id='login-container'>
-      <a {{action 'login'}} id='login-button' class='navbar-right'>sign up/log
-        in</a>
-    </div>
+      <a {{action 'login'}} class='login-button'>Login</a>
   {{/if}}
 </div>

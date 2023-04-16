@@ -6,6 +6,8 @@ $mimic-yellow: #55d6be;
 $mimic-green: #2e5eaa;
 $mimic-pink: #5b4e77;
 $mimic-blue: #593959;
+$purple: #5D5A88;
+$lightpurple: #8885ae;
 $max-site-width: 950px;
 $footer-grey: #303030;
 
@@ -91,9 +93,6 @@ blockquote p {
 }
 
 h1 {
-  margin-top: 70px;
-  font-weight: bold;
-  font-size: 24pt;
 }
 
 h2 {
@@ -228,17 +227,23 @@ h2 {
   margin: 10px 10px 10px 10px;
 }
 
-.navbar-right {
-  margin: 10px 10px 10px 10px;
-}
-
-.dropdow-menu {
-  //KILL SHADOW
+.blur-background {
+  background: transparent;
+  backdrop-filter: blur(5px);
 }
 
 #mimic-navbar {
-  padding-top: 15px;
-  padding-bottom: 10px;
+  z-index: 1000 !important;
+  position: absolute;
+  top: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 #create-doc-placeholder {
@@ -531,14 +536,13 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #project-tabs {
-  max-height: 55px;
+  height: 35px;
   padding-left: 30px;
   margin-left: auto;
   margin-right: 0;
   clear: right;
   width: 30%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
 .editor-container {
@@ -549,14 +553,17 @@ input[id='docName']:-ms-input-placeholder {
 
 #main-site-container {
   height: 100vh;
-  margin-top: -10px;
+  background: rgba(255,255,255,0);
+  position: relative;
 }
 
 #main-code-container {
+  top: 0px;
   left: 0px;
   width: 100%;
   height: 80vh;
   display: inline-block;
+  top: 0px;
   position: relative;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -569,11 +576,9 @@ input[id='docName']:-ms-input-placeholder {
   width: 84%;
   height: 80vh;
   position: absolute;
-  top: 220px;
   left: 8%;
   z-index: 1;
   overflow: hidden;
-  border: solid black 1px;
 }
 
 #output-iframe-gone {
@@ -733,6 +738,7 @@ input[id='docName']:-ms-input-placeholder {
   position: absolute;
   padding-left: 2em;
   overflow-x: hidden;
+  /* height: 80%; */
 }
 
 .ace_editor {
@@ -743,7 +749,7 @@ input[id='docName']:-ms-input-placeholder {
 #drag-container {
   position: absolute;
   top: 0px;
-  height: 100%;
+  height: 90%;
   width: 30px;
 }
 
@@ -753,7 +759,7 @@ input[id='docName']:-ms-input-placeholder {
 
 #drag-button {
   position: absolute;
-  top: 30px;
+  /* top: 30px; */
   right: 1px;
   z-index: 20;
   height: 100%;
@@ -840,7 +846,7 @@ input[id='docName']:-ms-input-placeholder {
   border: none;
   border-radius: 0px;
   background-color: transparent;
-  color: white;
+  color: black;
   height: 30px;
 }
 
@@ -872,8 +878,34 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #doc-title-container {
-  background-color: darkgray;
+  font-family: 'DM Sans', sans-serif;
   height: 70px;
+
+  color: black;
+  background-color: transparent;
+  height: 50px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .doc-title {
+    color: black;
+    font-weight: 700;
+    font-size: 20pt;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    float: left;
+    display: inline;
+    overflow: hidden;
+    max-width: 45vw;
+  }
+
+  .doc-author {
+    font-weight: 400;
+    font-size: 18pt;
+
+  }
 }
 
 #doc-controls-container {
@@ -882,22 +914,6 @@ input[id='docName']:-ms-input-placeholder {
   position: relative;
   font-size: 14pt;
   width: 500px;
-}
-
-#doc-title {
-  color: black;
-  background-color: transparent;
-  font-weight: 400;
-  float: left;
-  position: absolute;
-  font-size: 20pt;
-  max-width: 45vw;
-  display: inline;
-  height: 50px;
-  text-align: left;
-  transform: translateY(35%);
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .modal-dialog {
@@ -1016,10 +1032,7 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #transport-container {
-  position: absolute;
-  right: 5px;
-  top: 0%;
-  margin-top: 20px;
+  text-align: right;
 }
 
 #main-document-container {
@@ -1028,7 +1041,7 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #document-container {
-  margin-top: 0px;
+  margin-top: 80px;
 }
 
 @keyframes fadingOutAnimation {
@@ -1195,13 +1208,11 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 .uncharted-token-main-container {
-  background-color: #e6e6e6;
   height: auto;
   min-height: 35px;
 }
 
 .uncharted-token-container {
-  background-color: #e6e6e6;
   height: auto;
   position: relative;
 }
@@ -1274,11 +1285,11 @@ input[id='docName']:-ms-input-placeholder {
   color: black;
   font-weight: bold;
   font-size: 14pt;
+  border-radius: 100%;
 }
 
 .nav-button:hover {
-  border-radius: 0px;
-  background-color: #e6e6e6 !important;
+  border-radius: 100%;
   color: black;
   text-decoration: none;
   cursor: pointer;
@@ -1292,11 +1303,8 @@ input[id='docName']:-ms-input-placeholder {
 .nav-button {
   float: left;
   width: auto;
-  margin-left: 10px;
-  padding: 10px;
   color: black;
   font-size: 14pt;
-  height: 45px;
   text-align: center;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -1306,8 +1314,16 @@ input[id='docName']:-ms-input-placeholder {
   user-select: none;
 }
 
+.nav-pills {
+  > li {
+  margin-right: 1em;
+    > a {
+      border-radius: 999em;
+    }
+  }
+}
+
 .nav-dropdown:hover {
-  border-radius: 0px;
   color: black;
   background-color: #e6e6e6 !important;
 }
@@ -1315,6 +1331,7 @@ input[id='docName']:-ms-input-placeholder {
 .nav-dropdown {
   color: black;
   font-size: 14pt;
+  background: white;
 }
 
 .burger-btn {
@@ -1327,36 +1344,30 @@ input[id='docName']:-ms-input-placeholder {
   position: relative;
 }
 
-#login-container {
-  width: 150px;
-  height: 50px;
-  margin-right: 5px;
-  float: right !important;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-}
-
-#login-button {
-  background-color: transparent;
-  color: black;
-  font-weight: bold;
-  font-size: 14pt;
-  float: right;
+.home-button {
   cursor: pointer;
-}
-
-#logout-button {
-  position: absolute;
-  background-color: transparent;
-  color: black;
+  background: white;
+  border-radius: 999em;
+  padding: 10px 15px;
+  font-size: 14pt;
   border: none;
-  font-weight: bold;
-  font-size: 14pt;
-  margin-top: 0px;
-  top: 30px;
-  right: 0px;
+  color: black;
+  margin-right: 1em;
+}
+
+.login-button {
+  background-color: transparent;
   cursor: pointer;
+  background: $purple;
+  border-radius: 999em;
+  padding: 10px 15px;
+  font-size: 14pt;
+  border: none;
+  color: white;
+}
+
+.login-button:hover {
+  background-color: $lightpurple;
 }
 
 #signed-in-label {
@@ -1574,17 +1585,46 @@ input[id='searchTerm']:-ms-input-placeholder {
   width: 250px;
 }
 
+
 .list-group-title {
-  font-size: xx-large;
-  font-weight: bold;
+  background: none;
 }
 
-.login-list-group > li {
-  background-color: $mimic-orange;
-}
+#main-login-container {
+  margin-top: 100px;
 
-.new-user-group > li {
-  background-color: $mimic-yellow;
+  * > li:first-of-type {
+    color: white;
+    background: $lightpurple;
+  }
+
+  * > li {
+    border-radius: 2rem;
+    background: white;
+    margin-top: 1rem;
+    flex-grow: 1;
+  color: black;
+  }
+
+  * > li:last-of-type {
+    margin-bottom: 1rem;
+  }
+
+  * > ui {
+    width: 100%;
+    align-items: center;
+    /* Clearfix */
+    /* content: ""; */
+    /* clear: both; */
+    /* display: table; */
+  }
+
+  button {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
+  }
 }
 
 .reset-password-group {
@@ -1595,58 +1635,40 @@ input[id='searchTerm']:-ms-input-placeholder {
   background-color: $footer-grey;
 }
 
-#about-header-image {
-  position: absolute;
-  left: 250px;
-  width: 100%;
-  margin-top: 20px;
-  margin-bottom: 110px;
-  height: 500px;
-}
-
-#about-overlay-title {
-  background-color: rgba(237, 61, 5, 0.95);
-  width: 100%;
-  height: auto;
-  position: absolute;
-  top: 250px;
-}
-
-#about-overlay-title-text {
+#about-container {
+  font-family: 'Gugi', cursive;
   height: 100%;
-  font-family: 'Overpass Mono';
-  padding-top: 20px;
-  padding-bottom: 10px;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
   color: white;
-  font-size: 20pt;
-  font-weight: 500;
-  text-align: center;
-  text-overflow: clip;
-  overflow: hidden;
+  letter-spacing: 0.8em;
+  gap: 50vh;
+  padding-top: 45vh;
 }
 
-#about-overlay-desc {
-  background-color: rgba(255, 206, 0, 0.95);
-  width: 60%;
-  max-width: $max-site-width;
-  left: 20vw;
-  height: 270px;
-  padding-left: 50px;
-  padding-right: 50px;
-  position: absolute;
-  top: 470px;
-}
-
-#about-overlay-desc-text {
-  height: 210px;
-  font-family: 'Overpass Mono';
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-top: 30px;
-  color: white;
-  font-size: calc(4px + 1.5vw);
-  font-weight: 100;
-  text-align: left;
+.gradient-background {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: radial-gradient(
+      circle at 50% 0,
+      rgba(151, 177, 203, 1),
+      rgba(151, 177, 203, 0) 70.71%
+    ), radial-gradient(
+      circle at 6.7% 75%,
+      rgba(230, 204, 131, 1),
+      rgba(230, 204, 131, 0) 70.71%
+    ),
+    radial-gradient(
+        circle at 93.3% 75%,
+        rgba(182, 127, 166, 1),
+        rgba(182, 127, 166, 0) 70.71%
+      ) beige;
 }
 
 #getting-started-container {
@@ -1668,32 +1690,11 @@ input[id='searchTerm']:-ms-input-placeholder {
   color: white;
 }
 
-#about-text-container {
-  width: 90%;
-  max-width: $max-site-width;
-  margin-top: 70px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.about-text {
-  text-align: left;
-  font-weight: 500;
-  font-size: 14pt;
-}
-
 #logo-footer {
-  background-color: $footer-grey;
-  height: auto;
-  min-height: 100px;
-  padding: 20px;
-  margin-top: 50px;
 }
 
 #logo-container {
   max-width: $max-site-width;
-  width: auto;
-  margin: auto;
 }
 
 .footer-logo-cell {
@@ -1701,13 +1702,6 @@ input[id='searchTerm']:-ms-input-placeholder {
 }
 
 .footer-logo-img {
-  margin-bottom: 10px;
-  margin-top: 10px;
-  margin-right: 10px;
-  margin-left: 0px;
-  height: 50px;
-  display: table-cell;
-  vertical-align: middle;
 }
 
 #gs-logo {
@@ -2075,8 +2069,10 @@ input[id='searchTerm']:-ms-input-placeholder {
 #mimic-footer {
   width: 100%;
   height: 50px;
-  background-color: $footer-grey;
   color: white;
+  background: $purple;
+  display: flex;
+  align-items: center;
 }
 
 #footer-table {

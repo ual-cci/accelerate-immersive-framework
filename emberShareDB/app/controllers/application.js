@@ -26,6 +26,9 @@ export default Controller.extend({
     transitionToGSRoute() {
       this.transitionToRoute('getting-started', 'beginner')
     },
+    transitionToHomeRoute() {
+      this.transitionToRoute('/')
+    },
     transitionToAboutRoute() {
       this.transitionToRoute('about')
     },
