@@ -92,6 +92,7 @@ export default Controller.extend({
   isCollaborative: false,
   suppressSnippetWarnings: false,
   infoBarButton: null,
+  nafClientIds: '',
 
   showHUD: true,
   hudMessage: 'Loading...',
@@ -177,6 +178,7 @@ export default Controller.extend({
       if (!e.origin === config.localOrigin || e.data.target) {
         throw 'Data is from an incorrect source.'
       }
+
       const { data } = e
       if (!typeof data === 'string') return
       if (!data) return
@@ -188,6 +190,12 @@ export default Controller.extend({
 
       if(parsedData.respawn){
         this.updateIFrame()
+      }
+
+      if(parsedData.clientIds) {
+        const clientList = `<strong>Other users in the scene:</strong> ${parsedData.clientIds.length}`
+        this.set('nafClientIds', clientList)
+        return
       }
 
       this.updateSourceFromSession().then(() => {
@@ -1461,7 +1469,6 @@ export default Controller.extend({
     } else {
       //signed in and is the owner
       this.set('isCollaborative', this.isCollaborator())
-      console.log('isCollaborative', this.get('isCollaborative'))
       this.set('isOwner', true)
       this.set('canEditSource', true)
       this.set('canEditSettings', true)
@@ -1520,8 +1527,7 @@ export default Controller.extend({
     setTimeout(() => {
       const ace = $('#ace-container')
       if (!isEmpty(ace)) {
-        document.getElementById('output-container').style.top = '85px'
-        /* document.getElementById('output-container').style.top = ace.offset().top */
+        document.getElementById('output-container').style.top = ace.offset().top + 'px'
       }
     }, 50)
   },
@@ -1773,10 +1779,8 @@ export default Controller.extend({
       this.set('codeW', doHide ? '30px' : w)
       const editor = this.get('editor')
       if (!isEmpty(editor) && !doHide) {
-        console.log('refresh')
         editor.refresh()
         setTimeout(() => {
-          console.log('refresh')
           editor.refresh()
           editor.refresh()
           editor.refresh()

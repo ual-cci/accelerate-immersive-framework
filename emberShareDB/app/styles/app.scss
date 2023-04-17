@@ -555,6 +555,7 @@ input[id='docName']:-ms-input-placeholder {
   height: 100vh;
   background: rgba(255,255,255,0);
   position: relative;
+  margin-top: 140px;
 }
 
 #main-code-container {
@@ -575,6 +576,7 @@ input[id='docName']:-ms-input-placeholder {
 #output-container {
   width: 84%;
   height: 80vh;
+  margin-top: -140px;
   position: absolute;
   left: 8%;
   z-index: 1;
@@ -844,7 +846,7 @@ input[id='docName']:-ms-input-placeholder {
 .clear-btn {
   width: 40px;
   border: none;
-  border-radius: 0px;
+  border-radius: 3px;
   background-color: transparent;
   color: black;
   height: 30px;
@@ -1529,7 +1531,7 @@ input[id='searchTerm']:-ms-input-placeholder {
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
-  top: 125%;
+  bottom: 125%;
   left: 50%;
   margin-left: -60px;
   transition: opacity 0.3s;
