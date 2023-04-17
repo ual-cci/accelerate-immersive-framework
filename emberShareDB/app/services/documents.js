@@ -18,8 +18,10 @@ export default Service.extend({
     <script src="${config.localOrigin}/libs/aframe-v1.3.0.min.js"></script>
     <script src="${config.localOrigin}/libs/a-game/a-game.min.js"></script>
     <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
-    <script src="${config.localOrigin}/libs/naf/networked-aframe.js"></script>
+    <script src="${config.localOrigin}/libs/naf/networked-aframe.min.js"></script>
     <script src="${config.localOrigin}/libs/naf/naf-firebase-adapter.js"></script>
+    <script src="${config.localOrigin}/libs/naf/components/random-color.js"></script>
+    <script src="${config.localOrigin}/libs/naf/components/spawn-in-circle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-app.js" integrity="sha512-xMRCzOTjDJ11FB7kcSaei0DtKn4RcWQTf6mDnnyckVnEjsrFDwzBegw38vSvz0YEpqHd9C4hwB7z3TG9AlWwDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-auth.min.js" integrity="sha512-XED9cD3dr51//hI8GbU6xalb5USHAwmwr58sHNCujabNPp0XTr6HwpieEM+W/gIkAlj0xtfx+JISIc47HEeZiQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.24.0/firebase-database.min.js" integrity="sha512-VwEb0SF/mWiYaPh2cN1r2R7+HTwrLf/pEuefq+wF4v3ts9iZh/phaZLwdQX72Y4Btfsfpe3Pmt4kWQTqLUnXjA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -29,8 +31,8 @@ export default Service.extend({
       <a-assets>
         <template id="avatar-template">
           <a-entity class="avatar">
-            <a-sphere class="head" color="#5985ff" position="0 1 0" scale="0.45 0.5 0.4" random-color></a-sphere>
-            <a-entity class="face" position="0 1 0">
+            <a-sphere class="head" scale="0.45 0.5 0.4" random-color></a-sphere>
+            <a-entity class="face" position="0 0.05 0">
               <a-sphere class="eye" color="#efefef" position="0.16 0.1 -0.35" scale="0.12 0.12 0.12">
                 <a-sphere class="pupil" color="#000" position="0 0 -1" scale="0.2 0.2 0.2"></a-sphere>
               </a-sphere>
@@ -42,13 +44,7 @@ export default Service.extend({
         </template>
       </a-assets>
 
-      <!-- <a-player id="player" locomotion grabbing></a-player> -->
-      <a-player id="player"
-                networked="template:#avatar-template;attachTemplateToLocal:false;"
-                wasd-controls
-                look-controls
-                position="0 1.3 0">
-      </a-player>
+      <a-player id="player" grabbing locomotion spawn-in-circle></a-player>
 
       <a-sky color="#ECECEC"></a-sky>
       <a-box id="floor_0001"
@@ -77,6 +73,19 @@ export default Service.extend({
         },
       ]
     });
+  </script>
+
+  <script>
+    setInterval(() => {
+      const clientIds = Object.keys(NAF.connection.connectedClients)
+      if(clientIds.length > 0) {
+        const clients = {
+          target: 'accelerate-editor',
+          clientIds
+        }
+        parent.postMessage(JSON.stringify(clients), '*')
+      }
+    }, 1000)
   </script>
 </html>
 `
