@@ -44,11 +44,6 @@ export default Service.extend({
       for (const lib of libs) {
         const libDesc = this.get('library').desc(lib)
         if (source.indexOf(libDesc.url) < 0) {
-          for (const alternative of libDesc.search) {
-            if (source.indexOf(alternative) > 0) {
-              return 'alternativeFound'
-            }
-          }
           return 'libNotFound'
         }
       }
@@ -319,7 +314,7 @@ export default Service.extend({
             '"' + url + '"'
           )
           js = js.replace(
-            new RegExp("'" + child.name + "'", 'gm'),
+            new RegExp('\'' + child.name + '\'', 'gm'),
             '"' + url + '"'
           )
           //this.get('cs').log("AFTER", js);
@@ -641,7 +636,7 @@ export default Service.extend({
               '"' + url + '"'
             )
             source = source.replace(
-              new RegExp("'" + toFind + "'", 'gm'),
+              new RegExp('\'' + toFind + '\'', 'gm'),
               '"' + url + '"'
             )
             //this.get('cs').log(source)

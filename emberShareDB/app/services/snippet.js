@@ -7,7 +7,7 @@ import config from '../config/environment'
 export default Service.extend({
   snippetsMap: computed(() => {
     return [
-      {
+      /* {
         title: 'Export Scene as GLTF',
         id: 'exportGLTF',
         fn: () => ({
@@ -61,7 +61,7 @@ export default Service.extend({
           marker: '</body>',
           libs: ['threejs'],
         }),
-      },
+      }, */
       {
         title: 'A-Frame Basic Scene',
         fn: () => ({
