@@ -1,3 +1,12 @@
 [submodule "a-game"]
 	path = a-game
 	url = git@github.com:joshmurr/a-game.git
+[submodule "naf-firebase-adapter"]
+	path = naf-firebase-adapter
+	url = git@github.com:joshmurr/naf-firebase-adapter.git
+[submodule "networked-aframe"]
+	path = networked-aframe
+	url = git@github.com:joshmurr/networked-aframe.git
+[submodule "aframe-inspector"]
+	path = aframe-inspector
+	url = git@github.com:joshmurr/aframe-inspector.git

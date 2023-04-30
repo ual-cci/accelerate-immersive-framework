@@ -1,4 +1,11 @@
-# MIMIC Code Editor
+# Accelerate Immersicve Framework
+
+![Accelerate Editor Landing Screenshot](./docs/images/accelerate.png)
+
+A central hub to store documentation, experiments and development of an immersive web-based AR/VR platform as part of the Erasmus+ Strategic Partnership in HEI funded project “ACCELERATE: Accessible immersive learning for art and design".
+
+See the Wiki for more information.
+
 
 ## To run locally:
 
@@ -64,12 +71,12 @@ NODE_ENV=local node server
     //const url = "url = "mimic-238710.appspot.com";"
     //ENV.serverHost = "https://" + url;
     //ENV.wsHost = "wss://" + url;
-    
+
     //FOR DEV BACKEND
     //const url = "dev.codecircle.gold.ac.uk/api"
     //ENV.serverHost = "https://" + url;
     //ENV.wsHost = "wss://" + url;
-    
+
     //FOR LOCAL BACKEND
     const url = "localhost:8080";
     ENV.serverHost = "http://" + url;
@@ -93,7 +100,7 @@ Go to localhost:4200 to view site
 
 # Deployment
 
-For deploying backends you will need the appropriate config.js, contact Admin (Louis) for these details. 
+For deploying backends you will need the appropriate config.js, contact Admin (Louis) for these details.
 
 ## Deploying local
 ### Frontend
@@ -118,19 +125,19 @@ cd emberShareDB
 ./deployDev.sh
 ```
 
-### Backend 
+### Backend
 ```
-git pull 
+git pull
 sudo docker build -t mimic/dev_test .
 sudo docker ps
 //probably kill something
 sudo docker kill (id of the thing I want to kill as seen in the list of dockers)
-//run it 
+//run it
 sudo docker run -d -p 4001:8081  mimic/dev_test
 ```
 
-## Deploying Production 
-### Frontend 
+## Deploying Production
+### Frontend
 
 When signed into the appropriate firebase account use the firebase cli
 ```
@@ -153,7 +160,7 @@ When you have tested and want to send traffic to the new version, use the GCP Co
 
 https://console.cloud.google.com/appengine/versions
 
-# Testing backend on local machine 
+# Testing backend on local machine
 ```
 cd nodeServer
 npm test
