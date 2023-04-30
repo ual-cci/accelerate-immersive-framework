@@ -192,3 +192,9 @@ When you have tested and want to send traffic to the new version, use the GCP Co
 cd nodeServer
 npm test
 ```
+
+## Submodules
+
+The Accelerate Editor uses A-Frame for all the 3D engine stuff. A-Frame is an open source and highly extensible library and so we make use of a number of community made plugins too. To get this to work with the editor the plugins needed to be patched, mostly to re-route how data is being sent around. The code editor runs in an IFrame and so to get data in and out of that IFrame (to and from the parent window). Most of the plugins used had to be patched to send relevant data to the parent window via `window.postMessage()`. There is a short README file with a ChangeLog in each of the submodules used.
+
+Each submodule is treated as it's own distinct codebase. The code is compiled (normally with a `npm run build` command - see the relevant `package.json` file to find out) and copied into `./emberShareDB/public/libs/` for consumption by the Accelerate Editor.
