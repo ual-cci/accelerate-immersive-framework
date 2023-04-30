@@ -1700,37 +1700,6 @@ input[id='searchTerm']:-ms-input-placeholder {
   max-width: $max-site-width;
 }
 
-.footer-logo-cell {
-  padding-left: 0px;
-}
-
-.footer-logo-img {
-}
-
-#gs-logo {
-  width: 135px;
-}
-
-#durham-logo {
-  width: 132px;
-}
-
-#sussex-logo {
-  width: 97px;
-}
-
-#ahrc-logo {
-  width: 171px;
-}
-
-#google-logo {
-  width: 124px;
-}
-
-#ual-logo {
-  width: 161px;
-}
-
 .center-cropped {
   width: 100%;
   height: 550px;
@@ -2076,33 +2045,13 @@ input[id='searchTerm']:-ms-input-placeholder {
   background: $purple;
   display: flex;
   align-items: center;
-}
+  justify-content: space-between;
+  padding: 0 20px;
 
-#footer-table {
-  width: 100%;
-}
-
-#footer-table td {
-  text-align: center;
-  width: 33%;
-}
-
-.footer-link {
-  color: white;
-}
-
-#footer-copyright {
-  padding-top: 5px;
-}
-
-#footer-contact {
-  text-align: left !important;
-  padding-left: 10px;
-}
-
-#footer-terms {
-  text-align: right !important;
-  padding-right: 10px;
+  img {
+    height: 100%;
+  padding: 15px 0;
+    }
 }
 
 #code-mirror-container {
