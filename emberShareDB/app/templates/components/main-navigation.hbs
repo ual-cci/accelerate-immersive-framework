@@ -1,5 +1,4 @@
 <div id='mimic-navbar' class='blur-background'>
-  <a {{action 'home'}} class='home-button'>home</a>
   {{#bs-nav type='pills' as |nav|}}
     {{#if mediaQueries.isBurger}}
       {{#nav.dropdown as |dd|}}
@@ -8,32 +7,11 @@
           <span class='caret'></span>{{/dd.toggle}}
         {{#dd.menu as |ddm|}}
           {{#ddm.item}}
-            <a
-              {{action 'gettingStarted'}}
-              href={{concat url '/getting-started/beginner'}}
-              class='nav-button dropdown-item'
-            >getting started</a>
+            <a {{ action 'home'}} class='dropdown-item'>home</a>
           {{/ddm.item}}
+
           {{#ddm.item}}
-            <a
-              {{action 'guides'}}
-              href={{concat url '/guides/root'}}
-              class='nav-button dropdown-item'
-            >guides</a>
-          {{/ddm.item}}
-          {{#ddm.item}}
-            <a
-              {{action 'docs'}}
-              href={{concat url '/d/ /views/0'}}
-              class='nav-button dropdown-item'
-            >projects</a>
-          {{/ddm.item}}
-          {{#ddm.item}}
-            <a
-              {{action 'examples'}}
-              href={{concat url '/examples'}}
-              class='nav-button dropdown-item'
-            >examples</a>
+            <a href="https://github.com/ual-cci/accelerate-immersive-framework/wiki" target="_blank" class='dropdown-item'>learn</a>
           {{/ddm.item}}
 
           {{#ddm.item}}
@@ -45,56 +23,15 @@
                 sessionAccount.currentUserName
                 '/views/0'
               }}
-              class='nav-button dropdown-item'
+              class='dropdown-item'
             >my projects</a>
           {{/ddm.item}}
         {{/dd.menu}}
       {{/nav.dropdown}}
     {{else}}
+      <li><a {{action 'home'}} class='nav-dropdown'>home</a></li>
+      <li><a href="https://github.com/ual-cci/accelerate-immersive-framework/wiki" target="_blank" class='nav-dropdown'>learn</a></li>
 
-
-      {{#nav.dropdown as |dd|}}
-        {{#dd.toggle class='nav-dropdown'}}
-          explore
-          <span class='caret'></span>{{/dd.toggle}}
-        {{#dd.menu as |ddm|}}
-          {{#ddm.item}}
-            <a
-              {{action 'examples'}}
-              href={{concat url '/examples/root'}}
-              class='nav-button dropdown-item'
-            >examples</a>
-          {{/ddm.item}}
-          {{#ddm.item}}
-            <a
-              {{action 'docs'}}
-              href={{concat url '/d/ /views/0'}}
-              class='nav-button dropdown-item'
-            >projects</a>
-          {{/ddm.item}}
-        {{/dd.menu}}
-      {{/nav.dropdown}}
-      {{#nav.dropdown as |dd|}}
-        {{#dd.toggle class='nav-dropdown'}}
-          learn
-          <span class='caret'></span>{{/dd.toggle}}
-        {{#dd.menu as |ddm|}}
-          {{#ddm.item}}
-            <a
-              {{action 'gettingStarted'}}
-              href={{concat url '/getting-started/beginner'}}
-              class='nav-button dropdown-item'
-            >getting started</a>
-          {{/ddm.item}}
-          {{#ddm.item}}
-            <a
-              {{action 'guides'}}
-              href={{concat url '/guides/root'}}
-              class='nav-button dropdown-item'
-            >guides</a>
-          {{/ddm.item}}
-        {{/dd.menu}}
-      {{/nav.dropdown}}
       {{#if session.isAuthenticated}}
         {{#nav.dropdown as |dd|}}
           {{#dd.toggle class='nav-dropdown'}}my projects

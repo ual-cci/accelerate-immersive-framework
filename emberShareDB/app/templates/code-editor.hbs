@@ -147,24 +147,6 @@
                   {{/if}}
                   <span class='tooltiptext'>Show Document Settings</span>
                 </div>
-                <div class='tooltip'>
-                  {{#if showRecordingPanel}}
-                    {{#bs-button
-                      (html-attributes aria-label='hide Recording')
-                      class='clear-btn transport-btn'
-                      icon='glyphicon glyphicon-chevron-up'
-                      onClick=(action 'toggleShowRecordingPanel')
-                    }}{{/bs-button}}
-                  {{else}}
-                    {{#bs-button
-                      (html-attributes aria-label='show Recording')
-                      class='clear-btn transport-btn'
-                      icon='glyphicon glyphicon-record'
-                      onClick=(action 'toggleShowRecordingPanel')
-                    }}{{/bs-button}}
-                  {{/if}}
-                  <span class='tooltiptext'>Recording Options</span>
-                </div>
                 <div class='tooltip col-2'>
                   {{download-button doc=parentData}}
                   <span class='tooltiptext'>Download Project as Zip</span>
@@ -216,15 +198,6 @@
           <div id='share-container'>
             <p>Editable Link : {{editLink}}</p>
             <p>Embed Link : {{embedLink}}</p>
-          </div>
-        {{/if}}
-        {{#if showRecordingPanel}}
-          <div id='recording-panel-container'>
-            {{recording-panel
-              possibleNodes=possibleRecordingNodes
-              options=recordingOptions
-              onOptionsChanged=(action 'onRecordingOptionsChanged')
-            }}
           </div>
         {{/if}}
         {{#if showSettings}}
