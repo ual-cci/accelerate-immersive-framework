@@ -1,20 +1,22 @@
 <div id='document-container'>
   <header>
-    <div id='code-header-container' class='limited-width-container'>
+    <div id='code-header-container' >
       <h4><span>{{feedbackMessage}}</span></h4>
       {{#if isEmbedded}}
         <div></div>
       {{else}}
         <div id='doc-title-container'>
+        <div class="doc-title-with-name">
           {{#if isNotEdittingDocName}}
             <span
               id='doc-title'
-              class='label label-default'
+              class='doc-title label label-default'
               role='button'
               tabIndex='0'
               {{action 'doEditDocName'}}
               for='doc-name'
-            >{{titleName}}</span>
+            >{{titleNoName}}</span>
+            <span class="doc-author">by {{author}}</span>
           {{else}}
             {{input
               role='form'
@@ -24,7 +26,7 @@
               name='doc-name-input'
               focusOut=(action 'endEdittingDocName')
             }}
-          {{/if}}
+          {{/if}}</div>
           {{#if mediaQueries.isDesktop}}
             <div id='doc-controls-container'>
               <div id={{concat 'render-doc-' isOwner}}>
@@ -145,24 +147,6 @@
                   {{/if}}
                   <span class='tooltiptext'>Show Document Settings</span>
                 </div>
-                <div class='tooltip'>
-                  {{#if showRecordingPanel}}
-                    {{#bs-button
-                      (html-attributes aria-label='hide Recording')
-                      class='clear-btn transport-btn'
-                      icon='glyphicon glyphicon-chevron-up'
-                      onClick=(action 'toggleShowRecordingPanel')
-                    }}{{/bs-button}}
-                  {{else}}
-                    {{#bs-button
-                      (html-attributes aria-label='show Recording')
-                      class='clear-btn transport-btn'
-                      icon='glyphicon glyphicon-record'
-                      onClick=(action 'toggleShowRecordingPanel')
-                    }}{{/bs-button}}
-                  {{/if}}
-                  <span class='tooltiptext'>Recording Options</span>
-                </div>
                 <div class='tooltip col-2'>
                   {{download-button doc=parentData}}
                   <span class='tooltiptext'>Download Project as Zip</span>
@@ -214,15 +198,6 @@
           <div id='share-container'>
             <p>Editable Link : {{editLink}}</p>
             <p>Embed Link : {{embedLink}}</p>
-          </div>
-        {{/if}}
-        {{#if showRecordingPanel}}
-          <div id='recording-panel-container'>
-            {{recording-panel
-              possibleNodes=possibleRecordingNodes
-              options=recordingOptions
-              onOptionsChanged=(action 'onRecordingOptionsChanged')
-            }}
           </div>
         {{/if}}
         {{#if showSettings}}
@@ -374,6 +349,12 @@
             isError=isError
             hide=(action 'closeInfoBar')
           }}
+          {{info-bar
+            msg=nafClientIds
+            button=infoBarButton
+            isError=isError
+            hide=(action 'closeInfoBar')
+          }}
         {{/if}}
         {{#if mediaQueries.isDesktop}}
           {{#if showSettings}}
@@ -391,17 +372,6 @@
                 }}
               {{/if}}
             {{/if}}
-          {{else}}
-            {{tokenfield-input
-              tokens=model.tags
-              elementId='tags'
-              allowDuplicates=false
-              placeholder='Enter Tags'
-              editable=canEditSettings
-              searchTag=(action 'searchTag')
-              tokensChanged=(action 'tagsChanged')
-              inputToggled=(action 'syncOutputContainer')
-            }}
           {{/if}}
         {{/if}}
       {{/if}}

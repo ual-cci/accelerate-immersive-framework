@@ -8,61 +8,6 @@ export default Service.extend({
   snippetsMap: computed(() => {
     return [
       {
-        title: 'Export Scene as GLTF',
-        id: 'exportGLTF',
-        fn: () => ({
-          snip: `
-          <script  language="javascript" type="text/javascript">
-            function save(blob, filename) {
-              const link = document.createElement('a')
-              link.style.display = 'block'
-              document.body.appendChild(link)
-
-              console.log(blob)
-
-              link.href = URL.createObjectURL(blob)
-              link.download = filename
-              link.click()
-
-            }
-            function saveString(text, filename) {
-              save(new Blob([text], { type: 'text/plain' }), filename)
-            }
-
-            function exportGLTF() {
-              const exporter = new GLTFExporter()
-              const params = {
-                trs: false,
-                onlyVisible: true,
-                truncateDrawRange: true,
-                binary: false,
-                maxTextureSize: 4096,
-              }
-
-              exporter.parse(
-                scene,
-                // called when the gltf has been generated
-                function (gltf) {
-                  const output = JSON.stringify(gltf, null, 2)
-                  console.log(output)
-                  saveString(output, 'scene.gltf')
-                },
-                // called when there is an error in the generation
-                function (error) {
-                  console.log('An error happened')
-                },
-                params
-              )
-            }
-            exportGLTF()
-          </script>
-        `,
-          position: 'before',
-          marker: '</body>',
-          libs: ['threejs'],
-        }),
-      },
-      {
         title: 'A-Frame Basic Scene',
         fn: () => ({
           type: 'scene',
@@ -333,74 +278,6 @@ export default Service.extend({
           },
         ],
       },
-
-      /*
-       * Effects do not work with A-Frame 1.3.0 and it doesn't look like there is much work
-       * happening on the A-Frame Effects repo.. I've played around a little bit seeing if
-       * I could get a few of the functions working which were throwing errors, but other
-       * problems occur which don't seem lilke quick fixes.
-       * See: https://github.com/wizgrav/aframe-effects/issues/21
-       */
-      /*
-      {
-        title: 'A-Frame Effect: Toon',
-        fn: () => ({
-          type: 'effect',
-          name: 'colors',
-          effect:
-            'colors="mode:hqprtom; mul: 1 1 1; pow: 1 1.33 1.66; quant: 0.3 0.3 0.1; orig: 0.33 0.66 0.66"',
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-      },
-      {
-        title: 'A-Frame Effect: Bloom',
-        fn: ({ strength, radius }) => ({
-          type: 'effect',
-          name: 'bloom',
-          effect: `bloom="filter: bloom.filter; strength: ${strength}; radius: ${radius}"`,
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-        props: [
-          {
-            name: 'strength',
-            default: '0.3',
-          },
-          {
-            name: 'radius',
-            default: '1.0',
-          },
-        ],
-      },
-      {
-        title: 'A-Frame Effect: God Rays',
-        fn: ({ source, threshold, intensity }) => ({
-          type: 'effect',
-          name: 'godrays',
-          effect: `godrays="src: #${source}; threshold: ${threshold}; intensity: ${intensity}"`,
-          position: 'after',
-          marker: '<a-scene',
-          libs: ['a-frame', 'a-frame-effects'],
-        }),
-        props: [
-          {
-            name: 'source',
-            default: '',
-          },
-          {
-            name: 'threshold',
-            default: '0 0.33',
-          },
-          {
-            name: 'intensity',
-            default: '2',
-          },
-        ],
-      }, */
-
       {
         title: 'A-Frame Box',
         fn: ({
@@ -675,13 +552,6 @@ shadow="receive: ${shadow}"
           },
         ],
       },
-      /* {
-        title: 'THROW ERROR',
-        fn: () => ({
-          // Will throw as does not contain a snip fn
-          position: () => randomAframeAttr(-10, 10),
-        }),
-      }, */
     ]
   }),
 })

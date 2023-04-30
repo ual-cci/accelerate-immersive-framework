@@ -25,7 +25,7 @@
         }}
       </li>
     </ui>
-    <p><button class='login-btn' type='submit'>Login</button></p>
+    <p><button class='login-button' type='submit'>Login</button></p>
 
   </form>
   {{#if registerMessage}}
@@ -75,7 +75,7 @@
         }}
       </li>
     </ui>
-    <p><button class='login-btn' type='submit'>Create New User</button></p>
+    <p><button class='login-button' type='submit'>Create New User</button></p>
 
   </form>
   <form {{action 'resetPassword' on='submit'}}>
@@ -91,7 +91,7 @@
         }}
       </li>
     </ui>
-    <p><button class='login-btn' type='submit'>Reset Password</button></p>
+    <p><button class='login-button' type='submit'>Reset Password</button></p>
     {{#if resetMessage}}
       <p>{{resetMessage}}</p>
     {{/if}}
