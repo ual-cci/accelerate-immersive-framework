@@ -161,7 +161,7 @@ sudo docker run -d -p 4001:8081  mimic/dev_test
 
 ### Frontend
 
-*You will only really need to do this when making changes to the Accelerate Editor.*
+**This is probably the only command you'll need to do when making changes to the Accelerate Editor.**
 
 When signed into the appropriate firebase account use the Firebase CLI.
 
