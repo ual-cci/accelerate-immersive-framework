@@ -1,0 +1,3 @@
+[submodule "a-game"]
+	path = a-game
+	url = git@github.com:joshmurr/a-game.git
