@@ -2038,7 +2038,7 @@ input[id='searchTerm']:-ms-input-placeholder {
   margin-bottom: 10px;
 }
 
-#mimic-footer {
+.footer {
   width: 100%;
   height: 50px;
   color: white;
@@ -2048,11 +2048,30 @@ input[id='searchTerm']:-ms-input-placeholder {
   justify-content: space-between;
   padding: 0 20px;
 
+  & > * {
+    padding: 0;
+    margin: 0;
+  }
+
   img {
     height: 100%;
-  padding: 15px 0;
+    padding: 10px 0;
+  }
+
+  a {
+    color: white;
+
+    &:hover {
+      text-decoration: underline;
     }
+  }
 }
+
+.centered {
+  justify-content: center;
+  gap: 20px;
+}
+
 
 #code-mirror-container {
   width: 100%;
