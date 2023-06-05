@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "mimic-238710",
-    "staging": "accelerate-editor"
+    "default": "accelerate-immersive-framework"
   },
   "targets": {}
 }
