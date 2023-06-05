@@ -30,7 +30,7 @@ export default Service.extend({
     <a-scene physics networked-scene="room: ${this.generateRandomRoomName()}; adapter: firebase;">
       <a-assets>
         <template id="avatar-template">
-          <a-entity class="avatar">
+          <a-entity class="avatar" rotation="0 180 0">
             <a-sphere class="head" scale="0.45 0.5 0.4" random-color></a-sphere>
             <a-entity class="face" position="0 0.05 0">
               <a-sphere class="eye" color="#efefef" position="0.16 0.1 -0.35" scale="0.12 0.12 0.12">
