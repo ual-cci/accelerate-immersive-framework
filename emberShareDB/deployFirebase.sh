@@ -19,4 +19,4 @@ rm -rf firebase/public
 mkdir firebase/public
 cp -r dist/* firebase/public
 cd firebase/
-firebase deploy
+firebase --config ./firebase.json deploy
