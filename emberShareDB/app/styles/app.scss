@@ -733,7 +733,7 @@ input[id='docName']:-ms-input-placeholder {
 
 #ace-container {
   top: 0px;
-  right: 0px;
+  right: 8%;
   opacity: 0.95;
   z-index: 10;
   width: 70vw;
@@ -890,6 +890,7 @@ input[id='docName']:-ms-input-placeholder {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 8%;
 
   .doc-title {
     color: black;
@@ -1094,12 +1095,12 @@ input[id='docName']:-ms-input-placeholder {
 }
 
 #console {
-  width: 100%;
+  width: 84%;
   background-color: #e6e6e6;
   border: none;
   color: #999999;
   display: block;
-  margin-bottom: 30px;
+  margin: 0 8% 30px 8%;
 }
 
 .asset-token {

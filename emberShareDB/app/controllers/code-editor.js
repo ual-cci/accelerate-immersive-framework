@@ -1538,7 +1538,7 @@ export default Controller.extend({
     )
     const drag = document.getElementById('drag-container')
     if (!isEmpty(drag)) {
-      drag.style.right = codeW - 31 + 'px'
+      drag.style.right = `calc(${codeW - 31}px + 8%)`
     }
     const tab = document.getElementById('project-tabs')
     if (!isEmpty(tab)) {
