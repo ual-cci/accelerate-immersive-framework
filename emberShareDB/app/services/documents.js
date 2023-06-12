@@ -19,6 +19,37 @@ export default Service.extend({
     <script src="${config.localOrigin}/libs/a-game/a-game.min.js"></script>
     <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
     <script src="${config.localOrigin}/libs/naf/networked-aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene physics>
+      <a-player id="player" grabbing locomotion></a-player>
+
+      <a-sky color="#ECECEC"></a-sky>
+      <a-box id="floor_0001"
+             position="0 0 -3"
+             rotation="0 0 0"
+             material="color: #46aa46"
+             width="30"
+             height="1"
+             depth="30"
+             body="type:static;"
+             shadow="receive: true"
+             grabbable="physics:true;"
+             floor></a-box>
+    </a-scene>
+  </body>
+</html>
+`
+  },
+  getExperimentalNafSource() {
+    return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="${config.localOrigin}/libs/aframe-v1.3.0.min.js"></script>
+    <script src="${config.localOrigin}/libs/a-game/a-game.min.js"></script>
+    <script src="${config.localOrigin}/libs/aframe-inspector/aframe-inspector.min.js"></script>
+    <script src="${config.localOrigin}/libs/naf/networked-aframe.min.js"></script>
     <script src="${config.localOrigin}/libs/naf/naf-firebase-adapter.js"></script>
     <script src="${config.localOrigin}/libs/naf/components/random-color.js"></script>
     <script src="${config.localOrigin}/libs/naf/components/spawn-in-circle.js"></script>
