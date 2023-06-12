@@ -28,6 +28,14 @@ export default Component.extend({
       this.get('cs').log(this.get('sessionAccount').currentUserName);
       this.get('openUserDocs')(this.get('sessionAccount').currentUserName);
     },
+
+    createNafDoc() {
+      const src = this.get('documentService').getExperimentalNafSource();
+      const data = {name:'New Project', isPrivate:false, source:src}
+      this.get('documentService').makeNewDoc(data).then(() => {
+          this.get('onCreateDoc')();
+      });
+    },
     home() {
       this.get('onHome')();
     },
